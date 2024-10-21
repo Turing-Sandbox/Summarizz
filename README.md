@@ -2,7 +2,6 @@
   <img src="docs/assets/turing-sandbox-logo-rbg.png" alt="Turing Sandbox Logo" width="100" height="100"/>
 </div>
 
-
 # Turing Sandbox Web - Official Application
 
 [![Docker](https://img.shields.io/badge/-Docker-black?style=flat&logo=docker&logoColor)]()
