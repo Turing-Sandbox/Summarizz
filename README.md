@@ -1,6 +1,5 @@
 <div style="display: flex; align-items: center;">
   <img src="docs/assets/turing-sandbox-logo-rbg.png" alt="Turing Sandbox Logo" width="100" height="100"/>
-  <span style="margin-left: 10px; font-size: 24px; font-weight: bold;color: #acb3d4">Turing Sandbox</span>
 </div>
 
 
