@@ -1,5 +1,5 @@
-<div style="display: flex; align-items: center;">
-  <img src="docs/assets/turing-sandbox-logo-rbg.png" alt="Turing Sandbox Logo" width="100" height="100"/>
+<div align="center">
+  <img src="docs/assets/turing-sandbox-logo-rbg.png" alt="Turing Sandbox Logo" width="150" height="150"/>
 </div>
 
 # Turing Sandbox Web - Official Application
