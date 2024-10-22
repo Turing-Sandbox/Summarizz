@@ -1,5 +1,21 @@
 #!/usr/bin/bash
 
+: << 'END_COMMENT'
+
+This script is currently used to create temporary files based on a 
+pattern in the current directory and its subdirectories. However,
+you can use this script to create any recurring files you see fit such
+as repeating config files, or any other files that may be needed throughout 
+the module directories.
+
+In order to make this change, you will simply need to modify the following:
+
+for dir in "$script_dir"/*module*/; do
+
+to something more appropriate for the purpose of the script.
+
+END_COMMENT
+
 create_temp_file_in_subdirs() {
     local parent_dir="$1"
     local file_name="TEMP.txt"
@@ -26,4 +42,4 @@ for dir in "$script_dir"/*module*/; do
     fi
 done
 
-echo "Script has been executed successfully... Happy Coding!"
+echo "Script has been executed successfully... Happy Coding 🎉"
