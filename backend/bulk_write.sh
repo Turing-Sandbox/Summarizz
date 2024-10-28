@@ -26,10 +26,10 @@ create_temp_file_in_subdirs() {
             rm "$subdir/$file_name"
         fi
 
-        if [ -d "$subdir" ]; then
-            echo "Creating temp file in $subdir"
-            echo "This is a TEMP file, remove when necessary." > "$subdir/$file_name"
-        fi
+        # if [ -d "$subdir" ]; then
+        #     echo "Creating temp file in $subdir"
+        #     echo "This is a TEMP file, remove when necessary." > "$subdir/$file_name"
+        # fi
     done
 }
 
