@@ -1,0 +1,83 @@
+// Import colors.scss to use the variables
+@import "./colors.scss";
+
+html {
+  background-color: var(--background-color);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.left-bottom-rectangle {
+  background-color: #7e5c47;
+  opacity: 0.8;
+
+  height: 90vh;
+  width: 10vw;
+  position: fixed;
+  bottom: -5vh;
+  left: -2vw;
+
+  z-index: -1;
+
+  filter: blur(100px);
+}
+
+.left-top-rectangle {
+  background-color: #765846;
+  opacity: 0.5;
+
+  height: 50vh;
+  width: 20vw;
+  position: fixed;
+  top: -10vh;
+  left: 10vw;
+
+  z-index: -1;
+
+  filter: blur(100px);
+}
+
+.middle-bottom-circle {
+  background-color: #635350;
+  opacity: 0.5;
+
+  border-radius: 50%;
+
+  height: 30vw;
+  width: 30vw;
+  position: fixed;
+  bottom: 10vh;
+  left: 50vw;
+
+  z-index: -1;
+
+  filter: blur(100px);
+}
+
+.right-top-circle {
+  background-color: #635350;
+  opacity: 0.5;
+
+  border-radius: 50%;
+
+  height: 90vw;
+  width: 90vw;
+  position: fixed;
+  top: -40vw;
+  right: -40vw;
+
+  z-index: -1;
+
+  filter: blur(100px);
+}
+
+.background-shapes {
+  z-index: -1;
+
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+}
