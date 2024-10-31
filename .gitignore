@@ -57,3 +57,13 @@ dist/**/*
 
 # Ignore Yarn Lock File
 yarn.lock
+
+# Ignore .env files from frontend and backend modules
+**/*.env
+**/**/*.env
+**/.env
+
+
+# Ignore python cache
+**/__pycache__
+**/.pytest_cache
