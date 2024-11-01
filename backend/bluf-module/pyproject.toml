@@ -18,7 +18,9 @@ requests = "^2.32.3"
 langchain = "^0.3.6"
 langchain-openai = "^0.2.4"
 openrouter = "^1.0"
-openai = "^1.52.2"
+openai = "^1.53.0"
+marshmallow = "^3.23.0"
+tiktoken = "^0.8.0"
 
 
 [build-system]

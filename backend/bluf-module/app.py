@@ -8,7 +8,6 @@ from flask_limiter.util import get_remote_address, get_qualified_name
 # Internal Dependencies (Imports)
 import os
 import sys
-import json
 import datetime
 import logging
 
@@ -32,23 +31,23 @@ def make_custom_response(**kwargs) -> Response:
 
 
 @app.route("/api/v1/", methods=["GET"])
-def root() -> Response:
+def root() -> tuple[Response, int]:
     return jsonify({
         "status": 200,
         "message": "BLUR API is working.",
         "abbr": "BLUR stands for Bottom Line Up Front.",
         "version": "1.0.0",
         "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    })
+    }), 200
 
 
 @app.route("/summarize/<string:text>", methods=["POST"])
-def summarize_request(text: str):
+def summarize_request(text: str) -> tuple[Response, int]:
     pass
 
 
 @app.route("/summarize", methods=["POST"])
-def summarize_request_json():
+def summarize_request_json() -> tuple[Response, int]:
     pass
 
 
