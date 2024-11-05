@@ -20,24 +20,39 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 from lib.constants import LANGCHAIN_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY
 from config.rich_logging import logger as log
 
+"""
+File: langchain_ai.py
+Module: bluf-module
+Author: Muhammad Bilal Khan
+Description:
+    - This file contains implementation of LangChain AI models.
+    - The models are defined using the LangChain LLMChain class.
+    - This file is responsible for handling interactions using LangChain but is 
+      not implemented completely until later releases.
+    
+License: MIT License
+Copyright (c) 2024 Turing Sandbox
+
+Modified History:
+    - 2024-11-01: Creation of the file.
+"""
+
 
 class LCSummarizerAI(LLMChain):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def _call(self, inputs: dict[str, str]) -> str:
+    def __call__(self, inputs: dict[str, str]) -> str:
         pass
 
-    def _parse(self, text: str) -> str:
+    def __parse(self, text: str) -> str:
         pass
 
-    def _get_summary(self, text: str) -> str:
+    def __get_summary(self, text: str) -> str:
         pass
 
-    def _get_summary_with_openrouter(self, text: str) -> str:
+    def __get_summary_with_openrouter(self, text: str) -> str:
         pass
 
-    def _get_summary_with_openai(self, text: str) -> str:
+    def __get_summary_with_openai(self, text: str) -> str:
         pass
-
-

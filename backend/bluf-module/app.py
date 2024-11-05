@@ -1,8 +1,6 @@
 # External Dependencies (Imports)
 from flask import Flask, make_response, request, jsonify, Response
 from flask_cors import CORS, cross_origin
-from flask_limiter import Limiter, RequestLimit, RateLimitExceeded
-from flask_limiter.util import get_remote_address, get_qualified_name
 
 
 # Internal Dependencies (Imports)
@@ -14,6 +12,8 @@ import logging
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from config.rich_logging import logger as log
+from blueprints.general import general_bp
+from blueprints.summarize import summary_bp
 
 app = Flask(__name__)
 app.logger.handlers = log.handlers
@@ -30,26 +30,17 @@ def make_custom_response(**kwargs) -> Response:
     return response
 
 
-@app.route("/api/v1/", methods=["GET"])
-def root() -> tuple[Response, int]:
-    return jsonify({
-        "status": 200,
-        "message": "BLUR API is working.",
-        "abbr": "BLUR stands for Bottom Line Up Front.",
-        "version": "1.0.0",
-        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }), 200
+app.register_blueprint(general_bp)
+app.register_blueprint(summary_bp)
 
 
-@app.route("/summarize/<string:text>", methods=["POST"])
-def summarize_request(text: str) -> tuple[Response, int]:
-    pass
-
-
-@app.route("/summarize", methods=["POST"])
-def summarize_request_json() -> tuple[Response, int]:
-    pass
+@app.before_request
+def before_request():
+    log.info(f"REQUEST: {request.method} {request.path}")
 
 
 if __name__ == "__main__":
+    time_in = datetime.datetime.now()
     app.run(debug=True)
+    time_out = datetime.datetime.now() - time_in
+    log.info(f"Application started in {time_out.total_seconds()} seconds.")
