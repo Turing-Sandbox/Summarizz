@@ -1,8 +1,0 @@
-- model: 
-    - model: 
-        name: bluf
-        fields: 
-            - ...
-
-
-# TODO: Implement models.yml file.
