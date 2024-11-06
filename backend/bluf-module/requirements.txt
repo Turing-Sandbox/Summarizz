@@ -1,0 +1,13 @@
+flask-cors
+flask-limiter
+flask
+rich
+pydantic
+python-dotenv
+requests
+langchain
+langchain-openai
+openrouter
+openai
+marshmallow
+tiktoken
