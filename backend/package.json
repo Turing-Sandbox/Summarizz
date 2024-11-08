@@ -4,7 +4,7 @@
   "description": "Summarizz backend server",
   "main": "server.ts",
   "scripts": {
-    "start": "tsc && node dist/server.js",
+    "start": "tsc && node dist/shared/server.js",
     "dev": "nodemon --watch 'shared/**/*.ts' --exec 'ts-node' shared/server.ts",
     "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"

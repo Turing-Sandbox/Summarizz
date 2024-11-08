@@ -1,6 +1,7 @@
 // shared/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -18,6 +19,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 // Conditionally initialize Analytics if supported
 let analytics;
@@ -30,4 +32,4 @@ isSupported().then((supported) => {
   }
 });
 
-export { firebaseApp, analytics };
+export { firebaseApp, analytics, db };
