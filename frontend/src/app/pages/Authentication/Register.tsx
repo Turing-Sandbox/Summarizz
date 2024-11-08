@@ -1,26 +1,131 @@
+import { useEffect, useState } from "react";
 import "../../styles/authentication.scss";
 
 function Register() {
+  const [error, setError] = useState("");
+  const [user, setUser] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
+
+  useEffect(() => {
+    if (user.password !== user.confirmPassword) {
+      setError("Passwords do not match");
+    } else {
+      setError("");
+    }
+  }, [user.password, user.confirmPassword]);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // e.preventDefault;
+
+    // Reset Error Message
+    setError("");
+
+    // Validate user input
+    if (user.password !== user.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    // Register user
+    fetch("/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(user),
+    })
+      .then((res) => {
+        if (res.ok) {
+          // Login user
+          // Redirect to home page
+        } else {
+          // Display error message
+          setError("An error occurred. Please try again.");
+        }
+      })
+      .catch(() => {
+        setError("An error occurred. Please try again.");
+      });
+  };
+
   return (
     <>
       <div className='auth-box'>
         <h1 className='auth-title summarizz-logo'>Summarizz</h1>
 
-        <form className='auth-form'>
-          <input type='text' placeholder='First Name' className='auth-input' />
-          <input type='text' placeholder='Last Name' className='auth-input' />
-          <input type='text' placeholder='Username' className='auth-input' />
-          <input type='email' placeholder='Email' className='auth-input' />
+        <form className='auth-form' onSubmit={handleSubmit}>
+          <input
+            type='text'
+            value={user.firstName}
+            onChange={handleChange}
+            name='firstName'
+            id='firstName'
+            placeholder='First Name'
+            className='auth-input'
+            required
+          />
+          <input
+            type='text'
+            value={user.lastName}
+            onChange={handleChange}
+            name='lastName'
+            id='lastName'
+            placeholder='Last Name'
+            className='auth-input'
+            required
+          />
+          <input
+            type='text'
+            value={user.username}
+            onChange={handleChange}
+            name='username'
+            id='username'
+            placeholder='Username'
+            className='auth-input'
+            required
+          />
+          <input
+            type='email'
+            value={user.email}
+            onChange={handleChange}
+            name='email'
+            id='email'
+            placeholder='Email'
+            className='auth-input'
+            required
+          />
           <input
             type='password'
+            value={user.password}
+            onChange={handleChange}
+            name='password'
+            id='password'
             placeholder='Password'
             className='auth-input'
+            required
           />
           <input
             type='password'
+            value={user.confirmPassword}
+            onChange={handleChange}
+            name='confirmPassword'
+            id='confirmPassword'
             placeholder='Confirm Password'
             className='auth-input'
+            required
           />
+
+          {error && <p className='auth-error'>{error}</p>}
 
           <button type='submit' className='auth-button'>
             Register

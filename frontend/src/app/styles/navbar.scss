@@ -1,4 +1,4 @@
-@import "colors.scss";
+@use "colors.scss";
 
 .navbar-background {
   background-color: var(--tile-color);
@@ -24,8 +24,8 @@
 }
 
 .navbar-title {
-  font-size: 30px;
-  margin: 18px 30px;
+  font-size: 20px;
+  margin: 25px 30px 25px 40px;
   cursor: pointer;
 }
 

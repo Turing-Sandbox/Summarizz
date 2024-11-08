@@ -1,4 +1,4 @@
-@import "./colors.scss";
+@use "./colors.scss";
 
 .auth-box {
   background-color: var(--tile-color);
@@ -46,6 +46,13 @@
 
   background-color: var(--input-field-color);
   color: var(--text-color);
+}
+
+.auth-error {
+  color: red;
+  font-size: 0.8rem;
+  margin: 0.2rem 0;
+  text-align: left;
 }
 
 .auth-button {

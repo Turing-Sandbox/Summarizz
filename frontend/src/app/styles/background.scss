@@ -1,5 +1,5 @@
 // Import colors.scss to use the variables
-@import "./colors.scss";
+@use "./colors.scss";
 
 html {
   background-color: var(--background-color);
