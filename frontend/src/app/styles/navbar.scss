@@ -5,8 +5,8 @@
 
   border-radius: 25px;
 
-  /* Shadow to the box */
-  box-shadow: 0 0 5px var(--shadow-color);
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
 
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

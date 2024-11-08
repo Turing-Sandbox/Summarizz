@@ -2,8 +2,9 @@
 :root {
   --background-color: #d9d9d9;
   --text-color: #2a2a2a;
-  --tile-color: rgba(217, 217, 217, 0.5);
-  //   --tile-color: rgba(42, 42, 42, 0.5);
+  --tile-color: rgba(176, 176, 176, 0.5);
+  --input-field-color: rgba(255, 255, 255, 0.25);
+  --input-border-color: rgba(0, 0, 0, 0.25);
 
   // Background color
   --left-bottom-rectangle: #7e5c47;
@@ -12,7 +13,7 @@
   --right-top-circle: #554b49;
 
   // Shadow color
-  --shadow-color: rgba(0, 0, 0, 0.5);
+  --shadow-color: rgba(255, 255, 255, 0.25);
 }
 
 // DARK MODE
@@ -20,5 +21,8 @@
   --background-color: #2a2a2a;
   --text-color: #ffffff;
   --tile-color: rgba(42, 42, 42, 0.8);
-  //   --tile-color: rgba(217, 217, 217, 0.5);
+  --input-field-color: rgba(0, 0, 0, 0.25);
+  --input-border-color: rgba(255, 255, 255, 0.25);
+
+  --shadow-color: rgba(0, 0, 0, 0.25);
 }
