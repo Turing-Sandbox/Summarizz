@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import "../../styles/authentication.scss";
 
@@ -24,7 +25,7 @@ function Register() {
     }
   }, [user.password, user.confirmPassword]);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = () => {
     // e.preventDefault;
 
     // Reset Error Message
@@ -132,12 +133,12 @@ function Register() {
           </button>
         </form>
 
-        <div className='auth-oauth-section'>
+        {/* ------------------------- OAUTH ------------------------- */}
+        {/* <div className='auth-oauth-section'>
           <button className='auth-button auth-oauth-button left'>
             <img src='/images/google.svg' alt='Google' className='logo' />
           </button>
           <button className='auth-button auth-oauth-button'>
-            {/* <img src='/images/apple.svg' alt='Apple' className='logo' /> */}
             <svg
               className='logo'
               xmlns='http://www.w3.org/2000/svg'
@@ -147,7 +148,6 @@ function Register() {
             </svg>
           </button>
           <button className='auth-button auth-oauth-button right'>
-            {/* <img src='/images/github.svg' alt='Github' className='logo' /> */}
             <svg
               className='logo'
               xmlns='http://www.w3.org/2000/svg'
@@ -159,7 +159,7 @@ function Register() {
               />
             </svg>
           </button>
-        </div>
+        </div> */}
 
         <a href='/login' className='auth-link'>
           <p>

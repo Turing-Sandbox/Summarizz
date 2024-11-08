@@ -1,20 +1,21 @@
 "use client";
 
-import { useState } from "react";
 import Background from "./components/background";
 import Navbar from "./components/navbar";
 import Register from "./pages/Authentication/Register";
+import AuthProvider, { useAuth } from "./hooks/AuthProvider";
 
 export default function View() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const auth = useAuth();
 
   return (
     <>
       <Background />
+      <AuthProvider>
+        {auth.user && <Navbar />}
 
-      {isAuthenticated && <Navbar />}
-
-      {!isAuthenticated && <Register />}
+        {!auth.user && <Register />}
+      </AuthProvider>
     </>
   );
 }
