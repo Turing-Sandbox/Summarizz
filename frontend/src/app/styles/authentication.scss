@@ -28,14 +28,14 @@
 }
 
 .auth-title {
-  padding: 3rem 0 1rem 0;
+  margin: 1.3rem 0;
 }
 
 .auth-input {
   width: 100%;
 
   margin: 0.5rem auto;
-  padding: 1rem;
+  padding: 0.8rem;
   box-sizing: border-box;
 
   border-radius: 10px;
@@ -70,6 +70,38 @@
   color: var(--background-color);
 
   cursor: pointer;
+}
+
+.auth-oauth-button {
+  width: 30%;
+
+  margin: 0rem 2.5% 1rem;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  font-size: 1.1rem;
+}
+
+.left {
+  margin-left: 0;
+}
+
+.right {
+  margin-right: 0;
+}
+
+.logo {
+  height: 25px;
+  color: var(--text-color);
+  fill: var(--text-color);
 }
 
 .auth-link {

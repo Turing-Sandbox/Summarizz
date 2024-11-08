@@ -11,7 +11,7 @@ export default function Home() {
 
       {/* ELSE */}
 
-      <Navbar />
+      {/* <Navbar /> */}
       <Register />
     </>
   );
