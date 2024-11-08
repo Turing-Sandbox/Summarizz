@@ -4,7 +4,7 @@ function Register() {
   return (
     <>
       <div className='auth-box'>
-        <h1 className='auth-title'>Register</h1>
+        <h1 className='auth-title summarizz-logo'>Summarizz</h1>
 
         <form className='auth-form'>
           <input type='text' placeholder='First Name' className='auth-input' />

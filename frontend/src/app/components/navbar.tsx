@@ -19,6 +19,7 @@ function Navbar() {
 
   return (
     <div className='navbar-background'>
+      <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
       <label className='theme-toggle'>
         <input type='checkbox' checked={isDarkMode} onChange={toggleTheme} />
         <span className='slider'></span>

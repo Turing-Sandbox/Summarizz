@@ -2,7 +2,7 @@ import Background from "./components/background";
 import Navbar from "./components/navbar";
 import Register from "./pages/Authentication/Register";
 
-export default function Home() {
+export default function View() {
   return (
     <>
       <Background />
@@ -11,7 +11,7 @@ export default function Home() {
 
       {/* ELSE */}
 
-      {/* <Navbar /> */}
+      <Navbar />
       <Register />
     </>
   );
