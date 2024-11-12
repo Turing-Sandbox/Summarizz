@@ -1,12 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
   getAuth,
@@ -14,19 +7,27 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 
-export async function register(email: string, password: string) {
+export async function register(
+  firstName: string,
+  lastName: string,
+  username: string,
+  email: string,
+  password: string
+) {
   const auth = getAuth();
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed up
-      const user = userCredential.user;
-      console.log("User signed up: ", user);
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(errorCode, errorMessage);
-    });
+  try {
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+
+    createUser(user.uid, firstName, lastName, username, email);
+  } catch (error) {
+    const errorMessage = error.message;
+    throw new Error(errorMessage);
+  }
 }
 
 export async function login(email: string, password: string) {
@@ -44,11 +45,24 @@ export async function login(email: string, password: string) {
     });
 }
 
-export async function createUser(user: User) {
-  await setDoc(doc(db, "users"), {
-    ...user,
-    createdAt: serverTimestamp(),
-  });
+export async function createUser(
+  uid: string,
+  firstName: string,
+  lastName: string,
+  username: string,
+  email: string
+) {
+  console.log("Creating user...");
+  const user: User = {
+    uid: uid,
+    firstName: firstName,
+    lastName: lastName,
+    username: username,
+    email: email,
+    createdAt: new Date(),
+  };
+
+  await setDoc(doc(db, "users", uid), user);
 }
 
 export async function getUser(uid: string) {

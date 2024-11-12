@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import "../../styles/authentication.scss";
+import axios from "axios";
 
 function Register() {
   const [error, setError] = useState("");
@@ -25,8 +26,17 @@ function Register() {
     }
   }, [user.password, user.confirmPassword]);
 
-  const handleSubmit = () => {
-    // e.preventDefault;
+  // interface User {
+  //   firstName: string;
+  //   lastName: string;
+  //   username: string;
+  //   email: string;
+  //   password: string;
+  //   confirmPassword: string;
+  // }
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     // Reset Error Message
     setError("");
@@ -37,25 +47,30 @@ function Register() {
       return;
     }
 
+    console.log("Registering user... ", user);
     // Register user
-    fetch("/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    })
+    axios
+      .post("http://localhost:3000/user/register", user)
       .then((res) => {
-        if (res.ok) {
+        if (res.status === 200 || res.status === 201) {
           // Login user
           // Redirect to home page
         } else {
+          console.log(res.data);
           // Display error message
           setError("An error occurred. Please try again.");
         }
       })
-      .catch(() => {
-        setError("An error occurred. Please try again.");
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          setError(error.response.data.error);
+        } else {
+          setError("An error occurred. Please try again.");
+        }
       });
   };
 
