@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
-import "../../styles/authentication.scss";
+import "../styles/authentication.scss";
 import axios from "axios";
 
 function Register() {
@@ -70,80 +70,81 @@ function Register() {
 
   return (
     <>
-      <div className='auth-box'>
-        <h1 className='auth-title summarizz-logo'>Summarizz</h1>
+      <div className='container'>
+        <div className='auth-box'>
+          <h1 className='auth-title summarizz-logo'>Summarizz</h1>
 
-        <form className='auth-form' onSubmit={handleSubmit}>
-          <input
-            type='text'
-            value={user.firstName}
-            onChange={handleChange}
-            name='firstName'
-            id='firstName'
-            placeholder='First Name'
-            className='auth-input'
-            required
-          />
-          <input
-            type='text'
-            value={user.lastName}
-            onChange={handleChange}
-            name='lastName'
-            id='lastName'
-            placeholder='Last Name'
-            className='auth-input'
-            required
-          />
-          <input
-            type='text'
-            value={user.username}
-            onChange={handleChange}
-            name='username'
-            id='username'
-            placeholder='Username'
-            className='auth-input'
-            required
-          />
-          <input
-            type='email'
-            value={user.email}
-            onChange={handleChange}
-            name='email'
-            id='email'
-            placeholder='Email'
-            className='auth-input'
-            required
-          />
-          <input
-            type='password'
-            value={user.password}
-            onChange={handleChange}
-            name='password'
-            id='password'
-            placeholder='Password'
-            className='auth-input'
-            required
-          />
-          <input
-            type='password'
-            value={user.confirmPassword}
-            onChange={handleChange}
-            name='confirmPassword'
-            id='confirmPassword'
-            placeholder='Confirm Password'
-            className='auth-input'
-            required
-          />
+          <form className='auth-form' onSubmit={handleSubmit}>
+            <input
+              type='text'
+              value={user.firstName}
+              onChange={handleChange}
+              name='firstName'
+              id='firstName'
+              placeholder='First Name'
+              className='auth-input'
+              required
+            />
+            <input
+              type='text'
+              value={user.lastName}
+              onChange={handleChange}
+              name='lastName'
+              id='lastName'
+              placeholder='Last Name'
+              className='auth-input'
+              required
+            />
+            <input
+              type='text'
+              value={user.username}
+              onChange={handleChange}
+              name='username'
+              id='username'
+              placeholder='Username'
+              className='auth-input'
+              required
+            />
+            <input
+              type='email'
+              value={user.email}
+              onChange={handleChange}
+              name='email'
+              id='email'
+              placeholder='Email'
+              className='auth-input'
+              required
+            />
+            <input
+              type='password'
+              value={user.password}
+              onChange={handleChange}
+              name='password'
+              id='password'
+              placeholder='Password'
+              className='auth-input'
+              required
+            />
+            <input
+              type='password'
+              value={user.confirmPassword}
+              onChange={handleChange}
+              name='confirmPassword'
+              id='confirmPassword'
+              placeholder='Confirm Password'
+              className='auth-input'
+              required
+            />
 
-          {error && <p className='auth-error'>{error}</p>}
+            {error && <p className='auth-error'>{error}</p>}
 
-          <button type='submit' className='auth-button'>
-            Register
-          </button>
-        </form>
+            <button type='submit' className='auth-button'>
+              Register
+            </button>
+          </form>
 
-        {/* ------------------------- OAUTH ------------------------- */}
-        {/* <div className='auth-oauth-section'>
+          {/* ------------------------- OAUTH ------------------------- */}
+          {/* <div className='auth-oauth-section'>
           <button className='auth-button auth-oauth-button left'>
             <img src='/images/google.svg' alt='Google' className='logo' />
           </button>
@@ -170,11 +171,12 @@ function Register() {
           </button>
         </div> */}
 
-        <a href='/login' className='auth-link'>
-          <p>
-            Already have an account? <b>Login</b>
-          </p>
-        </a>
+          <a href='/authentication/login' className='auth-link'>
+            <p>
+              Already have an account? <b>Login</b>
+            </p>
+          </a>
+        </div>
       </div>
     </>
   );

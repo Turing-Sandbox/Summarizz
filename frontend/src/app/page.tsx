@@ -1,10 +1,9 @@
 "use client";
 
-import Background from "./components/background";
-import Navbar from "./components/navbar";
-import Register from "./pages/Authentication/Register";
+import Background from "./components/Background";
+import { Footer } from "./components/Footer";
+import Navbar from "./components/Navbar";
 import AuthProvider, { useAuth } from "./hooks/AuthProvider";
-import Login from "./pages/Authentication/Login";
 
 export default function View() {
   const auth = useAuth();
@@ -13,10 +12,18 @@ export default function View() {
     <>
       <Background />
       <AuthProvider>
-        {auth.user && <Navbar />}
+        <Navbar />
 
-        {/* {!auth.user && <Register />} */}
-        {!auth.user && <Login />}
+        <div className='main-content'>
+          <div className='header'>
+            <h1>Summarizz</h1>
+            <p>Summarize your text with ease</p>
+          </div>
+        </div>
+
+        <div className='footer'>
+          <Footer />
+        </div>
       </AuthProvider>
     </>
   );

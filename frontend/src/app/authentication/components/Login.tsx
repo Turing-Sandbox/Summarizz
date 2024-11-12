@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
-import "../../styles/authentication.scss";
+import "../styles/authentication.scss";
 import axios from "axios";
 
 function Login() {
@@ -53,40 +53,41 @@ function Login() {
 
   return (
     <>
-      <div className='auth-box'>
-        <h1 className='auth-title summarizz-logo'>Summarizz</h1>
+      <div className='container'>
+        <div className='auth-box'>
+          <h1 className='auth-title summarizz-logo'>Summarizz</h1>
 
-        <form className='auth-form' onSubmit={handleSubmit}>
-          <input
-            type='email'
-            value={user.email}
-            onChange={handleChange}
-            name='email'
-            id='email'
-            placeholder='Email'
-            className='auth-input'
-            required
-          />
-          <input
-            type='password'
-            value={user.password}
-            onChange={handleChange}
-            name='password'
-            id='password'
-            placeholder='Password'
-            className='auth-input'
-            required
-          />
+          <form className='auth-form' onSubmit={handleSubmit}>
+            <input
+              type='email'
+              value={user.email}
+              onChange={handleChange}
+              name='email'
+              id='email'
+              placeholder='Email'
+              className='auth-input'
+              required
+            />
+            <input
+              type='password'
+              value={user.password}
+              onChange={handleChange}
+              name='password'
+              id='password'
+              placeholder='Password'
+              className='auth-input'
+              required
+            />
 
-          {error && <p className='auth-error'>{error}</p>}
+            {error && <p className='auth-error'>{error}</p>}
 
-          <button type='submit' className='auth-button'>
-            Login
-          </button>
-        </form>
+            <button type='submit' className='auth-button'>
+              Login
+            </button>
+          </form>
 
-        {/* ------------------------- OAUTH ------------------------- */}
-        {/* <div className='auth-oauth-section'>
+          {/* ------------------------- OAUTH ------------------------- */}
+          {/* <div className='auth-oauth-section'>
           <button className='auth-button auth-oauth-button left'>
             <img src='/images/google.svg' alt='Google' className='logo' />
           </button>
@@ -113,11 +114,12 @@ function Login() {
           </button>
         </div> */}
 
-        <a href='/register' className='auth-link'>
-          <p>
-            Don&apos;t have an account? <b>Register</b>
-          </p>
-        </a>
+          <a href='/authentication/register' className='auth-link'>
+            <p>
+              Don&apos;t have an account? <b>Register</b>
+            </p>
+          </a>
+        </div>
       </div>
     </>
   );
