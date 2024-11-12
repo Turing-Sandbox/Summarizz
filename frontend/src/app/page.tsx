@@ -1,8 +1,8 @@
 "use client";
 
-import Background from "./components/Background";
+import Background from "./components/background";
 import { Footer } from "./components/Footer";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/navbar";
 import AuthProvider from "./hooks/AuthProvider";
 
 export default function View() {
