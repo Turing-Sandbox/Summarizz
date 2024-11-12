@@ -3,10 +3,10 @@
 import Background from "./components/Background";
 import { Footer } from "./components/Footer";
 import Navbar from "./components/Navbar";
-import AuthProvider, { useAuth } from "./hooks/AuthProvider";
+import AuthProvider from "./hooks/AuthProvider";
 
 export default function View() {
-  const auth = useAuth();
+  // const auth = useAuth();
 
   return (
     <>
