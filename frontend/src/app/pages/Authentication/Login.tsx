@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import "../../styles/authentication.scss";
+import axios from "axios";
 
 function Login() {
   const [error, setError] = useState("");
@@ -13,31 +14,40 @@ function Login() {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    // e.preventDefault;
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     // Reset Error Message
     setError("");
 
-    // Login user
-    fetch("/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(user),
-    })
+    console.log("Login user... ", user);
+
+    // login user
+    axios
+      .post("http://localhost:3000/user/login", user)
       .then((res) => {
-        if (res.ok) {
+        if (res.status === 200 || res.status === 201) {
+          const user = res.data.user;
+          console.log("User login: ", user);
           // Login user
+
           // Redirect to home page
         } else {
+          console.log(res.data);
           // Display error message
           setError("An error occurred. Please try again.");
         }
       })
-      .catch(() => {
-        setError("An error occurred. Please try again.");
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          setError(error.response.data.error);
+        } else {
+          setError("An error occurred. Please try again.");
+        }
       });
   };
 

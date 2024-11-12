@@ -16,6 +16,7 @@ export async function register(
 ) {
   const auth = getAuth();
   try {
+    // Register user - Firebase Auth (Email & Password)
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
@@ -23,26 +24,38 @@ export async function register(
     );
     const user = userCredential.user;
 
+    // Create user - Firestore Database (User Data)
     createUser(user.uid, firstName, lastName, username, email);
+    return user;
   } catch (error) {
-    const errorMessage = error.message;
+    let errorMessage = error.message;
+    // Remove "Firebase: " prefix from the error message
+    if (errorMessage.startsWith("Firebase: ")) {
+      errorMessage = errorMessage.replace("Firebase: ", "");
+    }
     throw new Error(errorMessage);
   }
 }
 
 export async function login(email: string, password: string) {
   const auth = getAuth();
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in
-      const user = userCredential.user;
-      console.log("User signed in: ", user);
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.error(errorCode, errorMessage);
-    });
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const user = userCredential.user;
+    console.log("User signed in: ", user);
+    return user;
+  } catch (error) {
+    let errorMessage = error.message;
+    // Remove "Firebase: " prefix from the error message
+    if (errorMessage.startsWith("Firebase: ")) {
+      errorMessage = errorMessage.replace("Firebase: ", "");
+    }
+    throw new Error(errorMessage);
+  }
 }
 
 export async function createUser(

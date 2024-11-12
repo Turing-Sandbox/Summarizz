@@ -26,15 +26,6 @@ function Register() {
     }
   }, [user.password, user.confirmPassword]);
 
-  // interface User {
-  //   firstName: string;
-  //   lastName: string;
-  //   username: string;
-  //   email: string;
-  //   password: string;
-  //   confirmPassword: string;
-  // }
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -53,7 +44,10 @@ function Register() {
       .post("http://localhost:3000/user/register", user)
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
+          const user = res.data.user;
+          console.log("User registered: ", user);
           // Login user
+
           // Redirect to home page
         } else {
           console.log(res.data);
