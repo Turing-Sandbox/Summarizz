@@ -1,12 +1,12 @@
-@import "colors.scss";
+@use "colors.scss";
 
 .navbar-background {
   background-color: var(--tile-color);
 
   border-radius: 25px;
 
-  /* Shadow to the box */
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
 
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -21,6 +21,12 @@
   margin: 10px 5vw;
 
   z-index: 1;
+}
+
+.navbar-title {
+  font-size: 20px;
+  margin: 25px 30px 25px 40px;
+  cursor: pointer;
 }
 
 // THEME TOGGLE

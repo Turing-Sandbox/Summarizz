@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
+import { getAuth } from "firebase/auth";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+const auth = getAuth(firebaseApp);
 
 // Conditionally initialize Analytics if supported
 let analytics;
@@ -32,4 +34,4 @@ isSupported().then((supported) => {
   }
 });
 
-export { firebaseApp, analytics, db };
+export { firebaseApp, analytics, db, auth };

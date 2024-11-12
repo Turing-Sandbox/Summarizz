@@ -1,15 +1,52 @@
 // src/modules/user/controllers/userController.ts
-import { Request, Response } from 'express';
-import { createUser, getUser, updateUser, deleteUser } from '../services/userService';
+import { Request, Response } from "express";
+import {
+  createUser,
+  getUser,
+  updateUser,
+  deleteUser,
+  register,
+  login,
+} from "../services/userService";
+
+// Register User
+export async function registerUserController(req: Request, res: Response) {
+  console.log("Registering user...");
+  const { firstName, lastName, username, email, password } = req.body;
+
+  try {
+    const user = await register(firstName, lastName, username, email, password);
+    res.status(201).json({ user: user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message || "Failed to register user" });
+  }
+}
+
+// Login User
+export async function loginUserController(req: Request, res: Response) {
+  console.log("Logging in user...");
+  const { email, password } = req.body;
+
+  try {
+    const user = await login(email, password);
+    res.status(201).json({ user: user });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message || "Failed to login user" });
+  }
+}
 
 // Create User
 export async function createUserController(req: Request, res: Response) {
-  const { uid, email, username } = req.body;
+  const { firstName, lastName, username, email, password } = req.body;
+
   try {
-    await createUser(uid, email, username);
-    res.status(201).json({ message: 'User created successfully' });
+    await createUser(firstName, lastName, username, email, password);
+    res.status(201).json({ message: "User created successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create user' });
+    console.log(error);
+    res.status(500).json({ error: "Failed to create user" });
   }
 }
 
@@ -19,9 +56,10 @@ export async function getUserController(req: Request, res: Response) {
   try {
     const user = await getUser(uid);
     if (user) res.status(200).json(user);
-    else res.status(404).json({ error: 'User not found' });
+    else res.status(404).json({ error: "User not found" });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch user' });
+    console.log(error);
+    res.status(500).json({ error: "Failed to fetch user" });
   }
 }
 
@@ -31,9 +69,10 @@ export async function updateUserController(req: Request, res: Response) {
   const data = req.body;
   try {
     await updateUser(uid, data);
-    res.status(200).json({ message: 'User updated successfully' });
+    res.status(200).json({ message: "User updated successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update user' });
+    console.log(error);
+    res.status(500).json({ error: "Failed to update user" });
   }
 }
 
@@ -42,8 +81,9 @@ export async function deleteUserController(req: Request, res: Response) {
   const { uid } = req.params;
   try {
     await deleteUser(uid);
-    res.status(200).json({ message: 'User deleted successfully' });
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete user' });
+    console.log(error);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 }

@@ -1,16 +1,24 @@
 // server.ts
 
 import express from "express";
-import userRoutes from '../user-module/routes/userRoutes';
+import userRoutes from "../user-module/routes/userRoutes";
 import "./firebaseConfig";
+import cors from "cors";
 
 const app = express();
-app.use(express.json());
-app.use('/api', userRoutes);  // Prefix your routes with '/api' if desired
 const port = 3000;
+app.use(cors());
+app.use(express.json());
+app.use("/user", userRoutes);
+
+// Middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Server is Listening!");
 });
 
 app.listen(port, () => {

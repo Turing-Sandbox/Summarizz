@@ -1,5 +1,5 @@
 // Import colors.scss to use the variables
-@import "./colors.scss";
+@use "./colors.scss";
 
 html {
   background-color: var(--background-color);
@@ -11,7 +11,7 @@ body {
 }
 
 .left-bottom-rectangle {
-  background-color: #7e5c47;
+  background-color: var(--left-bottom-rectangle);
   opacity: 0.8;
 
   height: 90vh;
@@ -26,7 +26,7 @@ body {
 }
 
 .left-top-rectangle {
-  background-color: #765846;
+  background-color: var(--left-top-rectangle);
   opacity: 0.5;
 
   height: 50vh;
@@ -41,7 +41,7 @@ body {
 }
 
 .middle-bottom-circle {
-  background-color: #635350;
+  background-color: var(--middle-bottom-circle);
   opacity: 0.7;
 
   border-radius: 50%;
@@ -58,7 +58,7 @@ body {
 }
 
 .right-top-circle {
-  background-color: #554b49;
+  background-color: var(--right-top-circle);
   opacity: 0.9;
 
   border-radius: 50%;
