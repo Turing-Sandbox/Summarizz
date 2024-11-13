@@ -15,8 +15,14 @@ export async function registerUserController(req: Request, res: Response) {
   const { firstName, lastName, username, email, password } = req.body;
 
   try {
-    const user = await register(firstName, lastName, username, email, password);
-    res.status(201).json({ userUID: user.uid });
+    const response = await register(
+      firstName,
+      lastName,
+      username,
+      email,
+      password
+    );
+    res.status(201).json(response);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message || "Failed to register user" });
@@ -29,8 +35,8 @@ export async function loginUserController(req: Request, res: Response) {
   const { email, password } = req.body;
 
   try {
-    const user = await login(email, password);
-    res.status(201).json({ userUID: user.uid });
+    const response = await login(email, password);
+    res.status(201).json(response);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message || "Failed to login user" });

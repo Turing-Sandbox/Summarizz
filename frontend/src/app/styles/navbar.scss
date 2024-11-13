@@ -29,9 +29,21 @@
   cursor: pointer;
 }
 
+.navbar-menu {
+  display: inline-block;
+  position: absolute;
+  right: 90px;
+  top: 30px;
+  cursor: pointer;
+}
+
+.navbar-menu-item {
+  display: inline-block;
+  margin: 0 5px;
+}
+
 // THEME TOGGLE
 .theme-toggle {
-  position: relative;
   display: inline-block;
   width: 50px;
   height: 26px;

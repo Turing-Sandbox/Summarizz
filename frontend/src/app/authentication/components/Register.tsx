@@ -43,16 +43,16 @@ function Register() {
       return;
     }
 
-    console.log("Registering user... ", user);
     // Register user
     axios
       .post("http://localhost:3000/user/register", user)
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
           const userUID = res.data.userUID;
+          const token = res.data.token;
 
           // Login user
-          auth.setUserUID(userUID);
+          auth.login(token, userUID);
 
           // Redirect to home page
           router.push("/");
@@ -74,6 +74,10 @@ function Register() {
         }
       });
   };
+
+  if (auth.userUID && auth.token) {
+    router.push("/");
+  }
 
   return (
     <>

@@ -1,19 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Background from "./components/Background";
 import { Footer } from "./components/Footer";
 import Navbar from "./components/Navbar";
-import AuthProvider, { useAuth } from "./hooks/AuthProvider";
-import { useEffect } from "react";
+import AuthProvider from "./hooks/AuthProvider";
 
 export default function Page() {
-  const router = useRouter();
-  const auth = useAuth();
+  // const router = useRouter();
+  // const auth = useAuth();
 
-  if (auth.userUID === null) {
-    router.push("/authentication/login");
-  }
+  // if (auth.userUID === null) {
+  //   router.push("/authentication/login");
+  // }
 
   return (
     <AuthProvider>

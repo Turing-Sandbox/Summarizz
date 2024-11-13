@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import jwt from "jsonwebtoken";
 
 export async function register(
   firstName: string,
@@ -25,8 +26,10 @@ export async function register(
     const user = userCredential.user;
 
     // Create user - Firestore Database (User Data)
-    createUser(user.uid, firstName, lastName, username, email);
-    return user;
+    await createUser(user.uid, firstName, lastName, username, email);
+
+    // Log the user
+    return await login(email, password);
   } catch (error) {
     let errorMessage = error.message;
     // Remove "Firebase: " prefix from the error message
@@ -40,14 +43,24 @@ export async function register(
 export async function login(email: string, password: string) {
   const auth = getAuth();
   try {
+    // Sign in user - Firebase Auth (Email & Password)
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
       password
     );
     const user = userCredential.user;
+
     console.log("User signed in: ", user);
-    return user;
+
+    const token = jwt.sign({ _id: user.uid, email: email }, "YOUR_SECRET", {
+      expiresIn: "30d",
+    });
+
+    return {
+      userUID: user.uid,
+      token: token,
+    };
   } catch (error) {
     let errorMessage = error.message;
     // Remove "Firebase: " prefix from the error message

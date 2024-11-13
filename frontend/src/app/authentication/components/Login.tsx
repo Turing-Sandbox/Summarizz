@@ -25,17 +25,16 @@ function Login() {
     // Reset Error Message
     setError("");
 
-    console.log("Login user... ", user);
-
     // login user
     axios
       .post("http://localhost:3000/user/login", user)
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
           const userUID = res.data.userUID;
+          const token = res.data.token;
 
           // Login user
-          auth.setUserUID(userUID);
+          auth.login(token, userUID);
 
           // Redirect to home page
           router.push("/");
@@ -57,6 +56,10 @@ function Login() {
         }
       });
   };
+
+  if (auth.userUID && auth.token) {
+    router.push("/");
+  }
 
   return (
     <>
