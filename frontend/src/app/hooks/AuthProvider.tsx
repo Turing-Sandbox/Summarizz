@@ -1,7 +1,6 @@
 import { useContext, createContext, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { ReactNode } from "react";
-import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   userUID: string | null;
@@ -26,7 +25,6 @@ const AuthContext = createContext<AuthContextType>({
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userUID, setUserUID] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const navigate = useRouter();
 
   useEffect(() => {
     setToken(localStorage.getItem("token"));
