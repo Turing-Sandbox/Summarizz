@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import "../styles/authentication.scss";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/hooks/AuthProvider";
 
 function Register() {
   const [error, setError] = useState("");
@@ -13,6 +15,9 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+
+  const router = useRouter();
+  const auth = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -44,11 +49,13 @@ function Register() {
       .post("http://localhost:3000/user/register", user)
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
-          const user = res.data.user;
-          console.log("User registered: ", user);
+          const userUID = res.data.userUID;
+
           // Login user
+          auth.setUserUID(userUID);
 
           // Redirect to home page
+          router.push("/");
         } else {
           console.log(res.data);
           // Display error message

@@ -1,30 +1,35 @@
 "use client";
 
-import Background from "./components/background";
+import { useRouter } from "next/navigation";
+import Background from "./components/Background";
 import { Footer } from "./components/Footer";
-import Navbar from "./components/navbar";
-import AuthProvider from "./hooks/AuthProvider";
+import Navbar from "./components/Navbar";
+import AuthProvider, { useAuth } from "./hooks/AuthProvider";
+import { useEffect } from "react";
 
-export default function View() {
-  // const auth = useAuth();
+export default function Page() {
+  const router = useRouter();
+  const auth = useAuth();
+
+  if (auth.userUID === null) {
+    router.push("/authentication/login");
+  }
 
   return (
-    <>
+    <AuthProvider>
       <Background />
-      <AuthProvider>
-        <Navbar />
+      <Navbar />
 
-        <div className='main-content'>
-          <div className='header'>
-            <h1>Summarizz</h1>
-            <p>Summarize your text with ease</p>
-          </div>
+      <div className='main-content'>
+        <div className='header'>
+          <h1>Summarizz</h1>
+          <p>Summarize your text with ease</p>
         </div>
+      </div>
 
-        <div className='footer'>
-          <Footer />
-        </div>
-      </AuthProvider>
-    </>
+      <div className='footer'>
+        <Footer />
+      </div>
+    </AuthProvider>
   );
 }
