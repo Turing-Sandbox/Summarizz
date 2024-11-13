@@ -27,13 +27,17 @@ function Navbar() {
     <>
       <div className='navbar-background'>
         {/* App Name */}
-        <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
+        <a href='/'>
+          <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
+        </a>
 
-        {/* Theme Slider */}
-        <label className='theme-toggle'>
-          <input type='checkbox' checked={isDarkMode} onChange={toggleTheme} />
-          <span className='slider'></span>
-        </label>
+        {/* Create New Content */}
+        <button
+          className='navbar-button'
+          onClick={() => navigate.push("/content/create")}
+        >
+          Create Content
+        </button>
 
         {/* Profile Picture */}
         <div className='profile-picture' onClick={() => setShowMenu(!showMenu)}>
@@ -46,12 +50,18 @@ function Navbar() {
                 alt='Profile Picture'
             /> */}
         </div>
+
+        {/* Theme Slider */}
+        <label className='theme-toggle'>
+          <input type='checkbox' checked={isDarkMode} onChange={toggleTheme} />
+          <span className='slider'></span>
+        </label>
       </div>
 
       {/* Profile Menu */}
       {showMenu && (
         <div className='menu'>
-          {!auth.userUID && !auth.token ? (
+          {auth.getUserUID() === null && auth.getToken() === null ? (
             <>
               <a
                 className='menu-item'

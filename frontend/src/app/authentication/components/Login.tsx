@@ -57,7 +57,13 @@ function Login() {
       });
   };
 
-  if (auth.userUID && auth.token) {
+  console.log("auth.getUserUID: ", auth.getUserUID());
+  console.log("auth.getToken: ", auth.getToken());
+
+  if (auth.getUserUID() !== null && auth.getToken() !== null) {
+    console.log("UserUID", auth.getUserUID());
+    console.log("Token", auth.getToken());
+    console.log("Redirecting to home page...");
     router.push("/");
   }
 

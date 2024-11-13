@@ -1,12 +1,15 @@
-import { useContext, createContext, useState, useEffect } from "react";
+import { useContext, createContext } from "react";
 import PropTypes from "prop-types";
 import { ReactNode } from "react";
 
 interface AuthContextType {
   userUID: string | null;
-  setUserUID: (arg0: string | null) => void;
+  setUserUID: (arg0: string) => void;
+  getUserUID: () => string | null;
+
   token: string | null;
   setToken: (arg0: string) => void;
+  getToken: () => string | null;
 
   login: (token: string, userUID: string) => void;
   logout: () => void;
@@ -15,51 +18,55 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   userUID: null,
   setUserUID: () => {},
+  getUserUID: () => null,
+
   token: null,
   setToken: () => {},
+  getToken: () => null,
 
   login: () => {},
   logout: () => {},
 });
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [userUID, setUserUID] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  
+  
+  function setUserUID(userUID: string) {
+    localStorage.setItem("userUID", userUID);
+  }
 
-  useEffect(() => {
-    setToken(localStorage.getItem("token"));
-    setUserUID(localStorage.getItem("userUID"));
-  }, []);
+  function getUserUID() {
+    return localStorage.getItem("userUID");
+  }
 
-  useEffect(() => {
-    setToken(localStorage.getItem("token"));
-    setUserUID(localStorage.getItem("userUID"));
+  function setToken(token: string) {
+    localStorage.setItem("token", token);
+  }
 
-    console.log("Token: ", token);
-    console.log("UserUID: ", userUID);
-  }, [userUID, token]);
+  function getToken() {
+    return localStorage.getItem("token");
+  }
 
   function login(token: string, userUID: string) {
     setToken(token);
     setUserUID(userUID);
-
-    // Save token to local storage
-    localStorage.setItem("token", token);
-    localStorage.setItem("userUID", userUID);
   }
 
   function logout() {
-    setUserUID(null);
-    setToken(null);
-
-    // Remove token from local storage
     localStorage.removeItem("token");
     localStorage.removeItem("userUID");
   }
 
   return (
     <AuthContext.Provider
-      value={{ userUID, setUserUID, token, setToken, login, logout }}
+      value={{
+        setUserUID,
+        getUserUID,
+        setToken,
+        getToken,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

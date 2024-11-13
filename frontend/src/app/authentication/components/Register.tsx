@@ -75,7 +75,7 @@ function Register() {
       });
   };
 
-  if (auth.userUID && auth.token) {
+  if (auth.getUserUID !== null && auth.getToken !== null) {
     router.push("/");
   }
 
