@@ -26,6 +26,7 @@
 .navbar-title {
   font-size: 20px;
   margin: 25px 30px 25px 40px;
+  display: inline-block;
   cursor: pointer;
 }
 
@@ -34,22 +35,62 @@
   position: absolute;
   right: 90px;
   top: 30px;
-  cursor: pointer;
 }
 
 .navbar-menu-item {
   display: inline-block;
   margin: 0 5px;
+  cursor: pointer;
+}
+
+.profile-picture {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 15px 20px;
+  position: absolute;
+  right: 0;
+  display: inline-block;
+  background-color: var(--background-color);
+  cursor: pointer;
+}
+
+.menu {
+  background-color: var(--tile-color);
+
+  border-radius: 25px;
+
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  position: fixed;
+  top: 90px;
+  right: 0;
+  padding: 10px 30px;
+
+  margin: 10px 5vw;
+
+  z-index: 1;
+}
+
+.menu-item {
+  display: block;
+  margin: 10px 0;
+  text-align: center;
+  cursor: pointer;
 }
 
 // THEME TOGGLE
 .theme-toggle {
   display: inline-block;
-  width: 50px;
-  height: 26px;
+  width: 25px; // 50 px
+  height: 15px; // 26 px
   position: absolute;
-  right: 27px;
-  top: 27px;
+  right: 80px;
+  top: 32px;
 }
 
 .theme-toggle input {
@@ -66,22 +107,22 @@
   right: 0;
   bottom: 0;
   transition: 0.4s;
-  border-radius: 34px;
+  border-radius: 17px;
   background-color: var(--background-color);
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 20px;
-  width: 20px;
-  left: 3px;
-  bottom: 3px;
+  height: 10px;
+  width: 10px;
+  left: 2.5px;
+  bottom: 2.5px;
   background-color: white;
   transition: 0.4s;
   border-radius: 50%;
 }
 
 input:checked + .slider:before {
-  transform: translateX(24px);
+  transform: translateX(10px);
 }
