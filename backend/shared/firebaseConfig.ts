@@ -1,5 +1,6 @@
 // shared/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
@@ -15,11 +16,14 @@ const firebaseConfig = {
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.FIREBASE_APP_ID,
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  databaseURL: process.env.databaseURL,
 };
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+
+export const database = getDatabase(firebaseApp)
 
 // Conditionally initialize Analytics if supported
 let analytics;
