@@ -1,5 +1,4 @@
 import { getComment, getAllComments, updateComment, createComment, deleteComment } from '../services/commentService';
-import { Comment } from '../models/commentModel';
 import { Request, Response } from 'express';
 
 export async function createCommentController(req: Request, res: Response): Promise<void> {
@@ -44,13 +43,18 @@ export async function deleteCommentController(req: Request, res: Response) {
 	}
 }
 
-
-export async function getAllCommentsController(res: Response) {
+export async function getAllCommentsController(req: Request, res: Response): Promise<void> {
 	try {
-		await getAllComments();
-		res.status(200).json({ message: 'Comments listed successfully' });
+		const comments = await getAllComments();
+
+		if (comments.length > 0) {
+			res.status(200).json(comments);
+		} else {
+			res.status(404).json({ message: 'No comments found' });
+		}
 	} catch (error) {
-		res.status(500).json({ error: 'Failed to delete comment' });
+		console.error('Error fetching comments:', error);
+		res.status(500).json({ error: 'Failed to fetch comments' });
 	}
 }
 

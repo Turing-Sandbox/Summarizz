@@ -32,12 +32,16 @@ export async function deleteComment(commentId: string): Promise<void> {
 	await remove(child(commentsRef, commentId))
 }
 
+// Function to fetch comments from the database
 export async function getAllComments(): Promise<Comment[]> {
-	const commentsRef = ref(database, "comments");
-	const snapshot = await get(commentsRef);
-	const comments: Comment[] = [];
-	snapshot.forEach(childSnapshot => {
-		comments.push(childSnapshot.val() as Comment);
-	});
-	return comments;
+	const commentsRef = ref(database, 'comments'); // Assuming your comments are stored under 'comments'
+	const snapshot = await get(child(commentsRef, '/'));
+
+	if (snapshot.exists()) {
+		return snapshot.val(); // Return the comments as an array or object
+	} else {
+		return []; // Return an empty array if no comments are found
+	}
 }
+
+
