@@ -2,13 +2,13 @@ import { getComment, getAllComments, updateComment, createComment, deleteComment
 import { Request, Response } from 'express';
 
 export async function createCommentController(req: Request, res: Response): Promise<void> {
-	const { owner_id, text } = req.body;
+	const { owner_id, text } = req.params;
 	try {
 		await createComment(owner_id, text);
 		res.status(201).json({ message: 'Comment created successfully' });
 	} catch (error) {
-		console.log(error)
 		res.status(500).json({ error: 'Failed to create comment' });
+		console.log(error)
 	}
 }
 
@@ -42,7 +42,7 @@ export async function deleteCommentController(req: Request, res: Response) {
 		await deleteComment(commentId);
 		res.status(200).json({ message: 'Comment deleted successfully' });
 	} catch (error) {
-		res.status(500).json({ error: 'Failed to delete comment' });
+		res.status(500).json({ error: error});
 		console.log(error)
 	}
 }
