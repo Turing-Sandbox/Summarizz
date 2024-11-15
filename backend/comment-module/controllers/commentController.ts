@@ -7,6 +7,7 @@ export async function createCommentController(req: Request, res: Response): Prom
 		await createComment(owner_id, text);
 		res.status(201).json({ message: 'Comment created successfully' });
 	} catch (error) {
+		console.log(error)
 		res.status(500).json({ error: 'Failed to create comment' });
 	}
 }
@@ -19,6 +20,7 @@ export async function getCommentController(req: Request, res: Response) {
 		else res.status(404).json({ error: 'Comment not found' });
 	} catch (error) {
 		res.status(500).json({ error: 'Failed to fetch comment' });
+		console.log(error)
 	}
 }
 
@@ -30,6 +32,7 @@ export async function updateCommentController(req: Request, res: Response) {
 		res.status(200).json({ message: 'Comment updated successfully' });
 	} catch (error) {
 		res.status(500).json({ error: 'Failed to update comment' });
+		console.log(error)
 	}
 }
 
@@ -40,6 +43,7 @@ export async function deleteCommentController(req: Request, res: Response) {
 		res.status(200).json({ message: 'Comment deleted successfully' });
 	} catch (error) {
 		res.status(500).json({ error: 'Failed to delete comment' });
+		console.log(error)
 	}
 }
 
@@ -55,6 +59,7 @@ export async function getAllCommentsController(req: Request, res: Response): Pro
 	} catch (error) {
 		console.error('Error fetching comments:', error);
 		res.status(500).json({ error: 'Failed to fetch comments' });
+		console.log(error)
 	}
 }
 
