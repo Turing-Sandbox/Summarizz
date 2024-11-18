@@ -6,17 +6,26 @@ import Navbar from "@/app/components/Navbar";
 import AuthProvider, { useAuth } from "@/app/hooks/AuthProvider";
 import "../styles/content.scss";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Page() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [thumbnail, setThumbnail] = useState("");
+  const [error, setError] = useState("");
+  
+  function handleSubmit() {
+    // Reset Error Message
 
-  const auth = useAuth();
-  const router = useRouter();
+    // Validate user input
 
-  if (auth.getUserUID() === null && auth.getToken() === null) {
-    router.push("/authentication/login");
+    // Create content
+
+    // Post content to server
+
+    // Post Thumbnail to server
+
+    // Redirect to home page
   }
 
   return (
@@ -52,11 +61,11 @@ export default function Page() {
               Upload Thumbnail
             </label>
             <input id='file-upload' type='file' />
-
-            <button className='content-button' type='submit'>
-              Published
-            </button>
           </form>
+
+          <button className='content-button' onClick={() => handleSubmit()}>
+            Published
+          </button>
         </div>
       </AuthProvider>
 

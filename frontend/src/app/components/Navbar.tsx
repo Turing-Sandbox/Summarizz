@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
   const auth = useAuth();
   const navigate = useRouter();
@@ -21,6 +22,10 @@ function Navbar() {
     const newTheme = isDarkMode ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
     setIsDarkMode(!isDarkMode);
+  };
+
+  const updateAuthenticated = () => {
+    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
   };
 
   return (
@@ -40,7 +45,13 @@ function Navbar() {
         </button>
 
         {/* Profile Picture */}
-        <div className='profile-picture' onClick={() => setShowMenu(!showMenu)}>
+        <div
+          className='profile-picture'
+          onClick={() => {
+            updateAuthenticated();
+            setShowMenu(!showMenu);
+          }}
+        >
           {/* <img
                 src={
                 auth.user?.profilePicture ||
@@ -61,23 +72,35 @@ function Navbar() {
       {/* Profile Menu */}
       {showMenu && (
         <div className='menu'>
-          {auth.getUserUID() === null && auth.getToken() === null ? (
+          {!authenticated ? (
             <>
               <a
                 className='menu-item'
-                onClick={() => navigate.push("/authentication/login")}
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate.push("/authentication/login");
+                }}
               >
                 Login
               </a>
               <a
                 className='menu-item'
-                onClick={() => navigate.push("/authentication/register")}
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate.push("/authentication/register");
+                }}
               >
                 Register
               </a>
             </>
           ) : (
-            <a className='menu-item' onClick={auth.logout}>
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                auth.logout();
+              }}
+            >
               Logout
             </a>
           )}
