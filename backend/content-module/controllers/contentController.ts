@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
+import { StorageService } from "../../storage-module/services/serviceStorage";
 
 export class ContentController {
   static async createContent(req: Request, res: Response) {
@@ -46,7 +47,7 @@ export class ContentController {
       // Upload thumbnail to storage
       try {
         // Upload thumbnail
-        const response = await ContentService.uploadThumbnail(
+        const response = await StorageService.uploadFile(
           file,
           "thumbnails",
           fileName,
