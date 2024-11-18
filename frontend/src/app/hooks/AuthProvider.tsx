@@ -62,6 +62,8 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider
       value={{
+        userUID: getUserUID(),
+        token: getToken(),
         setUserUID,
         getUserUID,
         setToken,

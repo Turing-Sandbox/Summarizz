@@ -94,15 +94,27 @@ function Navbar() {
               </a>
             </>
           ) : (
-            <a
-              className='menu-item'
-              onClick={() => {
-                setShowMenu(false);
-                auth.logout();
-              }}
-            >
-              Logout
-            </a>
+            <>
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate.push(`/profile/${auth.getUserUID()}`);
+                }}
+              >
+                Profile
+              </a>
+
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
+                  auth.logout();
+                }}
+              >
+                Logout
+              </a>
+            </>
           )}
         </div>
       )}
