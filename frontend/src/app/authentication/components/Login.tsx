@@ -4,6 +4,7 @@ import "../styles/authentication.scss";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/hooks/AuthProvider";
+import { apiURL } from "@/app/scripts/api";
 
 function Login() {
   const [error, setError] = useState("");
@@ -27,7 +28,7 @@ function Login() {
 
     // login user
     axios
-      .post("http://localhost:3000/user/login", user)
+      .post(`${apiURL}/user/login`, user)
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
           const userUID = res.data.userUID;
@@ -57,7 +58,13 @@ function Login() {
       });
   };
 
-  if (auth.userUID && auth.token) {
+  console.log("auth.getUserUID: ", auth.getUserUID());
+  console.log("auth.getToken: ", auth.getToken());
+
+  if (auth.getUserUID() !== null && auth.getToken() !== null) {
+    console.log("UserUID", auth.getUserUID());
+    console.log("Token", auth.getToken());
+    console.log("Redirecting to home page...");
     router.push("/");
   }
 

@@ -1,17 +1,19 @@
 "use client";
 
-import Register from "@/app/authentication/components/Register";
 import Background from "@/app/components/Background";
 import { Footer } from "@/app/components/Footer";
 import AuthProvider from "@/app/hooks/AuthProvider";
-import "../styles/authentication.scss";
+import Profile from "../components/profile";
+import { useParams } from "next/navigation";
 
 export default function Page() {
+  const { id } = useParams();
+
   return (
     <>
       <Background />
       <AuthProvider>
-        <Register />
+        <Profile id={id as string} />
 
         <div className='footer'>
           <Footer />

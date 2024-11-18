@@ -4,12 +4,14 @@ import express from "express";
 import userRoutes from "../user-module/routes/userRoutes";
 import "./firebaseConfig";
 import cors from "cors";
+import contentRoutes from "../content-module/routes/contentRoutes";
 
 const app = express();
 const port = 3000;
 app.use(cors());
 app.use(express.json());
 app.use("/user", userRoutes);
+app.use("/content", contentRoutes);
 
 // Middleware to log all requests
 app.use((req, res, next) => {

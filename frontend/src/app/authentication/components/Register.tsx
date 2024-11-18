@@ -4,6 +4,7 @@ import "../styles/authentication.scss";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/hooks/AuthProvider";
+import { apiURL } from "@/app/scripts/api";
 
 function Register() {
   const [error, setError] = useState("");
@@ -45,7 +46,7 @@ function Register() {
 
     // Register user
     axios
-      .post("http://localhost:3000/user/register", user)
+      .post(`${apiURL}/user/register`, user)
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
           const userUID = res.data.userUID;
@@ -75,7 +76,10 @@ function Register() {
       });
   };
 
-  if (auth.userUID && auth.token) {
+  if (auth.getUserUID() !== null && auth.getToken() !== null) {
+    console.log("UserUID", auth.getUserUID());
+    console.log("Token", auth.getToken());
+    console.log("Redirecting to home page...");
     router.push("/");
   }
 

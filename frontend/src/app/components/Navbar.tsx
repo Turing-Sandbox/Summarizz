@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
   const auth = useAuth();
   const navigate = useRouter();
@@ -23,20 +24,34 @@ function Navbar() {
     setIsDarkMode(!isDarkMode);
   };
 
+  const updateAuthenticated = () => {
+    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
+  };
+
   return (
     <>
       <div className='navbar-background'>
         {/* App Name */}
-        <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
+        <a href='/'>
+          <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
+        </a>
 
-        {/* Theme Slider */}
-        <label className='theme-toggle'>
-          <input type='checkbox' checked={isDarkMode} onChange={toggleTheme} />
-          <span className='slider'></span>
-        </label>
+        {/* Create New Content */}
+        <button
+          className='navbar-button'
+          onClick={() => navigate.push("/content/create")}
+        >
+          Create Content
+        </button>
 
         {/* Profile Picture */}
-        <div className='profile-picture' onClick={() => setShowMenu(!showMenu)}>
+        <div
+          className='profile-picture'
+          onClick={() => {
+            updateAuthenticated();
+            setShowMenu(!showMenu);
+          }}
+        >
           {/* <img
                 src={
                 auth.user?.profilePicture ||
@@ -46,30 +61,60 @@ function Navbar() {
                 alt='Profile Picture'
             /> */}
         </div>
+
+        {/* Theme Slider */}
+        <label className='theme-toggle'>
+          <input type='checkbox' checked={isDarkMode} onChange={toggleTheme} />
+          <span className='slider'></span>
+        </label>
       </div>
 
       {/* Profile Menu */}
       {showMenu && (
         <div className='menu'>
-          {!auth.userUID && !auth.token ? (
+          {!authenticated ? (
             <>
               <a
                 className='menu-item'
-                onClick={() => navigate.push("/authentication/login")}
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate.push("/authentication/login");
+                }}
               >
                 Login
               </a>
               <a
                 className='menu-item'
-                onClick={() => navigate.push("/authentication/register")}
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate.push("/authentication/register");
+                }}
               >
                 Register
               </a>
             </>
           ) : (
-            <a className='menu-item' onClick={auth.logout}>
-              Logout
-            </a>
+            <>
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
+                  navigate.push(`/profile/${auth.getUserUID()}`);
+                }}
+              >
+                Profile
+              </a>
+
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
+                  auth.logout();
+                }}
+              >
+                Logout
+              </a>
+            </>
           )}
         </div>
       )}

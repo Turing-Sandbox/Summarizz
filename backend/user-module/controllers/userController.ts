@@ -58,7 +58,9 @@ export async function createUserController(req: Request, res: Response) {
 
 // Get User
 export async function getUserController(req: Request, res: Response) {
+  console.log("Fetching user...");
   const { uid } = req.params;
+
   try {
     const user = await getUser(uid);
     if (user) res.status(200).json(user);

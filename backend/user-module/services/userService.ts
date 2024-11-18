@@ -91,6 +91,20 @@ export async function createUser(
   await setDoc(doc(db, "users", uid), user);
 }
 
+export async function addContentToUser(userUID: string, contentUID: string) {
+  const userDoc = await getDoc(doc(db, "users", userUID));
+
+  if (userDoc.exists()) {
+    const user = userDoc.data();
+    if (user?.content) {
+      user.content.push(contentUID);
+    } else {
+      user.content = [contentUID];
+    }
+    await updateDoc(doc(db, "users", userUID), user);
+  }
+}
+
 export async function getUser(uid: string) {
   const userDoc = await getDoc(doc(db, "users", uid));
   return userDoc.exists() ? userDoc.data() : null;
