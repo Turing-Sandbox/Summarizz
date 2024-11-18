@@ -39,11 +39,6 @@ export class ContentController {
       const fileName = file.newFilename;
       const fileType = file.mimetype;
 
-      console.log("File:", file);
-      console.log("File Name:", fileName);
-      console.log("Size:", file.size);
-      console.log("Type:", fileType);
-
       // Upload thumbnail to storage
       try {
         // Upload thumbnail
@@ -61,5 +56,20 @@ export class ContentController {
           .json({ error: error.message || "Failed to upload thumbnail" });
       }
     });
+  }
+
+  static async getContent(req: Request, res: Response) {
+    console.log("Fetching Content...");
+    const { contentId } = req.params;
+
+    try {
+      const response = await ContentService.getContent(contentId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to fetch content" });
+    }
   }
 }

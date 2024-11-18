@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { addContentToUser } from "../../user-module/services/userService";
 
 export class ContentService {
@@ -35,5 +35,22 @@ export class ContentService {
       }
       throw new Error(errorMessage);
     }
+  }
+
+  static async getContent(uid: string) {
+    console.log("Getting content...");
+    // Get content from Firestore
+    console.log(uid);
+    const contentDoc = await getDoc(doc(db, "contents", uid));
+    return contentDoc.exists() ? contentDoc.data() : null;
+
+    // const contentRef = await getDoc(doc(db, "contents", contentID));
+
+    // if (contentRef.exists()) {
+    //   const content = contentRef.data();
+    //   return content;
+    // } else {
+    //   return null;
+    // }
   }
 }
