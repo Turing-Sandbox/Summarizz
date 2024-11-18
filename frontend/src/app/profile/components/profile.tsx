@@ -5,6 +5,7 @@ import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import "../styles/profile.scss";
 
 interface ProfileProps {
   id: string;
@@ -68,28 +69,30 @@ export default function Profile({ id }: ProfileProps) {
     <>
       <Navbar />
       <div className='main-content'>
-        <h1>Profile</h1>
-        <p>{user?.username}</p>
-        <p>{user?.firstName}</p>
-        <p>{user?.lastName}</p>
-        <p>{user?.email}</p>
-        <p>{user?.bio}</p>
+        <h1>{user?.username}</h1>
         {/* <img src={user.profilePicture} alt='Profile Picture' /> */}
 
+        <p>
+          {user?.firstName} {user?.lastName}
+        </p>
+        <p>{user?.bio}</p>
+
         <h2>Content</h2>
-        {contents.map((content, index) => (
-          <div key={content.id || index}>
-            <h3>{content.title}</h3>
-            <p>{content.content}</p>
-            {/* Load thumbnail image from URL */}
-            <Image
-              src={content.thumbnail}
-              alt='Thumbnail'
-              width={200}
-              height={200}
-            />
-          </div>
-        ))}
+        <div className='content-list'>
+          {contents.map((content, index) => (
+            <div key={content.id || index} className='content-list-item'>
+              <h3>{content.title}</h3>
+              <p>{content.content}</p>
+              {/* Load thumbnail image from URL */}
+              <Image
+                src={content.thumbnail}
+                alt='Thumbnail'
+                width={200}
+                height={200}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

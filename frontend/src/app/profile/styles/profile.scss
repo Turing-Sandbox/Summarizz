@@ -1,0 +1,22 @@
+.content-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.content-list-item {
+  width: calc(33.33% - 1rem);
+  margin: 1rem 0;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--tile-color);
+  color: var(--text-color);
+
+  font-size: 1.1rem;
+}
