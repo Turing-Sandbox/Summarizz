@@ -44,6 +44,7 @@
 
   margin: auto;
   display: flex;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -56,6 +57,7 @@ body,
 html {
   height: 100vh;
   margin: 0;
+  flex-direction: column;
   display: flex;
   justify-content: center;
   align-items: center;
