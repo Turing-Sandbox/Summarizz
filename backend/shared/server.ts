@@ -7,11 +7,6 @@ import "./firebaseConfig";
 
 const app = express();
 
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' http://localhost:3000; connect-src 'self' http://localhost:3000;");
-  next();
-});
-
 app.use(express.json());
 app.use('/api', userRoutes);  // Prefix your routes with '/api' if desired
 app.use('/api', commentRoutes);
