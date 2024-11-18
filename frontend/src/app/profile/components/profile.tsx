@@ -60,7 +60,7 @@ export default function Profile({ id }: ProfileProps) {
 
   function getContent(contentId: string) {
     axios.get(`${apiURL}/content/${contentId}`).then((res) => {
-      setContents([...contents, res.data]);
+      setContents((prevContents) => [...prevContents, res.data]);
     });
   }
 
