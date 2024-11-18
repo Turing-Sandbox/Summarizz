@@ -2,13 +2,16 @@ import { getComment, getAllComments, updateComment, createComment, deleteComment
 import { Request, Response } from 'express';
 
 export async function createCommentController(req: Request, res: Response): Promise<void> {
-	const { owner_id, text } = req.params;
+	const { owner_id, text } = req.body;
 	try {
-		await createComment(owner_id, text);
-		res.status(201).json({ message: 'Comment created successfully' });
+		const creation = await createComment(owner_id, text);
+		res.status(201).json({ message: 'Comment created successfully' + creation});
 	} catch (error) {
-		res.status(500).json({ error: 'Failed to create comment' });
 		console.log(error)
+		console.log("req.body", req.body)
+		console.log("req.params", req.params)
+		console.log(owner_id, text)
+		res.status(500).json({ error: error });
 	}
 }
 

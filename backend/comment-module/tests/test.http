@@ -3,3 +3,13 @@ GET https://examples.http-client.intellij.net/get
     ?generated-in=IntelliJ IDEA
 
 ###
+
+POST http://localhost:3000/api/comments
+Content-Type: application/json
+
+{
+"owner_id":"just_PLEASE_work",
+"text":"third time is the charm"
+}
+###
+GET http://localhost:3000/api/comments/?commentId=-OC004u5Ox4UAEhwN3cy
