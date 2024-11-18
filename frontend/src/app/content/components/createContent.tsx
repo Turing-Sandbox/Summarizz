@@ -190,13 +190,15 @@ export default function CreateContent() {
             <>
               <p>Selected file: {thumbnail.name}</p>
               <p>File size: {(thumbnail.size / 1024).toFixed(2)} KB</p>
-              <Image
-                src={thumbnailPreview}
-                alt='Thumbnail Preview'
-                width={200}
-                height={200}
-                style={{ maxWidth: "200px", maxHeight: "200px" }}
-              />
+              {thumbnailPreview && (
+                <Image
+                  src={thumbnailPreview}
+                  alt='Thumbnail Preview'
+                  width={200}
+                  height={200}
+                  style={{ maxWidth: "200px", maxHeight: "200px" }}
+                />
+              )}
             </>
           )}
         </form>

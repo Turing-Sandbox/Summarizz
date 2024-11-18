@@ -10,4 +10,5 @@ export interface User {
   phone?: string; // Optional phone number
   location?: string; // Optional location
   website?: string; // Optional website
+  content?: string[]; // Optional content
 }

@@ -1,7 +1,8 @@
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { db, storage } from "../../shared/firebaseConfig";
-import { doc, setDoc, collection, addDoc } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import fs from "fs/promises";
+import { addContentToUser } from "../../user-module/services/userService";
 
 export class ContentService {
   static async createContent(
@@ -24,6 +25,8 @@ export class ContentService {
 
       const docRef = await addDoc(collection(db, "contents"), newContent);
       console.log("Content created with ID:", docRef.id);
+
+      addContentToUser(creatorUID, docRef.id);
 
       return { id: docRef.id };
     } catch (error) {
