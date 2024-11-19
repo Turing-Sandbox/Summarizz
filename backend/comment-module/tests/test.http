@@ -4,27 +4,27 @@ GET https://examples.http-client.intellij.net/get
 
 ###
 
-POST http://localhost:3000/api/comments
+POST http://localhost:3000/api/comments/1/
 Content-Type: application/json
 
 {
-"owner_id":"This works now2",
-"text":"this is a comment2"
+"owner_id":"Attempt 2",
+"text":"this is a comment under a post"
 }
 ###
-GET http://localhost:3000/api/comments/-OC0MTMk9Nh2Kk-eCIRbZ
+GET http://localhost:3000/api/comments/1/-OC1Q7ghFQh0Fd43cyUl
 
 ###
 
-GET http://localhost:3000/api/comments
+GET http://localhost:3000/api/comments/1
 
 ###
 
-DELETE localhost:3000/api/comments/-OC0MTMk9Nh2Kk-eCIRb
+DELETE localhost:3000/api/comments/1/-OC1QQZheDo5EE1UxKJk
 
 ###
 
-PUT localhost:3000/api/comments/-OC13j_cWxWVqOK2pLmy
+PUT localhost:3000/api/comments/1/-OC1Q7ghFQh0Fd43cyUl
 Content-Type: application/json
 
 {

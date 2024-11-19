@@ -3,30 +3,35 @@ import { ref, get, set, remove, update, child, push } from 'firebase/database';
 import { Comment } from '../models/commentModel';
 
 
-export async function createComment(owner_id: string, text: string): Promise<Comment> {
-	const commentsRef = ref(realtime_db, "comments");
+export async function createComment(post_id: string, owner_id: string, text: string): Promise<Comment> {
+	const commentsRef = ref(realtime_db, `comments/${post_id}`);
 	const newCommentID = push(commentsRef).key
+	const time = Date.now()
 	const newComment: Comment = {
+		post_id: post_id,
 		comment_id: newCommentID,
 		owner_id: owner_id,
 		text: text,
-		timestamp: Date.now(),
+		timestamp: time,
+		last_edited_timestamp: time,
+		like_count: 0,
 	}
 	await set(child(commentsRef, newCommentID), newComment);
 	console.log(newComment)
 	return newComment;
 }
 
-export async function getComment(commentId: string): Promise<Comment | null> {
-	const commentsRef = ref(realtime_db, "comments");
-	const snapshot = await get(child(commentsRef, commentId));
+export async function getComment(post_id: string, commentId: string): Promise<Comment | null> {
+	const commentsRef = ref(realtime_db, `comments/${post_id}/${commentId}`);
+	const snapshot = await get(commentsRef);
 	return snapshot.val();
 }
 
-export async function updateComment(commentId: string, updatedComment: Partial<Comment>): Promise<void> {
-	const commentRef = ref(realtime_db, "comments/" + commentId);
+export async function updateComment(post_id: string, commentId: string, updatedComment: Partial<Comment>): Promise<void> {
+	const commentRef = ref(realtime_db, `comments/${post_id}/${commentId}`);
 	console.log("updated: ", updatedComment)
 	const doesExist = await get(commentRef)
+	updatedComment.last_edited_timestamp = Date.now()
 	if (doesExist.exists()) {
 		await update(commentRef, updatedComment);
 	} else {
@@ -35,8 +40,8 @@ export async function updateComment(commentId: string, updatedComment: Partial<C
 }
 
 
-export async function deleteComment(commentId: string): Promise<void> {
-	const commentRef = ref(realtime_db, "comments/" + commentId);
+export async function deleteComment(post_id: string, commentId: string): Promise<void> {
+	const commentRef = ref(realtime_db, `comments/${post_id}/${commentId}`);
 	const doesExist = await get(commentRef)
 	if (doesExist.exists()) {
 		console.log(doesExist.val())
@@ -49,8 +54,8 @@ export async function deleteComment(commentId: string): Promise<void> {
 }
 
 // Function to fetch comments from the database
-export async function getAllComments(): Promise<Comment[]> {
-	const commentsRef = ref(realtime_db, 'comments');
+export async function getAllComments(post_id: string): Promise<Comment[]> {
+	const commentsRef = ref(realtime_db, `comments/${post_id}`);
 	const snapshot = await get(commentsRef);
 
 	if (snapshot.exists()) {
