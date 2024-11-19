@@ -8,8 +8,28 @@ POST http://localhost:3000/api/comments
 Content-Type: application/json
 
 {
-"owner_id":"just_PLEASE_work",
-"text":"third time is the charm"
+"owner_id":"This works now2",
+"text":"this is a comment2"
 }
 ###
-GET http://localhost:3000/api/comments/?commentId=-OC004u5Ox4UAEhwN3cy
+GET http://localhost:3000/api/comments/-OC0MTMk9Nh2Kk-eCIRbZ
+
+###
+
+GET http://localhost:3000/api/comments
+
+###
+
+DELETE localhost:3000/api/comments/-OC0MTMk9Nh2Kk-eCIRb
+
+###
+
+PUT localhost:3000/api/comments/-OC13j_cWxWVqOK2pLmy
+Content-Type: application/json
+
+{
+  "owner_id": "This is an edited owner",
+  "text":"this is an edited comment!!"
+}
+
+###
