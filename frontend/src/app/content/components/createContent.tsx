@@ -2,24 +2,29 @@
 
 import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import "../styles/content.scss";
+import "../styles/createContent.scss";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
 import { apiURL } from "@/app/scripts/api";
 
 export default function CreateContent() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const [error, setError] = useState("");
-  // const [authenticated, setAuthenticated] = useState(false);
 
   const auth = useAuth();
   const router = useRouter();
 
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file && file.type.startsWith("image/")) {
@@ -32,21 +37,18 @@ export default function CreateContent() {
     }
   };
 
-  // console.log("auth.getUserUID: ", auth.getUserUID());
-  // console.log("auth.getToken: ", auth.getToken());
-
   function handleSubmit() {
-    // Reset Error Message
+    // 1 - Reset Error Message
     setError("");
 
-    // Validate user input
+    // 2 - Validate user input
     if (title === "" || content === "") {
       setError("Title and content are required.");
       return;
     }
 
     if (thumbnail) {
-      // Post Thumbnail to server
+      // 3 - Post Thumbnail to server
       const formData = new FormData();
       formData.append("thumbnail", thumbnail);
 
@@ -59,7 +61,7 @@ export default function CreateContent() {
 
           const thumbnailUrl = res.url;
 
-          // Create content with thumbnail URL
+          // 4 - Create content with thumbnail URL
           const newContent = {
             creatorUID: auth.getUserUID(),
             title,
@@ -67,7 +69,7 @@ export default function CreateContent() {
             thumbnailUrl,
           };
 
-          // Post content to server
+          // 5 - Post content to server
           fetch(`${apiURL}/content`, {
             method: "POST",
             headers: {
@@ -76,14 +78,14 @@ export default function CreateContent() {
             body: JSON.stringify(newContent),
           })
             .then(async (response) => {
-              const res = await response.json();
+              // const res = await response.json();
 
+              // 6 - Redirect to home page
               if (response.status === 200 || response.status === 201) {
-                console.log("Content created successfully");
-                // Redirect to home page
                 router.push("/");
+
+                // 7 - Error Handling
               } else {
-                console.log(res);
                 setError("Failed to create content.");
               }
             })
@@ -97,14 +99,14 @@ export default function CreateContent() {
           setError("Failed to upload thumbnail.");
         });
     } else {
-      // Create content without thumbnail URL
+      // 3 - Create content without thumbnail URL
       const newContent = {
         creatorUID: auth.getUserUID(),
         title,
         content,
       };
 
-      // Post content to server
+      // 4 - Post content to server
       fetch(`${apiURL}/content`, {
         method: "POST",
         headers: {
@@ -114,9 +116,10 @@ export default function CreateContent() {
       })
         .then((response) => response.json())
         .then(() => {
-          // Redirect to home page
+          // 5 - Redirect to home page
           router.push("/");
         })
+        // 6 - Error Handling
         .catch((error) => {
           console.log(error);
           setError("Failed to create content.");
@@ -124,14 +127,14 @@ export default function CreateContent() {
     }
   }
 
+  // User must be authenticated to create content
   if (auth.getUserUID() === null || auth.getToken() === null) {
-    console.log("User not authenticated");
-    console.log("auth.getUserUID: ", auth.getUserUID());
-    console.log("auth.getToken: ", auth.getToken());
-
     router.push("/authentication/login");
   }
 
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <Navbar />
@@ -158,24 +161,6 @@ export default function CreateContent() {
             onChange={(e) => setContent(e.target.value)}
             placeholder='Content'
           />
-          {/* 
-          <label htmlFor='file-upload' className='content-file-upload'>
-            Upload Thumbnail
-          </label>
-          <input
-            id='file-upload'
-            type='file'
-            onChange={(e) =>
-              setThumbnail(e.target.files ? e.target.files[0] : null)
-            }
-          />
-          {thumbnail && (
-            <>
-              <p>Selected file: {thumbnail.name}</p>
-              <p>{thumbnail.size}</p>
-              <image src={thumbnail.webkitRelativePath} />
-            </>
-          )} */}
 
           <label htmlFor='file-upload' className='content-file-upload'>
             Upload Thumbnail

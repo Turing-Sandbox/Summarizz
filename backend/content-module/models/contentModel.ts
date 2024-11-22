@@ -9,4 +9,5 @@ export interface Content {
   // Optional Fields
   thumbnail?: string; // Thumbnail Image
   summary?: string; // Content Summary
+  readtime?: number; // Read Time
 }
