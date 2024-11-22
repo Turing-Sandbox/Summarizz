@@ -78,10 +78,10 @@ export default function CreateContent() {
             body: JSON.stringify(newContent),
           })
             .then(async (response) => {
-              const res = await response.json();
+              // const res = await response.json();
 
               // 6 - Redirect to home page
-              if (res.status === 200 || res.status === 201) {
+              if (response.status === 200 || response.status === 201) {
                 router.push("/");
 
                 // 7 - Error Handling
