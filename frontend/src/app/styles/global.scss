@@ -40,6 +40,34 @@ label {
   text-decoration: none;
 }
 
+code {
+  display: block; /* Ensure the code block occupies the full width */
+  width: 100%; /* Occupy the full width of the container */
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 400;
+  font-style: normal;
+  font-size: small;
+  background-color: var(--background-color);
+  padding: 1rem; /* Add padding for better readability */
+  margin: 1rem 0; /* Add margin to separate from other elements */
+  border-radius: 10px; /* Optional: Add border radius for rounded corners */
+  overflow-x: auto; /* Ensure long code blocks are scrollable */
+}
+
+blockquote {
+  display: block; /* Ensure the blockquote occupies the full width */
+  width: 100%; /* Occupy the full width of the container */
+  font-family: "Work Sans", sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: small;
+  background-color: var(--tile-color);
+  padding: 1rem; /* Add padding for better readability */
+  margin: 1rem 0; /* Add margin to separate from other elements */
+  border-left: 5px solid var(--input-border-color); /* Optional: Add a left border for visual distinction */
+  border-radius: 5px; /* Optional: Add border radius for rounded corners */
+}
+
 .summarizz-logo {
   font-family: "Blanka";
   user-select: none;

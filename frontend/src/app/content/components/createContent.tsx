@@ -5,8 +5,19 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 import "../styles/createContent.scss";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { apiURL } from "@/app/scripts/api";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Bold from "@tiptap/extension-bold";
+import Italic from "@tiptap/extension-italic";
+import Underline from "@tiptap/extension-underline";
+import Heading from "@tiptap/extension-heading";
+import BulletList from "@tiptap/extension-bullet-list";
+import OrderedList from "@tiptap/extension-ordered-list";
+import Toolbar from "./toolbar"; 
+import Cookies from "js-cookie";
+import Paragraph from "@tiptap/extension-paragraph";
 
 export default function CreateContent() {
   // ---------------------------------------
@@ -21,6 +32,44 @@ export default function CreateContent() {
 
   const auth = useAuth();
   const router = useRouter();
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Bold,
+      Italic,
+      Underline,
+      Paragraph,
+      Heading.configure({ levels: [1, 2, 3] }),
+      BulletList,
+      OrderedList,
+    ],
+    content: content,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setContent(html);
+      Cookies.set("content", html);
+    },
+  });
+
+  // ---------------------------------------
+  // ----------- Event Handlers ------------
+  // ---------------------------------------
+  useEffect(() => {
+    const savedTitle = localStorage.getItem("title");
+    const savedContent = Cookies.get("content");
+
+    if (savedTitle) {
+      setTitle(savedTitle);
+    }
+
+    if (savedContent) {
+      setContent(savedContent);
+      if (editor) {
+        editor.commands.setContent(savedContent);
+      }
+    }
+  }, [editor]);
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -82,6 +131,8 @@ export default function CreateContent() {
 
               // 6 - Redirect to home page
               if (response.status === 200 || response.status === 201) {
+                Cookies.remove("content");
+                localStorage.removeItem("title");
                 router.push("/");
 
                 // 7 - Error Handling
@@ -116,6 +167,8 @@ export default function CreateContent() {
       })
         .then((response) => response.json())
         .then(() => {
+          Cookies.remove("content");
+          localStorage.removeItem("title");
           // 5 - Redirect to home page
           router.push("/");
         })
@@ -149,18 +202,16 @@ export default function CreateContent() {
             id='title'
             name='title'
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              localStorage.setItem("title", e.target.value);
+            }}
             placeholder='Title'
           />
 
-          <textarea
-            className='content-input'
-            id='content'
-            name='content'
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder='Content'
-          />
+          <Toolbar editor={editor} />
+
+          <EditorContent editor={editor} className='content-input' />
 
           <label htmlFor='file-upload' className='content-file-upload'>
             Upload Thumbnail
@@ -191,7 +242,7 @@ export default function CreateContent() {
         {error && <p className='error-message'>{error}</p>}
 
         <button className='content-button' onClick={() => handleSubmit()}>
-          Published
+          Publish
         </button>
       </div>
     </>

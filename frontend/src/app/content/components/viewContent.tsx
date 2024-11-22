@@ -8,6 +8,7 @@ import axios from "axios";
 import { User } from "@/app/profile/models/User";
 import Image from "next/image";
 import "../styles/viewContent.scss";
+import DOMPurify from "dompurify";
 
 interface ViewContentProps {
   id: string;
@@ -19,6 +20,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   // ---------------------------------------
   const [content, setContent] = useState<Content | null>(null);
   const [creator, setCreator] = useState<User | null>(null);
+  const [formatedContent, setFormatedContent] = useState<string | null>(null);
 
   // ---------------------------------------
   // -------------- Page INIT --------------
@@ -35,6 +37,10 @@ export default function ViewContent({ id }: ViewContentProps) {
 
   useEffect(() => {
     getUserInfo();
+    if (content) {
+      const sanitizedContent = DOMPurify.sanitize(content.content);
+      setFormatedContent(sanitizedContent);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
@@ -56,6 +62,14 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       fetchedContent.id = id;
       setContent(fetchedContent);
+
+      //   if (fetchedContent.content) {
+      //     const doc = new DOMParser().parseFromString(
+      //       fetchedContent.content,
+      //       "text/xml"
+      //     );
+      //     setFormatedContent(doc.documentElement);
+      //   }
     });
   }
 
@@ -118,7 +132,11 @@ export default function ViewContent({ id }: ViewContentProps) {
                 <p>Article Summary</p>
               </div>
             </div>
-            <p>{content?.content}</p>
+            {formatedContent ? (
+              <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
+            ) : (
+              ""
+            )}
           </div>
         </div>
       </div>

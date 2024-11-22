@@ -4,7 +4,7 @@ import express from "express";
 import "./firebaseConfig";
 import cors from "cors";
 import contentRoutes from "../content-module/routes/contentRoutes";
-import userRoutes from '../user-module/routes/userRoutes';
+import userRoutes from "../user-module/routes/userRoutes";
 import commentRoutes from "../comment-module/routes/commentRoutes";
 
 const app = express();
@@ -12,7 +12,7 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use('/comment', commentRoutes);
+app.use("/comment", commentRoutes);
 app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
 
