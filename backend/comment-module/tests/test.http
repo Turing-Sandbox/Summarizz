@@ -1,0 +1,35 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+###
+
+POST http://localhost:3000/api/comments/1/
+Content-Type: application/json
+
+{
+"owner_id":"Attempt 2",
+"text":"this is a comment under a post"
+}
+###
+GET http://localhost:3000/api/comments/1/-OC1Q7ghFQh0Fd43cyUl
+
+###
+
+GET http://localhost:3000/api/comments/1
+
+###
+
+DELETE localhost:3000/api/comments/1/-OC1QQZheDo5EE1UxKJk
+
+###
+
+PUT localhost:3000/api/comments/1/-OC1Q7ghFQh0Fd43cyUl
+Content-Type: application/json
+
+{
+  "owner_id": "This is an edited owner",
+  "text":"this is an edited comment!!"
+}
+
+###

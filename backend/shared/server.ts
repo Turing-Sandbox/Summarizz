@@ -1,15 +1,18 @@
 // server.ts
 
 import express from "express";
-import userRoutes from "../user-module/routes/userRoutes";
 import "./firebaseConfig";
 import cors from "cors";
 import contentRoutes from "../content-module/routes/contentRoutes";
+import userRoutes from '../user-module/routes/userRoutes';
+import commentRoutes from "../comment-module/routes/commentRoutes";
 
 const app = express();
 const port = 3000;
 app.use(cors());
 app.use(express.json());
+
+app.use('/api', commentRoutes);
 app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
 

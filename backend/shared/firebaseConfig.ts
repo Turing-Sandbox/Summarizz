@@ -1,12 +1,13 @@
 // shared/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-dotenv.config();
+dotenv.config({ path: __dirname + '/.env' });
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
@@ -17,11 +18,13 @@ const firebaseConfig = {
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.FIREBASE_APP_ID,
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
 };
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
+const realtime_db = getDatabase(firebaseApp)
 const auth = getAuth(firebaseApp);
 const storage = getStorage(
   firebaseApp,
@@ -39,4 +42,4 @@ isSupported().then((supported) => {
   }
 });
 
-export { firebaseApp, analytics, db, auth, storage };
+export { firebaseApp, analytics, db, realtime_db, auth, storage};
