@@ -8,6 +8,7 @@ import Image from "next/image";
 import "../styles/profile.scss";
 import { Content } from "@/app/content/models/Content";
 import { User } from "../models/User";
+import { useRouter } from "next/navigation";
 
 interface ViewProfileProps {
   id: string;
@@ -20,10 +21,12 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const [user, setUser] = useState<User | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
 
+  const router = useRouter();
+
   // ---------------------------------------
   // ------------ Event Handler ------------
   // ---------------------------------------
-  
+
   // Fetch user data on page load
   const hasFetchedData = useRef(false);
   useEffect(() => {
@@ -53,7 +56,9 @@ export default function ViewProfile({ id }: ViewProfileProps) {
 
   function getContent(contentId: string) {
     axios.get(`${apiURL}/content/${contentId}`).then((res) => {
-      setContents((prevContents) => [...prevContents, res.data]);
+      const fetchedContent = res.data;
+      fetchedContent.id = contentId;
+      setContents((prevContents) => [...prevContents, fetchedContent]);
     });
   }
 
@@ -75,16 +80,23 @@ export default function ViewProfile({ id }: ViewProfileProps) {
         <h2>Content</h2>
         <div className='content-list'>
           {contents.map((content, index) => (
-            <div key={content.id || index} className='content-list-item'>
+            <div
+              key={content.id || index}
+              className='content-list-item'
+              onClick={() => router.push(`/content/${content.id}`)}
+            >
               <h3>{content.title}</h3>
               <p>{content.content}</p>
               {/* Load thumbnail image from URL */}
-              <Image
-                src={content.thumbnail}
-                alt='Thumbnail'
-                width={200}
-                height={200}
-              />
+              <div className='content-thumbnail-container'>
+                <Image
+                  src={content.thumbnail}
+                  alt='Thumbnail'
+                  width={200}
+                  height={200}
+                  className='content-thumbnail'
+                />
+              </div>
             </div>
           ))}
         </div>

@@ -5,6 +5,9 @@ import "../styles/content.scss";
 import { useEffect, useRef, useState } from "react";
 import { apiURL } from "@/app/scripts/api";
 import { Content } from "../models/Content";
+import axios from "axios";
+import { User } from "@/app/profile/models/User";
+import Image from "next/image";
 
 interface ViewContentProps {
   id: string;
@@ -14,7 +17,8 @@ export default function ViewContent({ id }: ViewContentProps) {
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------
-  const [contents, setContents] = useState<Content>();
+  const [content, setContent] = useState<Content | null>(null);
+  const [creator, setCreator] = useState<User | null>(null);
 
   // ---------------------------------------
   // -------------- Page INIT --------------
@@ -23,18 +27,33 @@ export default function ViewContent({ id }: ViewContentProps) {
   useEffect(() => {
     if (!hasFetchedData.current) {
       getContent();
+      //   getUserInfo();
       hasFetchedData.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    getUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
+
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
-  function getContent(contentId: string) {
-    axios.get(`${apiURL}/content/${contentId}`).then((res) => {
-      setContents((prevContents) => [...prevContents, res.data]);
+  function getContent() {
+    axios.get(`${apiURL}/content/${id}`).then((res) => {
+      setContent(res.data);
     });
+  }
+
+  function getUserInfo() {
+    if (content) {
+      axios.get(`${apiURL}/user/${content.creatorUID}`).then((res) => {
+        console.log(res.data);
+        setCreator(res.data);
+      });
+    }
   }
 
   // --------------------------------------
@@ -44,33 +63,21 @@ export default function ViewContent({ id }: ViewContentProps) {
     <>
       <Navbar />
       <div className='main-content'>
-        <h1>{user?.username}</h1>
+        <h1>{content?.title}</h1>
         {/* <img src={user.profilePicture} alt='Profile Picture' /> */}
 
-        <p>
-          {user?.firstName} {user?.lastName}
-        </p>
-        <p>{user?.bio}</p>
+        <p>{creator?.username}</p>
+        <p>{content?.content}</p>
 
-        <h2>Content</h2>
-        <div className='content-list'>
-          {contents.map((content, index) => (
-            <div key={content.id || index} className='content-list-item'>
-              <h3>{content.title}</h3>
-              <p>{content.content}</p>
-              {/* Load thumbnail image from URL */}
-              <Image
-                src={content.thumbnail}
-                alt='Thumbnail'
-                width={200}
-                height={200}
-              />
-            </div>
-          ))}
-        </div>
+        {content && (
+          <Image
+            src={content!.thumbnail}
+            alt='Thumbnail'
+            width={200}
+            height={200}
+          />
+        )}
       </div>
     </>
   );
-}
-
 }
