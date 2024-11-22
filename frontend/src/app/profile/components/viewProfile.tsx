@@ -31,7 +31,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const hasFetchedData = useRef(false);
   useEffect(() => {
     if (!hasFetchedData.current) {
-      getUserInfo();
+      getUserInfo(id);
       hasFetchedData.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -40,14 +40,12 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
-  function getUserInfo() {
-    axios.get(`${apiURL}/user/${id}`).then((res) => {
-      console.log(res.data);
+  function getUserInfo(userId: string = id) {
+    axios.get(`${apiURL}/user/${userId}`).then((res) => {
       setUser(res.data);
 
       if (res.data?.content) {
         for (let i = 0; i < res.data.content.length; i++) {
-          console.log(res.data.content[i]);
           getContent(res.data.content[i]);
         }
       }
