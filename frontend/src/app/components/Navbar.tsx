@@ -57,6 +57,7 @@ function Navbar() {
   useEffect(() => {
     setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
     getUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ---------------------------------------
@@ -110,7 +111,7 @@ function Navbar() {
 
             {/* Profile Picture */}
             <div
-              className='profile-picture'
+              className='profile-picture-container'
               onClick={() => {
                 updateAuthenticated();
                 setShowMenu(!showMenu);
