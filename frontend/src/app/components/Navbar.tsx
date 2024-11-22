@@ -11,7 +11,7 @@ function Navbar() {
   const [authenticated, setAuthenticated] = useState(false);
 
   const auth = useAuth();
-  const navigate = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
     const currentTheme = document.documentElement.getAttribute("data-theme");
@@ -32,14 +32,19 @@ function Navbar() {
     <>
       <div className='navbar-background'>
         {/* App Name */}
-        <a href='/'>
+        <a
+          onClick={() => {
+            setShowMenu(false);
+            router.push("/");
+          }}
+        >
           <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
         </a>
 
         {/* Create New Content */}
         <button
           className='navbar-button'
-          onClick={() => navigate.push("/content/create")}
+          onClick={() => router.push("/content/create")}
         >
           Create Content
         </button>
@@ -78,7 +83,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  navigate.push("/authentication/login");
+                  router.push("/authentication/login");
                 }}
               >
                 Login
@@ -87,7 +92,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  navigate.push("/authentication/register");
+                  router.push("/authentication/register");
                 }}
               >
                 Register
@@ -99,7 +104,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  navigate.push(`/profile/${auth.getUserUID()}`);
+                  router.push(`/profile/${auth.getUserUID()}`);
                 }}
               >
                 Profile
