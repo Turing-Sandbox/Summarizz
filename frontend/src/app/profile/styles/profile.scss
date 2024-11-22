@@ -7,6 +7,16 @@
   height: 200px;
   border-radius: 10px;
   background-color: var(--tile-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-initial {
+  font-size: 100px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
 }
 
 .profile-banner-info {

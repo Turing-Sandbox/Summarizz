@@ -79,7 +79,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       <div className='main-content'>
         <div className='profile-banner'>
           <div className='profile-banner-image'>
-            {user && user.profileImage && (
+            {user && user.profileImage ? (
               <Image
                 src={user.profileImage}
                 width={200}
@@ -87,7 +87,11 @@ export default function ViewProfile({ id }: ViewProfileProps) {
                 alt='Profile Picture'
                 className='profile-banner-image'
               />
-            )}{" "}
+            ) : (
+              <h1 className='profile-initial'>
+                {user?.username[0].toUpperCase()}
+              </h1>
+            )}
           </div>
 
           <div className='profile-banner-info'>

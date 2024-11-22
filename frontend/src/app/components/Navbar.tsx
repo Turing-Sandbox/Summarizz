@@ -116,7 +116,7 @@ function Navbar() {
                 setShowMenu(!showMenu);
               }}
             >
-              {user && user.profileImage && (
+              {user && user.profileImage ? (
                 <Image
                   src={user.profileImage}
                   width={50}
@@ -124,6 +124,12 @@ function Navbar() {
                   alt='Profile Picture'
                   className='profile-picture'
                 />
+              ) : (
+                <div className='no-profile-picture-container'>
+                  <h1 className='no-profile-picture'>
+                    {user?.username[0].toUpperCase()}
+                  </h1>
+                </div>
               )}
             </div>
 

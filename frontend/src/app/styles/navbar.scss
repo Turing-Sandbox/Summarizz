@@ -67,9 +67,9 @@
   height: 50px;
   border-radius: 50%;
   margin: 15px 20px;
-  position: absolute;
-  right: 0px;
   display: inline-block;
+  right: 0px;
+  position: absolute;
   background-color: var(--background-color);
   cursor: pointer;
 }
@@ -79,6 +79,21 @@
   height: 100%;
   border-radius: 50%;
   object-fit: cover; /* Ensure the image covers the container */
+}
+
+.no-profile-picture-container {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-profile-picture {
+  font-size: 20px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
 }
 
 .menu {
