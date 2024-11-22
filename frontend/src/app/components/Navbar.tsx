@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import "../styles/navbar.scss";
 import { useAuth } from "../hooks/AuthProvider";
 import { useRouter } from "next/navigation";
+import { User } from "../profile/models/User";
+import Image from "next/image";
+import axios from "axios";
+import { apiURL } from "../scripts/api";
 
 function Navbar() {
   // ---------------------------------------
@@ -12,6 +16,7 @@ function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>();
 
   const auth = useAuth();
   const router = useRouter();
@@ -48,6 +53,12 @@ function Navbar() {
     }
   }, []);
 
+  // Update user info
+  useEffect(() => {
+    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
+    getUserInfo();
+  }, []);
+
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
@@ -61,6 +72,15 @@ function Navbar() {
   const updateAuthenticated = () => {
     setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
   };
+
+  function getUserInfo() {
+    const userID = auth.getUserUID();
+    if (!userID) return;
+
+    axios.get(`${apiURL}/user/${userID}`).then((res) => {
+      setUser(res.data);
+    });
+  }
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -79,30 +99,35 @@ function Navbar() {
         </a>
 
         {/* Create New Content */}
-        <button
-          className='navbar-button'
-          onClick={() => router.push("/content/create")}
-        >
-          Create Content
-        </button>
+        {authenticated && (
+          <>
+            <button
+              className='navbar-button'
+              onClick={() => router.push("/content/create")}
+            >
+              Create Content
+            </button>
 
-        {/* Profile Picture */}
-        <div
-          className='profile-picture'
-          onClick={() => {
-            updateAuthenticated();
-            setShowMenu(!showMenu);
-          }}
-        >
-          {/* <img
-                src={
-                auth.user?.profilePicture ||
-                "https://www.gravatar.com/avatar/
-                ?d=identicon"
-                }
-                alt='Profile Picture'
-            /> */}
-        </div>
+            {/* Profile Picture */}
+            <div
+              className='profile-picture'
+              onClick={() => {
+                updateAuthenticated();
+                setShowMenu(!showMenu);
+              }}
+            >
+              {user && user.profileImage && (
+                <Image
+                  src={user.profileImage}
+                  width={50}
+                  height={50}
+                  alt='Profile Picture'
+                  className='profile-picture'
+                />
+              )}
+            </div>
+          </>
+        )}
 
         {/* Theme Slider */}
         <label className='theme-toggle'>
@@ -144,7 +169,7 @@ function Navbar() {
                   router.push(`/profile/${auth.getUserUID()}`);
                 }}
               >
-                Profile
+                View Profile
               </a>
 
               <a

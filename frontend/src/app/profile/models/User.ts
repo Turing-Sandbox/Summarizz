@@ -5,6 +5,6 @@ export interface User {
   lastName: string;
   uid: string;
   bio?: string;
-  profilePicture?: string;
+  profileImage?: string;
   content?: string[];
 }

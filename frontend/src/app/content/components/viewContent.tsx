@@ -64,12 +64,19 @@ export default function ViewContent({ id }: ViewContentProps) {
       <Navbar />
       <div className='main-content'>
         <h1>{content?.title}</h1>
-        {/* <img src={user.profilePicture} alt='Profile Picture' /> */}
 
+        {creator && creator.profileImage && (
+          <Image
+            src={creator.profileImage}
+            width={200}
+            height={200}
+            alt='Profile Picture'
+          />
+        )}
         <p>{creator?.username}</p>
         <p>{content?.content}</p>
 
-        {content && (
+        {content && content.thumbnail && (
           <Image
             src={content!.thumbnail}
             alt='Thumbnail'

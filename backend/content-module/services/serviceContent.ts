@@ -11,6 +11,11 @@ export class ContentService {
   ) {
     try {
       console.log("Creating content...");
+
+      const readtime = await this.estimateReadTime(content);
+
+      console.log("Readtime: ", readtime);
+
       // Build the content object
       const newContent = {
         creatorUID,
@@ -19,6 +24,7 @@ export class ContentService {
         thumbnail: thumbnail || null,
         dateCreated: new Date(),
         dateUpdated: new Date(),
+        readtime,
       };
 
       const docRef = await addDoc(collection(db, "contents"), newContent);
@@ -52,5 +58,11 @@ export class ContentService {
     // } else {
     //   return null;
     // }
+  }
+
+  static async estimateReadTime(content: string) {
+    const wordsPerMinute = 200;
+    const wordCount = content.split(" ").length;
+    return Math.ceil(wordCount / wordsPerMinute);
   }
 }
