@@ -7,6 +7,9 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 
 function Register() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     firstName: "",
@@ -20,10 +23,11 @@ function Register() {
   const router = useRouter();
   const auth = useAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
-  };
+  // ---------------------------------------
+  // ------------ Event Handler ------------
+  // ---------------------------------------
 
+  // Check if passwords match
   useEffect(() => {
     if (user.password !== user.confirmPassword) {
       setError("Passwords do not match");
@@ -32,19 +36,26 @@ function Register() {
     }
   }, [user.password, user.confirmPassword]);
 
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Reset Error Message
+    // 1 - Reset Error Message
     setError("");
 
-    // Validate user input
+    // 2 - Validate user input
     if (user.password !== user.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    // Register user
+    // 3 - Register user
     axios
       .post(`${apiURL}/user/register`, user)
       .then((res) => {
@@ -52,14 +63,14 @@ function Register() {
           const userUID = res.data.userUID;
           const token = res.data.token;
 
-          // Login user
+          // 3 - Set User Session (Save Token and User UID)
           auth.login(token, userUID);
 
-          // Redirect to home page
+          // 4 - Redirect to home page
           router.push("/");
+
+          // 5 - Error Handling
         } else {
-          console.log(res.data);
-          // Display error message
           setError("An error occurred. Please try again.");
         }
       })
@@ -76,13 +87,14 @@ function Register() {
       });
   };
 
+  // Redirect to home page if user is already logged in
   if (auth.getUserUID() !== null && auth.getToken() !== null) {
-    console.log("UserUID", auth.getUserUID());
-    console.log("Token", auth.getToken());
-    console.log("Redirecting to home page...");
     router.push("/");
   }
 
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <div className='container'>
@@ -158,7 +170,10 @@ function Register() {
             </button>
           </form>
 
+          {/* --------------------------------------------------------- */}
           {/* ------------------------- OAUTH ------------------------- */}
+          {/* --------------------------------------------------------- */}
+
           {/* <div className='auth-oauth-section'>
           <button className='auth-button auth-oauth-button left'>
             <img src='/images/google.svg' alt='Google' className='logo' />
@@ -185,6 +200,10 @@ function Register() {
             </svg>
           </button>
         </div> */}
+
+          {/* --------------------------------------------------------- */}
+          {/* ------------------------- OAUTH ------------------------- */}
+          {/* --------------------------------------------------------- */}
 
           <a href='/authentication/login' className='auth-link'>
             <p>

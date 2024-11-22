@@ -6,46 +6,32 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import "../styles/profile.scss";
+import { Content } from "@/app/content/models/Content";
+import { User } from "../models/User";
 
-interface ProfileProps {
+interface ViewProfileProps {
   id: string;
 }
 
-export default function Profile({ id }: ProfileProps) {
+export default function ViewProfile({ id }: ViewProfileProps) {
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------
-  interface User {
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    uid: string;
-    bio?: string;
-    profilePicture?: string;
-    content?: string[];
-  }
-
-  interface Content {
-    id: string;
-    title: string;
-    content: string;
-    thumbnail: string;
-  }
-
   const [user, setUser] = useState<User | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
 
   // ---------------------------------------
-  // -------------- Page INIT --------------
+  // ------------ Event Handler ------------
   // ---------------------------------------
+  
+  // Fetch user data on page load
   const hasFetchedData = useRef(false);
   useEffect(() => {
     if (!hasFetchedData.current) {
       getUserInfo();
       hasFetchedData.current = true;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ---------------------------------------
@@ -70,6 +56,7 @@ export default function Profile({ id }: ProfileProps) {
       setContents((prevContents) => [...prevContents, res.data]);
     });
   }
+
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------

@@ -15,7 +15,6 @@ export default function CreateContent() {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const [error, setError] = useState("");
-  // const [authenticated, setAuthenticated] = useState(false);
 
   const auth = useAuth();
   const router = useRouter();
@@ -31,9 +30,6 @@ export default function CreateContent() {
       setError("Please select a valid image file.");
     }
   };
-
-  // console.log("auth.getUserUID: ", auth.getUserUID());
-  // console.log("auth.getToken: ", auth.getToken());
 
   function handleSubmit() {
     // Reset Error Message
@@ -158,24 +154,6 @@ export default function CreateContent() {
             onChange={(e) => setContent(e.target.value)}
             placeholder='Content'
           />
-          {/* 
-          <label htmlFor='file-upload' className='content-file-upload'>
-            Upload Thumbnail
-          </label>
-          <input
-            id='file-upload'
-            type='file'
-            onChange={(e) =>
-              setThumbnail(e.target.files ? e.target.files[0] : null)
-            }
-          />
-          {thumbnail && (
-            <>
-              <p>Selected file: {thumbnail.name}</p>
-              <p>{thumbnail.size}</p>
-              <image src={thumbnail.webkitRelativePath} />
-            </>
-          )} */}
 
           <label htmlFor='file-upload' className='content-file-upload'>
             Upload Thumbnail

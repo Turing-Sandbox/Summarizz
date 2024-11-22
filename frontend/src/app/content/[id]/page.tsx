@@ -4,7 +4,7 @@ import Background from "@/app/components/Background";
 import { Footer } from "@/app/components/Footer";
 import AuthProvider from "@/app/hooks/AuthProvider";
 import { useParams } from "next/navigation";
-import ViewProfile from "../components/viewProfile";
+import ViewContent from "../components/viewContent";
 
 export default function Page() {
   const { id } = useParams();
@@ -13,7 +13,7 @@ export default function Page() {
     <>
       <Background />
       <AuthProvider>
-        <ViewProfile id={id as string} />
+        <ViewContent id={id as string} />
 
         <div className='footer'>
           <Footer />

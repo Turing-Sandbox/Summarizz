@@ -7,6 +7,9 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 
 function Login() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     email: "",
@@ -16,6 +19,9 @@ function Login() {
   const router = useRouter();
   const auth = useAuth();
 
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
@@ -23,10 +29,10 @@ function Login() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Reset Error Message
+    // 1 - Reset Error Message
     setError("");
 
-    // login user
+    // 2 - Login user
     axios
       .post(`${apiURL}/user/login`, user)
       .then((res) => {
@@ -34,14 +40,14 @@ function Login() {
           const userUID = res.data.userUID;
           const token = res.data.token;
 
-          // Login user
+          // 3 - Set User Session (Save Token and User UID)
           auth.login(token, userUID);
 
-          // Redirect to home page
+          // 4 - Redirect to home page
           router.push("/");
+
+          // 5 - Error Handling
         } else {
-          console.log(res.data);
-          // Display error message
           setError("An error occurred. Please try again.");
         }
       })
@@ -58,16 +64,14 @@ function Login() {
       });
   };
 
-  console.log("auth.getUserUID: ", auth.getUserUID());
-  console.log("auth.getToken: ", auth.getToken());
-
+  // Authenticated users should not be able to access the login page
   if (auth.getUserUID() !== null && auth.getToken() !== null) {
-    console.log("UserUID", auth.getUserUID());
-    console.log("Token", auth.getToken());
-    console.log("Redirecting to home page...");
     router.push("/");
   }
 
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <div className='container'>
@@ -103,7 +107,10 @@ function Login() {
             </button>
           </form>
 
+          {/* --------------------------------------------------------- */}
           {/* ------------------------- OAUTH ------------------------- */}
+          {/* --------------------------------------------------------- */}
+
           {/* <div className='auth-oauth-section'>
           <button className='auth-button auth-oauth-button left'>
             <img src='/images/google.svg' alt='Google' className='logo' />
@@ -130,6 +137,10 @@ function Login() {
             </svg>
           </button>
         </div> */}
+
+          {/* --------------------------------------------------------- */}
+          {/* ------------------------- OAUTH ------------------------- */}
+          {/* --------------------------------------------------------- */}
 
           <a href='/authentication/register' className='auth-link'>
             <p>
