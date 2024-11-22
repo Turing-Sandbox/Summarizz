@@ -98,9 +98,8 @@ function Navbar() {
         >
           <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
         </a>
-
         {/* Create New Content */}
-        {authenticated && (
+        {authenticated ? (
           <>
             <button
               className='navbar-button'
@@ -127,14 +126,43 @@ function Navbar() {
                 />
               )}
             </div>
-          </>
-        )}
 
-        {/* Theme Slider */}
-        <label className='theme-toggle'>
-          <input type='checkbox' checked={isDarkMode} onChange={toggleTheme} />
-          <span className='slider'></span>
-        </label>
+            {/* Theme Slider */}
+            <label className='theme-toggle'>
+              <input
+                type='checkbox'
+                checked={isDarkMode}
+                onChange={toggleTheme}
+              />
+              <span className='slider'></span>
+            </label>
+          </>
+        ) : (
+          <div className='navbar-auth'>
+            <a
+              className='navbar-link'
+              onClick={() => router.push("/authentication/login")}
+            >
+              Login
+            </a>
+            <a
+              className='navbar-link padding-right'
+              onClick={() => router.push("/authentication/register")}
+            >
+              Register
+            </a>
+
+            {/* Theme Slider */}
+            <label className='theme-toggle-auth'>
+              <input
+                type='checkbox'
+                checked={isDarkMode}
+                onChange={toggleTheme}
+              />
+              <span className='slider-auth'></span>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Profile Menu */}
