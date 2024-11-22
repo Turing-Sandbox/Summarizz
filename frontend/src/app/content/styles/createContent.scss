@@ -1,0 +1,78 @@
+@use "../../styles/colors.scss";
+
+.content-button {
+  width: 100%;
+
+  margin: 2rem auto;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  font-size: 1.1rem;
+}
+
+.content-button:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
+}
+
+.content-input {
+  width: 100%;
+
+  margin: 0.5rem auto;
+  padding: 0.8rem;
+  box-sizing: border-box;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
+  color: var(--text-color);
+}
+
+textarea.content-input {
+  min-height: 40vh;
+  resize: vertical;
+  margin-bottom: 2rem;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.content-file-upload {
+  width: 100%;
+
+  margin: 100px auto;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.content-file-upload:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
+}

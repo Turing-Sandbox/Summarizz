@@ -1,0 +1,237 @@
+@use "colors.scss";
+
+.navbar-background {
+  background-color: var(--tile-color);
+
+  border-radius: 25px;
+
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  height: 80px;
+  width: 90vw;
+  position: fixed;
+  display: inline-block;
+  top: 0;
+  left: 0;
+
+  margin: 10px 5vw;
+
+  z-index: 1;
+}
+
+.navbar-auth {
+  display: flex;
+  position: absolute;
+  right: 30px;
+  top: 30px;
+  gap: 10px;
+}
+
+.navbar-link {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.padding-right {
+  padding-right: 40px;
+}
+
+.navbar-title {
+  font-size: 20px;
+  margin: 24px 30px 25px 30px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.navbar-menu {
+  display: inline-block;
+  position: absolute;
+  right: 90px;
+  top: 30px;
+}
+
+.navbar-menu-item {
+  display: inline-block;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.profile-picture-container {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 15px 20px;
+  display: inline-block;
+  right: 0px;
+  position: absolute;
+  background-color: var(--background-color);
+  cursor: pointer;
+}
+
+.profile-picture {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover; /* Ensure the image covers the container */
+}
+
+.no-profile-picture-container {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-profile-picture {
+  font-size: 20px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
+}
+
+.menu {
+  background-color: var(--tile-color);
+
+  border-radius: 25px;
+
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  position: fixed;
+  top: 90px;
+  right: 0;
+  padding: 10px 30px;
+
+  margin: 10px 5vw;
+
+  z-index: 1;
+}
+
+.menu-item {
+  display: block;
+  margin: 10px 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+.navbar-button {
+  margin-top: 22px;
+  padding: 8px;
+
+  right: 80px;
+  position: absolute;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.navbar-button:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+}
+
+// THEME TOGGLE
+.theme-toggle {
+  display: inline-block;
+  width: 25px; // 50 px
+  height: 15px; // 26 px
+  position: absolute;
+  right: 15px;
+  bottom: 10px;
+}
+
+.theme-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.4s;
+  border-radius: 17px;
+  background-color: var(--background-color);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 10px;
+  width: 10px;
+  left: 2.5px;
+  bottom: 2.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider:before {
+  transform: translateX(10px);
+}
+
+.theme-toggle-auth {
+  display: inline-block;
+  width: 25px; // 50 px
+  height: 15px; // 26 px
+  position: absolute;
+  right: 0;
+  top: 2px;
+}
+
+.theme-toggle-auth input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-auth {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: 0.4s;
+  border-radius: 17px;
+  background-color: var(--background-color);
+}
+
+.slider-auth:before {
+  position: absolute;
+  content: "";
+  height: 10px;
+  width: 10px;
+  left: 2.5px;
+  bottom: 2.5px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider-auth:before {
+  transform: translateX(10px);
+}

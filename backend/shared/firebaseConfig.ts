@@ -4,6 +4,8 @@ import { getDatabase } from "firebase/database";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 dotenv.config({ path: __dirname + '/.env' });
 
@@ -23,6 +25,11 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 const realtime_db = getDatabase(firebaseApp)
+const auth = getAuth(firebaseApp);
+const storage = getStorage(
+  firebaseApp,
+  "gs://summarizz-d3713.firebasestorage.app"
+);
 
 // Conditionally initialize Analytics if supported
 let analytics;
@@ -35,4 +42,4 @@ isSupported().then((supported) => {
   }
 });
 
-export { firebaseApp, analytics, db, realtime_db};
+export { firebaseApp, analytics, db, realtime_db, auth, storage};
