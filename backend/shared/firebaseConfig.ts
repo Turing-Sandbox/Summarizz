@@ -5,7 +5,7 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: __dirname + '/.env' });
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
