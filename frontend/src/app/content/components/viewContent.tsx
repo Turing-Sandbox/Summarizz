@@ -62,14 +62,6 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       fetchedContent.id = id;
       setContent(fetchedContent);
-
-      //   if (fetchedContent.content) {
-      //     const doc = new DOMParser().parseFromString(
-      //       fetchedContent.content,
-      //       "text/xml"
-      //     );
-      //     setFormatedContent(doc.documentElement);
-      //   }
     });
   }
 
