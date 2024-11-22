@@ -2,7 +2,7 @@
 
 import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import "../styles/content.scss";
+import "../styles/createContent.scss";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
