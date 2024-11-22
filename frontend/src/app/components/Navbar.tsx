@@ -6,6 +6,9 @@ import { useAuth } from "../hooks/AuthProvider";
 import { useRouter } from "next/navigation";
 
 function Navbar() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
@@ -13,21 +16,55 @@ function Navbar() {
   const auth = useAuth();
   const router = useRouter();
 
+  // ---------------------------------------
+  // ------------ Event Handler ------------
+  // ---------------------------------------
+
+  // Dark Mode handling
   useEffect(() => {
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    setIsDarkMode(currentTheme === "dark");
+    const preferenceMode = localStorage.getItem("isDarkMode");
+
+    // Check if user has a saved preference in cookies
+    if (preferenceMode) {
+      if (preferenceMode === "true") {
+        document.documentElement.setAttribute("data-theme", "dark");
+        setIsDarkMode(true);
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        setIsDarkMode(false);
+      }
+    }
+
+    // If notCheck system preference as default.
+    if (!preferenceMode) {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+
+      if (mq.matches) {
+        setIsDarkMode(true);
+      }
+
+      // This callback will fire if the perferred color scheme changes without a reload
+      mq.addEventListener("change", (evt) => setIsDarkMode(evt.matches));
+    }
   }, []);
 
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
   const toggleTheme = () => {
     const newTheme = isDarkMode ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
     setIsDarkMode(!isDarkMode);
+    localStorage.setItem("isDarkMode", isDarkMode ? "false" : "true");
   };
 
   const updateAuthenticated = () => {
     setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
   };
 
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <div className='navbar-background'>
