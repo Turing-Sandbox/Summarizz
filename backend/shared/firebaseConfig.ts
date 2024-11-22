@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
-dotenv.config({ path: __dirname + '/.env' });
+dotenv.config();
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
@@ -24,7 +24,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
-const realtime_db = getDatabase(firebaseApp)
+const realtime_db = getDatabase(firebaseApp);
 const auth = getAuth(firebaseApp);
 const storage = getStorage(
   firebaseApp,
@@ -42,4 +42,4 @@ isSupported().then((supported) => {
   }
 });
 
-export { firebaseApp, analytics, db, realtime_db, auth, storage};
+export { firebaseApp, analytics, db, realtime_db, auth, storage };
