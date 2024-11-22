@@ -3,7 +3,7 @@
 import Navbar from "@/app/components/Navbar";
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import "../styles/profile.scss";
 
@@ -12,6 +12,9 @@ interface ProfileProps {
 }
 
 export default function Profile({ id }: ProfileProps) {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   interface User {
     username: string;
     email: string;
@@ -21,7 +24,6 @@ export default function Profile({ id }: ProfileProps) {
     bio?: string;
     profilePicture?: string;
     content?: string[];
-    // Add other fields as necessary
   }
 
   interface Content {
@@ -29,33 +31,37 @@ export default function Profile({ id }: ProfileProps) {
     title: string;
     content: string;
     thumbnail: string;
-    // Add other fields as necessary
   }
 
   const [user, setUser] = useState<User | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
 
-  // INIT - Get the user info
+  // ---------------------------------------
+  // -------------- Page INIT --------------
+  // ---------------------------------------
+  const hasFetchedData = useRef(false);
   useEffect(() => {
-    getUserInfo();
+    if (!hasFetchedData.current) {
+      getUserInfo();
+      hasFetchedData.current = true;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // INIT - Get the user's content
-  useEffect(() => {
-    // Get the user's content
-    if (user?.content) {
-      for (let i = 0; i < user.content.length; i++) {
-        console.log(user.content[i]);
-        getContent(user.content[i]);
-      }
-    }
-  }, [user]);
-
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
   function getUserInfo() {
-    // Get the user info
     axios.get(`${apiURL}/user/${id}`).then((res) => {
       console.log(res.data);
       setUser(res.data);
+
+      if (res.data?.content) {
+        for (let i = 0; i < res.data.content.length; i++) {
+          console.log(res.data.content[i]);
+          getContent(res.data.content[i]);
+        }
+      }
     });
   }
 
@@ -64,7 +70,9 @@ export default function Profile({ id }: ProfileProps) {
       setContents((prevContents) => [...prevContents, res.data]);
     });
   }
-
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <Navbar />
