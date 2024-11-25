@@ -15,7 +15,7 @@ import Underline from "@tiptap/extension-underline";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
-import Toolbar from "./toolbar"; 
+import Toolbar from "./toolbar";
 import Cookies from "js-cookie";
 import Paragraph from "@tiptap/extension-paragraph";
 
@@ -208,10 +208,31 @@ export default function CreateContent() {
             }}
             placeholder='Title'
           />
+          <a
+            onClick={() => {
+              setTitle("");
+              localStorage.removeItem("title");
+            }}
+            className='clear-button'
+          >
+            Clear
+          </a>
 
           <Toolbar editor={editor} />
 
-          <EditorContent editor={editor} className='content-input' />
+          <EditorContent
+            editor={editor}
+            className='content-input text-editor'
+          />
+          <a
+            onClick={() => {
+              setContent("");
+              Cookies.remove("content");
+            }}
+            className='clear-button'
+          >
+            Clear
+          </a>
 
           <label htmlFor='file-upload' className='content-file-upload'>
             Upload Thumbnail

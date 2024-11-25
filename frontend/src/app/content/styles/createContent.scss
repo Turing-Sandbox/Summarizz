@@ -1,5 +1,10 @@
 @use "../../styles/colors.scss";
 
+form {
+  display: flex;
+  flex-direction: column;
+}
+
 .content-button {
   width: 100%;
 
@@ -28,10 +33,10 @@
 .content-input {
   width: 100%;
 
-  margin: 0.5rem auto 2rem;
   padding: 0.8rem;
   box-sizing: border-box;
 
+  font-size: large;
   border-radius: 10px;
   border-style: solid;
   border-color: var(--input-border-color);
@@ -39,6 +44,18 @@
 
   background-color: var(--input-field-color);
   color: var(--text-color);
+}
+
+.text-editor {
+  border-radius: 0 0 10px 10px;
+}
+
+.clear-button {
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  margin: 5px 5px 20px auto;
+  // Aligns the button to the right
 }
 
 textarea.content-input {

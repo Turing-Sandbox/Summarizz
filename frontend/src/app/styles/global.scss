@@ -44,28 +44,28 @@ label {
 
 code {
   display: block;
-  width: 100%;
+  width: 90%;
   font-family: "IBM Plex Mono", monospace;
   font-weight: 400;
   font-style: normal;
   font-size: small;
   background-color: var(--background-color);
   padding: 1rem;
-  margin: 1rem 0;
+  margin: 1rem auto;
   border-radius: 10px;
   overflow-x: auto;
 }
 
 blockquote {
   display: block;
-  width: 100%;
+  width: 90%;
   font-family: "Work Sans", sans-serif;
   font-weight: 400;
   font-style: italic;
   font-size: small;
   background-color: var(--tile-color);
   padding: 1rem;
-  margin: 1rem 0;
+  margin: 1rem auto;
   border-left: 5px solid var(--input-border-color);
   border-radius: 5px;
 }
