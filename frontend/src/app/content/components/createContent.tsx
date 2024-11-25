@@ -15,7 +15,7 @@ import Underline from "@tiptap/extension-underline";
 import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
-import Toolbar from "./toolbar"; 
+import Toolbar from "./toolbar";
 import Cookies from "js-cookie";
 import Paragraph from "@tiptap/extension-paragraph";
 
@@ -208,42 +208,81 @@ export default function CreateContent() {
             }}
             placeholder='Title'
           />
+          <a
+            onClick={() => {
+              setTitle("");
+              localStorage.removeItem("title");
+            }}
+            className='clear-button'
+          >
+            Clear
+          </a>
 
           <Toolbar editor={editor} />
 
-          <EditorContent editor={editor} className='content-input' />
-
-          <label htmlFor='file-upload' className='content-file-upload'>
-            Upload Thumbnail
-          </label>
-          <input
-            id='file-upload'
-            type='file'
-            accept='image/*'
-            onChange={handleThumbnailChange}
+          <EditorContent
+            editor={editor}
+            className='content-input text-editor'
           />
+          <a
+            onClick={() => {
+              setContent("");
+              Cookies.remove("content");
+            }}
+            className='clear-button'
+          >
+            Clear
+          </a>
+
           {thumbnail && (
             <>
-              <p>Selected file: {thumbnail.name}</p>
-              <p>File size: {(thumbnail.size / 1024).toFixed(2)} KB</p>
               {thumbnailPreview && (
                 <Image
                   src={thumbnailPreview}
                   alt='Thumbnail Preview'
                   width={200}
                   height={200}
-                  style={{ maxWidth: "200px", maxHeight: "200px" }}
+                  className='thumbnail-preview'
                 />
               )}
             </>
           )}
+          <div>
+            <label htmlFor='file-upload' className='content-file-upload'>
+              {thumbnail ? "Change" : "Upload"} Thumbnail
+            </label>
+            <input
+              id='file-upload'
+              type='file'
+              accept='image/*'
+              onChange={handleThumbnailChange}
+            />
+          </div>
         </form>
 
         {error && <p className='error-message'>{error}</p>}
 
-        <button className='content-button' onClick={() => handleSubmit()}>
-          Publish
-        </button>
+        <div className='form-buttons'>
+          <button
+            className='content-button left-button'
+            onClick={() => {
+              localStorage.removeItem("title");
+              Cookies.remove("content");
+              setTitle("");
+              setContent("");
+              if (editor) {
+                editor.commands.setContent("");
+              }
+              setThumbnail(null);
+              setThumbnailPreview(null);
+            }}
+          >
+            Clear
+          </button>
+          <button className='content-button' onClick={() => handleSubmit()}>
+            Publish
+          </button>
+        </div>
       </div>
     </>
   );

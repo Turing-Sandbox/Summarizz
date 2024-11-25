@@ -29,29 +29,6 @@
   margin-bottom: 10px;
 }
 
-// .content-list {
-//   display: flex;
-//   flex-wrap: wrap;
-//   justify-content: space-between;
-// }
-
-// .content-list-item {
-//   width: calc(33.33% - 1rem);
-//   margin: 1rem 0;
-//   padding: 20px;
-
-//   border-radius: 20px;
-//   border-style: solid;
-//   border-color: var(--input-border-color);
-//   border-width: 1px;
-//   box-sizing: border-box;
-
-//   background-color: var(--tile-color);
-//   color: var(--text-color);
-
-//   font-size: 1.1rem;
-// }
-
 .content-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

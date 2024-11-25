@@ -1,21 +1,33 @@
 @use "../../styles/colors.scss";
 
+form {
+  display: flex;
+  flex-direction: column;
+  // space between items evenly based on the available space
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .content-button {
-  width: 100%;
-
-  margin: 2rem auto;
+  width: 49%;
   padding: 1rem;
-
   border-radius: 10px;
+  margin-top: 20px;
   border-style: solid;
   border-color: var(--input-border-color);
   border-width: 1px;
   box-sizing: border-box;
-
   background-color: var(--background-color);
   color: var(--text-color);
-
   font-size: 1.1rem;
+}
+
+.left-button {
+  background-color: var(--input-background-color);
 }
 
 .content-button:hover {
@@ -28,10 +40,10 @@
 .content-input {
   width: 100%;
 
-  margin: 0.5rem auto 2rem;
   padding: 0.8rem;
   box-sizing: border-box;
 
+  font-size: large;
   border-radius: 10px;
   border-style: solid;
   border-color: var(--input-border-color);
@@ -41,10 +53,15 @@
   color: var(--text-color);
 }
 
-textarea.content-input {
-  min-height: 40vh;
-  resize: vertical;
-  margin-bottom: 2rem;
+.text-editor {
+  border-radius: 0 0 10px 10px;
+}
+
+.clear-button {
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  margin: 5px 5px 20px auto;
 }
 
 input[type="file"] {
@@ -52,9 +69,10 @@ input[type="file"] {
 }
 
 .content-file-upload {
-  width: 100%;
+  display: inline-block;
+  width: 30%;
 
-  margin: 100px auto;
+  margin-right: 20px;
   padding: 1rem;
 
   border-radius: 10px;
@@ -75,4 +93,11 @@ input[type="file"] {
   color: var(--background-color);
 
   cursor: pointer;
+}
+
+.thumbnail-preview {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: -1rem;
 }
