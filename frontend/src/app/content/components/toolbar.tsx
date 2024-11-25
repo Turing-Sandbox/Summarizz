@@ -207,8 +207,6 @@ export default function Toolbar({ editor }: ToolbarProps) {
           alt='Ordered List'
         />
       </button>
-
-      <hr />
     </div>
   );
 }
