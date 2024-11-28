@@ -105,6 +105,41 @@ export async function addContentToUser(userUID: string, contentUID: string) {
   }
 }
 
+export async function addLikedContentToUser(userUID: string, contentUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const likedContent = user?.likedContent || [];
+
+    if (!likedContent.includes(contentUID)) {
+      likedContent.push(contentUID); // Add content ID to likedContent array
+      await updateDoc(userRef, { likedContent });
+    }    
+  } else {
+    throw new Error("User not found");  
+  }
+}
+
+export async function removeLikedContentFromUser(userUID: string, contentUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const likedContent = user.likedContent || [];
+
+    const index = likedContent.indexOf(contentUID);
+    if (index > -1) {
+      likedContent.splice(index, 1);  // Remove content ID from likedContent
+      await updateDoc(userRef, { likedContent });
+    }    
+  } else {
+    throw new Error("User not found");
+  }
+}
+
 export async function getUser(uid: string) {
   const userDoc = await getDoc(doc(db, "users", uid));
   return userDoc.exists() ? userDoc.data() : null;

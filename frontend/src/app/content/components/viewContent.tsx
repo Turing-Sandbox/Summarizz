@@ -9,6 +9,7 @@ import { User } from "@/app/profile/models/User";
 import Image from "next/image";
 import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
+import { useAuth } from "@/app/hooks/AuthProvider";
 
 interface ViewContentProps {
   id: string;
@@ -21,7 +22,11 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [content, setContent] = useState<Content | null>(null);
   const [creator, setCreator] = useState<User | null>(null);
   const [formatedContent, setFormatedContent] = useState<string | null>(null);
+  const [isLiked, setIsLiked] = useState(false); // Track liked state
+  const [likes, setLikes] = useState(0); // Track likes count
 
+  const { userUID } = useAuth(); // Get logged in user's UID
+  
   // ---------------------------------------
   // -------------- Page INIT --------------
   // ---------------------------------------
@@ -40,9 +45,22 @@ export default function ViewContent({ id }: ViewContentProps) {
     if (content) {
       const sanitizedContent = DOMPurify.sanitize(content.content);
       setFormatedContent(sanitizedContent);
+
+      const likesCount = typeof content.likes === 'number' 
+      ? content.likes 
+      : 0;
+   
+      setLikes(likesCount);
+      
+      const userLiked = content.peopleWhoLiked 
+        ? content.peopleWhoLiked.includes(userUID || "") 
+        : false;
+      
+      setIsLiked(userLiked);
+    
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]);
+  }, [content, userUID]);
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -62,6 +80,8 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       fetchedContent.id = id;
       setContent(fetchedContent);
+    }).catch((error) => {
+      console.error("Error fetching content:", error);
     });
   }
 
@@ -70,10 +90,55 @@ export default function ViewContent({ id }: ViewContentProps) {
       axios.get(`${apiURL}/user/${content.creatorUID}`).then((res) => {
         console.log(res.data);
         setCreator(res.data);
+      }).catch((error) => {
+        console.error("Error fetching user info:", error);
       });
     }
   }
 
+  const handleLike = async () => {
+    try {
+      if (!userUID) {
+        console.error("No user ID available");
+        return;
+      }
+  
+      // Determine whether to like or unlike the content
+      const action = isLiked ? "unlike" : "like";
+      const url = `${apiURL}/content/${id}/${action}/${userUID}`;
+  
+      // Send the appropriate like/unlike request
+      const response = await axios.post(url, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Extract updated content details from the response
+      const updatedContent = response.data.content;
+      const updatedLikes = typeof updatedContent.likes === 'number' ? updatedContent.likes : 0;
+  
+      // Update local state based on the like or unlike action
+      setLikes(updatedLikes);
+      setIsLiked(!isLiked); // Toggle isLiked state
+  
+      console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} response:`, updatedContent);
+  
+    } catch (error) {
+      console.error("Error liking/unliking content:", error);
+  
+      // Additional logging for Axios errors
+      if ((error as any).response) {
+        console.error("Axios Error Response:", {
+          data: (error as any).response.data,
+          status: (error as any).response.status,
+          headers: (error as any).response.headers,
+        });
+      }
+    }
+  };
+  
+  
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
@@ -116,6 +181,16 @@ export default function ViewContent({ id }: ViewContentProps) {
                     alt='Profile Picture'
                   />
                 )}
+              </div>
+
+              <div>
+                {/* Like Button */}
+                <button
+                  className={`like-button ${isLiked ? "liked" : ""}`}
+                  onClick={handleLike}
+                >
+                  {isLiked ? "Unlike" : "Like"} ({likes})
+                </button>
               </div>
 
               <div className='spliter'></div>

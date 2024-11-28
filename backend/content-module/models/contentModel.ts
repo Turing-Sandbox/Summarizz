@@ -10,4 +10,6 @@ export interface Content {
   thumbnail?: string; // Thumbnail Image
   summary?: string; // Content Summary
   readtime?: number; // Read Time
+  likes?: number; // Likes Count
+  peopleWhoLiked?: string[]; // List of user IDs who liked the post
 }
