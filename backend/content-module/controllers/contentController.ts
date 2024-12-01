@@ -104,4 +104,34 @@ export class ContentController {
       });
     }
   }
+
+  // Bookmark content
+  static async bookmarkContent(req: Request, res: Response) {
+    const { contentId, userId } = req.params;
+
+    try {
+      const response = await ContentService.bookmarkContent(contentId, userId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error("Error bookmarking content:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Failed to bookmark content",
+      });
+    }
+  }
+
+  // Unbookmark content
+  static async unbookmarkContent(req: Request, res: Response) {
+    const { contentId, userId } = req.params;
+
+    try {
+      const response = await ContentService.unbookmarkContent(contentId, userId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error("Error unbookmarking content:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Failed to unbookmark content",
+      });
+    }
+  }
 }

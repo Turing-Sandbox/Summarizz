@@ -11,4 +11,7 @@ contentRoutes.get("/:contentId", ContentController.getContent); // Get content b
 contentRoutes.post("/:contentId/like/:userId", ContentController.likeContent); // Like content
 contentRoutes.post("/:contentId/unlike/:userId", ContentController.unlikeContent); // Unlike content
 
+contentRoutes.post("/:userId/bookmark/:contentId", ContentController.bookmarkContent); // Bookmark content
+contentRoutes.post("/:userId/unbookmark/:contentId", ContentController.unbookmarkContent); // Unbookmark content
+
 export default contentRoutes;
