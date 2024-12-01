@@ -7,4 +7,6 @@ export interface Content {
   content: string;
   thumbnail?: string;
   readtime?: number;
+  likes?: number;
+  peopleWhoLiked?: string[];
 }

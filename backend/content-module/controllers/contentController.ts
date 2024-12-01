@@ -72,4 +72,36 @@ export class ContentController {
         .json({ error: error.message || "Failed to fetch content" });
     }
   }
+
+  // Like content
+  static async likeContent(req: Request, res: Response) {
+    console.log("Liking Content...");
+    const { contentId, userId } = req.params;
+
+    try {
+      const response = await ContentService.likeContent(contentId, userId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error("Error liking content:", error);
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Failed to like content",
+        stack: error instanceof Error ? error.stack : null
+      });
+    }
+  } 
+  
+  // Unlike content
+  static async unlikeContent(req: Request, res: Response) {
+    const { contentId, userId } = req.params;
+
+    try {
+      const response = await ContentService.unlikeContent(contentId, userId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error("Error unliking content:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Failed to unlike content",
+      });
+    }
+  }
 }

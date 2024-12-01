@@ -11,4 +11,5 @@ export interface User {
   location?: string; // Optional location
   website?: string; // Optional website
   content?: string[]; // Optional content
+  likedContent?: string[]; // Optional liked content
 }

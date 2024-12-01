@@ -8,4 +8,7 @@ contentRoutes.post("/uploadThumbnail", ContentController.uploadThumbnail); // Up
 
 contentRoutes.get("/:contentId", ContentController.getContent); // Get content by ID
 
+contentRoutes.post("/:contentId/like/:userId", ContentController.likeContent); // Like content
+contentRoutes.post("/:contentId/unlike/:userId", ContentController.unlikeContent); // Unlike content
+
 export default contentRoutes;
