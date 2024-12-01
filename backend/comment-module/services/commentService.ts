@@ -53,7 +53,6 @@ export async function deleteComment(post_id: string, commentId: string): Promise
 	}
 }
 
-// Function to fetch comments from the database
 export async function getAllComments(post_id: string): Promise<Comment[]> {
 	const commentsRef = ref(realtime_db, `comments/${post_id}`);
 	const snapshot = await get(commentsRef);
@@ -64,5 +63,3 @@ export async function getAllComments(post_id: string): Promise<Comment[]> {
 		return [];
 	}
 }
-
-

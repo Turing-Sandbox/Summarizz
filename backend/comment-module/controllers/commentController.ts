@@ -76,4 +76,3 @@ export async function getCommentsByPostController(req: Request, res: Response): 
 		console.log(error)
 	}
 }
-
