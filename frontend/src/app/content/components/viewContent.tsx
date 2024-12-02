@@ -24,6 +24,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [formatedContent, setFormatedContent] = useState<string | null>(null);
   const [isLiked, setIsLiked] = useState(false); // Track liked state
   const [likes, setLikes] = useState(0); // Track likes count
+  const [isBookmarked, setIsBookmarked] = useState(false); // Track bookmarked state
 
   const { userUID } = useAuth(); // Get logged in user's UID
   
@@ -57,7 +58,13 @@ export default function ViewContent({ id }: ViewContentProps) {
         : false;
       
       setIsLiked(userLiked);
-    
+
+      // Check if the content is bookmarked by the user
+      const userBookmarked = content.bookmarkedBy 
+        ? content.bookmarkedBy.includes(userUID || "") 
+        : false;
+
+      setIsBookmarked(userBookmarked);    
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, userUID]);
@@ -137,6 +144,44 @@ export default function ViewContent({ id }: ViewContentProps) {
       }
     }
   };
+
+  const handleBookmark = async () => {
+    try {
+      if (!userUID) {
+        console.error("No user ID available");
+        return;
+      }
+  
+      // Determine whether to bookmark or unbookmark the content
+      const action = isBookmarked ? "unbookmark" : "bookmark";
+      const url = `${apiURL}/content/${userUID}/${action}/${id}`; // mine
+  
+      // Send the appropriate bookmark/unbookmark request
+      const response = await axios.post(url, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Extract updated content details from the response
+      const updatedContent = response.data.content;
+      setIsBookmarked(!isBookmarked); // Toggle isBookmarked state
+  
+      console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} response:`, updatedContent);
+  
+    } catch (error) {
+      console.error("Error bookmarking/unbookmarking content:", error);
+  
+      // Additional logging for Axios errors
+      if ((error as any).response) {
+        console.error("Axios Error Response:", {
+          data: (error as any).response.data,
+          status: (error as any).response.status,
+          headers: (error as any).response.headers,
+        });
+      }
+    }
+  }
   
   
   // --------------------------------------
@@ -190,6 +235,16 @@ export default function ViewContent({ id }: ViewContentProps) {
                   onClick={handleLike}
                 >
                   {isLiked ? "Unlike" : "Like"} ({likes})
+                </button>
+              </div>
+
+              {/* Bookmark Button */}
+              <div>
+                <button
+                  className={`bookmark-button ${isBookmarked ? "bookmarked" : ""}`}
+                  onClick={handleBookmark}
+                >
+                  {isBookmarked ? "Unbookmark" : "Bookmark"}
                 </button>
               </div>
 
