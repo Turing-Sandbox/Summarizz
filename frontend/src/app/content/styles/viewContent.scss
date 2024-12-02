@@ -32,6 +32,46 @@
   background-color: var(--tile-color);
 }
 
+/* Common styles for the like and bookmark buttons */
+.icon-container {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.icon-button {
+  padding: 0;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px; /* Space between icon and text */
+}
+
+/* Icon styles */
+.icon {
+  width: 16px; /* Match h-4 in Tailwind */
+  height: 16px; /* Match w-4 in Tailwind */
+  color: #7D7F7C; /* Default gray color */
+}
+
+.icon.liked {
+  color: black; /* Black when liked */
+}
+
+.icon.bookmarked {
+  color: black; /* Black when bookmarked */
+}
+
+.icon.counter {
+  font-size: 12px; /* Small text */
+  margin-top: 0; /* No extra spacing above */
+  visibility: hidden; /* Default hidden */
+}
+
+.icon.counter.visible {
+  visibility: visible; /* Visible when there's a count */
+}
+
 // media queries
 @media screen and (max-width: 768px) {
   .row {

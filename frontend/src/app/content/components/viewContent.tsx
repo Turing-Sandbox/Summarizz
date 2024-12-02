@@ -10,6 +10,7 @@ import Image from "next/image";
 import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
 import { useAuth } from "@/app/hooks/AuthProvider";
+import { HeartIcon, BookmarkIcon } from "@heroicons/react/24/solid";
 
 interface ViewContentProps {
   id: string;
@@ -228,23 +229,22 @@ export default function ViewContent({ id }: ViewContentProps) {
                 )}
               </div>
 
-              <div>
+              <div className="icon-container">
                 {/* Like Button */}
                 <button
-                  className={`like-button ${isLiked ? "liked" : ""}`}
+                  className={`icon-button ${isLiked ? "liked" : ""}`}
                   onClick={handleLike}
                 >
-                  {isLiked ? "Unlike" : "Like"} ({likes})
+                  <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
+                  <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
                 </button>
-              </div>
 
-              {/* Bookmark Button */}
-              <div>
+                {/* Bookmark Button */}
                 <button
-                  className={`bookmark-button ${isBookmarked ? "bookmarked" : ""}`}
-                  onClick={handleBookmark}
+                  className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
+                  onClick={() => setIsBookmarked(!isBookmarked)}
                 >
-                  {isBookmarked ? "Unbookmark" : "Bookmark"}
+                  <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
                 </button>
               </div>
 
