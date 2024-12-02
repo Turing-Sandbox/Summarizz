@@ -10,7 +10,7 @@ import Image from "next/image";
 import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import { HeartIcon } from "@heroicons/react/24/solid";
+import { HeartIcon, BookmarkIcon } from "@heroicons/react/24/solid";
 
 interface ViewContentProps {
   id: string;
@@ -229,50 +229,22 @@ export default function ViewContent({ id }: ViewContentProps) {
                 )}
               </div>
 
-              <div>
+              <div className="icon-container">
+                {/* Like Button */}
                 <button
-                  className={`like-button flex items-center space-x-1 ${isLiked ? "liked" : ""}`}
+                  className={`icon-button ${isLiked ? "liked" : ""}`}
                   onClick={handleLike}
-                  style={{
-                    padding: "0", // Remove extra padding from button
-                    border: "none", // Remove border
-                    background: "none", // Remove background color
-                    display: "inline-flex",
-                    alignItems: "center", // Align items vertically
-                    gap: "4px", // Optional: Fine-tune spacing between heart and counter
-                  }}
                 >
-                  {/* Heart Icon */}
-                  <HeartIcon
-                    className="h-4 w-4"
-                    style={{
-                      color: isLiked ? "black" : "#7D7F7C", // Custom lighter gray
-                      minWidth: "16px", // Prevent shrinking
-                      minHeight: "16px",
-                    }}
-                  />
-                  {/* Counter */}
-                  <span
-                    className={`text-xs text-gray-600 ${
-                      likes > 0 ? "visible" : "invisible"
-                    }`}
-                    style={{
-                      fontSize: "12px", // Small text size
-                      marginTop: "0", // Remove unnecessary spacing
-                    }}
-                  >
-                    {likes}
-                  </span>
+                  <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
+                  <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
                 </button>
-              </div>
 
-              {/* Bookmark Button */}
-              <div>
+                {/* Bookmark Button */}
                 <button
-                  className={`bookmark-button ${isBookmarked ? "bookmarked" : ""}`}
-                  onClick={handleBookmark}
+                  className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
+                  onClick={() => setIsBookmarked(!isBookmarked)}
                 >
-                  {isBookmarked ? "Unbookmark" : "Bookmark"}
+                  <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
                 </button>
               </div>
 
