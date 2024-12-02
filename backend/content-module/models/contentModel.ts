@@ -12,4 +12,5 @@ export interface Content {
   readtime?: number; // Read Time
   likes?: number; // Likes Count
   peopleWhoLiked?: string[]; // List of user IDs who liked the post
+  bookmarkedBy?: string[]; // List of user IDs who bookmarked the post
 }

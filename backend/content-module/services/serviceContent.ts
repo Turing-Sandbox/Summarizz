@@ -1,6 +1,6 @@
 import { db } from "../../shared/firebaseConfig";
 import { collection, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc } from "firebase/firestore";
-import { addContentToUser, addLikedContentToUser, removeLikedContentFromUser } from "../../user-module/services/userService";
+import { addContentToUser, addLikedContentToUser, removeLikedContentFromUser, addBookmarkedContentToUser, removeBookmarkedContentFromUser } from "../../user-module/services/userService";
 import { increment, update } from "firebase/database";
 
 export class ContentService {
@@ -27,7 +27,8 @@ export class ContentService {
         dateUpdated: new Date(),
         readtime,
         likes: 0,
-        peopleWhoLiked: []
+        peopleWhoLiked: [],
+        bookmarkedBy: []
       };
 
       const docRef = await addDoc(collection(db, "contents"), newContent);
@@ -149,6 +150,82 @@ export class ContentService {
     } catch (error) {
       console.error("Error unliking content:", error);
       throw new Error(error.message || "Failed to unlike content");
+    }
+  }
+
+  // Bookmark content
+  static async bookmarkContent(contentID: string, userId: string) {
+    try {
+      // Get the content document from Firestore
+      const contentRef = doc(db, "contents", contentID);
+      const contentDoc = await getDoc(contentRef);
+
+      if (!contentDoc.exists()) {
+        throw new Error("Content not found");
+      }
+
+      const contentData = contentDoc.data();
+      const bookmarkedBy = contentData?.bookmarkedBy || []; // Ensure it's initialized as an empty array if undefined
+
+      // Check if the user has already bookmarked the content
+      if (bookmarkedBy.includes(userId)) {
+        throw new Error("You have already bookmarked this content");
+      }
+
+      // Update the content document to add the user to the bookmarkedBy list
+      await updateDoc(contentRef, {
+        bookmarkedBy: arrayUnion(userId),
+      });
+
+      // Add this content to the user's bookmarked content list
+      await addBookmarkedContentToUser(userId, contentID);
+
+      // Fetch the updated document and return it
+      const updatedContentDoc = await getDoc(contentRef);
+      const updatedContent = updatedContentDoc.data();
+
+      return { content: updatedContent }; // Return updated content with the bookmarkedBy list updated
+    } catch (error) {
+      console.error("Error bookmarking content:", error);
+      throw new Error(error.message || "Failed to bookmark content");
+    }
+  }
+
+  // Unbookmark content
+  static async unbookmarkContent(contentID: string, userId: string) {
+    try {
+      // Get the content document from Firestore
+      const contentRef = doc(db, "contents", contentID);
+      const contentDoc = await getDoc(contentRef);
+
+      if (!contentDoc.exists()) {
+        throw new Error("Content not found");
+      }
+
+      const contentData = contentDoc.data();
+      const bookmarkedBy = contentData?.bookmarkedBy || []; 
+
+      // Check if user has already bookmarked the content
+      if (!bookmarkedBy.includes(userId)) {
+        throw new Error("You haven't bookmarked this content yet.");
+      }
+
+      // Update the content document to remove the user from the bookmarkedBy list
+      await updateDoc(contentRef, {
+        bookmarkedBy: arrayRemove(userId),
+      });
+
+      // Remove this content from the user's bookmarked content list
+      await removeBookmarkedContentFromUser(userId, contentID);
+
+      // Fetch the updated document and return it
+      const updatedContentDoc = await getDoc(contentRef);
+      const updatedContent = updatedContentDoc.data();
+
+      return { content: updatedContent }; // Return updated content with the bookmarkedBy list updated
+    } catch (error) {
+      console.error("Error unbookmarking content:", error);
+      throw new Error(error.message || "Failed to unbookmark content");
     }
   }
 }

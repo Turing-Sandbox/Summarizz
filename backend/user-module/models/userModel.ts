@@ -12,4 +12,5 @@ export interface User {
   website?: string; // Optional website
   content?: string[]; // Optional content
   likedContent?: string[]; // Optional liked content
+  bookmarkedContent?: string[]; // Optional bookmarked content
 }

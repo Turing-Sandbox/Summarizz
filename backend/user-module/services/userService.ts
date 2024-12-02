@@ -140,6 +140,41 @@ export async function removeLikedContentFromUser(userUID: string, contentUID: st
   }
 }
 
+export async function addBookmarkedContentToUser(userUID: string, contentUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const bookmarkedContent = user?.bookmarkedContent || [];
+
+    if (!bookmarkedContent.includes(contentUID)) {
+      bookmarkedContent.push(contentUID); // Add content ID to bookmarkedContent array
+      await updateDoc(userRef, { bookmarkedContent });
+    }    
+  } else {
+    throw new Error("User not found");  
+  }
+}
+
+export async function removeBookmarkedContentFromUser(userUID: string, contentUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const bookmarkedContent = user.bookmarkedContent || [];
+
+    const index = bookmarkedContent.indexOf(contentUID);
+    if (index > -1) {
+      bookmarkedContent.splice(index, 1);  // Remove content ID from bookmarkedContent
+      await updateDoc(userRef, { bookmarkedContent });
+    }    
+  } else {
+    throw new Error("User not found");
+  }
+}
+
 export async function getUser(uid: string) {
   const userDoc = await getDoc(doc(db, "users", uid));
   return userDoc.exists() ? userDoc.data() : null;

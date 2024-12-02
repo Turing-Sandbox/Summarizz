@@ -9,4 +9,5 @@ export interface Content {
   readtime?: number;
   likes?: number;
   peopleWhoLiked?: string[];
+  bookmarkedBy?: string[];
 }
