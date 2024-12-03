@@ -11,7 +11,7 @@ import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { HeartIcon, BookmarkIcon, TrashIcon } from "@heroicons/react/24/solid";
-// import { useNavigate } from 'react-router-dom';
+// import { useRouter } from 'next/router';
 
 interface ViewContentProps {
   id: string;
@@ -28,7 +28,9 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [likes, setLikes] = useState(0); // Track likes count
   const [isBookmarked, setIsBookmarked] = useState(false); // Track bookmarked state
 
+  // const router = useRouter();
   const { userUID } = useAuth(); // Get logged in user's UID
+
   // ---------------------------------------
   // -------------- Page INIT --------------
   // ---------------------------------------
@@ -109,22 +111,22 @@ export default function ViewContent({ id }: ViewContentProps) {
   const handleDelete = async  () => {
     if (localStorage.getItem('userUID') === content?.creatorUID){
       try {
-        alert(true)
+        // alert(true)
         console.log("deleting...")
         const user_id = content?.creatorUID;
         const content_id = content?.id;
         if (content.thumbnail){
-          console.log("deleting but with thumbnail")
+          // console.log("deleting but with thumbnail")
           const file_path = decodeURIComponent(content?.thumbnail.split('/o/')[1].split('?')[0]);
           await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`).then((res) => {
-            console.log("with thumbnail: " + res.data)
-            alert("with thumbnail: " + res.data)
+            // console.log("with thumbnail: " + res.data)
+            // alert("with thumbnail: " + res.data)
           })
         } else {
-          console.log("deleting but without thumbnail")
+          // console.log("deleting but without thumbnail")
           await axios.delete(`${apiURL}/content/${user_id}/${content_id}`).then((res) => {
-            console.log("without thumbnail: " + res.data)
-            alert("without thumbnail: " + res.data)
+            // console.log("without thumbnail: " + res.data)
+            // alert("without thumbnail: " + res.data)
           })
         }
         // useNavigate(`/profile/${content.creatorUID}`)
@@ -133,8 +135,10 @@ export default function ViewContent({ id }: ViewContentProps) {
         alert(error)
       }
     } else {
-      alert(false)
+      throw Error("You do not have the permission to delete this page.")
     }
+    window.location.href = `/profile/${content?.creatorUID}`;
+    // await router.push()
   }
 
   const handleLike = async () => {
@@ -283,7 +287,7 @@ export default function ViewContent({ id }: ViewContentProps) {
                 {/* Delete Button */}
                 <button
                   className={`icon-button`}
-                  onClick={async () => {handleDelete}}
+                  onClick={handleDelete}
                 >
                   <TrashIcon className={`icon`} />
                 </button>
