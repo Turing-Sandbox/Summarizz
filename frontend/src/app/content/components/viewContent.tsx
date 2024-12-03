@@ -10,7 +10,8 @@ import Image from "next/image";
 import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import { HeartIcon, BookmarkIcon } from "@heroicons/react/24/solid";
+import { HeartIcon, BookmarkIcon, TrashIcon } from "@heroicons/react/24/solid";
+// import { useNavigate } from 'react-router-dom';
 
 interface ViewContentProps {
   id: string;
@@ -28,7 +29,6 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isBookmarked, setIsBookmarked] = useState(false); // Track bookmarked state
 
   const { userUID } = useAuth(); // Get logged in user's UID
-  
   // ---------------------------------------
   // -------------- Page INIT --------------
   // ---------------------------------------
@@ -76,6 +76,8 @@ export default function ViewContent({ id }: ViewContentProps) {
   function getContent() {
     axios.get(`${apiURL}/content/${id}`).then((res) => {
       const fetchedContent = res.data;
+      console.log(fetchedContent)
+      console.log("^^^^^^^^^^^^^^")
 
       // Convert Firestore Timestamp to JavaScript Date
       if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
@@ -101,6 +103,37 @@ export default function ViewContent({ id }: ViewContentProps) {
       }).catch((error) => {
         console.error("Error fetching user info:", error);
       });
+    }
+  }
+
+  const handleDelete = async  () => {
+    if (localStorage.getItem('userUID') === content?.creatorUID){
+      try {
+        alert(true)
+        console.log("deleting...")
+        const user_id = content?.creatorUID;
+        const content_id = content?.id;
+        if (content.thumbnail){
+          console.log("deleting but with thumbnail")
+          const file_path = decodeURIComponent(content?.thumbnail.split('/o/')[1].split('?')[0]);
+          await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`).then((res) => {
+            console.log("with thumbnail: " + res.data)
+            alert("with thumbnail: " + res.data)
+          })
+        } else {
+          console.log("deleting but without thumbnail")
+          await axios.delete(`${apiURL}/content/${user_id}/${content_id}`).then((res) => {
+            console.log("without thumbnail: " + res.data)
+            alert("without thumbnail: " + res.data)
+          })
+        }
+        // useNavigate(`/profile/${content.creatorUID}`)
+      } catch (error){
+        console.error(error)
+        alert(error)
+      }
+    } else {
+      alert(false)
     }
   }
 
@@ -245,6 +278,14 @@ export default function ViewContent({ id }: ViewContentProps) {
                   onClick={() => setIsBookmarked(!isBookmarked)}
                 >
                   <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
+                </button>
+
+                {/* Delete Button */}
+                <button
+                  className={`icon-button`}
+                  onClick={async () => {handleDelete}}
+                >
+                  <TrashIcon className={`icon`} />
                 </button>
               </div>
 

@@ -105,6 +105,23 @@ export async function addContentToUser(userUID: string, contentUID: string) {
   }
 }
 
+export async function removeContentFromUser(userUID: string, contentUID: string) {
+  const userDoc = await getDoc(doc(db, "users", userUID));
+  console.log(`Removing content: ${contentUID} from user: ${userUID}`)
+  if (userDoc.exists()) {
+    const user = userDoc.data();
+    console.log("initial user content: ", user.content)
+    if (user?.content) {
+      user.content = user.content.filter((uid: string) => uid !== contentUID);
+      console.log("after removing: ", user.content)
+    } else {
+      console.error("user has no content!!!!! ", user)
+    }
+    await updateDoc(doc(db, "users", userUID), user);
+  }
+}
+
+
 export async function addLikedContentToUser(userUID: string, contentUID: string) {
   const userRef = doc(db, "users", userUID);
   const userSnapshot = await getDoc(userRef);

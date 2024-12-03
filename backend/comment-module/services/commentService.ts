@@ -53,6 +53,21 @@ export async function deleteComment(post_id: string, commentId: string): Promise
 	}
 }
 
+export async function deletePost(post_id: string): Promise<void> {
+	const commentRef = ref(realtime_db, `comments/${post_id}`);
+	console.log("DELETING POST AND ALL COMMENTS: " + post_id)
+	const doesExist = await get(commentRef)
+	if (doesExist.exists()) {
+		console.log(doesExist.val())
+		console.log(doesExist.exists())
+		await remove(commentRef)
+	} else {
+		console.log(doesExist.val())
+		throw "The requested post does not exist."
+	}
+}
+
+
 export async function getAllComments(post_id: string): Promise<Comment[]> {
 	const commentsRef = ref(realtime_db, `comments/${post_id}`);
 	const snapshot = await get(commentsRef);
