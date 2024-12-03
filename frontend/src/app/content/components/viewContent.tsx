@@ -325,7 +325,7 @@ export default function ViewContent({ id }: ViewContentProps) {
                 {/* Bookmark Button */}
                 <button
                   className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
-                  onClick={() => setIsBookmarked(!isBookmarked)}
+                  onClick={handleBookmark}
                   title={isBookmarked ? "Unookmark Content" : "Bookmark Content"} // Tooltip for clarity
                 >
                   <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
