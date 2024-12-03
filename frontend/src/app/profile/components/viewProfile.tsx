@@ -9,6 +9,8 @@ import "../styles/profile.scss";
 import { Content } from "@/app/content/models/Content";
 import { User } from "../models/User";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/hooks/AuthProvider";
+import { UserPlusIcon } from "@heroicons/react/24/solid";
 
 interface ViewProfileProps {
   id: string;
@@ -20,6 +22,10 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // ---------------------------------------
   const [user, setUser] = useState<User | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followRequested, setFollowRequested] = useState(false);
+
+  const { userUID } = useAuth(); // // Get logged in user's UID
 
   const router = useRouter();
 
@@ -49,8 +55,16 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           getContent(res.data.content[i]);
         }
       }
+
+      if (userUID) {
+        setIsFollowing(res.data.followedBy?.includes(userUID)); // Logged-in user is following
+        setFollowRequested(res.data.followRequests?.includes(userUID)); // Follow request is pending
+      }
+    }).catch((error) => {
+      console.error("Error fetching user info:", error);
     });
   }
+
 
   function getContent(contentId: string) {
     axios.get(`${apiURL}/content/${contentId}`).then((res) => {
@@ -69,6 +83,65 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       setContents((prevContents) => [...prevContents, fetchedContent]);
     });
   }
+
+  const handleFollow = async () => {
+    try {
+      if (!userUID || !user?.uid) {
+        console.error("User ID or Target User ID not available");
+        return;
+      }
+  
+      if (userUID === user.uid) {
+        console.warn("You cannot follow yourself.");
+        alert("You can't follow yourself."); 
+        return;
+      }
+  
+      // Construct the appropriate URL based on the action
+      let url = ""; 
+      if (isFollowing) {
+        url = `${apiURL}/user/${userUID}/unfollow/user/${user.uid}`; // Unfollow
+      } else if (user?.isPrivate && !isFollowing) {
+        url = `${apiURL}/user/${userUID}/request/${user.uid}`; // Follow Request for private accounts
+      } else {
+        url = `${apiURL}/user/${userUID}/follow/user/${user.uid}`; // Follow for public accounts
+      }
+  
+      await axios.post(url);
+      
+      // Update state based on the action
+      if (isFollowing) {
+        setIsFollowing(false); // Unfollowed
+      } else if (user?.isPrivate) {
+        setFollowRequested(true); // Follow request sent
+      } else {
+        setIsFollowing(true); // Followed
+      }
+  
+      console.log(`Action performed successfully.`);
+    } catch (error) {
+      console.error("Error following/unfollowing user:", error);
+    }
+  };
+
+  const handleRequestFollow = async () => {
+    try {
+      if (!userUID || !user?.uid) {
+        console.error("User ID or Target ID not available");
+        return;
+      }
+  
+      const url = `${apiURL}/user/${userUID}/request/${user.uid}`;
+  
+      await axios.post(url);
+      setFollowRequested(true); // Set request state
+  
+      console.log("Follow request sent successfully.");
+    } catch (error) {
+      console.error("Error sending follow request:", error);
+    }
+  }; 
+
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -95,7 +168,31 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           </div>
 
           <div className='profile-banner-info'>
-            <h1>{user?.username}</h1>
+            <div className="username-follow">
+              <h1 className="username">{user?.username}</h1>
+              <button
+                className={`icon-button follow ${isFollowing ? "following" : ""}`}
+                onClick={ handleFollow }                
+                title={
+                  isFollowing
+                    ? "Unfollow User"
+                    : followRequested
+                    ? "Request Sent"
+                    : user?.isPrivate
+                    ? "Request User"
+                    : "Follow User"
+                } // Tooltip text
+              >
+                <UserPlusIcon
+                  className={`icon follow ${isFollowing ? "following" : ""}`}
+                  style={{
+                    color: isFollowing ? "black" : "#7D7F7C", // Black when following
+                    width: "16px",
+                    height: "16px",
+                  }}
+                />
+              </button>
+            </div>
             <p>
               {user?.firstName} {user?.lastName}
             </p>
