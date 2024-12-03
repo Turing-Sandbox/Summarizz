@@ -25,6 +25,7 @@
   - [Introduction](#introduction)
   - [Getting Started](#getting-started)
     - [Installation](#installation)
+    - [Docker Configuration for Frontend and Backend](#docker-configuration-for-frontend-and-backend)
     - [Configuration](#configuration)
   - [Branching Strategy and Workflow](#branching-strategy-and-workflow)
   - [Contributing](#contributing)
@@ -77,6 +78,27 @@ npm run dev
 ```
 
 7. You will now be able to access the frontend application at `http://localhost:3001` and the backend application at `http://localhost:3000`.
+
+### Docker Configuration for Frontend and Backend
+
+> [!NOTE]
+> This is not a required step but we recommend it for those who are familiar with Docker and running multiple contains on the same machine, you will have 2 containers running on your machine (1 for the ai backend and 1 for the core backend) and you can access them at `http://localhost:3001` and `http://localhost:3000` or access the other ports (`5001` and `5000`) that are exposed by the containers.
+
+> [!WARNING]
+> This is still being worked on and might not work as expected, we will updated this section once we know the `Dockerfile`s for the AI backend and the core backend are working as expected and can be deployed both locally and on an EC2 instance alongside AWS Fargate for scaling purposes.
+
+1. Building the Docker Images for Core Backend and AI Backend:
+```bash
+docker build -t ts-core-backend .
+docker build -t ts-ai-backend .
+```
+1. Running the Docker Images for Core Backend and AI Backend:
+```bash
+docker run -d -p 3000:3000 -p 5000:5000 ts-core-backend
+docker run -d -p 3001:3001 -p 5001:5001 ts-ai-backend
+```
+
+This should create 2 containers on your machine, one for the core backend and one for the AI backend, you can access them at `http://localhost:3000` and `http://localhost:3001` respectively or access the other ports that are exposed by the containers.
 
 ### Configuration
 
