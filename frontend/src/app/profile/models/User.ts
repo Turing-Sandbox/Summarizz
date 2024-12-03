@@ -7,4 +7,8 @@ export interface User {
   bio?: string;
   profileImage?: string;
   content?: string[];
+  isPrivate?: boolean;
+  followedCreators?: string[];
+  followedBy?: string[];
+  followRequests?: string[];
 }

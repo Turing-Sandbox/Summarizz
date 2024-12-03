@@ -6,9 +6,11 @@ import {
   registerUserController,
   loginUserController,
   followCreatorController,
-  unfollowCreatorController
+  unfollowCreatorController,
+  followUserController,
+  unfollowUserController,
+  requestFollowController,
 } from "../controllers/userController";
-import { followCreator } from "../services/userService";
 
 const router = Router();
 
@@ -19,7 +21,15 @@ router.get("/:uid", getUserController); // Get a user by UID
 router.put("/:uid", updateUserController); // Update a user by UID
 router.delete("/:uid", deleteUserController); // Delete a user by UID
 
-router.post("/:userId/follow/:creatorId", followCreatorController); // Follow creator
-router.post("/:userId/unfollow/:creatorId", unfollowCreatorController); // Unfollow creator
+// Content View - Follow/Unfollow Creator
+router.post("/:userId/follow/creator/:creatorId", followCreatorController); // Follow Creator
+router.post("/:userId/unfollow/creator/:creatorId", unfollowCreatorController); // Unfollow Creator
+
+// Profile View - Follow/Unfollow User
+router.post("/:userId/follow/user/:targetId", followUserController); // Follow User
+router.post("/:userId/unfollow/user/:targetId", unfollowUserController); // Unfollow User
+
+// Profile View - Request Follow for Private Account
+router.post("/:userId/request/:targetId", requestFollowController); // Request Follow
 
 export default router;
