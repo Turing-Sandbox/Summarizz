@@ -1,4 +1,4 @@
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytes, deleteObject } from "firebase/storage";
 import { storage } from "../../shared/firebaseConfig";
 import fs from "fs/promises";
 
@@ -17,14 +17,17 @@ export class StorageService {
   ) {
     try {
       console.log("Uploading File...");
+
       const storageRef = ref(storage, `${filePath}/${fileName}`);
       const metadata = {
         contentType: fileType,
       };
-
       const fileBuffer = await fs.readFile(file.filepath);
 
       const snapshot = await uploadBytes(storageRef, fileBuffer, metadata);
+      console.log("path: ", filePath)
+      console.log("fileName",fileName)
+      console.log("storageRef: ", storageRef)
       console.log("Uploaded file successfully!");
 
       // Get the download URL
@@ -41,4 +44,15 @@ export class StorageService {
       throw new Error(errorMessage);
     }
   }
+
+  static async deleteFile (filePath: string) {
+    const fileRef = ref(storage, `${filePath}`);
+    try {
+      await deleteObject(fileRef);
+      console.log(`File ${filePath} deleted.`);
+    } catch (error) {
+      console.error(`Error deleting file ${filePath}: `, error);
+    }
+  }
+
 }

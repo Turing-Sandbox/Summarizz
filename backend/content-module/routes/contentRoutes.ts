@@ -7,6 +7,8 @@ contentRoutes.post("/", ContentController.createContent); // Create new content
 contentRoutes.post("/uploadThumbnail", ContentController.uploadThumbnail); // Upload thumbnail
 
 contentRoutes.get("/:contentId", ContentController.getContent); // Get content by ID
+contentRoutes.delete("/:userId/:contentId/:filePath/:fileName", ContentController.deleteContentAndThumbnail); // Delete content by ID
+contentRoutes.delete("/:userId/:contentId", ContentController.deleteContent); // Delete content by ID
 
 contentRoutes.post("/:contentId/like/:userId", ContentController.likeContent); // Like content
 contentRoutes.post("/:contentId/unlike/:userId", ContentController.unlikeContent); // Unlike content

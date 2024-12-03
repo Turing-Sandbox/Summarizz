@@ -1,5 +1,18 @@
 ###
-GET http://localhost:3000/comment/comments/0
+GET http://localhost:3000/content/DeT1DWq3e5a8CSfoM8fJ
+###
+
+###
+DELETE http://localhost:3000/content/OcrRfUsHhm3eM7IToYb5/
+###
+
+###
+GET http://localhost:3000/user/LEwlA1KMRDeKzeknqM0srxOAmc42
+###
+
+###
+GET http://localhost:3000/user/LEwlA1KMRDeKzeknqM0srxOAmc42
+###
 
 ###
 

@@ -1,4 +1,11 @@
-import { getComment, getAllComments, updateComment, createComment, deleteComment } from '../services/commentService';
+import {
+	getComment,
+	getAllComments,
+	updateComment,
+	createComment,
+	deleteComment,
+	deletePost
+} from '../services/commentService';
 import { Request, Response } from 'express';
 
 export async function createCommentController(req: Request, res: Response): Promise<void> {
@@ -54,6 +61,19 @@ export async function deleteCommentController(req: Request, res: Response) {
 		res.status(200).json({ message: 'Comment deleted successfully' });
 	} catch (error) {
 		res.status(500).json({ error: error });
+		console.log(error)
+	}
+}
+
+export async function deletePostController(req: Request, res: Response) {
+	const { post_id } = req.params;
+	try {
+		console.log("req.body", req.body)
+		console.log("req.params", req.params)
+		await deletePost(post_id);
+		res.status(200).json({ message: 'Comment deleted successfully' });
+	} catch (error) {
+		res.status(500).json({ error: error + " " + post_id});
 		console.log(error)
 	}
 }

@@ -100,13 +100,14 @@ export default function CreateContent() {
       // 3 - Post Thumbnail to server
       const formData = new FormData();
       formData.append("thumbnail", thumbnail);
-
+      console.log("Thumbnail formdata: ", formData)
       fetch(`${apiURL}/content/uploadThumbnail`, {
         method: "POST",
         body: formData,
       })
         .then(async (response) => {
           const res = await response.json();
+          console.log("Thumbnail response: ", res)
 
           const thumbnailUrl = res.url;
 
