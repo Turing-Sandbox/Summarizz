@@ -9,6 +9,9 @@ import {
   login,
   followCreator,
   unfollowCreator,
+  followUser,
+  unfollowUser,
+  requestFollow,
 } from "../services/userService";
 
 // Register User
@@ -98,7 +101,7 @@ export async function deleteUserController(req: Request, res: Response) {
   }
 }
 
-// Follow Creator
+// Content View - Follow Creator
 export async function followCreatorController(req: Request, res: Response) {
   console.log("Following creator...");
   const { userId, creatorId } = req.params;
@@ -111,7 +114,7 @@ export async function followCreatorController(req: Request, res: Response) {
   }
 }
 
-// Unfollow Creator
+// Content View - Unfollow Creator
 export async function unfollowCreatorController(req: Request, res: Response) {
   const { userId, creatorId } = req.params;
   try {
@@ -120,5 +123,41 @@ export async function unfollowCreatorController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to unfollow creator" });
+  }
+}
+
+// Profile View - Follow User
+export async function followUserController(req: Request, res: Response) {
+  const { userId, targetId } = req.params;
+  try {
+    await followUser(userId, targetId);
+    res.status(200).json({ message: "User followed successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to follow user" });
+  }
+}
+
+// Profile View - Unfollow User
+export async function unfollowUserController(req: Request, res: Response) {
+  const { userId, targetId } = req.params;
+  try {
+    await unfollowUser(userId, targetId);
+    res.status(200).json({ message: "User unfollowed successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to unfollow user" });
+  }
+}
+
+// Profile View - Request Follow
+export async function requestFollowController(req: Request, res: Response) {
+  const { userId, targetId } = req.params;
+  try {
+    await requestFollow(userId, targetId);
+    res.status(200).json({ message: "Follow request sent successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to send follow request" });
   }
 }
