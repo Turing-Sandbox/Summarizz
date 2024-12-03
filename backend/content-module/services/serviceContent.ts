@@ -1,6 +1,14 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc } from "firebase/firestore";
-import { addContentToUser, addLikedContentToUser, removeLikedContentFromUser, addBookmarkedContentToUser, removeBookmarkedContentFromUser } from "../../user-module/services/userService";
+import {collection, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc} from "firebase/firestore";
+import {
+  addContentToUser,
+  removeContentFromUser,
+  addLikedContentToUser,
+  removeLikedContentFromUser,
+  addBookmarkedContentToUser,
+  removeBookmarkedContentFromUser
+} from "../../user-module/services/userService";
+import { StorageService } from "../../storage-module/services/serviceStorage"
 import { increment, update } from "firebase/database";
 
 export class ContentService {
@@ -63,6 +71,47 @@ export class ContentService {
     //   return null;
     // }
   }
+
+  static async deleteContentAndThumbnail(user_id: string, content_id: string, filePath: string, fileName: string) {
+    console.log("Deleting content (with thumbnail)...");
+    // Delete content from Firestore
+    console.log(user_id);
+    console.log(content_id);
+    const file_path = `${filePath}/${fileName}`
+    console.log(file_path);
+
+    try{
+      // delete actual content
+      await deleteDoc(doc(db, "contents", content_id));
+      // delete thumbnail
+      await StorageService.deleteFile(file_path);
+      // delete content from user
+      await removeContentFromUser(user_id, content_id);
+    }catch (error){
+      console.error("Error! ", error);
+      throw new Error(error)
+    }
+    return "Successfully deleted!";
+  }
+
+  static async deleteContent(user_id: string, content_id:string) {
+    console.log("Deleting content (without thumbnail)...");
+    // Delete content from Firestore
+    console.log(user_id);
+    console.log(content_id);
+
+    try{
+      // delete actual content
+      await deleteDoc(doc(db, "contents", content_id));
+      // remove content from user list
+      await removeContentFromUser(user_id, content_id); // tested. it works
+    }catch (error){
+      console.error("Error! ", error);
+      throw new Error(error)
+    }
+    return "Successfully deleted!";
+  }
+
 
   static async estimateReadTime(content: string) {
     const wordsPerMinute = 200;

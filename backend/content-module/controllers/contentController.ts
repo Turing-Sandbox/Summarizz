@@ -73,6 +73,42 @@ export class ContentController {
     }
   }
 
+  static async deleteContent(req: Request, res: Response) {
+    console.log("Deleting Content...");
+    const { userId, contentId} = req.params;
+    try {
+      // delete actual content, thumbnail, and content from user.content list
+      const response = await ContentService.deleteContent(userId, contentId);
+      console.log("DELETING CONTENT:::::")
+      console.log(response)
+      // console.log(userId, contentId)
+      res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      res
+          .status(500)
+          .json({ error: error.message || "Failed to fetch content" });
+    }
+  }
+
+  static async deleteContentAndThumbnail(req: Request, res: Response) {
+    console.log("Deleting Content...");
+    const { userId, contentId, filePath, fileName} = req.params;
+    try {
+      // delete actual content, thumbnail, and content from user.content list
+      const response = await ContentService.deleteContentAndThumbnail(userId, contentId, filePath, fileName);
+      console.log("DELETING CONTENT:::::")
+      console.log(response)
+      res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      res
+          .status(500)
+          .json({ error: error.message || "Failed to fetch content" });
+    }
+  }
+
+
   // Like content
   static async likeContent(req: Request, res: Response) {
     console.log("Liking Content...");
