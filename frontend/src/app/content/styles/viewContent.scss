@@ -32,6 +32,33 @@
   background-color: var(--tile-color);
 }
 
+/* Username and follow button container */
+.username-follow {
+  display: inline-flex; /* Align username and icon horizontally */
+  align-items: center;
+  gap: 5px; /* Space between username and icon */
+}
+
+/* Follow button styles */
+.icon-button.follow {
+  padding: 0;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Follow icon styles */
+.icon.follow {
+  width: 16px; /* Match other icons */
+  height: 16px; /* Match other icons */
+  color: #7D7F7C; /* Default gray */
+}
+
+.icon.follow.following {
+  color: black; /* Black when following */
+}
+
 /* Common styles for the like and bookmark buttons */
 .icon-container {
   display: inline-flex;

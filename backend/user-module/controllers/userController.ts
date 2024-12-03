@@ -1,5 +1,5 @@
 // src/modules/user/controllers/userController.ts
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import {
   createUser,
   getUser,
@@ -7,6 +7,8 @@ import {
   deleteUser,
   register,
   login,
+  followCreator,
+  unfollowCreator,
 } from "../services/userService";
 
 // Register User
@@ -93,5 +95,30 @@ export async function deleteUserController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to delete user" });
+  }
+}
+
+// Follow Creator
+export async function followCreatorController(req: Request, res: Response) {
+  console.log("Following creator...");
+  const { userId, creatorId } = req.params;
+  try {
+    await followCreator(userId, creatorId);
+    res.status(200).json({ message: "Creator followed successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to follow creator" });
+  }
+}
+
+// Unfollow Creator
+export async function unfollowCreatorController(req: Request, res: Response) {
+  const { userId, creatorId } = req.params;
+  try {
+    await unfollowCreator(userId, creatorId);
+    res.status(200).json({ message: "Creator unfollowed successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Failed to unfollow creator" });
   }
 }

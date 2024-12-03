@@ -10,7 +10,7 @@ import Image from "next/image";
 import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import { HeartIcon, BookmarkIcon } from "@heroicons/react/24/solid";
+import { HeartIcon, BookmarkIcon, UserPlusIcon } from "@heroicons/react/24/solid";
 
 interface ViewContentProps {
   id: string;
@@ -26,6 +26,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isLiked, setIsLiked] = useState(false); // Track liked state
   const [likes, setLikes] = useState(0); // Track likes count
   const [isBookmarked, setIsBookmarked] = useState(false); // Track bookmarked state
+  const [isFollowing, setIsFollowing] = useState(false); // Track following state
 
   const { userUID } = useAuth(); // Get logged in user's UID
   
@@ -48,23 +49,13 @@ export default function ViewContent({ id }: ViewContentProps) {
       const sanitizedContent = DOMPurify.sanitize(content.content);
       setFormatedContent(sanitizedContent);
 
-      const likesCount = typeof content.likes === 'number' 
-      ? content.likes 
-      : 0;
-   
+      const likesCount = typeof content.likes === 'number' ? content.likes : 0;
       setLikes(likesCount);
       
-      const userLiked = content.peopleWhoLiked 
-        ? content.peopleWhoLiked.includes(userUID || "") 
-        : false;
-      
+      const userLiked = content.peopleWhoLiked ? content.peopleWhoLiked.includes(userUID || "") : false;
       setIsLiked(userLiked);
 
-      // Check if the content is bookmarked by the user
-      const userBookmarked = content.bookmarkedBy 
-        ? content.bookmarkedBy.includes(userUID || "") 
-        : false;
-
+      const userBookmarked = content.bookmarkedBy ? content.bookmarkedBy.includes(userUID || "") : false;
       setIsBookmarked(userBookmarked);    
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -184,6 +175,42 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   }
   
+  const handleFollow = async () => {
+    try {
+      if (!userUID || !content?.creatorUID) {
+        console.error("User ID or Creator ID not available");
+        return;
+      }
+  
+      // Determine whether to follow or unfollow the creator
+      const action = isFollowing ? "unfollow" : "follow";
+      const url = `${apiURL}/user/${userUID}/${action}/${content.creatorUID}`;
+  
+      // Send the follow/unfollow request
+      const response = await axios.post(url, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Update the local state
+      setIsFollowing(!isFollowing); // Toggle follow state
+  
+      console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} response:`, response.data);
+  
+    } catch (error) {
+      console.error("Error following/unfollowing creator:", error);
+  
+      // Additional logging for Axios errors
+      if ((error as any).response) {
+        console.error("Axios Error Response:", {
+          data: (error as any).response.data,
+          status: (error as any).response.status,
+          headers: (error as any).response.headers,
+        });
+      }
+    }
+  };
   
   // --------------------------------------
   // -------------- Render ----------------
@@ -217,8 +244,27 @@ export default function ViewContent({ id }: ViewContentProps) {
                   {content?.dateCreated?.toLocaleDateString()}
                   {content?.readtime ? ` - ${content.readtime} min` : ""}
                 </p>
-                <p>{creator?.username}</p>
 
+                {/* Username with Follow Icon */}
+                <div className="username-follow">
+                  <p className="username">{creator?.username}</p>
+                  <button
+                    className={`icon-button ${isFollowing ? "following" : ""}`}
+                    onClick={handleFollow}
+                    title={isFollowing ? "Unfollow Author" : "Follow Author"} // Tooltip for clarity
+                  >
+                    <UserPlusIcon
+                      className={`icon ${isFollowing ? "following" : ""}`}
+                      style={{
+                        color: isFollowing ? "black" : "#7D7F7C", // Black when following
+                        width: "16px",
+                        height: "16px",
+                      }}
+                    />
+                  </button>
+                </div>
+
+                {/* Profile Image */}
                 {creator && creator.profileImage && (
                   <Image
                     src={creator.profileImage}
@@ -234,6 +280,7 @@ export default function ViewContent({ id }: ViewContentProps) {
                 <button
                   className={`icon-button ${isLiked ? "liked" : ""}`}
                   onClick={handleLike}
+                  title={isLiked ? "Unlike Content" : "Like Content"} // Tooltip for clarity
                 >
                   <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
                   <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
@@ -243,10 +290,11 @@ export default function ViewContent({ id }: ViewContentProps) {
                 <button
                   className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
                   onClick={() => setIsBookmarked(!isBookmarked)}
+                  title={isBookmarked ? "Unookmark Content" : "Bookmark Content"} // Tooltip for clarity
                 >
                   <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
-                </button>
-              </div>
+                </button>                
+              </div>             
 
               <div className='spliter'></div>
 

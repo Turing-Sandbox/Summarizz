@@ -175,6 +175,41 @@ export async function removeBookmarkedContentFromUser(userUID: string, contentUI
   }
 }
 
+export async function followCreator(userUID: string, creatorUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const followedCreators = user?.followedCreators || [];
+
+    if (!followedCreators.includes(creatorUID)) {
+      followedCreators.push(creatorUID); // Add creator ID to followedCreators array
+      await updateDoc(userRef, { followedCreators });
+    }    
+  } else {
+    throw new Error("User not found");  
+  }
+}
+
+export async function unfollowCreator(userUID: string, creatorUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const followedCreators = user.followedCreators || [];
+
+    const index = followedCreators.indexOf(creatorUID);
+    if (index > -1) {
+      followedCreators.splice(index, 1);  // Remove creator ID from followedCreators
+      await updateDoc(userRef, { followedCreators });
+    }    
+  } else {
+    throw new Error("User not found");
+  }
+}
+
 export async function getUser(uid: string) {
   const userDoc = await getDoc(doc(db, "users", uid));
   return userDoc.exists() ? userDoc.data() : null;
