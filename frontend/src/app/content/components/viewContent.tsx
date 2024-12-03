@@ -137,7 +137,7 @@ export default function ViewContent({ id }: ViewContentProps) {
     } else {
       throw Error("You do not have the permission to delete this page.")
     }
-    window.location.href = `/profile/${content?.creatorUID}`;
+    window.location.href = `/profile/${userUID}`;
     // await router.push()
   }
 
