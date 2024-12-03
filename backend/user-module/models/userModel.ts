@@ -13,4 +13,5 @@ export interface User {
   content?: string[]; // Optional content
   likedContent?: string[]; // Optional liked content
   bookmarkedContent?: string[]; // Optional bookmarked content
+  followedCreators?: string[]; // Optional followed creators
 }
