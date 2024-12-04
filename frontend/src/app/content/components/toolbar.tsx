@@ -1,13 +1,65 @@
-import { Editor } from "@tiptap/react";
-import "../styles/toolbar.scss";
 import { Level } from "@tiptap/extension-heading";
+import { Editor } from "@tiptap/react";
+import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Image from "next/image";
+
+import "../styles/toolbar.scss";
 
 interface ToolbarProps {
   editor: Editor | null;
 }
 
+const headingLevels = [
+  { key: 0, value: "0", label: "Paragraph" },
+  { key: 1, value: "1", label: "Header 1" },
+  { key: 2, value: "2", label: "Header 2" },
+  { key: 3, value: "3", label: "Header 3" },
+  { key: 4, value: "4", label: "Header 4" },
+  { key: 5, value: "5", label: "Header 5" },
+  { key: 6, value: "6", label: "Header 6" },
+]
+
 export default function Toolbar({ editor }: ToolbarProps) {
+  const [isDarkMode , setIsDarkMode] = useState(false);
+  const [formattedMarkdown, setFormattedMarkdown] = useState("");
+
+  {/*ANCHOR - Fix this Code, Light Mode / Dark Mode is not Actively Working. */}
+  useEffect(() => {
+    const preferenceMode = localStorage.getItem("isDarkMode");
+  
+    if (preferenceMode === "true") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      setIsDarkMode(true);
+
+    } else if (preferenceMode === "false") {
+      document.documentElement.setAttribute("data-theme", "light");
+      setIsDarkMode(false);
+
+    } else {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+  
+      if (mq.matches) {
+        document.documentElement.setAttribute("data-theme", "dark");
+        setIsDarkMode(true);
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        setIsDarkMode(false);
+      }
+  
+      const handleChange = (evt: any) => {
+        const isDark = evt.matches;
+        document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+        setIsDarkMode(isDark);
+      };
+  
+      mq.addEventListener("change", handleChange);
+  
+      return () => mq.removeEventListener("change", handleChange);
+    }
+  }, []);
+
   if (!editor) {
     return null;
   }
@@ -22,63 +74,29 @@ export default function Toolbar({ editor }: ToolbarProps) {
     }
   };
 
+  const activeHeadingLevel = () => {
+    for (let i = 1; i <= 6; i++) {
+      if (editor.isActive("heading", { level: i })) {
+        return i;
+      }
+    }
+
+    return editor.isActive("paragraph") ? 0 : "";
+  }
+
   return (
     <div className='toolbar'>
-      {/* <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        disabled={
-          !editor.can().chain().focus().toggleHeading({ level: 1 }).run()
-        }
-        className={`toolbar-button ${
-          editor.isActive("heading", { level: 1 }) ? "active" : ""
-        }`}
-      >
-        Header 1
-      </button>
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        disabled={
-          !editor.can().chain().focus().toggleHeading({ level: 2 }).run()
-        }
-        className={`toolbar-button ${
-          editor.isActive("heading", { level: 2 }) ? "active" : ""
-        }`}
-      >
-        Header 2
-      </button>
-      <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        disabled={
-          !editor.can().chain().focus().toggleHeading({ level: 3 }).run()
-        }
-        className={`toolbar-button ${
-          editor.isActive("heading", { level: 3 }) ? "active" : ""
-        }`}
-      >
-        Header 3
-      </button> */}
       <select
         onChange={handleHeadingChange}
         className='toolbar-dropdown'
-        value={
-          editor.isActive("paragraph")
-            ? "0"
-            : editor.isActive("heading", { level: 1 })
-            ? "1"
-            : editor.isActive("heading", { level: 2 })
-            ? "2"
-            : editor.isActive("heading", { level: 3 })
-            ? "3"
-            : ""
-        }
+        value={activeHeadingLevel()}
       >
-        <option value='0'>Paragraph</option>
-        <option value='1'>Header 1</option>
-        <option value='2'>Header 2</option>
-        <option value='3'>Header 3</option>
+       
+       {headingLevels.map(({ key, value, label }) => (
+          <option key={key} value={value}>
+            {label}
+          </option>
+        ))}
       </select>
 
       <hr />
@@ -124,16 +142,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
       >
         <s>S</s>
       </button>
-
-      {/* <button
-        type='button'
-        onClick={() => editor.chain().focus().toggleCode().run()}
-        disabled={!editor.can().chain().focus().toggleCode().run()}
-        className={`toolbar-button ${editor.isActive("code") ? "active" : ""}`}
-      >
-        Code
-      </button> */}
-
+      
       <hr />
 
       <button
@@ -160,53 +169,42 @@ export default function Toolbar({ editor }: ToolbarProps) {
       <hr />
 
       <button
-        type='button'
+        type="button"
         onClick={() => editor.chain().focus().toggleBulletList().run()}
         disabled={!editor.can().chain().focus().toggleBulletList().run()}
-        className={`toolbar-button ${
-          editor.isActive("bulletList") ? "active" : ""
-        }`}
+        className={`toolbar-button ${editor.isActive("bulletList") ? "active" : ""}`}
       >
-        {/* If Dark Mode on */}
         <Image
-          src='/images/orderedListIcon-light.png'
+          src={
+            isDarkMode
+              ? "/images/orderedListIcon-light.png"
+              : "/images/orderedListIcon-dark.png"
+          }
           width={20}
           height={20}
-          alt='Unordered List'
-        />
-
-        {/* If Light Mode on */}
-        <Image
-          src='/images/orderedListIcon-dark.png'
-          width={20}
-          height={20}
-          alt='Unordered List'
+          alt="Unordered List"
         />
       </button>
+
       <button
-        type='button'
+        type="button"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
         disabled={!editor.can().chain().focus().toggleOrderedList().run()}
-        className={`toolbar-button ${
-          editor.isActive("orderedList") ? "active" : ""
-        }`}
+        className={`toolbar-button ${editor.isActive("orderedList") ? "active" : ""}`}
       >
-        {/* if Dark Mode on */}
         <Image
-          src='/images/numberedListIcon-light.png'
+          src={
+            isDarkMode
+              ? "/images/numberedListIcon-light.png"
+              : "/images/numberedListIcon-dark.png"
+          }
           width={20}
           height={20}
-          alt='Ordered List'
-        />
-
-        {/* if Light Mode on */}
-        <Image
-          src='/images/numberedListIcon-dark.png'
-          width={20}
-          height={20}
-          alt='Ordered List'
+          alt="Ordered List"
         />
       </button>
+
+      <hr />
     </div>
   );
 }

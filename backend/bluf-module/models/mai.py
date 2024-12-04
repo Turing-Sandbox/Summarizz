@@ -25,7 +25,7 @@ class Mai:
         try:
             self.client = OpenAI(
                 base_url="https://openrouter.ai/api/v1",
-                api_key=OPENROUTER_API_KEY if not None else self.__api_key,
+                api_key=OPENROUTER_API_KEY or self.__api_key,
                 default_headers={
                     "Authorization": f"Bearer {self.__api_key}",
                     "Content-Type": "application/json"
@@ -50,7 +50,9 @@ class Mai:
                     {
                         "role": "user",
                         "content": f"""
-                        {self.prompt.user_prompt.format(input_text=input_text)}
+                        {self.prompt.user_prompt}
+                        Input Text to Summarize:
+                        {input_text}
                         """
                     }
                 ]

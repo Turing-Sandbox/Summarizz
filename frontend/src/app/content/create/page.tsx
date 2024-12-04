@@ -11,7 +11,6 @@ export default function Page() {
       <Background />
       <AuthProvider>
         <CreateContent />
-
         <div className='footer'>
           <Footer />
         </div>

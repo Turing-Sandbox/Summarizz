@@ -46,35 +46,49 @@ Key Instructions:
 """
 
 USER_PROMPT_FORMAT = f"""
-Analyze the following text and create a comprehensive two-paragraph summary. The first paragraph
-should provide context and main ideas, while the second should elaborate on key details and
-implications. Maintain academic rigor while ensuring accessibility to a general audience.
+Analyze the provided text and create a comprehensive two-paragraph summary 
+using proper markdown formatting for titles, headers, and structure. The 
+summary should reflect an in-depth understanding of the content while 
+remaining accessible to a general audience. Use clear, concise language, 
+ensuring the response maintains academic rigor while being easy to follow. 
+Where relevant, include jot notes to break down complex concepts or 
+highlight key points. The summary should be no longer than two paragraphs
+and should be filled with relevant information, insights, and conclusions.
 
-Example Input-Output Pair:
+Instructions:
+Paragraph 1 (Context and Main Ideas):
 
-Input: [Research paper about effects of caffeine on productivity]
+Summarize the broader context and the primary themes of the text.
+Identify the subject matter, the scope of the discussion, and key findings or arguments.
+Provide a clear and engaging introduction that frames the central focus of the text.
+Paragraph 2 (Key Details and Implications):
 
-Output:
-Coffee consumption and its impact on workplace productivity has been extensively studied across
-multiple industries and demographics. A comprehensive analysis of 2,000 participants across 50
-companies revealed that moderate caffeine intake, defined as 200-300mg per day, consistently
-correlates with improved cognitive performance during standard working hours. The study,
-conducted over 18 months, employed both quantitative productivity metrics and qualitative
-employee feedback to establish these findings.
+Elaborate on the critical data points, specific insights, and their broader implications.
+Highlight notable trends, limitations, or areas of impact discussed in the text.
+Ensure this paragraph adds depth and connects back to the ideas in the first paragraph.
+Formatting Requirements:
 
-The research identified specific performance improvements in areas of focus, task completion,
-and creative problem-solving, with peak benefits occurring approximately 30 minutes after
-caffeine consumption. Notably, participants demonstrated a 27% increase in sustained attention
-spans and a 21% improvement in meeting deadline adherence when following optimal caffeine
-consumption patterns. However, these benefits were found to diminish significantly when daily
-intake exceeded 400mg, suggesting an important ceiling effect for workplace caffeine
-consumption.
+Use markdown to structure the response (e.g., headings, subheadings, bullet points).
+Add jot notes for clarity when appropriate, especially for lists, definitions, or nuanced details.
 
 Response Format:
-[Paragraph 1: Context and Main Ideas]
-[Paragraph 2: Key Details and Implications]
+# Title
 
-The following is the input you will receive:
+## Context and Main Ideas
+Provide a clear and engaging introduction with an overview of the main themes and context.
+
+### Subheading
+- Bullet Points
+- Bullet Points
+- Bullet Points
+
+## Key Details and Implications
+Dive into specific details and insights, and the significance of the insights/findings.
+
+### Subheading
+- Bullet Points
+- Bullet Points
+- Bullet Points
 """
 
 
