@@ -192,6 +192,41 @@ export async function removeBookmarkedContentFromUser(userUID: string, contentUI
   }
 }
 
+export async function addSharedContentToUser(userUID: string, contentUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const sharedContent = user?.sharedContent || [];
+
+    if (!sharedContent.includes(contentUID)) {
+      sharedContent.push(contentUID); // Add content ID to sharedContent array
+      await updateDoc(userRef, { sharedContent });
+    }    
+  } else {
+    throw new Error("User not found");  
+  }
+}
+
+export async function removeSharedContentFromUser(userUID: string, contentUID: string) {
+  const userRef = doc(db, "users", userUID);
+  const userSnapshot = await getDoc(userRef);
+
+  if (userSnapshot.exists()) {
+    const user = userSnapshot.data();
+    const sharedContent = user.sharedContent || [];
+
+    const index = sharedContent.indexOf(contentUID);
+    if (index > -1) {
+      sharedContent.splice(index, 1);  // Remove content ID from sharedContent
+      await updateDoc(userRef, { sharedContent });
+    }    
+  } else {
+    throw new Error("User not found");
+  }
+}
+
 export async function followCreator(userUID: string, creatorUID: string) {
   const userRef = doc(db, "users", userUID);
   const creatorRef = doc(db, "users", creatorUID);
