@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.rich_logging import logger as log
 from models.mai import Mai
 from models.prompt import Models, Prompt, Params
+from lib.sanitizer import sanitize_text
 
 # External Dependencies (Imports)
 from flask import request, jsonify, Response
@@ -80,19 +81,27 @@ def process_file_request(allows_extensions: set) -> tuple[Response, int]:
 @summary_bp.route("/summarize", methods=["POST"])
 def summarize_request() -> tuple[Response, int]:
     try:
-        text = request.args.get("input")
+        data = request.get_json()
 
-        log.info(f"Received request with text length: {len(text)}")
-        log.debug(f"Request text: {text}")
+        if not data or "input" not in data:
+            log.error("No input was provided in the request body.")
+            return jsonify({
+                "error": "No input was provided in the request body.",
+                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }), 400
+
+        text = data.get("input", "")
 
         if not text:
+            log.error("Empty input was provided in the request body.")
             return jsonify({
                 "error": "No text provided within the request body.",
                 "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }), 400
 
         mai = setup_mai()
-        summary = mai.summarize_request(input_text=text)
+        sanitized_text = sanitize_text(text)
+        summary = mai.summarize_request(input_text=sanitized_text)
 
         if not summary:
             return jsonify({

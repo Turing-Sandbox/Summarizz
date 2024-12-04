@@ -1,6 +1,6 @@
 # External Dependencies (Imports)
-from flask import Flask, make_response, request, jsonify, Response
-from flask_cors import CORS, cross_origin
+from flask import Flask, make_response, request, Response
+from flask_cors import CORS
 
 
 # Internal Dependencies (Imports)

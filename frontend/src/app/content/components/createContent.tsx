@@ -2,22 +2,23 @@
 
 import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import "../styles/createContent.scss";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import { apiURL } from "@/app/scripts/api";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { apiAIURL, apiURL } from "@/app/scripts/api";
 import Bold from "@tiptap/extension-bold";
-import Italic from "@tiptap/extension-italic";
-import Underline from "@tiptap/extension-underline";
-import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
+import Heading from "@tiptap/extension-heading";
+import Italic from "@tiptap/extension-italic";
 import OrderedList from "@tiptap/extension-ordered-list";
-import Toolbar from "./toolbar";
-import Cookies from "js-cookie";
 import Paragraph from "@tiptap/extension-paragraph";
+import Underline from "@tiptap/extension-underline";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Cookies from "js-cookie";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Toolbar from "./toolbar";
+
+import "../styles/createContent.scss";
 
 export default function CreateContent() {
   // ---------------------------------------
@@ -27,6 +28,7 @@ export default function CreateContent() {
   const [content, setContent] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -85,6 +87,56 @@ export default function CreateContent() {
       setError("Please select a valid image file.");
     }
   };
+
+  const handleSummarize = async () => {
+    if (!content) {
+      setError("Please add content before summarizing.");
+      return;
+    }
+
+    setIsSummarizing(true);
+    try {
+      const response = await fetch(`${apiAIURL}/api/v1/summarize`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          input: content,
+        })
+      })
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Failed to summarize provided content.");
+      }
+
+      if (!editor) {
+        return;
+      }
+
+      const formattedSummary = `
+        <div class="summary-container">
+          <h2 class="summary-title">Summary</h2>
+          <div class="summary-content">
+            <p>${data.summary.output.replace(/\n/g, "</p><p>")}</p>
+          </div>
+        </div>
+      `;
+
+      editor.commands.setContent(formattedSummary);
+      setContent(formattedSummary);
+      Cookies.set("content", formattedSummary);
+
+    } catch (error) {
+      console.error(error);
+      setError(`Failed to summarize provided content: ${error}`);
+
+    }
+
+    setIsSummarizing(false);
+  }
 
   function handleSubmit() {
     // 1 - Reset Error Message
@@ -279,6 +331,9 @@ export default function CreateContent() {
             }}
           >
             Clear
+          </button>
+          <button className='content-button' onClick={() => handleSummarize()}>
+            Summarize with AI
           </button>
           <button className='content-button' onClick={() => handleSubmit()}>
             Publish
