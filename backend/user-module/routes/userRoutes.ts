@@ -10,6 +10,7 @@ import {
   followUserController,
   unfollowUserController,
   requestFollowController,
+  changePasswordController,
 } from "../controllers/userController";
 
 const router = Router();
@@ -31,5 +32,8 @@ router.post("/:userId/unfollow/user/:targetId", unfollowUserController); // Unfo
 
 // Profile View - Request Follow for Private Account
 router.post("/:userId/request/:targetId", requestFollowController); // Request Follow
+
+// New Password Change Route
+router.post("/:userId/change-password", changePasswordController); // Change Password
 
 export default router;

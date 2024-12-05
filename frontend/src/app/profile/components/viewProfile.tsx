@@ -25,7 +25,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followRequested, setFollowRequested] = useState(false);
 
-  const { userUID } = useAuth(); // // Get logged in user's UID
+  const { userUID } = useAuth(); // Get logged in user's UID
 
   const router = useRouter();
 
@@ -43,9 +43,6 @@ export default function ViewProfile({ id }: ViewProfileProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
   function getUserInfo(userId: string = id) {
     axios.get(`${apiURL}/user/${userId}`).then((res) => {
       setUser(res.data);
@@ -64,7 +61,6 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       console.error("Error fetching user info:", error);
     });
   }
-
 
   function getContent(contentId: string) {
     axios.get(`${apiURL}/content/${contentId}`).then((res) => {
@@ -140,8 +136,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
     } catch (error) {
       console.error("Error sending follow request:", error);
     }
-  }; 
-
+  };
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -201,8 +196,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
         </div>
 
         <h2 className='section-title'>
-          {" "}
-          {contents.length === 1 ? "Content" : "Contents"}{" "}
+          {contents.length === 1 ? "Content" : "Contents"}
         </h2>
         {contents.length === 0 ? (
           <h2>No content found</h2>
@@ -218,11 +212,10 @@ export default function ViewProfile({ id }: ViewProfileProps) {
                 <p>
                   {new Date(content.dateCreated).toLocaleString("en-US", {
                     month: "short",
-                  })}{" "}
+                  })} {" "}
                   {new Date(content.dateCreated).getDate()}
                   {content.readtime ? ` - ${content.readtime} min read` : ""}
                 </p>
-                {/* Load thumbnail image from URL */}
 
                 {content.thumbnail && (
                   <div className='content-thumbnail-container'>

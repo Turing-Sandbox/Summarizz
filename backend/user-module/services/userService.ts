@@ -5,8 +5,10 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updatePassword,
 } from "firebase/auth";
 import jwt from "jsonwebtoken";
+import { adminAuth } from "../../shared/firebaseAdminConfig"; // Ensure you have Firebase Admin configured
 
 export async function register(
   firstName: string,
@@ -362,4 +364,37 @@ export async function updateUser(
 
 export async function deleteUser(uid: string) {
   await deleteDoc(doc(db, "users", uid));
+}
+
+// Change Password
+export async function changePassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+) {
+  const auth = getAuth();
+
+  try {
+    // Authenticate the user with the current password
+    const userRef = await getDoc(doc(db, "users", userId));
+    if (!userRef.exists()) {
+      throw new Error("User not found");
+    }
+    const user = userRef.data();
+    const email = user.email;
+
+    const userCredential = await signInWithEmailAndPassword(auth, email, currentPassword);
+    const firebaseUser = userCredential.user;
+
+    // Update password
+    await updatePassword(firebaseUser, newPassword);
+    console.log("Password updated successfully for user:", userId);
+  } catch (error) {
+    let errorMessage = error.message;
+    // Remove "Firebase: " prefix from the error message
+    if (errorMessage.startsWith("Firebase: ")) {
+      errorMessage = errorMessage.replace("Firebase: ", "");
+    }
+    throw new Error(errorMessage);
+  }
 }
