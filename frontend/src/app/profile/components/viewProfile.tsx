@@ -24,11 +24,6 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const [contents, setContents] = useState<Content[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followRequested, setFollowRequested] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const { userUID } = useAuth(); // Get logged in user's UID
 
@@ -143,31 +138,6 @@ export default function ViewProfile({ id }: ViewProfileProps) {
     }
   };
 
-  // Change Password Handler
-  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
-      return;
-    }
-
-    try {
-      // Send a request to the backend to change the password
-      await axios.post(`${apiURL}/user/${userUID}/change-password`, {
-        userId: userUID,
-        currentPassword,
-        newPassword,
-      });
-      setSuccess("Password updated successfully.");
-    } catch (error) {
-      console.error("Error changing password:", error);
-      setError("Failed to update password. Please check your current password and try again.");
-    }
-  };
-
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
@@ -223,52 +193,6 @@ export default function ViewProfile({ id }: ViewProfileProps) {
             </p>
             <p>{user?.bio}</p>
           </div>
-        </div>
-
-        {/* Change Password Section */}
-        <div className='change-password-section'>
-          <h2>Change Password</h2>
-          <form onSubmit={handleChangePassword} className='change-password-form'>
-            <div className='form-group'>
-              <label htmlFor='currentPassword'>Current Password</label>
-              <input
-                type='password'
-                id='currentPassword'
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className='form-group'>
-              <label htmlFor='newPassword'>New Password</label>
-              <input
-                type='password'
-                id='newPassword'
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className='form-group'>
-              <label htmlFor='confirmPassword'>Confirm New Password</label>
-              <input
-                type='password'
-                id='confirmPassword'
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>}
-
-            <button type='submit' className='change-password-button'>
-              Change Password
-            </button>
-          </form>
         </div>
 
         <h2 className='section-title'>

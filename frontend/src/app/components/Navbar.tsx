@@ -211,6 +211,16 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
+                  router.push(`/profile/${auth.getUserUID()}/manage`);
+                }}
+              >
+                Manage Profile
+              </a>
+
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
                   auth.logout();
                 }}
               >

@@ -4,7 +4,7 @@ import { getAuth } from "firebase-admin/auth";
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.applicationDefault(),
-    databaseURL: "https://<YOUR-FIREBASE-PROJECT>.firebaseio.com",
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
   });
 }
 
