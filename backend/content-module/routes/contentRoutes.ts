@@ -10,6 +10,9 @@ contentRoutes.get("/:contentId", ContentController.getContent); // Get content b
 contentRoutes.delete("/:userId/:contentId/:filePath/:fileName", ContentController.deleteContentAndThumbnail); // Delete content by ID
 contentRoutes.delete("/:userId/:contentId", ContentController.deleteContent); // Delete content by ID
 
+contentRoutes.put("/:contentId/:userId", ContentController.editContent); // Edit content by ID
+contentRoutes.put("/editThumbnail/:contentId/:userId", ContentController.editContentAndThumbnail); // Edit content by ID
+
 contentRoutes.post("/:contentId/like/:userId", ContentController.likeContent); // Like content
 contentRoutes.post("/:contentId/unlike/:userId", ContentController.unlikeContent); // Unlike content
 

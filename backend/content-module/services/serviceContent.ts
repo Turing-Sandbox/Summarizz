@@ -10,6 +10,7 @@ import {
 } from "../../user-module/services/userService";
 import { StorageService } from "../../storage-module/services/serviceStorage"
 import { increment, update } from "firebase/database";
+import {Content} from "../models/contentModel";
 
 export class ContentService {
   static async createContent(
@@ -112,6 +113,19 @@ export class ContentService {
     return "Successfully deleted!";
   }
 
+  static async editContent(content_id:string, data: Partial<Content>) {
+    console.log("Editing content...")
+    console.log(content_id);
+    console.log(data);
+    try{
+      await updateDoc(doc(db, `contents/${content_id}`), data);
+      console.log("EDIT^^^^^^^^^^^^^^^^^EDIT")
+    }catch (error){
+      console.error("Error while editing content! ", error);
+      throw new Error(error)
+    }
+    return "Successfully edited!";
+  }
 
   static async estimateReadTime(content: string) {
     const wordsPerMinute = 200;

@@ -10,7 +10,8 @@ import Image from "next/image";
 import "../styles/viewContent.scss";
 import DOMPurify from "dompurify";
 import { useAuth } from "@/app/hooks/AuthProvider";
-import { HeartIcon, BookmarkIcon, UserPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { HeartIcon, BookmarkIcon, UserPlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { redirect } from "next/navigation";
 
 interface ViewContentProps {
   id: string;
@@ -36,6 +37,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   // ---------------------------------------
   const hasFetchedData = useRef(false);
   useEffect(() => {
+    console.log("unforced get request: ")
     if (!hasFetchedData.current) {
       getContent();
       //   getUserInfo();
@@ -52,15 +54,21 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       const likesCount = typeof content.likes === 'number' ? content.likes : 0;
       setLikes(likesCount);
-      
+
       const userLiked = content.peopleWhoLiked ? content.peopleWhoLiked.includes(userUID || "") : false;
       setIsLiked(userLiked);
 
       const userBookmarked = content.bookmarkedBy ? content.bookmarkedBy.includes(userUID || "") : false;
-      setIsBookmarked(userBookmarked);    
+      setIsBookmarked(userBookmarked);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, userUID]);
+
+  useEffect(() => {
+    console.log("forced get request: ")
+      getContent();
+  }, []);
+
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -127,8 +135,7 @@ export default function ViewContent({ id }: ViewContentProps) {
     } else {
       throw Error("You do not have the permission to delete this page.")
     }
-    window.location.href = `/profile/${userUID}`;
-    // await router.push()
+    redirect(`/profile/${userUID}`)
   }
 
   const handleLike = async () => {
@@ -247,6 +254,10 @@ export default function ViewContent({ id }: ViewContentProps) {
       }
     }
   };
+
+  const editContent = () => {
+    redirect(`edit/${content?.id}`)
+  }
   
   // --------------------------------------
   // -------------- Render ----------------
@@ -314,30 +325,38 @@ export default function ViewContent({ id }: ViewContentProps) {
               <div className="icon-container">
                 {/* Like Button */}
                 <button
-                  className={`icon-button ${isLiked ? "liked" : ""}`}
-                  onClick={handleLike}
-                  title={isLiked ? "Unlike Content" : "Like Content"} // Tooltip for clarity
+                    className={`icon-button ${isLiked ? "liked" : ""}`}
+                    onClick={handleLike}
+                    title={isLiked ? "Unlike Content" : "Like Content"} // Tooltip for clarity
                 >
-                  <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
+                  <HeartIcon className={`icon ${isLiked ? "liked" : ""}`}/>
                   <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
                 </button>
 
                 {/* Bookmark Button */}
                 <button
-                  className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
-                  onClick={() => setIsBookmarked(!isBookmarked)}
-                  title={isBookmarked ? "Unookmark Content" : "Bookmark Content"} // Tooltip for clarity
+                    className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
+                    onClick={() => setIsBookmarked(!isBookmarked)}
+                    title={isBookmarked ? "Unookmark Content" : "Bookmark Content"} // Tooltip for clarity
                 >
-                  <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
+                  <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`}/>
                 </button>
 
+                {/* Edit Button */}
+                <button
+                    className={"icon-button"}
+                    onClick={editContent}
+                >
+                  <PencilIcon className={"icon edit"}/>
+                </button>
                 {/* Delete Button */}
                 <button
-                  className={`icon-button`}
-                  onClick={handleDelete}
+                    className={`icon-button`}
+                    onClick={handleDelete}
                 >
-                  <TrashIcon className={`icon`} />
+                  <TrashIcon className={`icon delete`}/>
                 </button>
+
               </div>
 
 
