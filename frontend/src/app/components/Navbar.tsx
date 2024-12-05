@@ -8,6 +8,7 @@ import { User } from "../profile/models/User";
 import Image from "next/image";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
+import Cookies from "js-cookie";
 
 function Navbar() {
   // ---------------------------------------
@@ -103,7 +104,11 @@ function Navbar() {
           <>
             <button
               className='navbar-button'
-              onClick={() => router.push("/content/create")}
+              onClick={() => {
+                router.push("/content/create")
+                localStorage.removeItem("title");
+                Cookies.remove("content");
+              }}
             >
               Create Content
             </button>

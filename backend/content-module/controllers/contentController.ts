@@ -1,4 +1,3 @@
-// src/modules/user/controllers/userController.ts
 import { Request, Response } from "express";
 import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
@@ -142,8 +141,6 @@ export class ContentController {
           // console.log("file_name: ", file_name)
           const file = files.thumbnail[0];
           // console.log()
-          const updateData = JSON.parse(fields.data)
-          await ContentService.editContent(contentId, updateData);
           let fileName;
           if (file_name){
             fileName = file_name;
@@ -161,6 +158,10 @@ export class ContentController {
                 fileName,
                 fileType
             );
+            // console.log("url response: ", response)
+            const updateData = JSON.parse(fields.data)
+            updateData.thumbnail = response.url
+            await ContentService.editContent(contentId, updateData);
             res.status(201).json(response);
           } catch (error) {
             console.log(error);

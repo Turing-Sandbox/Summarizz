@@ -125,15 +125,8 @@ export default function EditContent() {
     }
   };
 
-  function handleSubmit() {
-
-    // alert(JSON.stringify(page))
-    if (page?.thumbnail){
-      const file_path = decodeURIComponent(page.thumbnail.split('/o/')[1].split('?')[0]);
-      // alert(file_path)
-    }
+  async function handleSubmit() {
     console.log(page)
-
 
     // 1 - Reset Error Message
     setError("");
@@ -144,106 +137,38 @@ export default function EditContent() {
       return;
     }
 
+    // if thumbnail is provided: PUT title, content, time, and thumbnail to update the content and image
     if (thumbnail) {
-      // 3 - Post Thumbnail to server
-      console.log(content)
-      console.log(title)
-      console.log(thumbnail)
-      console.log(thumbnail.type)
-
-      // alert("thumbnail")
 
       const formData = new FormData();
       formData.append("thumbnail", thumbnail);
-
+      // save image to FormData
       if (page?.thumbnail){
         const file_path = decodeURIComponent(page.thumbnail.split('/o/')[1].split('?')[0]);
         const file_name = file_path.split("/")[1]
         console.log("FormData Filename: ", file_name)
         formData.append("file_name", file_name)
       }
-      console.log("Thumbnail formdata: ", formData)
+      // append title, content, and date updated to FormData
       const editData = {title: title, content:content, dateUpdated: new Date()}
       formData.append("data", JSON.stringify(editData))
+
       try{
         const user_id = auth.getUserUID();
         console.log(formData)
-        axios.put(`${apiURL}/content/editThumbnail/${contentId}/${user_id}`, formData)
+        await axios.put(`${apiURL}/content/editThumbnail/${contentId}/${user_id}`, formData)
+        localStorage.removeItem("title");
+        Cookies.remove("content");
+        router.replace(`../../content/${contentId}?${Date.now()}`)
       } catch (error){
         throw new Error(error)
       }
-      redirect(`../../content/${contentId}`)
 
-      // const form = new IncomingForm
-      // form.parse(req, async (err, fields, files) => {
-      //   if (err) {
-      //     console.error("Error parsing form: ", err);
-      //     return res.status(500).json({ error: "Failed to upload thumbnail." });
-      //   }
-
-        // const file = files.thumbnail[0];
-        // const fileName = file.newFilename;
-        // const fileType = file.mimetype;
-
-        // fetch(`${apiURL}/content/uploadThumbnail`, {
-      //   method: "POST",
-      //   body: formData,
-      // })
-      //   .then(async (response) => {
-      //     const res = await response.json();
-      //     console.log("Thumbnail response: ", res)
-      //
-      //     const thumbnailUrl = res.url;
-      //
-      //     // 4 - Create content with thumbnail URL
-      //     const newContent = {
-      //       creatorUID: auth.getUserUID(),
-      //       title,
-      //       content,
-      //       thumbnailUrl,
-      //     };
-
-        //   // 5 - Post content to server
-        //   fetch(`${apiURL}/content`, {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify(newContent),
-        //   })
-        //     .then(async (response) => {
-        //       // const res = await response.json();
-        //
-        //       // 6 - Redirect to home page
-        //       if (response.status === 200 || response.status === 201) {
-        //         Cookies.remove("content");
-        //         localStorage.removeItem("title");
-        //         router.push("/");
-        //
-        //         // 7 - Error Handling
-        //       } else {
-        //         setError("Failed to create content.");
-        //       }
-        //     })
-        //     .catch((error) => {
-        //       console.log(error);
-        //       setError("Failed to create content.");
-        //     });
-        // })
-        // .catch((error) => {
-        //   console.log(error);
-        //   setError("Failed to upload thumbnail.");
-        // });
-    } else {
-
-      // alert("thumbnail not present")
-
-      console.log(content)
-      console.log(title)
+    } else {// if thumbnail is not provided: PUT title, content, time, to update only the content
 
       try{
         const user_id = auth.getUserUID();
-        axios.put(`${apiURL}/content/${contentId}/${user_id}`,
+        await axios.put(`${apiURL}/content/${contentId}/${user_id}`,
             {data:
                   {
                     title:title,
@@ -252,7 +177,9 @@ export default function EditContent() {
                   },
             }
         )
-        router.push(`../../content/${contentId}`)
+        localStorage.removeItem("title");
+        Cookies.remove("content");
+        router.replace(`../../content/${contentId}?${Date.now()}`)
       } catch (error){
         throw new Error(error)
       }

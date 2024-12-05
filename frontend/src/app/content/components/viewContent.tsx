@@ -64,12 +64,6 @@ export default function ViewContent({ id }: ViewContentProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content, userUID]);
 
-  useEffect(() => {
-    console.log("forced get request: ")
-      getContent();
-  }, []);
-
-
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
