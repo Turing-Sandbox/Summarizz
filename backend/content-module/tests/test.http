@@ -1,5 +1,13 @@
 ###
-GET http://localhost:3000/content/DeT1DWq3e5a8CSfoM8fJ
+GET http://localhost:3000/content/MQhI7AISGMU8kRGZvqD5
+###
+PUT localhost:3000/content/editThumbnail/MQhI7AISGMU8kRGZvqD5/LEwlA1KMRDeKzeknqM0srxOAmc42
+Content-Type: application/json
+
+{
+  "data": {}
+}
+
 ###
 
 ###
@@ -35,8 +43,7 @@ GET http://localhost:3000/comment/comments/1
 DELETE http://localhost:3000/comment/post/1
 
 ###
-
-PUT localhost:3000/api/comments/1/-OC1Q7ghFQh0Fd43cyUl
+PUT localhost:3000/content/editThumbnail/MQhI7AISGMU8kRGZvqD5
 Content-Type: application/json
 
 {

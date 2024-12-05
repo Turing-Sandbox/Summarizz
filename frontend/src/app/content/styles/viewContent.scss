@@ -80,6 +80,7 @@
   width: 16px; /* Match h-4 in Tailwind */
   height: 16px; /* Match w-4 in Tailwind */
   color: #7D7F7C; /* Default gray color */
+  transition: all ease-out 0.3s;
 }
 
 .icon:hover{
@@ -94,9 +95,17 @@
   color: black; /* Black when bookmarked */
 }
 
-.icon.deleting{
-  color: #575555; // onclick, but held while the user confirms they want to delete or not.
-  // classname should get removed if they cancel
+
+.icon.delete:hover{
+  color: #d66363;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.icon.edit:hover{
+  color: #d69d63;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .icon.counter {

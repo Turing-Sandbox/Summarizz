@@ -25,10 +25,14 @@ export class StorageService {
       const fileBuffer = await fs.readFile(file.filepath);
 
       const snapshot = await uploadBytes(storageRef, fileBuffer, metadata);
-      console.log("path: ", filePath)
-      console.log("fileName",fileName)
-      console.log("storageRef: ", storageRef)
-      console.log("Uploaded file successfully!");
+      console.log("====================================")
+      console.log("   file: ", file)
+      console.log("   fileBuffer: ", fileBuffer)
+      console.log("   path: ", filePath)
+      console.log("   fileName",fileName)
+      console.log("   storageRef: ", storageRef)
+      console.log("   Uploaded file successfully!");
+      console.log("====================================")
 
       // Get the download URL
       const downloadURL = await getDownloadURL(snapshot.ref);

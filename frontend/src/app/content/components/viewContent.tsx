@@ -11,6 +11,9 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Content } from "../models/Content";
 import "../styles/viewContent.scss";
+import { useAuth } from "@/app/hooks/AuthProvider";
+import { HeartIcon, BookmarkIcon, UserPlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { redirect } from "next/navigation";
 
 interface ViewContentProps {
   id: string;
@@ -37,6 +40,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   // ---------------------------------------
   const hasFetchedData = useRef(false);
   useEffect(() => {
+    console.log("unforced get request: ")
     if (!hasFetchedData.current) {
       fetchLoggedInUser();
       getContent();
@@ -139,8 +143,7 @@ export default function ViewContent({ id }: ViewContentProps) {
     } else {
       throw Error("You do not have the permission to delete this page.")
     }
-    window.location.href = `/profile/${userUID}`;
-    // await router.push()
+    redirect(`/profile/${userUID}`)
   }
 
   const handleLike = async () => {
@@ -292,6 +295,10 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   };
 
+  const editContent = () => {
+    redirect(`edit/${content?.id}`)
+  }
+  
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
@@ -362,7 +369,7 @@ export default function ViewContent({ id }: ViewContentProps) {
                   onClick={handleLike}
                   title={isLiked ? "Unlike Content" : "Like Content"}
                 >
-                  <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
+                  <HeartIcon className={`icon ${isLiked ? "liked" : ""}`}/>
                   <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
                 </button>
 
@@ -372,7 +379,15 @@ export default function ViewContent({ id }: ViewContentProps) {
                   onClick={handleBookmark}
                   title={isBookmarked ? "Unookmark Content" : "Bookmark Content"}
                 >
-                  <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
+                  <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`}/>
+                </button>
+
+                {/* Edit Button */}
+                <button
+                    className={"icon-button"}
+                    onClick={editContent}
+                >
+                  <PencilIcon className={"icon edit"}/>
                 </button>
 
                 {/* Share Button */}
@@ -390,8 +405,9 @@ export default function ViewContent({ id }: ViewContentProps) {
                   onClick={handleDelete}
                   title="Delete Content"
                 >
-                  <TrashIcon className={`icon`} />
+                  <TrashIcon className={`icon delete`}/>
                 </button>
+
               </div>
 
 

@@ -1,8 +1,8 @@
-// src/modules/user/controllers/userController.ts
 import { Request, Response } from "express";
 import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
+import axios from "axios";
 
 export class ContentController {
   static async createContent(req: Request, res: Response) {
@@ -27,7 +27,8 @@ export class ContentController {
 
   static async uploadThumbnail(req: Request, res: Response) {
     console.log("Uploading Thumbnail...");
-
+    console.log(req.body)
+    console.log(req.params)
     const form = new IncomingForm();
     form.parse(req, async (err, fields, files) => {
       if (err) {
@@ -68,8 +69,115 @@ export class ContentController {
     } catch (error) {
       console.log(error);
       res
-        .status(500)
-        .json({ error: error.message || "Failed to fetch content" });
+          .status(500)
+          .json({ error: error.message || "Failed to fetch content" });
+    }
+  }
+
+  static async editContent(req: Request, res: Response) {
+    console.log("Fetching Content...");
+    const {contentId, userId} = req.params
+    const {data} = req.body
+
+    console.log("edit body: ", req.body)
+    console.log(data)
+
+    try {
+
+      // const confirmation = await axios.get(`${apiURL}/content/${contentId}`)
+      const confirmation = await ContentService.getContent(contentId)
+      const owner_id = confirmation.creatorUID
+      console.log(owner_id)
+      console.log(userId)
+      console.log(confirmation)
+      if (userId == owner_id){ //check whether they are allowed to edit the content
+        const response = await ContentService.editContent(contentId, data);
+        res.status(200).json(response);
+      } else{
+        throw Error("You do not have this permission.")
+      }
+    } catch (error) {
+      console.log(error);
+      res
+          .status(500)
+          .json({ error: error.message || "Failed to edit content" });
+    }
+  }
+
+  static async editContentAndThumbnail(req: Request, res: Response) {
+    console.log("Editing Content and Thumbnail...");
+    const {contentId, userId} = req.params
+    console.log("Content ID: ", contentId)
+    console.log("User ID: ", userId)
+
+    try {
+      const confirmation = await ContentService.getContent(contentId)
+      const owner_id = confirmation.creatorUID
+      console.log(owner_id)
+      console.log(userId)
+      console.log(confirmation)
+      if (userId == owner_id){ //check whether they are allowed to edit the content
+        console.log("User is authorized to edit")
+        const file_path = decodeURIComponent(confirmation.thumbnail.split('/o/')[1].split('?')[0]);
+        // const ref = file_path.split("/")[0]
+        const file_name = file_path.split("/")[1]
+        // console.log("data: ", data)
+        // console.log("file: ", file)
+        // console.log("file_name: ", file_name)
+        // console.log("ref: ", ref)
+        // console.log("file_type: ", file_type)
+        // const thumbnailResponse = StorageService.uploadFile(file, ref, file_name, file_type)
+        // console.log("Request: ", req)
+        console.log("Form is being created:...")
+        const form = new IncomingForm();
+        form.parse(req, async (err, fields, files) => {
+          if (err) {
+            console.error("Error parsing form: ", err);
+            return res.status(500).json({ error: "Failed to upload thumbnail." });
+          }
+          // console.log("Logging form stuff...")
+          // console.log("backend fields: ", fields)
+          // console.log("backend files: ",files)
+          // console.log("file_name: ", file_name)
+          const file = files.thumbnail[0];
+          // console.log()
+          let fileName;
+          if (file_name){
+            fileName = file_name;
+          } else {
+            fileName = file.newFilename;
+          }
+          const fileType = file.mimetype;
+
+          // Upload thumbnail to storage
+          try {
+            // Upload thumbnail
+            const response = await StorageService.uploadFile(
+                file,
+                "thumbnails",
+                fileName,
+                fileType
+            );
+            // console.log("url response: ", response)
+            const updateData = JSON.parse(fields.data)
+            updateData.thumbnail = response.url
+            await ContentService.editContent(contentId, updateData);
+            res.status(201).json(response);
+          } catch (error) {
+            console.log(error);
+            res
+                .status(500)
+                .json({ error: error.message || "Failed to upload thumbnail" });
+          }
+        });
+        } else {
+        throw new Error("You do not have permission to edit this post!")
+      }
+    } catch (error) {
+      console.log(error);
+      res
+          .status(500)
+          .json({ error: error.message || "Failed to edit content" });
     }
   }
 
@@ -77,17 +185,24 @@ export class ContentController {
     console.log("Deleting Content...");
     const { userId, contentId} = req.params;
     try {
-      // delete actual content, thumbnail, and content from user.content list
-      const response = await ContentService.deleteContent(userId, contentId);
-      console.log("DELETING CONTENT:::::")
-      console.log(response)
-      // console.log(userId, contentId)
-      res.status(200).json(response);
+
+      const confirmation = await axios.get(`content/${contentId}`)
+      const owner_id = confirmation.data.creatorUID
+      if (userId == owner_id) { //check whether they are allowed to delete the content
+        // delete actual content, thumbnail, and content from user.content list
+        const response = await ContentService.deleteContent(userId, contentId);
+        console.log("DELETING CONTENT:::::")
+        console.log(response)
+        // console.log(userId, contentId)
+        res.status(200).json(response);
+      } else{
+        throw new Error("You don't have the permission to delete this!!")
+      }
     } catch (error) {
       console.log(error);
       res
           .status(500)
-          .json({ error: error.message || "Failed to fetch content" });
+          .json({ error: error.message || "Failed to delete content" });
     }
   }
 
