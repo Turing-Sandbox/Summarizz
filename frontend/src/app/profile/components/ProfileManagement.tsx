@@ -2,7 +2,8 @@ import Navbar from "@/app/components/Navbar";
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
 import { useState } from "react";
-import "../styles/profile.scss";
+//import "../styles/profile.scss";
+import "../styles/ProfileManagement.scss"
 import { useAuth } from "@/app/hooks/AuthProvider";
 
 export default function ProfileManagement() {
@@ -54,7 +55,8 @@ export default function ProfileManagement() {
       <Navbar />
       <div className='main-content'>
         <div className='profile-management-section'>
-          <h2>Profile Management</h2>
+          <h1>Profile Management</h1>
+          <h2>Change Password</h2>
           <form onSubmit={handleChangePassword} className='change-password-form'>
             <div className='form-group'>
               <label htmlFor='currentPassword'>Current Password</label>
@@ -76,9 +78,6 @@ export default function ProfileManagement() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
               />
-            </div>
-
-            <div className='form-group'>
               <label htmlFor='confirmPassword'>Confirm New Password</label>
               <input
                 type='password'
