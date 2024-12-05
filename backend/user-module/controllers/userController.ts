@@ -12,6 +12,7 @@ import {
   followUser,
   unfollowUser,
   requestFollow,
+  changePassword,
 } from "../services/userService";
 
 // Register User
@@ -159,5 +160,19 @@ export async function requestFollowController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to send follow request" });
+  }
+}
+
+// Change Password
+export async function changePasswordController(req: Request, res: Response) {
+  const { userId } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    await changePassword(userId, currentPassword, newPassword);
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message || "Failed to update password" });
   }
 }
