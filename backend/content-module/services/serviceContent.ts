@@ -6,7 +6,9 @@ import {
   addLikedContentToUser,
   removeLikedContentFromUser,
   addBookmarkedContentToUser,
-  removeBookmarkedContentFromUser
+  removeBookmarkedContentFromUser,
+  addSharedContentToUser,
+  removeSharedContentFromUser,
 } from "../../user-module/services/userService";
 import { StorageService } from "../../storage-module/services/serviceStorage"
 import { increment, update } from "firebase/database";
@@ -289,6 +291,56 @@ export class ContentService {
     } catch (error) {
       console.error("Error unbookmarking content:", error);
       throw new Error(error.message || "Failed to unbookmark content");
+    }
+  }
+
+  // Share content
+  static async shareContent(contentID: string, userId: string) {
+    try {
+      // Get the content document from Firestore
+      const contentRef = doc(db, "contents", contentID);
+      const contentDoc = await getDoc(contentRef);
+
+      if (!contentDoc.exists()) {
+        throw new Error("Content not found");
+      }
+
+      // Add this content to the user's shared content list
+      await addSharedContentToUser(userId, contentID);
+
+      // Fetch the updated document and return it
+      const updatedContentDoc = await getDoc(contentRef);
+      const updatedContent = updatedContentDoc.data();
+
+      return { content: updatedContent }; // Return updated content
+    } catch (error) {
+      console.error("Error sharing content:", error);
+      throw new Error(error.message || "Failed to share content");
+    }
+  }
+
+  // Unshare content
+  static async unshareContent(contentID: string, userId: string) {
+    try {
+      // Get the content document from Firestore
+      const contentRef = doc(db, "contents", contentID);
+      const contentDoc = await getDoc(contentRef);
+
+      if (!contentDoc.exists()) {
+        throw new Error("Content not found");
+      }
+
+      // Remove this content from the user's shared content list
+      await removeSharedContentFromUser(userId, contentID);
+
+      // Fetch the updated document and return it
+      const updatedContentDoc = await getDoc(contentRef);
+      const updatedContent = updatedContentDoc.data();
+
+      return { content: updatedContent }; // Return updated content
+    } catch (error) {
+      console.error("Error unsharing content:", error);
+      throw new Error(error.message || "Failed to unshare content");
     }
   }
 }

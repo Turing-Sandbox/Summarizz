@@ -1,14 +1,16 @@
 "use client";
 
 import Navbar from "@/app/components/Navbar";
-import { useEffect, useRef, useState } from "react";
-import { apiURL } from "@/app/scripts/api";
-import { Content } from "../models/Content";
-import axios from "axios";
+import { useAuth } from "@/app/hooks/AuthProvider";
 import { User } from "@/app/profile/models/User";
-import Image from "next/image";
-import "../styles/viewContent.scss";
+import { apiURL } from "@/app/scripts/api";
+import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 import DOMPurify from "dompurify";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { Content } from "../models/Content";
+import "../styles/viewContent.scss";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { HeartIcon, BookmarkIcon, UserPlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { redirect } from "next/navigation";
@@ -28,6 +30,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [likes, setLikes] = useState(0); // Track likes count
   const [isBookmarked, setIsBookmarked] = useState(false); // Track bookmarked state
   const [isFollowing, setIsFollowing] = useState(false); // Track following state
+  const [user, setUser] = useState<User | null>(null); // Track logged in user
 
   // const router = useRouter();
   const { userUID } = useAuth(); // Get logged in user's UID
@@ -39,6 +42,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   useEffect(() => {
     console.log("unforced get request: ")
     if (!hasFetchedData.current) {
+      fetchLoggedInUser();
       getContent();
       //   getUserInfo();
       hasFetchedData.current = true;
@@ -100,14 +104,24 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   }
 
-  const handleDelete = async  () => {
-    if (localStorage.getItem('userUID') === content?.creatorUID){
+  function fetchLoggedInUser() {
+    if (userUID) {
+      axios.get(`${apiURL}/user/${userUID}`).then((res) => {
+        setUser(res.data);
+      }).catch((error) => {
+        console.error("Error fetching logged in user:", error);
+      });
+    }
+  }
+
+  const handleDelete = async () => {
+    if (localStorage.getItem('userUID') === content?.creatorUID) {
       try {
         // alert(true)
         console.log("deleting...")
         const user_id = content?.creatorUID;
         const content_id = content?.id;
-        if (content.thumbnail){
+        if (content.thumbnail) {
           // console.log("deleting but with thumbnail")
           const file_path = decodeURIComponent(content?.thumbnail.split('/o/')[1].split('?')[0]);
           await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`).then((res) => {
@@ -122,7 +136,7 @@ export default function ViewContent({ id }: ViewContentProps) {
           })
         }
         // useNavigate(`/profile/${content.creatorUID}`)
-      } catch (error){
+      } catch (error) {
         console.error(error)
         alert(error)
       }
@@ -138,31 +152,31 @@ export default function ViewContent({ id }: ViewContentProps) {
         console.error("No user ID available");
         return;
       }
-  
+
       // Determine whether to like or unlike the content
       const action = isLiked ? "unlike" : "like";
       const url = `${apiURL}/content/${id}/${action}/${userUID}`;
-  
+
       // Send the appropriate like/unlike request
       const response = await axios.post(url, {}, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       // Extract updated content details from the response
       const updatedContent = response.data.content;
       const updatedLikes = typeof updatedContent.likes === 'number' ? updatedContent.likes : 0;
-  
+
       // Update local state based on the like or unlike action
       setLikes(updatedLikes);
       setIsLiked(!isLiked); // Toggle isLiked state
-  
+
       console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} response:`, updatedContent);
-  
+
     } catch (error) {
       console.error("Error liking/unliking content:", error);
-  
+
       // Additional logging for Axios errors
       if ((error as any).response) {
         console.error("Axios Error Response:", {
@@ -180,27 +194,27 @@ export default function ViewContent({ id }: ViewContentProps) {
         console.error("No user ID available");
         return;
       }
-  
+
       // Determine whether to bookmark or unbookmark the content
       const action = isBookmarked ? "unbookmark" : "bookmark";
       const url = `${apiURL}/content/${userUID}/${action}/${id}`; // mine
-  
+
       // Send the appropriate bookmark/unbookmark request
       const response = await axios.post(url, {}, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       // Extract updated content details from the response
       const updatedContent = response.data.content;
       setIsBookmarked(!isBookmarked); // Toggle isBookmarked state
-  
+
       console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} response:`, updatedContent);
-  
+
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
-  
+
       // Additional logging for Axios errors
       if ((error as any).response) {
         console.error("Axios Error Response:", {
@@ -211,33 +225,65 @@ export default function ViewContent({ id }: ViewContentProps) {
       }
     }
   }
-  
+
+  const handleShare = async () => {
+    if (!user) {
+      console.error("User information is not available");
+      alert("Please log in to share this article.")
+      return;
+    }
+
+    const shareMessage = `${user.username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`
+
+    const shareOption = window.prompt(
+      "How do you want to share?\nType '1' to Copy to Clipboard\nType '2' to Share via Email"
+    );
+
+    if (shareOption === "1") {
+      // Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(shareMessage);
+        alert("Message copied to clipboard!");
+      } catch (err) {
+        console.error("Failed to copy: ", err);
+        alert("Failed to copy the message. Please try again.");
+      }
+    } else if (shareOption === "2") {
+      // Open email client
+      window.location.href = `mailto:?subject=Check out this article&body=${encodeURIComponent(
+        shareMessage
+      )}`;
+    } else {
+      alert("Invalid option. Please choose '1' or '2'.");
+    }
+  };
+
   const handleFollow = async () => {
     try {
       if (!userUID || !content?.creatorUID) {
         console.error("User ID or Creator ID not available");
         return;
       }
-  
+
       // Determine whether to follow or unfollow the creator
       const action = isFollowing ? "unfollow" : "follow";
       const url = `${apiURL}/user/${userUID}/${action}/${content.creatorUID}`;
-  
+
       // Send the follow/unfollow request
       const response = await axios.post(url, {}, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       // Update the local state
       setIsFollowing(!isFollowing); // Toggle follow state
-  
+
       console.log(`${action.charAt(0).toUpperCase() + action.slice(1)} response:`, response.data);
-  
+
     } catch (error) {
       console.error("Error following/unfollowing creator:", error);
-  
+
       // Additional logging for Axios errors
       if ((error as any).response) {
         console.error("Axios Error Response:", {
@@ -319,9 +365,9 @@ export default function ViewContent({ id }: ViewContentProps) {
               <div className="icon-container">
                 {/* Like Button */}
                 <button
-                    className={`icon-button ${isLiked ? "liked" : ""}`}
-                    onClick={handleLike}
-                    title={isLiked ? "Unlike Content" : "Like Content"} // Tooltip for clarity
+                  className={`icon-button ${isLiked ? "liked" : ""}`}
+                  onClick={handleLike}
+                  title={isLiked ? "Unlike Content" : "Like Content"}
                 >
                   <HeartIcon className={`icon ${isLiked ? "liked" : ""}`}/>
                   <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
@@ -329,9 +375,9 @@ export default function ViewContent({ id }: ViewContentProps) {
 
                 {/* Bookmark Button */}
                 <button
-                    className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
-                    onClick={() => setIsBookmarked(!isBookmarked)}
-                    title={isBookmarked ? "Unookmark Content" : "Bookmark Content"} // Tooltip for clarity
+                  className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
+                  onClick={handleBookmark}
+                  title={isBookmarked ? "Unookmark Content" : "Bookmark Content"}
                 >
                   <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`}/>
                 </button>
@@ -343,10 +389,21 @@ export default function ViewContent({ id }: ViewContentProps) {
                 >
                   <PencilIcon className={"icon edit"}/>
                 </button>
+
+                {/* Share Button */}
+                <button
+                  className="icon-button"
+                  onClick={handleShare}
+                  title="Share Content"
+                >
+                  <ShareIcon className="icon" />
+                </button>
+
                 {/* Delete Button */}
                 <button
-                    className={`icon-button`}
-                    onClick={handleDelete}
+                  className={`icon-button`}
+                  onClick={handleDelete}
+                  title="Delete Content"
                 >
                   <TrashIcon className={`icon delete`}/>
                 </button>

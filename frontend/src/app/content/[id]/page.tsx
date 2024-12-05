@@ -14,9 +14,8 @@ export default function Page() {
       <Background />
       <AuthProvider>
         <ViewContent id={id as string} />
-
         <div className='footer'>
-          <Footer />
+            <Footer/>
         </div>
       </AuthProvider>
     </>

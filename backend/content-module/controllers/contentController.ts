@@ -285,4 +285,34 @@ export class ContentController {
       });
     }
   }
+
+  // Share content
+  static async shareContent(req: Request, res: Response) {
+    const { contentId, userId } = req.params;
+
+    try {
+      const response = await ContentService.shareContent(contentId, userId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error("Error sharing content:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Failed to share content",
+      });
+    }
+  }
+
+  // Unshare content
+  static async unshareContent(req: Request, res: Response) {
+    const { contentId, userId } = req.params;
+
+    try {
+      const response = await ContentService.unshareContent(contentId, userId);
+      res.status(200).json(response);
+    } catch (error) {
+      console.error("Error unsharing content:", error);
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Failed to unshare content",
+      });
+    }
+  }
 }
