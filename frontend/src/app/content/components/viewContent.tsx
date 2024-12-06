@@ -4,14 +4,13 @@ import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { User } from "@/app/profile/models/User";
 import { apiURL } from "@/app/scripts/api";
-import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import DOMPurify from "dompurify";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Content } from "../models/Content";
 import "../styles/viewContent.scss";
-import { PencilIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 
 interface ViewContentProps {
@@ -19,9 +18,8 @@ interface ViewContentProps {
 }
 
 export default function ViewContent({ id }: ViewContentProps) {
-  // If viewing content requires auth, uncomment the lines below
-  // const { user, loading } = useAuth();
-  const { userUID } = useAuth();
+  const { userUID, user: authUser } = useAuth();
+
   const [content, setContent] = useState<Content | null>(null);
   const [creator, setCreator] = useState<User | null>(null);
   const [formatedContent, setFormatedContent] = useState<string | null>(null);
@@ -30,6 +28,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState("");
 
   const hasFetchedData = useRef(false);
   const router = useRouter();
@@ -116,7 +115,6 @@ export default function ViewContent({ id }: ViewContentProps) {
       alert("You do not have permission to delete this page.");
     }
 
-    // Replace redirect with router.push
     router.push(`/profile/${userUID}`);
   };
 
@@ -155,7 +153,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       const action = isBookmarked ? "unbookmark" : "bookmark";
       const url = `${apiURL}/content/${userUID}/${action}/${id}`;
 
-      const response = await axios.post(url, {}, { headers: { 'Content-Type': 'application/json' }});
+      await axios.post(url, {}, { headers: { 'Content-Type': 'application/json' }});
       setIsBookmarked(!isBookmarked);
 
     } catch (error) {
@@ -164,13 +162,17 @@ export default function ViewContent({ id }: ViewContentProps) {
   };
 
   const handleShare = async () => {
-    if (!user) {
-      console.error("User information is not available");
+    // Check if the user is logged in via AuthProvider
+    if (!authUser) {
+      console.error("User is not authenticated");
       alert("Please log in to share this article.");
       return;
     }
 
-    const shareMessage = `${user.username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
+    // Use Firestore user data if available, otherwise fallback
+    const username = user?.username || authUser.displayName || authUser.email || "A Summarizz User";
+
+    const shareMessage = `${username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
     const shareOption = window.prompt(
       "How do you want to share?\nType '1' to Copy to Clipboard\nType '2' to Share via Email"
     );
