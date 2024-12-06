@@ -15,6 +15,8 @@ export default function ProfileManagement() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newUsername, setNewUsername] = useState("");
 
   const { userUID } = useAuth(); // Get logged in user's UID
 
@@ -46,6 +48,31 @@ export default function ProfileManagement() {
       setError("Failed to update password. Please check your current password and try again.");
     }
   };
+
+// Change Email or Username Handler
+const handleUpdateEmailUsername = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setError("");
+  setSuccess("");
+
+  if (!newEmail && !newUsername) {
+    setError("Please provide a new email or username.");
+    return;
+  }
+
+  try {
+    await axios.post(`${apiURL}/user/${userUID}/change-email-username`, {
+      currentPassword,
+      newEmail,
+      newUsername,
+    });
+    setSuccess("Information updated successfully.");
+  } catch (error: any) {
+    console.error("Error updating email/username:", error);
+    setError(error.response?.data?.error || "Failed to update information.");
+  }
+};
+
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -93,6 +120,46 @@ export default function ProfileManagement() {
 
             <button type='submit' className='change-password-button'>
               Change Password
+            </button>
+          </form>
+          <h2>Change Email or Username</h2>
+          <form onSubmit={handleUpdateEmailUsername} className="update-info-form">
+            <div className="form-group">
+              <label htmlFor="currentPassword">Current Password</label>
+              <input
+                type="password"
+                id="currentPassword"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="newEmail">New Email</label>
+              <input
+                type="email"
+                id="newEmail"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="newUsername">New Username</label>
+              <input
+                type="text"
+                id="newUsername"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
+
+            <button type="submit" className="update-info-button">
+              Update Information
             </button>
           </form>
         </div>

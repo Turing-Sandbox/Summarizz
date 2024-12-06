@@ -13,6 +13,7 @@ import {
   unfollowUser,
   requestFollow,
   changePassword,
+  changeEmailUsername,
 } from "../services/userService";
 
 // Register User
@@ -174,5 +175,19 @@ export async function changePasswordController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message || "Failed to update password" });
+  }
+}
+
+// Change Email/Username Controller
+export async function changeEmailUsernameController(req: Request, res: Response) {
+  const { userId } = req.params;
+  const { currentPassword, newEmail, newUsername } = req.body;
+
+  try {
+    await changeEmailUsername(userId, currentPassword, newEmail, newUsername);
+    res.status(200).json({ message: "Email/username updated successfully" });
+  } catch (error: any) {
+    console.error("Error updating email/username:", error);
+    res.status(500).json({ error: error.message || "Failed to update email/username" });
   }
 }

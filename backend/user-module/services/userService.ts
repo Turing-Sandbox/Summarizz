@@ -1,14 +1,16 @@
 import { db } from "../../shared/firebaseConfig";
-import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where} from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updatePassword,
+  updateEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import jwt from "jsonwebtoken";
-import { adminAuth } from "../../shared/firebaseAdminConfig"; // Ensure you have Firebase Admin configured
+import { adminAuth } from "../../shared/firebaseAdminConfig";
 
 export async function register(
   firstName: string,
@@ -396,5 +398,45 @@ export async function changePassword(
       errorMessage = errorMessage.replace("Firebase: ", "");
     }
     throw new Error(errorMessage);
+  }
+}
+
+export async function changeEmailUsername(
+  userId: string,
+  currentPassword: string,
+  newEmail?: string,
+  newUsername?: string
+) {
+  const auth = getAuth();
+  const userRef = doc(db, "users", userId);
+  const userSnapshot = await getDoc(userRef);
+
+  if (!userSnapshot.exists()) {
+    throw new Error("User not found");
+  }
+
+  const userData = userSnapshot.data();
+  const existingEmail = userData.email;
+
+  // Re-authenticate the user
+  const userCredential = await signInWithEmailAndPassword(auth, existingEmail, currentPassword);
+  const firebaseUser = userCredential.user;
+
+  const updates: Record<string, any> = {};
+
+  // If newEmail is provided and different from current email, update it in Firebase Auth
+  if (newEmail && newEmail !== existingEmail) {
+    await updateEmail(firebaseUser, newEmail);
+    updates.email = newEmail;
+  }
+
+  // If newUsername is provided and different from current username, update it in Firestore
+  if (newUsername && newUsername !== userData.username) {
+    updates.username = newUsername;
+  }
+
+  // Update Firestore if there are changes
+  if (Object.keys(updates).length > 0) {
+    await updateDoc(userRef, updates);
   }
 }
