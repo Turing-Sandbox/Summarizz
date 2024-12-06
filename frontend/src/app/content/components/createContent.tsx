@@ -17,22 +17,16 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Toolbar from "./toolbar";
-
 import "../styles/createContent.scss";
 
 export default function CreateContent() {
-  // ---------------------------------------
-  // -------------- Variables --------------
-  // ---------------------------------------
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [isSummarizing, setIsSummarizing] = useState(false);
-
+  const { user, loading } = useAuth(); 
   const [error, setError] = useState("");
-
-  const auth = useAuth();
   const router = useRouter();
 
   const editor = useEditor({
@@ -54,9 +48,6 @@ export default function CreateContent() {
     },
   });
 
-  // ---------------------------------------
-  // ----------- Event Handlers ------------
-  // ---------------------------------------
   useEffect(() => {
     const savedTitle = localStorage.getItem("title");
     const savedContent = Cookies.get("content");
@@ -65,17 +56,29 @@ export default function CreateContent() {
       setTitle(savedTitle);
     }
 
-    if (savedContent) {
+    if (savedContent && editor) {
       setContent(savedContent);
-      if (editor) {
-        editor.commands.setContent(savedContent);
-      }
+      editor.commands.setContent(savedContent);
     }
   }, [editor]);
 
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
+  useEffect(() => {
+    // Only redirect after we know loading is false
+    if (!loading && !user) {
+      router.push("/authentication/login");
+    }
+  }, [user, loading, router]);
+
+  // If still loading auth state, show a loading message
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  // If user is null after loading, the redirect already happened in useEffect
+  if (!user) {
+    return null; 
+  }
+
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file && file.type.startsWith("image/")) {
@@ -101,13 +104,10 @@ export default function CreateContent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          input: content,
-        })
-      })
+        body: JSON.stringify({ input: content }),
+      });
 
       const data = await response.json();
-
       if (!response.ok) {
         setError(data.error || "Failed to summarize provided content.");
       }
@@ -132,100 +132,74 @@ export default function CreateContent() {
     } catch (error) {
       console.error(error);
       setError(`Failed to summarize provided content: ${error}`);
-
     }
 
     setIsSummarizing(false);
-  }
+  };
 
   function handleSubmit() {
-    // 1 - Reset Error Message
     setError("");
 
-    // 2 - Validate user input
     if (title === "" || content === "") {
       setError("Title and content are required.");
       return;
     }
 
+    if (!user) {
+      setError("No user is signed in.");
+      return;
+    }
+
+    const newContent: Record<string, any> = {
+      creatorUID: user.uid,
+      title,
+      content,
+    };
+
     if (thumbnail) {
-      // 3 - Post Thumbnail to server
       const formData = new FormData();
       formData.append("thumbnail", thumbnail);
-      console.log("Thumbnail formdata: ", formData)
+
       fetch(`${apiURL}/content/uploadThumbnail`, {
         method: "POST",
         body: formData,
       })
         .then(async (response) => {
           const res = await response.json();
-          console.log("Thumbnail response: ", res)
-
           const thumbnailUrl = res.url;
+          newContent["thumbnailUrl"] = thumbnailUrl;
 
-          // 4 - Create content with thumbnail URL
-          const newContent = {
-            creatorUID: auth.getUserUID(),
-            title,
-            content,
-            thumbnailUrl,
-          };
-
-          // 5 - Post content to server
-          fetch(`${apiURL}/content`, {
+          return fetch(`${apiURL}/content`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newContent),
-          })
-            .then(async (response) => {
-              // const res = await response.json();
-
-              // 6 - Redirect to home page
-              if (response.status === 200 || response.status === 201) {
-                Cookies.remove("content");
-                localStorage.removeItem("title");
-                router.push("/");
-
-                // 7 - Error Handling
-              } else {
-                setError("Failed to create content.");
-              }
-            })
-            .catch((error) => {
-              console.log(error);
-              setError("Failed to create content.");
-            });
+          });
+        })
+        .then(async (response) => {
+          if (response.status === 200 || response.status === 201) {
+            Cookies.remove("content");
+            localStorage.removeItem("title");
+            router.push("/");
+          } else {
+            setError("Failed to create content.");
+          }
         })
         .catch((error) => {
           console.log(error);
-          setError("Failed to upload thumbnail.");
+          setError("Failed to create content.");
         });
     } else {
-      // 3 - Create content without thumbnail URL
-      const newContent = {
-        creatorUID: auth.getUserUID(),
-        title,
-        content,
-      };
-
-      // 4 - Post content to server
       fetch(`${apiURL}/content`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newContent),
       })
         .then((response) => response.json())
         .then(() => {
           Cookies.remove("content");
           localStorage.removeItem("title");
-          // 5 - Redirect to home page
           router.push("/");
         })
-        // 6 - Error Handling
         .catch((error) => {
           console.log(error);
           setError("Failed to create content.");
@@ -233,14 +207,6 @@ export default function CreateContent() {
     }
   }
 
-  // User must be authenticated to create content
-  if (auth.getUserUID() === null || auth.getToken() === null) {
-    router.push("/authentication/login");
-  }
-
-  // --------------------------------------
-  // -------------- Render ----------------
-  // --------------------------------------
   return (
     <>
       <Navbar />
@@ -273,10 +239,7 @@ export default function CreateContent() {
 
           <Toolbar editor={editor} />
 
-          <EditorContent
-            editor={editor}
-            className='content-input text-editor'
-          />
+          <EditorContent editor={editor} className='content-input text-editor' />
           <a
             onClick={() => {
               setContent("");
@@ -287,18 +250,14 @@ export default function CreateContent() {
             Clear
           </a>
 
-          {thumbnail && (
-            <>
-              {thumbnailPreview && (
-                <Image
-                  src={thumbnailPreview}
-                  alt='Thumbnail Preview'
-                  width={200}
-                  height={200}
-                  className='thumbnail-preview'
-                />
-              )}
-            </>
+          {thumbnail && thumbnailPreview && (
+            <Image
+              src={thumbnailPreview}
+              alt='Thumbnail Preview'
+              width={200}
+              height={200}
+              className='thumbnail-preview'
+            />
           )}
           <div>
             <label htmlFor='file-upload' className='content-file-upload'>
@@ -332,10 +291,10 @@ export default function CreateContent() {
           >
             Clear
           </button>
-          <button className='content-button' onClick={() => handleSummarize()}>
+          <button className='content-button' onClick={handleSummarize}>
             Summarize with AI
           </button>
-          <button className='content-button' onClick={() => handleSubmit()}>
+          <button className='content-button' onClick={handleSubmit}>
             Publish
           </button>
         </div>

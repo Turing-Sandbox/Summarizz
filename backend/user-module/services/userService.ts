@@ -6,8 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updatePassword,
-  updateEmail,
-  sendEmailVerification,
+  verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import jwt from "jsonwebtoken";
 import { adminAuth } from "../../shared/firebaseAdminConfig";
@@ -418,24 +417,30 @@ export async function changeEmailUsername(
   const userData = userSnapshot.data();
   const existingEmail = userData.email;
 
-  // Re-authenticate the user
+  // Re-authenticate using the current password
   const userCredential = await signInWithEmailAndPassword(auth, existingEmail, currentPassword);
   const firebaseUser = userCredential.user;
 
   const updates: Record<string, any> = {};
 
-  // If newEmail is provided and different from current email, update it in Firebase Auth
-  if (newEmail && newEmail !== existingEmail) {
-    await updateEmail(firebaseUser, newEmail);
-    updates.email = newEmail;
-  }
-
-  // If newUsername is provided and different from current username, update it in Firestore
+  // If a new username is provided and is different, update Firestore immediately
   if (newUsername && newUsername !== userData.username) {
     updates.username = newUsername;
   }
 
-  // Update Firestore if there are changes
+  // If a new email is provided and different from the current one:
+  if (newEmail && newEmail !== existingEmail) {
+    // With email enumeration protection enabled, we must send a verification link first.
+    // This will send an email verification to the new email address. Once verified,
+    // the email in Firebase Auth will be updated automatically.
+    await verifyBeforeUpdateEmail(firebaseUser, newEmail);
+
+    // DO NOT update the email in Firestore yet. The Auth email will update only after the user verifies it.
+    // Once the user verifies the link in their email, their Auth email will be updated automatically.
+    // At that point (typically after re-login), you can fetch the Auth user's updated email and sync it to Firestore if needed.
+  }
+
+  // Update Firestore for username changes if any
   if (Object.keys(updates).length > 0) {
     await updateDoc(userRef, updates);
   }

@@ -1,3 +1,5 @@
+"use client";
+
 import Navbar from "@/app/components/Navbar";
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
@@ -5,6 +7,10 @@ import { useState } from "react";
 //import "../styles/profile.scss";
 import "../styles/ProfileManagement.scss"
 import { useAuth } from "@/app/hooks/AuthProvider";
+import { auth } from "../../lib/firebaseClientConfig";
+import { EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail, getAuth } from "firebase/auth";
+
+// Import Firebase client auth methods
 
 export default function ProfileManagement() {
   // ---------------------------------------
@@ -18,7 +24,7 @@ export default function ProfileManagement() {
   const [newEmail, setNewEmail] = useState("");
   const [newUsername, setNewUsername] = useState("");
 
-  const { userUID } = useAuth(); // Get logged in user's UID
+  const { user, userUID } = useAuth(); // Get logged in user's UID
 
   // ---------------------------------------
   // ------------ Event Handler ------------
@@ -55,21 +61,51 @@ const handleUpdateEmailUsername = async (e: React.FormEvent<HTMLFormElement>) =>
   setError("");
   setSuccess("");
 
+  const auth = getAuth();
+  const user = auth.currentUser;
+  
+  if (!user) {
+    setError("No user is signed in.");
+    return;
+  }
+
+  if (!user.email) {
+    setError("User does not have an email associated with their account.");
+    return;
+  }
+
+  if (!currentPassword) {
+    setError("Please provide your current password.");
+    return;
+  }
+
+  // Check if at least one field is provided
   if (!newEmail && !newUsername) {
     setError("Please provide a new email or username.");
     return;
   }
 
   try {
-    await axios.post(`${apiURL}/user/${userUID}/change-email-username`, {
-      currentPassword,
-      newEmail,
-      newUsername,
-    });
-    setSuccess("Information updated successfully.");
-  } catch (error: any) {
-    console.error("Error updating email/username:", error);
-    setError(error.response?.data?.error || "Failed to update information.");
+    // Re-authenticate the user
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
+    
+    if (newEmail && newEmail !== user?.email) {
+      await verifyBeforeUpdateEmail(user!, newEmail);
+      setSuccess("A verification link has been sent to your new email. Please verify it to complete the update.");
+    }
+
+    // If a new username is provided, update it via server
+    if (newUsername) {
+      await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
+      setSuccess((prev) => prev ? prev + " Username updated successfully." : "Username updated successfully.");
+    }
+
+  } catch (err: any) {
+    console.error("Error updating email/username:", err);
+    setError(err.message || "Failed to update information.");
   }
 };
 
