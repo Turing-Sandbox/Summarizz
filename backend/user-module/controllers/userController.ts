@@ -13,6 +13,7 @@ import {
   unfollowUser,
   requestFollow,
   changePassword,
+  changeEmailUsername,
 } from "../services/userService";
 
 // Register User
@@ -174,5 +175,28 @@ export async function changePasswordController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message || "Failed to update password" });
+  }
+}
+
+// Change Email/Username Controller
+export async function changeEmailUsernameController(req: Request, res: Response) {
+  const { userId } = req.params;
+  const { currentPassword, newEmail, newUsername } = req.body;
+
+  try {
+    await changeEmailUsername(userId, currentPassword, newEmail, newUsername);
+
+    // If a new email was requested, let the user know about the verification email
+    if (newEmail) {
+      return res.status(200).json({
+        message: "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update."
+      });
+    }
+
+    // If only the username was changed
+    res.status(200).json({ message: "Username updated successfully." });
+  } catch (error: any) {
+    console.error("Error updating email/username:", error);
+    res.status(500).json({ error: error.message || "Failed to update email/username" });
   }
 }

@@ -1,14 +1,15 @@
 import { db } from "../../shared/firebaseConfig";
-import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc, collection, getDocs, query, where} from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updatePassword,
+  verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import jwt from "jsonwebtoken";
-import { adminAuth } from "../../shared/firebaseAdminConfig"; // Ensure you have Firebase Admin configured
+import { adminAuth } from "../../shared/firebaseAdminConfig";
 
 export async function register(
   firstName: string,
@@ -396,5 +397,51 @@ export async function changePassword(
       errorMessage = errorMessage.replace("Firebase: ", "");
     }
     throw new Error(errorMessage);
+  }
+}
+
+export async function changeEmailUsername(
+  userId: string,
+  currentPassword: string,
+  newEmail?: string,
+  newUsername?: string
+) {
+  const auth = getAuth();
+  const userRef = doc(db, "users", userId);
+  const userSnapshot = await getDoc(userRef);
+
+  if (!userSnapshot.exists()) {
+    throw new Error("User not found");
+  }
+
+  const userData = userSnapshot.data();
+  const existingEmail = userData.email;
+
+  // Re-authenticate using the current password
+  const userCredential = await signInWithEmailAndPassword(auth, existingEmail, currentPassword);
+  const firebaseUser = userCredential.user;
+
+  const updates: Record<string, any> = {};
+
+  // If a new username is provided and is different, update Firestore immediately
+  if (newUsername && newUsername !== userData.username) {
+    updates.username = newUsername;
+  }
+
+  // If a new email is provided and different from the current one:
+  if (newEmail && newEmail !== existingEmail) {
+    // With email enumeration protection enabled, we must send a verification link first.
+    // This will send an email verification to the new email address. Once verified,
+    // the email in Firebase Auth will be updated automatically.
+    await verifyBeforeUpdateEmail(firebaseUser, newEmail);
+
+    // DO NOT update the email in Firestore yet. The Auth email will update only after the user verifies it.
+    // Once the user verifies the link in their email, their Auth email will be updated automatically.
+    // At that point (typically after re-login), you can fetch the Auth user's updated email and sync it to Firestore if needed.
+  }
+
+  // Update Firestore for username changes if any
+  if (Object.keys(updates).length > 0) {
+    await updateDoc(userRef, updates);
   }
 }
