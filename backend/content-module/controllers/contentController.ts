@@ -99,7 +99,7 @@ export class ContentController {
     } catch (error) {
       console.log(error);
       res
-          .status(500)
+          .status(401)
           .json({ error: error.message || "Failed to edit content" });
     }
   }
@@ -113,35 +113,28 @@ export class ContentController {
     try {
       const confirmation = await ContentService.getContent(contentId)
       const owner_id = confirmation.creatorUID
-      console.log(owner_id)
-      console.log(userId)
-      console.log(confirmation)
       if (userId == owner_id){ //check whether they are allowed to edit the content
         console.log("User is authorized to edit")
-        const file_path = decodeURIComponent(confirmation.thumbnail.split('/o/')[1].split('?')[0]);
-        // const ref = file_path.split("/")[0]
-        const file_name = file_path.split("/")[1]
-        // console.log("data: ", data)
-        // console.log("file: ", file)
-        // console.log("file_name: ", file_name)
-        // console.log("ref: ", ref)
-        // console.log("file_type: ", file_type)
-        // const thumbnailResponse = StorageService.uploadFile(file, ref, file_name, file_type)
-        // console.log("Request: ", req)
+
+        let file_path: string;
+        let file_name: string;
+        if (confirmation.thumbnail) {
+          file_path = decodeURIComponent(confirmation.thumbnail.split('/o/')[1].split('?')[0]); //Converts things like "%2F" to "/", etc.
+          file_name = file_path.split("/")[1] // The line above returns thumbnails/filename, this line returns filename.
+        }
+
         console.log("Form is being created:...")
         const form = new IncomingForm();
         form.parse(req, async (err, fields, files) => {
+
           if (err) {
             console.error("Error parsing form: ", err);
             return res.status(500).json({ error: "Failed to upload thumbnail." });
           }
-          // console.log("Logging form stuff...")
-          // console.log("backend fields: ", fields)
-          // console.log("backend files: ",files)
-          // console.log("file_name: ", file_name)
+
           const file = files.thumbnail[0];
-          // console.log()
-          let fileName;
+          let fileName: string;
+
           if (file_name){
             fileName = file_name;
           } else {
@@ -149,35 +142,30 @@ export class ContentController {
           }
           const fileType = file.mimetype;
 
-          // Upload thumbnail to storage
           try {
-            // Upload thumbnail
             const response = await StorageService.uploadFile(
                 file,
                 "thumbnails",
                 fileName,
                 fileType
             );
-            // console.log("url response: ", response)
+
             const updateData = JSON.parse(fields.data)
             updateData.thumbnail = response.url
+            console.log("updateData")
             await ContentService.editContent(contentId, updateData);
             res.status(201).json(response);
           } catch (error) {
             console.log(error);
-            res
-                .status(500)
-                .json({ error: error.message || "Failed to upload thumbnail" });
+            res.status(500).json({ error: error.message || "Failed to upload thumbnail" });
           }
         });
         } else {
-        throw new Error("You do not have permission to edit this post!")
+        res.status(401).json("You are not authorized to edit this content.");
       }
     } catch (error) {
-      console.log(error);
-      res
-          .status(500)
-          .json({ error: error.message || "Failed to edit content" });
+      console.error(error)
+      res.status(500).json({ error: error.message || "You are not authorized to edit this content." });
     }
   }
 
@@ -188,12 +176,12 @@ export class ContentController {
 
       const confirmation = await axios.get(`content/${contentId}`)
       const owner_id = confirmation.data.creatorUID
-      if (userId == owner_id) { //check whether they are allowed to delete the content
-        // delete actual content, thumbnail, and content from user.content list
+      if (userId == owner_id) {
+
         const response = await ContentService.deleteContent(userId, contentId);
         console.log("DELETING CONTENT:::::")
         console.log(response)
-        // console.log(userId, contentId)
+
         res.status(200).json(response);
       } else{
         throw new Error("You don't have the permission to delete this!!")

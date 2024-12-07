@@ -3,7 +3,7 @@ import { ref, get, set, remove, update, child, push } from 'firebase/database';
 import { Comment } from '../models/commentModel';
 
 
-export async function createComment(post_id: string, owner_id: string, text: string): Promise<Comment> {
+export async function createComment(post_id: string, owner_id: string, text: string, username:string): Promise<Comment> {
 	const commentsRef = ref(realtime_db, `comments/${post_id}`);
 	const newCommentID = push(commentsRef).key
 	const time = Date.now()
@@ -11,6 +11,7 @@ export async function createComment(post_id: string, owner_id: string, text: str
 		post_id: post_id,
 		comment_id: newCommentID,
 		owner_id: owner_id,
+		username: username,
 		text: text,
 		timestamp: time,
 		last_edited_timestamp: time,
@@ -71,10 +72,13 @@ export async function deletePost(post_id: string): Promise<void> {
 export async function getAllComments(post_id: string): Promise<Comment[]> {
 	const commentsRef = ref(realtime_db, `comments/${post_id}`);
 	const snapshot = await get(commentsRef);
-
-	if (snapshot.exists()) {
-		return snapshot.val();
-	} else {
-		return [];
+	try{
+		if (snapshot.exists()) {
+			return snapshot.val();
+		} else {
+			return [];
+		}
+	} catch (e){
+		throw new Error(e)
 	}
 }

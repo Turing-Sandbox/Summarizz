@@ -1,5 +1,5 @@
 ###
-GET http://localhost:3000/content/MQhI7AISGMU8kRGZvqD5
+GET http://localhost:3000/content/1
 ###
 PUT localhost:3000/content/editThumbnail/MQhI7AISGMU8kRGZvqD5/LEwlA1KMRDeKzeknqM0srxOAmc42
 Content-Type: application/json
@@ -16,6 +16,10 @@ DELETE http://localhost:3000/content/OcrRfUsHhm3eM7IToYb5/
 
 ###
 GET http://localhost:3000/user/LEwlA1KMRDeKzeknqM0srxOAmc42
+###
+
+###
+GET http://localhost:3000/content/MQhI7AISGMU8kRGZvqD5
 ###
 
 ###

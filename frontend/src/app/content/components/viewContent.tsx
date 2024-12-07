@@ -4,16 +4,17 @@ import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { User } from "@/app/profile/models/User";
 import { apiURL } from "@/app/scripts/api";
-import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon } from "@heroicons/react/24/solid";
+import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
 import axios from "axios";
 import DOMPurify from "dompurify";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Content } from "../models/Content";
 import "../styles/viewContent.scss";
-import { useAuth } from "@/app/hooks/AuthProvider";
-import { HeartIcon, BookmarkIcon, UserPlusIcon, TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 import { redirect } from "next/navigation";
+import {Comment} from "@/app/content/models/Comment";
+// import CommentComponent from "@/app/content/components/Comment";
+import CommentList from "@/app/content/components/CommentList";
 
 interface ViewContentProps {
   id: string;
@@ -32,7 +33,6 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isFollowing, setIsFollowing] = useState(false); // Track following state
   const [user, setUser] = useState<User | null>(null); // Track logged in user
 
-  // const router = useRouter();
   const { userUID } = useAuth(); // Get logged in user's UID
 
   // ---------------------------------------
@@ -99,7 +99,7 @@ export default function ViewContent({ id }: ViewContentProps) {
         console.log(res.data);
         setCreator(res.data);
       }).catch((error) => {
-        console.error("Error fetching user info:", error);
+        throw Error("Error fetching user info:", error);
       });
     }
   }
@@ -109,7 +109,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       axios.get(`${apiURL}/user/${userUID}`).then((res) => {
         setUser(res.data);
       }).catch((error) => {
-        console.error("Error fetching logged in user:", error);
+        throw Error("Error fetching logged in user:", error);
       });
     }
   }
@@ -120,20 +120,16 @@ export default function ViewContent({ id }: ViewContentProps) {
         // alert(true)
         console.log("deleting...")
         const user_id = content?.creatorUID;
+        await axios.delete(`${apiURL}/comment/post/${content.id}/${user_id}`);
+
         const content_id = content?.id;
         if (content.thumbnail) {
           // console.log("deleting but with thumbnail")
           const file_path = decodeURIComponent(content?.thumbnail.split('/o/')[1].split('?')[0]);
-          await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`).then((res) => {
-            // console.log("with thumbnail: " + res.data)
-            // alert("with thumbnail: " + res.data)
-          })
+          await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`)
         } else {
           // console.log("deleting but without thumbnail")
-          await axios.delete(`${apiURL}/content/${user_id}/${content_id}`).then((res) => {
-            // console.log("without thumbnail: " + res.data)
-            // alert("without thumbnail: " + res.data)
-          })
+          await axios.delete(`${apiURL}/content/${user_id}/${content_id}`)
         }
         // useNavigate(`/profile/${content.creatorUID}`)
       } catch (error) {
@@ -422,6 +418,11 @@ export default function ViewContent({ id }: ViewContentProps) {
             ) : (
               ""
             )}
+          </div>
+
+          <div className={'col-3'}>
+            {/*Comment form*/}
+            <CommentList/>
           </div>
         </div>
       </div>

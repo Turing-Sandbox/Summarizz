@@ -3,7 +3,7 @@
 import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import "../styles/createContent.scss";
-import {redirect, useParams, useRouter} from "next/navigation";
+import {useParams, useRouter} from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { apiURL } from "@/app/scripts/api";
@@ -76,8 +76,8 @@ export default function EditContent() {
             editor.commands.setContent(page.content);
           }
         }
-      } catch (err: any) {
-        setError(err); // Set any error that occurs
+      } catch (error) {
+        setError(error instanceof Error? error.message : String(error)); // Set any error that occurs
       }
     }
 
@@ -160,8 +160,8 @@ export default function EditContent() {
         localStorage.removeItem("title");
         Cookies.remove("content");
         router.replace(`../../content/${contentId}?${Date.now()}`)
-      } catch (error){
-        throw new Error(error)
+      } catch (error) {
+        setError(error instanceof Error? error.message : String(error)); // Set any error that occurs
       }
 
     } else {// if thumbnail is not provided: PUT title, content, time, to update only the content
@@ -180,8 +180,8 @@ export default function EditContent() {
         localStorage.removeItem("title");
         Cookies.remove("content");
         router.replace(`../../content/${contentId}?${Date.now()}`)
-      } catch (error){
-        throw new Error(error)
+      } catch (e){
+        throw new Error(e instanceof Error ? e.message : String(e))
       }
     }
   }
