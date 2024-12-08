@@ -217,12 +217,10 @@ h1{
   font-size: 12px; /* Small text */
   margin-top: 0; /* No extra spacing above */
   display: none; // same thing as the line below, just doesnt take space until it's visible
-  //visibility: hidden; /* Default hidden */
 }
 
 .icon.counter.visible {
   display: inline; // same thing as the line below, but since i set display:none i need to undo that
-  //visibility: visible; /* Visible when there's a count */
 }
 
 .comment-edit-textarea, .comment-create-textarea{
