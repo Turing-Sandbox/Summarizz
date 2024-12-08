@@ -1,25 +1,38 @@
 "use client";
 
-import Navbar from "@/app/components/Navbar";
-import { useAuth } from "@/app/hooks/AuthProvider";
-import { User } from "@/app/profile/models/User";
-import { apiURL } from "@/app/scripts/api";
-import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
+// React & NextJs
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+
+// Third-Party Libraries
 import axios from "axios";
 import DOMPurify from "dompurify";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
+
+// Local Components & Hooks
+import Navbar from "@/app/components/navbar";
+import { useAuth } from "@/app/hooks/AuthProvider";
+
+// Models & Utils
+import { User } from "@/app/profile/models/User";
 import { Content } from "../models/Content";
+import { apiURL } from "@/app/scripts/api";
+
+// Styles
 import "../styles/viewContent.scss";
-import { useRouter } from "next/navigation";
 
 interface ViewContentProps {
   id: string;
 }
 
 export default function ViewContent({ id }: ViewContentProps) {
+  // useAuth Hook for Authentication
   const { userUID, user: authUser } = useAuth();
 
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [content, setContent] = useState<Content | null>(null);
   const [creator, setCreator] = useState<User | null>(null);
   const [formatedContent, setFormatedContent] = useState<string | null>(null);
@@ -28,11 +41,12 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
 
   const hasFetchedData = useRef(false);
   const router = useRouter();
 
+  // EFFECT: Handle Fetching Logged In User
   useEffect(() => {
     if (!hasFetchedData.current) {
       fetchLoggedInUser();
@@ -41,6 +55,7 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   }, []);
 
+  // EFFECT: Handling Fetching Content
   useEffect(() => {
     getUserInfo();
     if (content) {
@@ -58,7 +73,18 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   }, [content, userUID]);
 
-  function getContent() {
+  /**
+   * getContent() -> void
+   * 
+   * @description
+   * Fetches content from the backend using the id provided in the route, this
+   * will fetch { datecreated, creatorUID, title, content, thumbnail, readtime, 
+   * likes, peopleWhoLiked, bookmarkedBy } from the backend and set the content
+   * accordingly.
+   * 
+   * @returns void
+   */
+  const getContent = async () => {
     axios.get(`${apiURL}/content/${id}`).then((res) => {
       const fetchedContent = res.data;
       if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
@@ -71,31 +97,64 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       fetchedContent.id = id;
       setContent(fetchedContent);
+
     }).catch((error) => {
       console.error("Error fetching content:", error);
+      
     });
   }
 
-  function getUserInfo() {
+  /**
+   * getUserInfo() -> void
+   * 
+   * @description
+   * Fetches user info from the backend using the creatorUID from the content,
+   * this will set the creator accordingly.
+   * 
+   * @returns void
+   */
+  const getUserInfo = async () => {
     if (content) {
       axios.get(`${apiURL}/user/${content.creatorUID}`).then((res) => {
         setCreator(res.data);
+
       }).catch((error) => {
         console.error("Error fetching user info:", error);
+
       });
     }
   }
 
-  function fetchLoggedInUser() {
+  /**
+   * fetchLoggedInuser() -> void
+   * 
+   * @description
+   * Fetches the logged in user's information from the backend using the userUID
+   * provided in the AuthProvider, this will set the user accordingly.
+   * 
+   * @returns void
+   */
+  const fetchLoggedInUser = async () => {
     if (userUID) {
       axios.get(`${apiURL}/user/${userUID}`).then((res) => {
         setUser(res.data);
+
       }).catch((error) => {
         console.error("Error fetching logged in user:", error);
+
       });
     }
   }
 
+  /**
+   * handleDelete() -> void
+   * 
+   * @description
+   * Handles the delete action for the content, deleting the content and thumbnail
+   * if it exists, and redirecting to the profile page of the creator.
+   * 
+   * @returns void
+   */
   const handleDelete = async () => {
     if (localStorage.getItem('userUID') === content?.creatorUID) {
       try {
@@ -104,20 +163,34 @@ export default function ViewContent({ id }: ViewContentProps) {
         if (content?.thumbnail) {
           const file_path = decodeURIComponent(content.thumbnail.split('/o/')[1].split('?')[0]);
           await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`);
+
         } else {
           await axios.delete(`${apiURL}/content/${user_id}/${content_id}`);
+
         }
+
       } catch (error) {
         console.error(error);
         alert(error);
+
       }
     } else {
-      alert("You do not have permission to delete this page.");
+      alert("You do not have permission to delete this page as you are not the creator.");
+
     }
 
     router.push(`/profile/${userUID}`);
   };
 
+  /**
+   * handleLike() -> void
+   * 
+   * @description
+   * Handles the liking and unliking of the content, setting the isLiked state
+   * to the opposite of the current state.
+   * 
+   * @returns {Promise<void>}
+   */
   const handleLike = async () => {
     try {
       if (!userUID) {
@@ -140,9 +213,19 @@ export default function ViewContent({ id }: ViewContentProps) {
 
     } catch (error) {
       console.error("Error liking/unliking content:", error);
+
     }
   };
 
+  /**
+   * handleBookmark() -> void
+   * 
+   * @description
+   * Handles the bookmarking and unbookmarking of the content,
+   * setting the isBookmarked state to the opposite of the current state.
+   * 
+   * @returns void
+   */
   const handleBookmark = async () => {
     try {
       if (!userUID) {
@@ -161,6 +244,16 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   };
 
+  /**
+   * handleShare() -> void
+   * 
+   * @description
+   * Handles the share action for the content, displaying a pop up window
+   * with the option to share the content through email copy the share
+   * link to the clipboard.
+   * 
+   * @returns void
+   */
   const handleShare = async () => {
     // Check if the user is logged in via AuthProvider
     if (!authUser) {
@@ -170,7 +263,7 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
 
     // Use Firestore user data if available, otherwise fallback
-    const username = user?.username || authUser.displayName || authUser.email || "A Summarizz User";
+    const username = user?.username || authUser.displayName || authUser.email || "Summarizz User"; // Fallback Username
 
     const shareMessage = `${username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
     const shareOption = window.prompt(
@@ -194,6 +287,14 @@ export default function ViewContent({ id }: ViewContentProps) {
     }
   };
 
+  /**
+   * handleFollow() -> void
+   * 
+   * @description
+   * Handles the follow/unfollow actions for the creator of the content.
+   * 
+   * @returns void
+   */
   const handleFollow = async () => {
     try {
       if (!userUID || !content?.creatorUID) {
@@ -209,13 +310,23 @@ export default function ViewContent({ id }: ViewContentProps) {
 
     } catch (error) {
       console.error("Error following/unfollowing creator:", error);
+
     }
   };
 
+  /**
+   * editContent() -> void
+   * 
+   * @description
+   * Redirects user to the edit page for the current content.
+   */
   const editContent = () => {
     router.push(`edit/${content?.id}`);
   };
 
+  // ---------------------------------------
+  // --------------- Render ----------------
+  // ---------------------------------------
   return (
     <>
       <Navbar />

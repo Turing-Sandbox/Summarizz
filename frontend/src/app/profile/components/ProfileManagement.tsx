@@ -1,17 +1,23 @@
 "use client";
 
-import Navbar from "@/app/components/Navbar";
+import Navbar from "@/app/components/navbar";
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
 import { useState } from "react";
 //import "../styles/profile.scss";
 import "../styles/ProfileManagement.scss"
 import { useAuth } from "@/app/hooks/AuthProvider";
-import { auth } from "../../lib/firebaseClientConfig";
+// import { auth } from "../../lib/firebaseClientConfig";
 import { EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail, getAuth } from "firebase/auth";
 
-// Import Firebase client auth methods
-
+/**
+ * ProfileManagement() -> JSX.Element
+ * 
+ * @description
+ * Renders the Profile Management page, allowing users to manage their profile.
+ * 
+ * @returns JSX.Element
+ */
 export default function ProfileManagement() {
   // ---------------------------------------
   // -------------- Variables --------------
@@ -23,14 +29,21 @@ export default function ProfileManagement() {
   const [success, setSuccess] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newUsername, setNewUsername] = useState("");
-
   const { user, userUID } = useAuth(); // Get logged in user's UID
 
   // ---------------------------------------
-  // ------------ Event Handler ------------
+  // ------------ Event Handlers -----------
   // ---------------------------------------
-
-  // Change Password Handler
+  /**
+   * handleChangePassword() -> void
+   * 
+   * @description
+   * Handles the change password form, setting the error and success states
+   * to an empty string and calling the backend to change the password.
+   * 
+   * @param e - Form Event
+   * @returns void
+   */
   const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -48,67 +61,76 @@ export default function ProfileManagement() {
         currentPassword,
         newPassword,
       });
-      setSuccess("Password updated successfully.");
+      setSuccess("Password has been successfully updated.");
+
     } catch (error) {
       console.error("Error changing password:", error);
       setError("Failed to update password. Please check your current password and try again.");
+
     }
   };
 
-// Change Email or Username Handler
-const handleUpdateEmailUsername = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setError("");
-  setSuccess("");
+  /**
+   * handleUpdateEmailUsername() -> void
+   * 
+   * @description
+   * Handles the update email or username form, setting the error and success states
+   * to an empty string and calling the backend to update the email or username.
+   * 
+   * @param e - Form Event
+   * @returns void
+   */
+  const handleUpdateEmailUsername = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
-  const auth = getAuth();
-  const user = auth.currentUser;
-  
-  if (!user) {
-    setError("No user is signed in.");
-    return;
-  }
-
-  if (!user.email) {
-    setError("User does not have an email associated with their account.");
-    return;
-  }
-
-  if (!currentPassword) {
-    setError("Please provide your current password.");
-    return;
-  }
-
-  // Check if at least one field is provided
-  if (!newEmail && !newUsername) {
-    setError("Please provide a new email or username.");
-    return;
-  }
-
-  try {
-    // Re-authenticate the user
-    const credential = EmailAuthProvider.credential(user.email, currentPassword);
-    await reauthenticateWithCredential(user, credential);
-
-    // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
+    const auth = getAuth();
+    const user = auth.currentUser;
     
-    if (newEmail && newEmail !== user?.email) {
-      await verifyBeforeUpdateEmail(user!, newEmail);
-      setSuccess("A verification link has been sent to your new email. Please verify it to complete the update.");
+    if (!user) {
+      setError("No user is signed in.");
+      return;
     }
 
-    // If a new username is provided, update it via server
-    if (newUsername) {
-      await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
-      setSuccess((prev) => prev ? prev + " Username updated successfully." : "Username updated successfully.");
+    if (!user.email) {
+      setError("User does not have an email associated with their account.");
+      return;
     }
 
-  } catch (err: any) {
-    console.error("Error updating email/username:", err);
-    setError(err.message || "Failed to update information.");
-  }
-};
+    if (!currentPassword) {
+      setError("Please provide your current password.");
+      return;
+    }
 
+    // Check if at least one field is provided
+    if (!newEmail && !newUsername) {
+      setError("Please provide a new email or username.");
+      return;
+    }
+
+    try {
+      // Re-authenticate the user
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+
+      // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
+      
+      if (newEmail && newEmail !== user?.email) {
+        await verifyBeforeUpdateEmail(user!, newEmail);
+        setSuccess("A verification link has been sent to your new email. Please verify it to complete the update.");
+      }
+
+      // If a new username is provided, update it via server
+      if (newUsername) {
+        await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
+        setSuccess((prev) => prev ? prev + " Username updated successfully." : "Username updated successfully.");
+      }
+    } catch (err: any) {
+      console.error("Error updating email/username:", err);
+      setError(err.message || "Failed to update information.");
+    }
+  };
 
   // --------------------------------------
   // -------------- Render ----------------

@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import {collection, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc} from "firebase/firestore";
+import { collection, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc } from "firebase/firestore";
 import {
   addContentToUser,
   removeContentFromUser,
@@ -12,7 +12,7 @@ import {
 } from "../../user-module/services/userService";
 import { StorageService } from "../../storage-module/services/serviceStorage"
 import { increment, update } from "firebase/database";
-import {Content} from "../models/contentModel";
+import { Content } from "../models/contentModel";
 
 export class ContentService {
   static async createContent(
@@ -83,46 +83,46 @@ export class ContentService {
     const file_path = `${filePath}/${fileName}`
     console.log(file_path);
 
-    try{
+    try {
       // delete actual content
       await deleteDoc(doc(db, "contents", content_id));
       // delete thumbnail
       await StorageService.deleteFile(file_path);
       // delete content from user
       await removeContentFromUser(user_id, content_id);
-    }catch (error){
+    } catch (error) {
       console.error("Error! ", error);
       throw new Error(error)
     }
     return "Successfully deleted!";
   }
 
-  static async deleteContent(user_id: string, content_id:string) {
+  static async deleteContent(user_id: string, content_id: string) {
     console.log("Deleting content (without thumbnail)...");
     // Delete content from Firestore
     console.log(user_id);
     console.log(content_id);
 
-    try{
+    try {
       // delete actual content
       await deleteDoc(doc(db, "contents", content_id));
       // remove content from user list
       await removeContentFromUser(user_id, content_id); // tested. it works
-    }catch (error){
+    } catch (error) {
       console.error("Error! ", error);
       throw new Error(error)
     }
     return "Successfully deleted!";
   }
 
-  static async editContent(content_id:string, data: Partial<Content>) {
+  static async editContent(content_id: string, data: Partial<Content>) {
     console.log("Editing content...")
     console.log(content_id);
     console.log(data);
-    try{
+    try {
       await updateDoc(doc(db, `contents/${content_id}`), data);
       console.log("EDIT^^^^^^^^^^^^^^^^^EDIT")
-    }catch (error){
+    } catch (error) {
       console.error("Error while editing content! ", error);
       throw new Error(error)
     }
@@ -141,38 +141,38 @@ export class ContentService {
       // Get the content document from Firestore
       const contentRef = doc(db, "contents", contentID);
       const contentDoc = await getDoc(contentRef);
-  
+
       if (!contentDoc.exists()) {
         throw new Error("Content not found");
       }
-  
+
       const contentData = contentDoc.data();
       const peopleWhoLiked = contentData?.peopleWhoLiked || []; // Ensure we initialize as an empty array if undefined
-  
+
       // Check if the user has already liked the content
       if (peopleWhoLiked.includes(userId)) {
         throw new Error("You have already liked this content");
       }
-  
+
       // Update the likes count and add the user to the peopleWhoLiked list
       await updateDoc(contentRef, {
         likes: (contentData?.likes ?? 0) + 1, // Increment likes
         peopleWhoLiked: arrayUnion(userId),  // Add user to the list of people who liked
       });
-      
+
       // Add this content to the user's liked content list
       await addLikedContentToUser(userId, contentID);
-  
+
       // Fetch the updated document and return it
       const updatedContentDoc = await getDoc(contentRef);
       const updatedContent = {
         ...contentData,
         likes: typeof contentData.likes === 'number' ? contentData.likes + 1 : 1, // Ensure likes is always a number
         peopleWhoLiked: [...contentData.peopleWhoLiked, userId],
-      }; 
-  
+      };
+
       return { content: updatedContent }; // Return updated content
-      
+
     } catch (error) {
       console.error("Error liking content:", error);
       throw new Error(error.message || "Failed to like content");
@@ -205,8 +205,8 @@ export class ContentService {
 
       // Remove this content from the user's liked content list
       await removeLikedContentFromUser(userId, contentID);
-    
-       // Fetch the updated content and return it
+
+      // Fetch the updated content and return it
       const updatedContentDoc = await getDoc(contentRef);
       const updatedContent = updatedContentDoc.data();
 
@@ -268,7 +268,7 @@ export class ContentService {
       }
 
       const contentData = contentDoc.data();
-      const bookmarkedBy = contentData?.bookmarkedBy || []; 
+      const bookmarkedBy = contentData?.bookmarkedBy || [];
 
       // Check if user has already bookmarked the content
       if (!bookmarkedBy.includes(userId)) {

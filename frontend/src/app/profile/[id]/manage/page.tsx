@@ -1,14 +1,19 @@
 "use client";
 
-import Background from "@/app/components/Background";
-import { Footer } from "@/app/components/Footer";
+import Background from "@/app/components/background";
+import { Footer } from "@/app/components/footer";
 import AuthProvider from "@/app/hooks/AuthProvider";
-import { useParams } from "next/navigation";
-import ProfileManagement from "../../components/ProfileManagement";
+import ProfileManagement from "../../components/profileManagement";
 
+/**
+ * Page() -> JSX.Element
+ * 
+ * @description
+ * Renders the Profile Management page, allowing users to manage their profile.
+ * 
+ * @returns JSX.Element
+ */
 export default function Page() {
-  const { id } = useParams();
-
   return (
     <>
       <Background />

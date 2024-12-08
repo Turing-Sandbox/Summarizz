@@ -1,15 +1,31 @@
 "use client";
 
+// React & NextJs (Import)
 import { useEffect, useState } from "react";
-import "../styles/navbar.scss";
-import { useAuth } from "../hooks/AuthProvider";
 import { useRouter } from "next/navigation";
-import { User } from "../profile/models/User";
 import Image from "next/image";
+
+// Third-Party Libraries (Import)
 import axios from "axios";
-import { apiURL } from "../scripts/api";
 import Cookies from "js-cookie";
 
+// Local Files (Import)
+import { useAuth } from "../hooks/AuthProvider";
+import { User } from "../profile/models/User";
+import { apiURL } from "../scripts/api";
+
+// Stylesheets
+import "../styles/navbar.scss";
+
+/**
+ * Navbar() -> JSX.Element
+ * 
+ * @description
+ * Renders the Navbar component, containing the user's profile picture,
+ * username, toggle for dark and light mode, alongside the Summarize logo.
+ * 
+ * @returns JSX.Element (Navbar Component)
+ */
 function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -20,9 +36,9 @@ function Navbar() {
 
   const authenticated = user !== null && getToken() !== null;
 
+  // EFFECT: Handle Dark Mode Preference
   useEffect(() => {
     const preferenceMode = localStorage.getItem("isDarkMode");
-
     if (preferenceMode) {
       if (preferenceMode === "true") {
         document.documentElement.setAttribute("data-theme", "dark");
@@ -50,17 +66,27 @@ function Navbar() {
     }
   }, []);
 
+  // EFFECT: Fetch User Information If Logged In
   useEffect(() => {
-    // Fetch user info if logged in
     if (userUID) {
       axios.get(`${apiURL}/user/${userUID}`).then((res) => {
         setUserInfo(res.data);
       });
+
     } else {
       setUserInfo(null);
+
     }
   }, [userUID]);
 
+  /**
+   * toggleTheme() -> void
+   * 
+   * @description
+   * Toggles the theme between light and dark mode, setting the
+   * data-them attribute to the new theme and updating the theme
+   * preference in localStorage.
+   */
   const toggleTheme = () => {
     const newTheme = isDarkMode ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
@@ -77,9 +103,10 @@ function Navbar() {
             router.push("/");
           }}
         >
-          <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
+          <h1 className='navbar-title summarizz-logo'>SUMMARIZZ</h1>
         </a>
 
+        { /* ANCHOR - Create Search and Filter Bar when Authenticated  */}
         {authenticated ? (
           <>
             <button

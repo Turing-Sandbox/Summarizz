@@ -1,16 +1,20 @@
-import { Level } from "@tiptap/extension-heading";
-import { Editor } from "@tiptap/react";
+// React & NextJs (Import)
 import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import Image from "next/image";
 
+// TipTap (Import)
+import { Level } from "@tiptap/extension-heading";
+import { Editor } from "@tiptap/react";
+
+// Stylesheets (Import)
 import "../styles/toolbar.scss";
 
+// ToolbarProps for Toolbar 
 interface ToolbarProps {
   editor: Editor | null;
 }
 
+// Heading Levels for Toolbar (1-6)
 const headingLevels = [
   { key: 0, value: "0", label: "Paragraph" },
   { key: 1, value: "1", label: "Header 1" },
@@ -21,11 +25,22 @@ const headingLevels = [
   { key: 6, value: "6", label: "Header 6" },
 ]
 
+/**
+ * Toolbar() -> JSX.Element
+ * 
+ * @description
+ * This function renders the Toolbar component, allowing users to format their content or
+ * add headings, lists, and other formatting options. 
+ * 
+ * @param editor - TipTap Editor (ToolbarProps)
+ * @returns JSX.Element
+ */
 export default function Toolbar({ editor }: ToolbarProps) {
   const [isDarkMode , setIsDarkMode] = useState(false);
-  const [formattedMarkdown, setFormattedMarkdown] = useState("");
 
   {/*ANCHOR - Fix this Code, Light Mode / Dark Mode is not Actively Working. */}
+
+  // EFFECT: Handle Dark Mode Preference for Formatting Options
   useEffect(() => {
     const preferenceMode = localStorage.getItem("isDarkMode");
   
@@ -60,10 +75,22 @@ export default function Toolbar({ editor }: ToolbarProps) {
     }
   }, []);
 
+  // If the editor is not available, return.
   if (!editor) {
     return null;
   }
 
+  /**
+   * handelHeadingChange() -> void
+   * 
+   * @description
+   * Handles the change of the heading level, setting the heading level
+   * based on user's selection. If the user selects "Paragraph", it will 
+   * set the paragraph style. If the user selects a heading level, it 
+   * will set the heading style, and so on.
+   * 
+   * @param event - Change Event for HTMLSelectElement
+   */
   const handleHeadingChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const value = event.target.value;
     if (value === "0") {
@@ -74,6 +101,18 @@ export default function Toolbar({ editor }: ToolbarProps) {
     }
   };
 
+  /**
+   * activeHeadingLevel() -> number
+   * 
+   * @description
+   * Determines the current heading level that is active in the editor. 
+   * If no heading is active, it checks if a paragraph is active and 
+   * returns 0 in that case. If neither a heading nor a paragraph is active, 
+   * it returns an empty string.
+   * 
+   * @returns {number} - The active heading level (1-6 for headings, 0 for paragraph),
+   * or an empty string if neither is active.
+   */
   const activeHeadingLevel = () => {
     for (let i = 1; i <= 6; i++) {
       if (editor.isActive("heading", { level: i })) {
@@ -90,8 +129,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
         onChange={handleHeadingChange}
         className='toolbar-dropdown'
         value={activeHeadingLevel()}
-      >
-       
+      > 
        {headingLevels.map(({ key, value, label }) => (
           <option key={key} value={value}>
             {label}
@@ -111,6 +149,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
       >
         <b>B</b>
       </button>
+
       <button
         type='button'
         onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -121,6 +160,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
       >
         <i>I</i>
       </button>
+
       <button
         type='button'
         onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -142,7 +182,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
       >
         <s>S</s>
       </button>
-      
+
       <hr />
 
       <button
@@ -155,6 +195,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
       >
         &lt;/&gt;
       </button>
+
       <button
         type='button'
         onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -185,7 +226,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
           alt="Unordered List"
         />
       </button>
-
+      
       <button
         type="button"
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -203,8 +244,6 @@ export default function Toolbar({ editor }: ToolbarProps) {
           alt="Ordered List"
         />
       </button>
-
-      <hr />
     </div>
   );
 }

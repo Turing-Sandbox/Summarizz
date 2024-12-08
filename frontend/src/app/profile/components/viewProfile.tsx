@@ -1,16 +1,23 @@
 "use client";
 
-import Navbar from "@/app/components/Navbar";
-import { apiURL } from "@/app/scripts/api";
-import axios from "axios";
+// React & NextJs (Import)
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import "../styles/profile.scss";
+
+// Third-Party Libraries (Import)
+import axios from "axios";
+import { UserPlusIcon } from "@heroicons/react/24/solid";
+
+// Local Files (Import)
+import Navbar from "@/app/components/navbar";
+import { useAuth } from "@/app/hooks/AuthProvider";
 import { Content } from "@/app/content/models/Content";
 import { User } from "../models/User";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/hooks/AuthProvider";
-import { UserPlusIcon } from "@heroicons/react/24/solid";
+import { apiURL } from "@/app/scripts/api";
+
+// Stylesheets
+import "../styles/profile.scss";
 
 interface ViewProfileProps {
   id: string;
@@ -22,18 +29,24 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // ---------------------------------------
   const [user, setUser] = useState<User | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
+  const [bookmarkedContents, setBookmarkedContents] = useState<Content[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followRequested, setFollowRequested] = useState(false);
 
   const { userUID } = useAuth(); // Get logged in user's UID
-
   const router = useRouter();
 
   // ---------------------------------------
-  // ------------ Event Handler ------------
+  // ------------ Event Handlers ------------
   // ---------------------------------------
-
-  // Fetch user data on page load
+  /**
+   * hasFetchedData() -> void
+   * 
+   * @description
+   * Used to prevent fetching user data on page load.
+   * 
+   * @returns void
+   */
   const hasFetchedData = useRef(false);
   useEffect(() => {
     if (!hasFetchedData.current) {
@@ -43,6 +56,16 @@ export default function ViewProfile({ id }: ViewProfileProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * getUserInfo() -> void
+   * 
+   * @description
+   * Fetches user data from the backend using the id provided in the route, this
+   * will fetch { firstName, lastName, bio, profileImage, followedBy, followRequests }
+   * from the backend and set the user accordingly.
+   * 
+   * @param userId - The id of the user to fetch
+   */
   function getUserInfo(userId: string = id) {
     axios.get(`${apiURL}/user/${userId}`).then((res) => {
       setUser(res.data);
@@ -57,11 +80,25 @@ export default function ViewProfile({ id }: ViewProfileProps) {
         setIsFollowing(res.data.followedBy?.includes(userUID)); // Logged-in user is following
         setFollowRequested(res.data.followRequests?.includes(userUID)); // Follow request is pending
       }
+
     }).catch((error) => {
       console.error("Error fetching user info:", error);
-    });
-  }
 
+    });
+  };
+
+  /**
+   * getContent() -> void
+   * 
+   * @description
+   * Fetches the content from the backend using the content id provided, this
+   * will fetch all information regarding the content, including but not limited 
+   * to{ creatorUID, title, content, thumbnail, dateCreated, readtime, likes, 
+   * peopleWhoLiked, bookmarkedBy } from the backend and set the content 
+   * accordingly.
+   * 
+   * @param contentId - The id of the content to fetch
+   */
   function getContent(contentId: string) {
     axios.get(`${apiURL}/content/${contentId}`).then((res) => {
       const fetchedContent = res.data;
@@ -78,8 +115,17 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       fetchedContent.id = contentId;
       setContents((prevContents) => [...prevContents, fetchedContent]);
     });
-  }
+  };
 
+  /**
+   * handleFollow() -> void
+   * 
+   * @description
+   * Handles the follow/unfollow actions for the user, setting the isFollowing
+   * state to the opposite of the current state.
+   * 
+   * @returns void
+   */
   const handleFollow = async () => {
     try {
       if (!userUID || !user?.uid) {
@@ -120,23 +166,24 @@ export default function ViewProfile({ id }: ViewProfileProps) {
     }
   };
 
-  const handleRequestFollow = async () => {
-    try {
-      if (!userUID || !user?.uid) {
-        console.error("User ID or Target ID not available");
-        return;
-      }
+  // ANCHOR - What do we do with this?
+  // const handleRequestFollow = async () => {
+  //   try {
+  //     if (!userUID || !user?.uid) {
+  //       console.error("User ID or Target ID not available");
+  //       return;
+  //     }
   
-      const url = `${apiURL}/user/${userUID}/request/${user.uid}`;
+  //     const url = `${apiURL}/user/${userUID}/request/${user.uid}`;
   
-      await axios.post(url);
-      setFollowRequested(true); // Set request state
+  //     await axios.post(url);
+  //     setFollowRequested(true); // Set request state
   
-      console.log("Follow request sent successfully.");
-    } catch (error) {
-      console.error("Error sending follow request:", error);
-    }
-  };
+  //     console.log("Follow request sent successfully.");
+  //   } catch (error) {
+  //     console.error("Error sending follow request:", error);
+  //   }
+  // };
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -195,9 +242,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           </div>
         </div>
 
-        <h2 className='section-title'>
-          {contents.length === 1 ? "Content" : "Contents"}
-        </h2>
+        <h2 className='section-title'>{contents.length === 1 ? "Content" : "Contents"}</h2>
         {contents.length === 0 ? (
           <h2>No content found</h2>
         ) : (

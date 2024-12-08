@@ -263,6 +263,7 @@ export class ContentController {
     try {
       const response = await ContentService.bookmarkContent(contentId, userId);
       res.status(200).json(response);
+      
     } catch (error) {
       console.error("Error bookmarking content:", error);
       res.status(500).json({
