@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/app/components/navbar";
+import Navbar from "@/app/components/Navbar";
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
 import { useState } from "react";

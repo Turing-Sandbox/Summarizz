@@ -20,8 +20,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 
 // Local Files (Import)
-import Navbar from "@/app/components/navbar";
-import { Footer } from "@/app/components/footer";
+import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { apiAIURL, apiURL } from "@/app/scripts/api";
 import Toolbar from "./toolbar";
@@ -31,12 +30,12 @@ import "../styles/createContent.scss";
 
 /**
  * CreateContent() -> JSX.Element
- * 
+ *
  * @description
  * Renders the Create Content page, allowing users to create content with the ability to
  * add { title, content, thumbnail }. If the user is not authenticated, it will redirect
  * them to the authentication page.
- * 
+ *
  * @returns JSX.Element
  */
 export default function CreateContent() {
@@ -48,7 +47,7 @@ export default function CreateContent() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSummarizing, setIsSummarizing] = useState(false);
-  const { user, loading } = useAuth(); 
+  const { user, loading } = useAuth();
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -102,17 +101,17 @@ export default function CreateContent() {
 
   // If the user is null after loading, the redirect already happened in useEffect
   if (!user) {
-    return null; 
+    return null;
   }
 
   /**
    * handleThumbnailChange() -> void
-   * 
+   *
    * @description
-   * Handles the file upload for the thumbnail, and sets the thumbnail preview 
+   * Handles the file upload for the thumbnail, and sets the thumbnail preview
    * to the file that was uploaded. If the file is not an image, or one was not provided, it
    * will throw and error indicating that the thumbnail was not set and to try again.
-   * 
+   *
    * @param e - Change Event for Thumbnail File
    */
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,18 +128,20 @@ export default function CreateContent() {
 
   /**
    * handleSummarize() -> void
-   * 
+   *
    * @description
    * Handles the summarization of the content using the AI service backend,
    * this will set the isSummarizing state to true and then call the backend
    * to summarize the content using the API. If the content is not provided,
    * it will set an error message and return.
-   * 
+   *
    * @returns {Promise<void>}
    */
   const handleSummarize = async () => {
     if (!content) {
-      setError("Please add some content before summarizing using our AI service.");
+      setError(
+        "Please add some content before summarizing using our AI service."
+      );
       return;
     }
 
@@ -156,7 +157,10 @@ export default function CreateContent() {
 
       const data = await response.json();
       if (!response.ok) {
-        setError(data.error || "Failed to summarize provided content. Please Try again.");
+        setError(
+          data.error ||
+            "Failed to summarize provided content. Please Try again."
+        );
       }
 
       if (!editor) {
@@ -175,12 +179,12 @@ export default function CreateContent() {
       editor.commands.setContent(formattedSummary);
       setContent(formattedSummary);
       Cookies.set("content", formattedSummary);
-
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       console.error(error.message);
-      setError(`Failed to summarize provided content: ${error}, something went wrong. Please Try again.`);
-
+      setError(
+        `Failed to summarize provided content: ${error}, something went wrong. Please Try again.`
+      );
     }
 
     setIsSummarizing(false);
@@ -188,20 +192,22 @@ export default function CreateContent() {
 
   /**
    * handleSubmit() -> void
-   * 
+   *
    * @description
    * Handles the submission of the content, setting { title, content, thumbnail }
    * respectively amnd redirecting to the Content page. If the title and content
    * are not provided, it will throw an error and set the error state to the current
    * error message based on the error thrown.
-   * 
+   *
    * @returns
    */
   function handleSubmit() {
     setError("");
 
     if (title === "" || content === "") {
-      setError("Title and content are required, and were not provided. Please Try again.");
+      setError(
+        "Title and content are required, and were not provided. Please Try again."
+      );
       return;
     }
 
@@ -234,7 +240,6 @@ export default function CreateContent() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(newContent),
-
           });
         })
         .then(async (response) => {
@@ -242,16 +247,13 @@ export default function CreateContent() {
             Cookies.remove("content");
             localStorage.removeItem("title");
             router.push("/");
-
           } else {
             setError("Failed to create content. Please Try again.");
-
           }
         })
         .catch((error) => {
           console.log(error);
           setError("Failed to create content. Please Try again.");
-
         });
     } else {
       fetch(`${apiURL}/content`, {
@@ -264,12 +266,10 @@ export default function CreateContent() {
           Cookies.remove("content");
           localStorage.removeItem("title");
           router.push("/");
-
         })
         .catch((error) => {
           console.log(error);
           setError("Failed to create content. Please Try again.");
-
         });
     }
   }
@@ -306,7 +306,10 @@ export default function CreateContent() {
 
           <Toolbar editor={editor} />
 
-          <EditorContent editor={editor} className='content-input text-editor' />
+          <EditorContent
+            editor={editor}
+            className='content-input text-editor'
+          />
           <a
             onClick={() => {
               setContent("");

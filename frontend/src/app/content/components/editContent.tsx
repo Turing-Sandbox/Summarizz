@@ -21,7 +21,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 
 // Local Files (Import)
-import Navbar from "@/app/components/navbar";
+import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { Content } from "../models/Content";

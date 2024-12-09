@@ -11,7 +11,7 @@ import DOMPurify from "dompurify";
 import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
 
 // Local Components & Hooks
-import Navbar from "@/app/components/navbar";
+import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 
 // Models & Utils

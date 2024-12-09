@@ -10,7 +10,7 @@ import axios from "axios";
 import { UserPlusIcon } from "@heroicons/react/24/solid";
 
 // Local Files (Import)
-import Navbar from "@/app/components/navbar";
+import Navbar from "@/app/components/Navbar";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { Content } from "@/app/content/models/Content";
 import { User } from "../models/User";

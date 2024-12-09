@@ -1,5 +1,5 @@
 // src/modules/user/controllers/userController.ts
-import e, { Request, Response } from "express";
+import { Request, Response } from "express";
 import {
   createUser,
   getUser,
@@ -174,12 +174,17 @@ export async function changePasswordController(req: Request, res: Response) {
     res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: error.message || "Failed to update password" });
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to update password" });
   }
 }
 
 // Change Email/Username Controller
-export async function changeEmailUsernameController(req: Request, res: Response) {
+export async function changeEmailUsernameController(
+  req: Request,
+  res: Response
+) {
   const { userId } = req.params;
   const { currentPassword, newEmail, newUsername } = req.body;
 
@@ -188,15 +193,19 @@ export async function changeEmailUsernameController(req: Request, res: Response)
 
     // If a new email was requested, let the user know about the verification email
     if (newEmail) {
-      return res.status(200).json({
-        message: "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update."
+      res.status(200).json({
+        message:
+          "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update.",
       });
+      return;
     }
 
     // If only the username was changed
     res.status(200).json({ message: "Username updated successfully." });
   } catch (error: any) {
     console.error("Error updating email/username:", error);
-    res.status(500).json({ error: error.message || "Failed to update email/username" });
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to update email/username" });
   }
 }
