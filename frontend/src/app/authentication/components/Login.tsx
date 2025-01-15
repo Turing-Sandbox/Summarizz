@@ -8,6 +8,7 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/lib/firebaseClientConfig";
+import { OAuthButtons } from "./OAuthButtons";
 
 function Login() {
   const [error, setError] = useState("");
@@ -63,8 +64,8 @@ function Login() {
     <>
       <div className='container'>
         <div className='auth-box'>
-          <h1 className='auth-title summarizz-logo'>Summarizz</h1>
-          <form className='auth-form' onSubmit={handleSubmit}>
+          <h1 className='summarizz-logo auth-title'>Summarizz</h1>
+          <form onSubmit={handleSubmit}>
             <input
               type='email'
               value={user.email}
@@ -91,13 +92,17 @@ function Login() {
             <button type='submit' className='auth-button'>
               Login
             </button>
+
+            {/* ------------------------- OAUTH ------------------------- */}
+            <OAuthButtons />
           </form>
 
-          <a href='/authentication/register' className='auth-link'>
-            <p>
-              Don&apos;t have an account? <b>Register</b>
-            </p>
-          </a>
+          <p>
+            Don&apos;t have an account?{" "}
+            <a href='/authentication/register'>Register</a>
+            <br />
+            Forgot your password? <a>Reset your password.</a>
+          </p>
         </div>
       </div>
     </>

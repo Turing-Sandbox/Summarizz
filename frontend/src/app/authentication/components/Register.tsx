@@ -8,6 +8,7 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/lib/firebaseClientConfig";
+import { OAuthButtons } from "./OAuthButtons";
 
 function Register() {
   const [error, setError] = useState("");
@@ -80,8 +81,8 @@ function Register() {
     <>
       <div className='container'>
         <div className='auth-box'>
-          <h1 className='auth-title summarizz-logo'>Summarizz</h1>
-          <form className='auth-form' onSubmit={handleSubmit}>
+          <h1 className='summarizz-logo auth-title'>Summarizz</h1>
+          <form onSubmit={handleSubmit}>
             <input
               type='text'
               value={user.firstName}
@@ -142,13 +143,14 @@ function Register() {
             <button type='submit' className='auth-button'>
               Register
             </button>
+
+            {/* ------------------------- OAUTH ------------------------- */}
+            <OAuthButtons />
           </form>
 
-          <a href='/authentication/login' className='auth-link'>
-            <p>
-              Already have an account? <b>Login</b>
-            </p>
-          </a>
+          <p>
+            Already have an account? <a href='/authentication/login'>Login</a>
+          </p>
         </div>
       </div>
     </>
