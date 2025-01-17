@@ -1,5 +1,5 @@
 ###
-GET http://localhost:3000/content/1
+GET http://localhost:3000/content/sLEehwKtpvnKyA9z5xoV
 ###
 PUT localhost:3000/content/editThumbnail/MQhI7AISGMU8kRGZvqD5/LEwlA1KMRDeKzeknqM0srxOAmc42
 Content-Type: application/json

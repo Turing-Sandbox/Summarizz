@@ -1,12 +1,11 @@
-// components/Comments.js
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/app/hooks/AuthProvider";
 import { Comment } from '@/app/content/models/Comment'
-import {redirect, useParams} from "next/navigation";
-import {PencilIcon, TrashIcon, DocumentPlusIcon} from "@heroicons/react/24/solid";
-import {XCircleIcon} from "@heroicons/react/24/outline";
+import { redirect, useParams } from "next/navigation";
+import { PencilIcon, TrashIcon, DocumentPlusIcon } from "@heroicons/react/24/solid";
+import { XCircleIcon } from "@heroicons/react/24/outline";
 
 const CommentList = () => {
     const [comments, setComments] = useState<Comment[]>([]);
@@ -18,11 +17,7 @@ const CommentList = () => {
     const userId = auth.userUID;
     const postId = useParams().id;
 
-    // function transformComments(){
-    //
-    // }
-
-    async function refreshComments(){
+    async function refreshComments() {
         setLoading(true);
         try {
             const response = await axios.get(`${apiURL}/comment/comments/${postId}`);
@@ -31,19 +26,15 @@ const CommentList = () => {
                 console.log("refresh response: ", response.data)
 
                 let commentArray: Comment[] = []
-                if (Array.isArray(response.data)){
+                if (Array.isArray(response.data)) {
                     console.log("is array: ", response.data)
                     const responseArray = response.data
-                    responseArray.forEach((c) =>{
+                    responseArray.forEach((c) => {
                         commentArray.push(Object.values(c) as unknown as Comment)
                     })
                 } else {
                     console.log("is NOT array: ", response.data)
                     commentArray = Object.values(response.data) as unknown as Comment[]
-                    // for (const comm of commentArray){
-                    //     const res = await axios.get(`${apiURL}/user/${comm.owner_id}`)
-                    //     console.log(res)
-                    // }
                 }
 
                 console.log("refreshComments Response.data: ", commentArray)
@@ -92,7 +83,7 @@ const CommentList = () => {
         }
     };
 
-    const handleDeleteComment = async (id:string) => {
+    const handleDeleteComment = async (id: string) => {
         if (!userId) redirect(`../authentication/login`);
         try {
             await axios.delete(`${apiURL}/comment/comments/${postId}/${id}/${userId}`);
@@ -102,7 +93,6 @@ const CommentList = () => {
         await refreshComments()
     };
 
-    // Render loading state or comments
     if (loading) return <p>Loading comments...</p>;
 
     return (
@@ -110,14 +100,14 @@ const CommentList = () => {
             <div className={"comment-row-1"}>
                 <h1>Add new comment:</h1>
                 <form onSubmit={handleAddComment} className={"create-comment"}>
-                <textarea
-                    className={"comment-create-textarea"}
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                />
+                    <textarea
+                        className={"comment-create-textarea"}
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                    />
                     <button type="submit" className={"icon-button"}>
-                        <DocumentPlusIcon className={"add-button"}/>
+                        <DocumentPlusIcon className={"add-button"} />
                     </button>
                 </form>
             </div>
@@ -134,12 +124,12 @@ const CommentList = () => {
                                         <p>Edit comment:</p>
                                         <div>
                                             <button type={"submit"} className={"icon-button"}>
-                                                <DocumentPlusIcon className={"icon add"}/>
+                                                <DocumentPlusIcon className={"icon add"} />
                                             </button>
                                             <button onClick={() => {
                                                 setEditingCommentId(null)
                                             }} className={"icon-button"}>
-                                                <XCircleIcon className={"icon cancel"}/>
+                                                <XCircleIcon className={"icon cancel"} />
                                             </button>
                                         </div>
                                     </div>
@@ -156,21 +146,21 @@ const CommentList = () => {
                                         <div className={"comment-info-container"}>
                                             <h4 className={"comment-username"}>{comment.username} says:</h4>
                                             {comment.owner_id === userId ? (
-                                                    <div className={"comment-icons"}>
-                                                        <button className={"icon-button"} onClick={
-                                                            () => {
-                                                                setEditingCommentId(comment.comment_id);
-                                                                setEditingCommentText(comment.text);
-                                                            }
-                                                        }>
-                                                            <PencilIcon className={"icon edit"}/>
-                                                </button>
-                                                <button className={"icon-button"}
+                                                <div className={"comment-icons"}>
+                                                    <button className={"icon-button"} onClick={
+                                                        () => {
+                                                            setEditingCommentId(comment.comment_id);
+                                                            setEditingCommentText(comment.text);
+                                                        }
+                                                    }>
+                                                        <PencilIcon className={"icon edit"} />
+                                                    </button>
+                                                    <button className={"icon-button"}
                                                         onClick={() => handleDeleteComment(comment.comment_id)}>
-                                                    <TrashIcon className={"icon delete"}/>
-                                                </button>
-                                            </div>)
-                                            : (<></>)}
+                                                        <TrashIcon className={"icon delete"} />
+                                                    </button>
+                                                </div>)
+                                                : (<></>)}
                                         </div>
                                         <p>{comment.text}</p>
                                     </div>

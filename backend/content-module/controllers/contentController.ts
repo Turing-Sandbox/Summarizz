@@ -174,8 +174,8 @@ export class ContentController {
     const { userId, contentId} = req.params;
     try {
 
-      const confirmation = await axios.get(`content/${contentId}`)
-      const owner_id = confirmation.data.creatorUID
+      const confirmation = await ContentService.getContent(contentId)
+      const owner_id = confirmation.creatorUID
       if (userId == owner_id) {
 
         const response = await ContentService.deleteContent(userId, contentId);

@@ -117,7 +117,6 @@ export default function ViewContent({ id }: ViewContentProps) {
   const handleDelete = async () => {
     if (localStorage.getItem('userUID') === content?.creatorUID) {
       try {
-        // alert(true)
         console.log("deleting...")
         const user_id = content?.creatorUID;
         await axios.delete(`${apiURL}/comment/post/${content.id}/${user_id}`);
@@ -292,7 +291,8 @@ export default function ViewContent({ id }: ViewContentProps) {
   };
 
   const editContent = () => {
-    redirect(`edit/${content?.id}`)
+    if (content?.creatorUID === userUID) redirect(`edit/${content?.id}`)
+    else throw Error("You cannot edit this content")
   }
   
   // --------------------------------------

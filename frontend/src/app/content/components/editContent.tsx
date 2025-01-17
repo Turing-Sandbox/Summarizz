@@ -60,20 +60,24 @@ export default function EditContent() {
   // ---------------------------------------
   // ----------- Event Handlers ------------
   // ---------------------------------------
+
+  /**
+   * This useEffect retrieves the content data from the database and uses it to populate the editor fields.
+   */
   useEffect(() => {
     const getContent = async () => {
       console.log(contentId)
       try {
-        const res = await axios.get(`${apiURL}/content/${contentId}`);
+        const res = await axios.get(`${apiURL}/content/${contentId}`); // request page by id
         const data = res.data;
-        console.log(data)      // setPage(data)
-        setPage(data)
-        setTitle(data.title)
-        setContent(data.content)
+        console.log(data)
+        setPage(data) // set page to the retrieved page
+        setTitle(data.title) // set title to the title of the retrieved page
+        setContent(data.content) // set the text body of the page to the content of the retrieved page
         if (page?.content) {
           setContent(page.content);
           if (editor) {
-            editor.commands.setContent(page.content);
+            editor.commands.setContent(page.content); // populate the editor with the content of the page
           }
         }
       } catch (error) {
@@ -81,18 +85,15 @@ export default function EditContent() {
       }
     }
 
-    getContent()
-    // const savedTitle = localStorage.getItem("title");
-    // const savedContent = Cookies.get("content");
-
+    getContent() // call the getContent method.
     if (page?.title) {
-      setTitle(page.title);
+      setTitle(page.title); // populate the editor's title field with the title of the page
     }
 
     if (page?.content) {
       setContent(page.content);
       if (editor) {
-        editor.commands.setContent(page.content);
+        editor.commands.setContent(page.content); // populate the editor's text body with the content of the page
       }
     }
 
@@ -106,8 +107,12 @@ export default function EditContent() {
       if (editor) {
         editor.commands.setContent(page.content);
       }
+      if (!auth.getUserUID() || auth.getUserUID() != page?.creatorUID){
+        router.replace(`../../content/${contentId}`)
+      }
     }
   }, [editor, page]);
+
 
 
   // ---------------------------------------
@@ -179,7 +184,7 @@ export default function EditContent() {
         )
         localStorage.removeItem("title");
         Cookies.remove("content");
-        router.replace(`../../content/${contentId}?${Date.now()}`)
+        router.replace(`../../content/${contentId}`)
       } catch (e){
         throw new Error(e instanceof Error ? e.message : String(e))
       }
