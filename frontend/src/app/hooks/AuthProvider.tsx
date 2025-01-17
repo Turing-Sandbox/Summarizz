@@ -1,83 +1,91 @@
-import { useContext, createContext } from "react";
-import PropTypes from "prop-types";
-import { ReactNode } from "react";
-import { useRouter } from "next/navigation";
+"use client";
 
-// ---------------------------------------
-// -------------- INTERFACE --------------
-// ---------------------------------------
+import { useContext, createContext, useState, useEffect, ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import PropTypes from "prop-types";
+import { User, onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/app/lib/firebaseClientConfig";
+
 interface AuthContextType {
   userUID: string | null;
-  setUserUID: (arg0: string) => void;
-  getUserUID: () => string | null;
-
   token: string | null;
-  setToken: (arg0: string) => void;
+  user: User | null;
+  loading: boolean; // New loading state
+
+  setToken: (token: string) => void;
   getToken: () => string | null;
 
   login: (token: string, userUID: string) => void;
   logout: () => void;
 }
 
-// -------------------------------------
-// -------------- CONTEXT --------------
-// -------------------------------------
 const AuthContext = createContext<AuthContextType>({
   userUID: null,
-  setUserUID: () => {},
-  getUserUID: () => null,
-
   token: null,
+  user: null,
+  loading: true, // Default loading state
   setToken: () => {},
   getToken: () => null,
-
   login: () => {},
-  logout: () => {},
+  logout: () => {}
 });
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // ---------------------------------------
-  // -------------- Variables --------------
-  // ---------------------------------------
   const router = useRouter();
 
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
-  function setUserUID(userUID: string) {
-    localStorage.setItem("userUID", userUID);
-  }
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
+  const [token, setTokenState] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  function getUserUID() {
-    return localStorage.getItem("userUID");
-  }
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) setTokenState(storedToken);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user);
+      if (user) {
+        localStorage.setItem("userUID", user.uid);
+      } else {
+        localStorage.removeItem("userUID");
+      }
+      setLoading(false); // Auth state loaded, set loading to false
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   function setToken(token: string) {
+    setTokenState(token);
     localStorage.setItem("token", token);
   }
 
   function getToken() {
-    return localStorage.getItem("token");
+    return token;
   }
 
   function login(token: string, userUID: string) {
     setToken(token);
-    setUserUID(userUID);
+    localStorage.setItem("userUID", userUID);
   }
 
   function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userUID");
-    router.push("/authentication/login");
+    auth.signOut().then(() => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userUID");
+      setTokenState(null);
+      router.push("/authentication/login");
+    });
   }
 
   return (
     <AuthContext.Provider
       value={{
-        userUID: getUserUID(),
-        token: getToken(),
-        setUserUID,
-        getUserUID,
+        userUID: firebaseUser ? firebaseUser.uid : null,
+        token,
+        user: firebaseUser,
+        loading,
         setToken,
         getToken,
         login,
@@ -95,6 +103,4 @@ AuthProvider.propTypes = {
 
 export default AuthProvider;
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);

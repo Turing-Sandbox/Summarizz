@@ -1,7 +1,7 @@
 "use client";
 
 import Background from "./components/Background";
-import { Footer } from "./components/Footer";
+import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
 import AuthProvider from "./hooks/AuthProvider";
 
@@ -17,7 +17,7 @@ export default function Page() {
           <p>Summarize your articles, videos, and more with ease.</p>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </AuthProvider>
   );
 }

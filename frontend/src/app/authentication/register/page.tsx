@@ -2,7 +2,7 @@
 
 import Register from "@/app/authentication/components/Register";
 import Background from "@/app/components/Background";
-import { Footer } from "@/app/components/Footer";
+import Footer from "@/app/components/Footer";
 import AuthProvider from "@/app/hooks/AuthProvider";
 import "../styles/authentication.scss";
 

@@ -39,6 +39,7 @@ frontend/*.iml
 frontend/.vscode
 frontend/.vscode/*
 frontend/.env
+frontend/.env.local
 
 .idea/*
 .idea
