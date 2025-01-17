@@ -16,11 +16,23 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 
 // Models & Utils
 import { User } from "@/app/profile/models/User";
+
+import { apiURL } from "@/app/scripts/api";
+import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
+import DOMPurify from "dompurify";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { Content } from "../models/Content";
 import { apiURL } from "@/app/scripts/api";
 
 // Styles
 import "../styles/viewContent.scss";
+
+import { redirect } from "next/navigation";
+import {Comment} from "@/app/content/models/Comment";
+import CommentList from "@/app/content/components/CommentList";
+
 
 interface ViewContentProps {
   id: string;
@@ -42,6 +54,13 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   // const [error, setError] = useState("");
+
+
+  const { userUID } = useAuth(); // Get logged in user's UID
+
+  // ---------------------------------------
+  // -------------- Page INIT --------------
+  // ---------------------------------------
 
   const hasFetchedData = useRef(false);
   const router = useRouter();
@@ -119,7 +138,8 @@ export default function ViewContent({ id }: ViewContentProps) {
         setCreator(res.data);
 
       }).catch((error) => {
-        console.error("Error fetching user info:", error);
+
+        throw Error("Error fetching user info:", error);
 
       });
     }
@@ -140,7 +160,8 @@ export default function ViewContent({ id }: ViewContentProps) {
         setUser(res.data);
 
       }).catch((error) => {
-        console.error("Error fetching logged in user:", error);
+
+        throw Error("Error fetching logged in user:", error);
 
       });
     }
@@ -158,15 +179,19 @@ export default function ViewContent({ id }: ViewContentProps) {
   const handleDelete = async () => {
     if (localStorage.getItem('userUID') === content?.creatorUID) {
       try {
+
         const user_id = content?.creatorUID;
+        await axios.delete(`${apiURL}/comment/post/${content.id}/${user_id}`);
+
         const content_id = content?.id;
-        if (content?.thumbnail) {
-          const file_path = decodeURIComponent(content.thumbnail.split('/o/')[1].split('?')[0]);
-          await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`);
 
+        if (content.thumbnail) {
+          // console.log("deleting but with thumbnail")
+          const file_path = decodeURIComponent(content?.thumbnail.split('/o/')[1].split('?')[0]);
+          await axios.delete(`${apiURL}/content/${user_id}/${content_id}/${file_path}`)
         } else {
-          await axios.delete(`${apiURL}/content/${user_id}/${content_id}`);
-
+          // console.log("deleting but without thumbnail")
+          await axios.delete(`${apiURL}/content/${user_id}/${content_id}`)
         }
 
       } catch (error) {
@@ -321,12 +346,15 @@ export default function ViewContent({ id }: ViewContentProps) {
    * Redirects user to the edit page for the current content.
    */
   const editContent = () => {
-    router.push(`edit/${content?.id}`);
-  };
 
-  // ---------------------------------------
-  // --------------- Render ----------------
-  // ---------------------------------------
+    if (content?.creatorUID === userUID) redirect(`edit/${content?.id}`)
+    else throw Error("You cannot edit this content")
+  }
+  
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
+
   return (
     <>
       <Navbar />
@@ -431,6 +459,11 @@ export default function ViewContent({ id }: ViewContentProps) {
             {formatedContent ? (
               <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
             ) : ""}
+          </div>
+
+          <div className={'col-3'}>
+            {/*Comment form*/}
+            <CommentList/>
           </div>
         </div>
       </div>

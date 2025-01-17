@@ -1,5 +1,8 @@
 "use client";
 
+import Navbar from "@/app/components/Navbar";
+import { useAuth } from "@/app/hooks/AuthProvider";
+import "../styles/createContent.scss";
 // React & NextJs (Import)
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -73,6 +76,7 @@ export default function EditContent() {
     },
   });
 
+
   // EFFECT: Handle User Authentication
   useEffect(() => {
     if (!loading && !user) {
@@ -82,6 +86,8 @@ export default function EditContent() {
 
   // EFFECT: Fetch Content once Editor and User are ready
   useEffect(() => {
+
+
     if (!loading && user && editor) {
       const getContent = async () => {
         try {
@@ -101,6 +107,10 @@ export default function EditContent() {
     }
   }, [editor, loading, user, contentId]);
 
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
+  
   /**
    * handleThumbnailChange() -> void
    * 

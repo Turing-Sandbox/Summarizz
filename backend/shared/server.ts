@@ -8,7 +8,7 @@ import userRoutes from "../user-module/routes/userRoutes";
 import commentRoutes from "../comment-module/routes/commentRoutes";
 
 const app = express();
-const port = 3000;
+const port = 5000;
 app.use(cors());
 app.use(express.json());
 

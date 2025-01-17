@@ -1,9 +1,9 @@
 ###
-GET http://localhost:3000/comment/comments/0
+GET http://localhost:3000/comment/comments/j8YDj1EQzlbtEA9uHQeM
 
 ###
 
-POST http://localhost:3000/comment/comments/1/
+POST http://localhost:3000/comment/comments/s81t5HqvejrWSVL27RIM
 Content-Type: application/json
 
 {
