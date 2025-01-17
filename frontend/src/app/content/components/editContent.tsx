@@ -1,7 +1,5 @@
 "use client";
 
-import Navbar from "@/app/components/Navbar";
-import { useAuth } from "@/app/hooks/AuthProvider";
 import "../styles/createContent.scss";
 // React & NextJs (Import)
 import { useEffect, useState } from "react";

@@ -16,13 +16,6 @@ import { useAuth } from "@/app/hooks/AuthProvider";
 
 // Models & Utils
 import { User } from "@/app/profile/models/User";
-
-import { apiURL } from "@/app/scripts/api";
-import { BookmarkIcon, HeartIcon, ShareIcon, TrashIcon, UserPlusIcon, PencilIcon } from "@heroicons/react/24/solid";
-import axios from "axios";
-import DOMPurify from "dompurify";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import { Content } from "../models/Content";
 import { apiURL } from "@/app/scripts/api";
 
@@ -53,10 +46,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  // const [error, setError] = useState("");
 
-
-  const { userUID } = useAuth(); // Get logged in user's UID
 
   // ---------------------------------------
   // -------------- Page INIT --------------
