@@ -1,0 +1,262 @@
+.content-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+
+.row {
+  display: flex;
+  gap: 20px;
+}
+
+.spliter {
+  height: 150px;
+  width: 1px;
+  background-color: var(--input-border-color);
+}
+
+.col-1 {
+  width: 40%;
+}
+
+.col-2 {
+  width: 30%;
+}
+
+.col-3 {
+  width: 30%;
+  max-width: 30%;
+  height: 530px;
+  max-height: 530px;
+  border-radius: 15px;
+  padding-bottom: 3rem;
+  overflow: hidden;
+  word-break: break-word;
+}
+.comment-row-1{
+  //padding-top: 12px;
+  height: fit-content;
+  min-height: 30%;
+}
+.comment-row-2{
+  height: 70%;
+  max-height: 400px;
+  margin-bottom: 120px;
+  overflow: auto;
+}
+
+.comment-row-1, .comment-row-2{
+  background-color: var(--comment-background-color);
+  padding: 0 0 0 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 15px;
+}
+
+.comment{
+  display: flex;
+  flex-direction: column;
+  background-color: var(--comment-background-color);
+  padding: 1rem 1rem;
+  margin: 10px;
+  border-radius: 15px;
+  border: 1px solid gray;
+}
+
+.create-comment{
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.create-comment > textarea {
+  width: 70%;
+  border: none;
+}
+
+.comment > p{
+  background-color: var(--comment-text-color);
+  max-width: 100%;
+  //margin: 10px 10px;
+  padding: 30px 5px;
+  border-radius: 15px;
+}
+
+.comment-info-container{
+  display: flex;
+  //flex-direction: row-reverse;
+  justify-content: space-between;
+}
+
+.comment-username{
+  font-weight: bolder;
+  margin: 0px;
+  //padding-right: 3rem;
+  display: inline-block;
+}
+
+.thumbnail {
+  width: 100%;
+  height: 300px;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: var(--tile-color);
+}
+
+/* Username and follow button container */
+.username-follow {
+  display: inline-flex; /* Align username and icon horizontally */
+  align-items: center;
+  gap: 5px; /* Space between username and icon */
+}
+
+/* Follow button styles */
+.icon-button.follow {
+  padding: 0;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Follow icon styles */
+.icon.follow {
+  width: 16px; /* Match other icons */
+  height: 16px; /* Match other icons */
+  color: #7D7F7C; /* Default gray */
+}
+
+.icon.follow.following {
+  color: black; /* Black when following */
+}
+
+/* Common styles for the like and bookmark buttons */
+.icon-container {
+  display: inline-flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.icon-button {
+  padding: 0;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px; /* Space between icon and text */
+}
+
+.add-button{
+  color: #7D7F7C; /* Default gray color */
+  transition: all ease-out 0.3s;
+  width: 48px;
+  height: 48px;
+}
+
+.add-button:hover{
+  transition: all ease-out 0.1s;
+  width : 48px;
+  height: 48px;
+  color: var(--add-hover-color);
+  border: 3px solid var(--add-hover-color);
+  border-radius: 15px;
+}
+
+h1{
+  padding-top: 10px;
+}
+
+/* Icon styles */
+.icon {
+  width: 16px; /* Match h-4 in Tailwind */
+  height: 16px; /* Match w-4 in Tailwind */
+  color: #7D7F7C; /* Default gray color */
+  transition: all ease-out 0.3s;
+}
+
+.icon:hover{
+  color: var(--icon-hover-color);
+  width: 24px;
+  height: 24px;
+}
+
+.icon.liked {
+  color: black; /* Black when liked */
+}
+
+.icon.bookmarked {
+  color: black; /* Black when bookmarked */
+}
+
+.icon.share:hover{
+  color: var(--edit-hover-color);
+}
+
+.icon.like:hover{
+  color: var(--edit-hover-color);
+}
+
+.icon.delete:hover{
+  color: var(--delete-hover-color);
+}
+
+.icon.edit:hover{
+  color: var(--edit-hover-color);
+}
+
+.icon.add:hover{
+  color: var(--add-hover-color);
+}
+
+.icon.cancel:hover{
+  color: var(--cancel-hover-color);
+}
+
+.icon.counter {
+  font-size: 12px; /* Small text */
+  margin-top: 0; /* No extra spacing above */
+  display: none; // same thing as the line below, just doesnt take space until it's visible
+}
+
+.icon.counter.visible {
+  display: inline; // same thing as the line below, but since i set display:none i need to undo that
+}
+
+.comment-edit-textarea, .comment-create-textarea{
+  background-color: var(--comment-text-color);
+  color: var(--text-color);
+  padding: 1rem;
+}
+
+.comment-icons-edit{
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.comment-icons-edit > p{
+  font-weight: bolder;
+  font-size: larger;
+}
+
+// media queries
+@media screen and (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .col-1 {
+    width: 100%;
+  }
+
+  .col-2 {
+    width: 100%;
+  }
+
+  .col-3{
+    width: 100%;
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,53 @@
+// LIGHT MODE
+:root {
+  --background-color: #d9d9d9;
+  --text-color: #2a2a2a;
+  --tile-color: rgba(176, 176, 176, 0.5);
+  --input-field-color: rgba(255, 255, 255, 0.25);
+  --input-border-color: rgba(0, 0, 0, 0.25);
+  --comment-background-color: rgb(218, 212, 210);
+  --comment-text-color: rgb(255, 255, 255);
+  --icon-hover-color: rgb(70, 70, 70);
+  --delete-hover-color: #ff5656;
+  --like-hover-color: #fa4d8a;
+  --edit-hover-color: #ff8500;
+  --add-hover-color: #2d559f;
+  --share-hover-color: rgb(37, 80, 251);
+  --cancel-hover-color: #d66397;
+
+
+  // Background color
+  --left-bottom-rectangle: #7e5c47;
+  --left-top-rectangle: #765846;
+  --middle-bottom-circle: #837977;
+  --right-top-circle: #948a88;
+
+  // Shadow color
+  --shadow-color: rgba(255, 255, 255, 0.25);
+}
+
+// DARK MODE
+[data-theme="dark"] {
+  --background-color: #2a2a2a;
+  --text-color: #ffffff;
+  --tile-color: rgba(42, 42, 42, 0.8);
+  --input-field-color: rgba(0, 0, 0, 0.25);
+  --input-border-color: rgba(255, 255, 255, 0.25);
+  --comment-background-color: rgb(41, 41, 41);
+  --comment-text-color: rgba(0, 0, 0, 0.25);
+  --icon-hover-color: rgb(200, 200, 200);
+  --delete-hover-color: #d66363;
+  --like-hover-color: #fa4d8a;
+  --edit-hover-color: #d69d63;
+  --add-hover-color: #8e9cff;
+  --share-hover-color: rgb(37, 80, 251);
+  --cancel-hover-color: #d66397;
+
+  // Background color
+  --left-bottom-rectangle: #7e5c47;
+  --left-top-rectangle: #765846;
+  --middle-bottom-circle: #726967;
+  --right-top-circle: #6b615f;
+
+  --shadow-color: rgba(0, 0, 0, 0.25);
+}

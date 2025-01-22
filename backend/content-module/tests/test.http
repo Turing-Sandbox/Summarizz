@@ -1,0 +1,58 @@
+###
+GET http://localhost:3000/content/sLEehwKtpvnKyA9z5xoV
+###
+PUT localhost:3000/content/editThumbnail/MQhI7AISGMU8kRGZvqD5/LEwlA1KMRDeKzeknqM0srxOAmc42
+Content-Type: application/json
+
+{
+  "data": {}
+}
+
+###
+
+###
+DELETE http://localhost:3000/content/OcrRfUsHhm3eM7IToYb5/
+###
+
+###
+GET http://localhost:3000/user/LEwlA1KMRDeKzeknqM0srxOAmc42
+###
+
+###
+GET http://localhost:3000/content/MQhI7AISGMU8kRGZvqD5
+###
+
+###
+GET http://localhost:3000/user/LEwlA1KMRDeKzeknqM0srxOAmc42
+###
+
+###
+
+POST http://localhost:3000/comment/comments/1/
+Content-Type: application/json
+
+{
+"owner_id":"Attempt 3",
+"text":"this is a comment under a post 3"
+}
+###
+GET http://localhost:3000/comment/comments/1/-ODBlvPvGSUWhzHr4nOi
+
+###
+
+GET http://localhost:3000/comment/comments/1
+
+###
+
+DELETE http://localhost:3000/comment/post/1
+
+###
+PUT localhost:3000/content/editThumbnail/MQhI7AISGMU8kRGZvqD5
+Content-Type: application/json
+
+{
+  "owner_id": "This is an edited owner",
+  "text":"this is an edited comment!!"
+}
+
+###

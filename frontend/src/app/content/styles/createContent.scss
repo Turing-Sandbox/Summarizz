@@ -1,0 +1,131 @@
+@use "../../styles/colors.scss";
+
+form {
+  display: flex;
+  flex-direction: column;
+  // space between items evenly based on the available space
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-button {
+  width: 49%;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 20px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.left-button {
+  background-color: var(--input-background-color);
+}
+
+.content-button:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
+}
+
+.content-input {
+  width: 100%;
+
+  padding: 0.8rem;
+  box-sizing: border-box;
+
+  font-size: large;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
+  color: var(--text-color);
+}
+
+.text-editor {
+  border-radius: 0 0 10px 10px;
+}
+
+.clear-button {
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  margin: 5px 5px 20px auto;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.content-file-upload {
+  display: inline-block;
+  width: 30%;
+
+  margin-right: 20px;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.content-file-upload:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
+}
+
+.thumbnail-preview {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  margin-bottom: -1rem;
+}
+
+
+.summary-container {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin: 20px 0;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.summary-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+  text-align: center;
+}
+
+.summary-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+  text-align: justify;
+}
+
+.summary-content p {
+  margin: 10px 0;
+}
