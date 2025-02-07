@@ -1,36 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles/authentication.scss";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/lib/firebaseClientConfig";
 import { OAuthButtons } from "./OAuthButtons";
 
-function Register() {
+function Login() {
   const [error, setError] = useState("");
   const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
-    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
 
   const router = useRouter();
   const authContext = useAuth();
-
-  useEffect(() => {
-    if (user.password !== user.confirmPassword) {
-      setError("Passwords do not match");
-    } else {
-      setError("");
-    }
-  }, [user.password, user.confirmPassword]);
 
   // If user is already logged in, redirect to homepage
   useEffect(() => {
@@ -47,13 +35,8 @@ function Register() {
     e.preventDefault();
     setError("");
 
-    if (user.password !== user.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
     try {
-      const res = await axios.post(`${apiURL}/user/register`, user);
+      const res = await axios.post(`${apiURL}/user/login`, user);
       if (res.status === 200 || res.status === 201) {
         const userUID = res.data.userUID;
         const token = res.data.token;
@@ -84,37 +67,11 @@ function Register() {
           <h1 className='summarizz-logo auth-title'>Summarizz</h1>
           <form onSubmit={handleSubmit}>
             <input
-              type='text'
-              value={user.firstName}
-              onChange={handleChange}
-              name='firstName'
-              placeholder='First Name'
-              className='auth-input'
-              required
-            />
-            <input
-              type='text'
-              value={user.lastName}
-              onChange={handleChange}
-              name='lastName'
-              placeholder='Last Name'
-              className='auth-input'
-              required
-            />
-            <input
-              type='text'
-              value={user.username}
-              onChange={handleChange}
-              name='username'
-              placeholder='Username'
-              className='auth-input'
-              required
-            />
-            <input
               type='email'
               value={user.email}
               onChange={handleChange}
               name='email'
+              id='email'
               placeholder='Email'
               className='auth-input'
               required
@@ -124,16 +81,8 @@ function Register() {
               value={user.password}
               onChange={handleChange}
               name='password'
+              id='password'
               placeholder='Password'
-              className='auth-input'
-              required
-            />
-            <input
-              type='password'
-              value={user.confirmPassword}
-              onChange={handleChange}
-              name='confirmPassword'
-              placeholder='Confirm Password'
               className='auth-input'
               required
             />
@@ -141,7 +90,7 @@ function Register() {
             {error && <p className='auth-error'>{error}</p>}
 
             <button type='submit' className='auth-button'>
-              Register
+              Login
             </button>
 
             {/* ------------------------- OAUTH ------------------------- */}
@@ -152,19 +101,19 @@ function Register() {
           {/* ------------------------- OAUTH ------------------------- */}
           {/* --------------------------------------------------------- */}
 
-
           {/* --------------------------------------------------------- */}
           {/* ------------------------- OAUTH ------------------------- */}
           {/* --------------------------------------------------------- */}
-
           <p>
-            Already have an account? <a href='/authentication/login'>Login</a>
+            Don&apos;t have an account?{" "}
+            <a href='/authentication/register'>Register</a>
+            <br />
+            Forgot your password? <a>Reset your password.</a>
           </p>
-
         </div>
       </div>
     </>
   );
 }
 
-export default Register;
+export default Login;

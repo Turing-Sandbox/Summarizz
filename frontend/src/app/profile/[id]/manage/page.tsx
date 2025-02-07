@@ -1,9 +1,10 @@
 "use client";
 
-import Background from "@/app/components/Background";
-import Footer from "@/app/components/Footer";
-import AuthProvider from "@/app/hooks/AuthProvider";
-import ProfileManagement from "../../components/ProfileManagement";
+
+import AuthProvider from "@/hooks/AuthProvider";
+import ProfileManagement from "../../../../components/profile/ProfileManagement";
+import Background from "@/components/Background";
+import Footer from "@/components/Footer";
 
 /**
  * Page() -> JSX.Element

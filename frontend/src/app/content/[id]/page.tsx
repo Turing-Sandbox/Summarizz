@@ -1,10 +1,11 @@
 "use client";
 
-import Background from "@/app/components/Background";
-import Footer from "@/app/components/Footer";
-import AuthProvider from "@/app/hooks/AuthProvider";
+
+import AuthProvider from "@/hooks/AuthProvider";
 import { useParams } from "next/navigation";
-import ViewContent from "../components/viewContent";
+import ViewContent from "../../../components/content/viewContent";
+import Background from "@/components/Background";
+import Footer from "@/components/Footer";
 
 /**
  * Page() -> JSX.Element
