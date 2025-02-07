@@ -2,7 +2,7 @@
 
 
 import AuthProvider from "@/hooks/AuthProvider";
-import "../styles/authentication.scss";
+import "@/app/styles/authentication/authentication.scss";
 import Background from "@/components/Background";
 import Register from "@/components/authentication/Register";
 import Footer from "@/components/Footer";

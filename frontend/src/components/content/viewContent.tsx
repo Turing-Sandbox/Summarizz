@@ -26,7 +26,7 @@ import { Content } from "../../models/Content";
 import { apiURL } from "@/app/scripts/api";
 
 // Styles
-import "../styles/viewContent.scss";
+import "@/app/styles/content/viewContent.scss";
 
 import { redirect } from "next/navigation";
 import { Comment } from "@/models/Comment";

@@ -4,7 +4,7 @@ import Login from "@/components/authentication/Login";
 import Background from "@/components/Background";
 import Footer from "@/components//Footer";
 import AuthProvider from "@/hooks/AuthProvider";
-import "../styles/authentication.scss";
+import "@/app/styles/authentication/authentication.scss";
 
 export default function Page() {
   return (

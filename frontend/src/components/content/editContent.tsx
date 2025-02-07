@@ -1,6 +1,6 @@
 "use client";
 
-import "../styles/createContent.scss";
+import "@/src/styles/content/createContent.scss";
 // React & NextJs (Import)
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -24,11 +24,11 @@ import OrderedList from "@tiptap/extension-ordered-list";
 // Local Files (Import)
 import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
-import { Content } from "../../models/Content";
+import { Content } from "@/models/Content";
 import Toolbar from "./toolbar";
 
 // Stylesheets (Import)
-import "../styles/createContent.scss";
+import "@/app/styles/content/createContent.scss";
 import Navbar from "../Navbar";
 
 /**

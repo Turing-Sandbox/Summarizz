@@ -16,7 +16,7 @@ import { User } from "../../models/User";
 import { apiURL } from "@/app/scripts/api";
 
 // Stylesheets
-import "../styles/profile.scss";
+import "@/app/styles/profile/profile.scss";
 import Navbar from "../Navbar";
 
 interface ViewProfileProps {

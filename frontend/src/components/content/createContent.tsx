@@ -25,7 +25,7 @@ import { apiAIURL, apiURL } from "@/app/scripts/api";
 import Toolbar from "./toolbar";
 
 // Stylesheets (Import)
-import "../styles/createContent.scss";
+import "@/app/styles/content/createContent.scss";
 import Navbar from "../Navbar";
 
 /**

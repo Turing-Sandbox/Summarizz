@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import "../styles/authentication.scss";
+import "@/app/styles/authentication/authentication.scss";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/AuthProvider";

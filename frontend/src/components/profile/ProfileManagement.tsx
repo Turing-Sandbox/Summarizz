@@ -4,7 +4,7 @@ import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
 import { useState } from "react";
 //import "../styles/profile.scss";
-import "../styles/ProfileManagement.scss";
+import "@/app/styles/profile/ProfileManagement.scss";
 import { useAuth } from "@/hooks/AuthProvider";
 // import { auth } from "../../lib/firebaseClientConfig";
 import {
