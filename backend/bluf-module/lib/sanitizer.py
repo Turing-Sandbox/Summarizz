@@ -3,21 +3,6 @@ import unicodedata
 from urllib.parse import unquote
 from config.rich_logging import logger as log
 
-"""
-File: sanitizer.py
-Module: bluf-module
-Author: Muhammad Bilal Khan
-Description:
-    - This file contains functions to sanitize and clean input from POST requests for the AI.
-    - Functions should take in a string of text and return a sanitized string of text.
-        - The sanitized string will make it easier for the AI to generate a 2 paragraph summary.
-    - The function(s) should be able to handle only English text.
-License: MIT License
-Copyright (c) 2024 Turing Sandbox
-Modified History:
-    - 2024-12-04: Creation of the file.
-"""
-
 HTML_REGEX = re.compile("<.*?>")
 SPECIAL_CHARS_REGEX = re.compile("[^a-zA-Z0-9\\s]")
 HTML_ENTITIES_REGEX = [

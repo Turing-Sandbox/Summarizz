@@ -2,21 +2,6 @@ from pydantic import BaseModel, Field
 from typing import List
 from enum import Enum
 
-"""
-File: prompt.py
-Module: bluf-module
-Author: Muhammad Bilal Khan
-Description:
-    - This file contains the schema for the prompts used by the AI models.
-    -  The prompts are defined using the Pydantic BaseModel class.
-    
-License: MIT License
-Copyright (c) 2024 Turing Sandbox
-
-Modified History:
-    - 2024-11-01: Creation of the file.
-"""
-
 DEFAULT_PROMPT = """
 You are an expert summarization model, trained to create concise yet informative 
 summaries similar to Distill BERT. Your task is to generate summaries that capture 

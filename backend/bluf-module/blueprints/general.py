@@ -9,22 +9,6 @@ from config.rich_logging import logger as log
 from flask import jsonify, Response
 from flask_smorest import Blueprint
 
-"""
-File: general.py
-Module: bluf-module
-Author: Muhammad Bilal Khan
-Description:
-    - This file contains a blueprint for general API endpoints.
-    - The blueprint is defined using flask_smorest, and is documented using OpenAPI.
-    
-License: MIT License
-Copyright (c) 2024 Turing Sandbox
-
-Modified History:
-    - 2024-11-05: Creation of the file.
-"""
-
-
 general_bp = Blueprint("general", __name__, url_prefix="/api/v1", description="General BLUR API endpoints.")
 
 

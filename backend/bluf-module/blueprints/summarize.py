@@ -15,23 +15,6 @@ from flask import request, jsonify, Response
 from flask_smorest import Blueprint
 from werkzeug.utils import secure_filename
 
-"""
-File: summarize.py
-Module: bluf-module
-Author: Muhammad Bilal Khan
-Description:
-    - This file contains a blueprint for summarize API endpoints.
-    - The blueprint is defined using flask_smorest, and is documented using OpenAPI.
-    - The blueprint is responsible for handling any requests related to AI summarization.
-    - The blueprint is designed to be flexible and can be used for different types of summarization.
-    
-License: MIT License
-Copyright (c) 2024 Turing Sandbox
-
-Modified History:
-    - 2024-11-05: Creation of the file.
-"""
-
 summary_bp = Blueprint("summary", __name__, url_prefix="/api/v1", description="Summarize BLUR API endpoints.")
 
 
