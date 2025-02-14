@@ -35,6 +35,7 @@ Copyright (c) 2024 Turing Sandbox
 
 Modified History:
     - 2024-11-01: Creation of the file.
+    - 2025-11-02: Update LCSummarizerAI class to include summary generation with OpenAI, OpenRouter, and DeepSeek.
 """
 
 
@@ -55,4 +56,7 @@ class LCSummarizerAI(LLMChain):
         pass
 
     def __get_summary_with_openai(self, text: str) -> str:
+        pass
+
+    def __get_summary_with_deepseek(self, text: str) -> str:
         pass

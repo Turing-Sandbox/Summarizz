@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "bluf-module"
-version = "1.0.0"
-description = "Summarization and Quantification Module using AI with Python."
+version = "1.0.1"
+description = "Summarization and RAG Module using AI with Python."
 authors = ["Muhammad Bilal Khan <@Hi-kue>"]
 license = "MIT"
 readme = "README.md"
