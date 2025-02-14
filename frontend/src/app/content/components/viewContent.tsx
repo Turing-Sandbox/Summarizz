@@ -317,6 +317,12 @@ export default function ViewContent({ id }: ViewContentProps) {
         return;
       }
 
+      if (userUID === content.creatorUID) {
+        console.warn("You cannot follow yourself.");
+        alert("You can't follow yourself."); 
+        return;
+      }
+
       const action = isFollowing ? "unfollow" : "follow";
       const url = `${apiURL}/user/${userUID}/${action}/${content.creatorUID}`;
 
@@ -325,7 +331,6 @@ export default function ViewContent({ id }: ViewContentProps) {
 
     } catch (error) {
       console.error("Error following/unfollowing creator:", error);
-
     }
   };
 
