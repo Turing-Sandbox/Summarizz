@@ -1,44 +1,62 @@
-# External Dependencies (Imports)
-from openai import OpenAI, OpenAIError, APIError
-from langchain.chat_models import ChatOpenAI
+from typing import Optional
 from langchain.chains import LLMChain
-from langchain.llms import OpenAI
-from langchain.prompts import PromptTemplate
 from langchain.schema import (
-    AIMessage,
     HumanMessage,
     SystemMessage,
 )
+from langchain_core.language_models import BaseChatModel
 
-
-# Internal Dependencies (Imports)
 import os
 import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from lib.constants import LANGCHAIN_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY
 from config.rich_logging import logger as log
+from config.llm_config import Providers, ProviderConfig
+from models.prompt import DEFAULT_SYSTEM_PROMPT, DEFAULT_USER_PROMPT_FORMAT
 
 
-class LCSummarizerAI(LLMChain):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+class LCSummarizerAI:
+    def __init__(self, provider: Providers, model: Optional[str] = None):
+        self.provider = provider
+        self.model = model
+        self.config = self._get_provider_config()
+        self.llm = self._initialize_llm()
 
-    def __call__(self, inputs: dict[str, str]) -> str:
-        pass
+    def _get_provider_config(self) -> ProviderConfig:
+        if self.provider not in PROVIDER_CONFIG:
+            raise ValueError(f"Unsupported provider: {self.provider}")
 
-    def __parse(self, text: str) -> str:
-        pass
+        return PROVIDER_CONFIG[self.provider]
 
-    def __get_summary(self, text: str) -> str:
-        pass
+    def _initialize_llm(self) -> BaseChatModel:
+        try:
+            return self.config.model_class(
+                model_name=self.model or self.config.default_model,
+                api_key=self.config.api_key
+            )
 
-    def __get_summary_with_openrouter(self, text: str) -> str:
-        pass
+        except Exception as e:
+            log.error(f"Failed to initialize LLM for provider {self.provider}: {str(e)}")
+            raise ValueError(f"Failed to initialize LLM: {str(e)}")
 
-    def __get_summary_with_openai(self, text: str) -> str:
-        pass
+    def summarize(self, content: str) -> str:
+        if not content.strip():
+            raise ValueError("Content cannot be empty")
 
-    def __get_summary_with_deepseek(self, text: str) -> str:
-        pass
+        messages = [
+            SystemMessage(content=DEFAULT_SYSTEM_PROMPT),
+            HumanMessage(content=f"{DEFAULT_USER_PROMPT_FORMAT}\n\n"
+                                f"Content to summarize:\n{content}")
+        ]
+
+        try:
+            response = self.llm.generate([messages])
+            if not response.generations:
+                raise ValueError("No summary generated")
+
+            return response.generations[0][0].text
+
+        except Exception as e:
+            log.error(f"Something went wrong, error generating summary: {str(e)}")
+            raise ValueError(f"Failed to generate a valid summary: {str(e)}")

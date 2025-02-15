@@ -5,9 +5,13 @@ rich
 pydantic
 python-dotenv
 requests
-langchain
-langchain-openai
 openrouter
 openai
 marshmallow
 tiktoken
+langchain
+langchain-openai
+langchain-together
+langchain-groq
+langchain-together
+langchain_mistralai

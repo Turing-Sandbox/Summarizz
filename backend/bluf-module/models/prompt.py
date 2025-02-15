@@ -1,13 +1,24 @@
 from pydantic import BaseModel, Field
 from typing import List
-from enum import Enum
 
-DEFAULT_PROMPT = """
+DEFAULT_SYSTEM_PROMPT = """
+<system_prompt>
 You are an expert summarization model, trained to create concise yet informative 
 summaries similar to Distill BERT. Your task is to generate summaries that capture 
 the core meaning and key details while maintaining brevity and clarity.
+</system_prompt>
 
-Key Instructions:
+<instructions>
+Summarize any provided text to create a comprehensive summary using
+proper markdown formatting for titles, headers, and structure. The summary
+should reflect an in-depth understanding of the content while remaining
+accessible to a general audience. Use clear, concise language, ensuring the
+response maintains academic rigor while being easy to follow. Where relevant,
+include jot notes to break down complex concepts or highlight key points.
+The summary should be no longer than two paragraphs and should be filled with
+relevant information, insights, and conclusions. Consider the following 
+requirements:
+
 1. LENGTH CONSTRAINT: Provide a summary in exactly two paragraphs, with each paragraph containing 3-5 sentences.
 2. CONTENT REQUIREMENTS:
    - First paragraph: Introduce the main topic and provide essential context
@@ -28,9 +39,11 @@ Key Instructions:
    - Personal opinions
    - Vague statements
    - Excessive technical terminology
+</instructions>
 """
 
-USER_PROMPT_FORMAT = f"""
+DEFAULT_USER_PROMPT_FORMAT = f"""
+<context>
 Analyze the provided text and create a comprehensive two-paragraph summary 
 using proper markdown formatting for titles, headers, and structure. The 
 summary should reflect an in-depth understanding of the content while 
@@ -39,8 +52,9 @@ ensuring the response maintains academic rigor while being easy to follow.
 Where relevant, include jot notes to break down complex concepts or 
 highlight key points. The summary should be no longer than two paragraphs
 and should be filled with relevant information, insights, and conclusions.
+</context>
 
-Instructions:
+<instructions>
 Paragraph 1 (Context and Main Ideas):
 
 Summarize the broader context and the primary themes of the text.
@@ -55,8 +69,9 @@ Formatting Requirements:
 
 Use markdown to structure the response (e.g., headings, subheadings, bullet points).
 Add jot notes for clarity when appropriate, especially for lists, definitions, or nuanced details.
+</instructions>
 
-Response Format:
+<response_format>
 # Title
 
 ## Context and Main Ideas
@@ -74,21 +89,15 @@ Dive into specific details and insights, and the significance of the insights/fi
 - Bullet Points
 - Bullet Points
 - Bullet Points
+</response_format>
 """
 
-
-class Models(str, Enum):
-    LLAMA_3B_PREVIEW = "meta-llama/llama-3.2-3b-instruct:free"
-    GEMINI_FLASH_8B = "google/gemini-flash-1.5-8b-exp"
-    ZEPHYR_7B = "huggingfaceh4/zephyr-7b-beta:free"
-
-
 class Params(BaseModel):
-    model: str = Models.LLAMA_3B_PREVIEW
+    model: str
     temperature: float = Field(
         0.5,
-        description="Controls the randomness of the generated text. Lower values is "
-                    "more random, while higher values is more deterministic.",
+        description="Controls the randomness of the generated text. Lower values are "
+                    "more random, while higher values are more deterministic.",
         ge=0.0,
         le=1.0
     )
@@ -103,5 +112,5 @@ class Params(BaseModel):
 
 class Prompt(BaseModel):
     params: Params
-    user_prompt: str = USER_PROMPT_FORMAT
-    system_prompt: str = DEFAULT_PROMPT
+    user_prompt: str = DEFAULT_USER_PROMPT_FORMAT
+    system_prompt: str = DEFAULT_SYSTEM_PROMPT

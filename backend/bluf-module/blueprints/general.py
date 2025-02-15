@@ -34,3 +34,13 @@ def info() -> tuple[Response, int]:
         "version": "1.0.0",
         "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }), 200
+
+
+@general_bp.route("/health", methods=["GET"])
+def health() -> tuple[Response, int]:
+    log.info("SERVE: /api/v1/health GET (health route)")
+    return jsonify({
+        "status": 200,
+        "message": "BLUR API module is healthy and active.",
+        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }), 200
