@@ -1,9 +1,10 @@
 "use client";
 
-import Background from "@/app/components/Background";
-import Footer from "@/app/components/Footer";
-import AuthProvider from "@/app/hooks/AuthProvider";
-import EditContent from "../../components/editContent";
+
+import AuthProvider from "@/hooks/AuthProvider";
+import EditContent from "../../../../components/content/editContent";
+import Background from "@/components/Background";
+import Footer from "@/components/Footer";
 
 /**
  * Page() -> JSX.Element

@@ -1,4 +1,4 @@
-@use "../../styles/colors.scss";
+@use "@/app/styles/colors.scss";
 
 body,
 html {
@@ -37,7 +37,6 @@ a {
 
   text-align: center;
 
-  // margin: auto;
   display: flex;
   flex: 1;
   flex-direction: column;

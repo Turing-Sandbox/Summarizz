@@ -10,14 +10,14 @@ import axios from "axios";
 import { UserPlusIcon } from "@heroicons/react/24/solid";
 
 // Local Files (Import)
-import Navbar from "@/app/components/Navbar";
-import { useAuth } from "@/app/hooks/AuthProvider";
-import { Content } from "@/app/content/models/Content";
-import { User } from "../models/User";
+import { useAuth } from "@/hooks/AuthProvider";
+import { Content } from "@/models/Content";
+import { User } from "../../models/User";
 import { apiURL } from "@/app/scripts/api";
 
 // Stylesheets
-import "../styles/profile.scss";
+import "@/app/styles/profile/profile.scss";
+import Navbar from "../Navbar";
 
 interface ViewProfileProps {
   id: string;
@@ -41,10 +41,10 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // ---------------------------------------
   /**
    * hasFetchedData() -> void
-   * 
+   *
    * @description
    * Used to prevent fetching user data on page load.
-   * 
+   *
    * @returns void
    */
   const hasFetchedData = useRef(false);
@@ -58,45 +58,46 @@ export default function ViewProfile({ id }: ViewProfileProps) {
 
   /**
    * getUserInfo() -> void
-   * 
+   *
    * @description
    * Fetches user data from the backend using the id provided in the route, this
    * will fetch { firstName, lastName, bio, profileImage, followedBy, followRequests }
    * from the backend and set the user accordingly.
-   * 
+   *
    * @param userId - The id of the user to fetch
    */
   function getUserInfo(userId: string = id) {
-    axios.get(`${apiURL}/user/${userId}`).then((res) => {
-      setUser(res.data);
+    axios
+      .get(`${apiURL}/user/${userId}`)
+      .then((res) => {
+        setUser(res.data);
 
-      if (res.data?.content) {
-        for (let i = 0; i < res.data.content.length; i++) {
-          getContent(res.data.content[i]);
+        if (res.data?.content) {
+          for (let i = 0; i < res.data.content.length; i++) {
+            getContent(res.data.content[i]);
+          }
         }
-      }
 
-      if (userUID) {
-        setIsFollowing(res.data.followedBy?.includes(userUID)); // Logged-in user is following
-        setFollowRequested(res.data.followRequests?.includes(userUID)); // Follow request is pending
-      }
-
-    }).catch((error) => {
-      console.error("Error fetching user info:", error);
-
-    });
-  };
+        if (userUID) {
+          setIsFollowing(res.data.followedBy?.includes(userUID)); // Logged-in user is following
+          setFollowRequested(res.data.followRequests?.includes(userUID)); // Follow request is pending
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching user info:", error);
+      });
+  }
 
   /**
    * getContent() -> void
-   * 
+   *
    * @description
    * Fetches the content from the backend using the content id provided, this
-   * will fetch all information regarding the content, including but not limited 
-   * to{ creatorUID, title, content, thumbnail, dateCreated, readtime, likes, 
-   * peopleWhoLiked, bookmarkedBy } from the backend and set the content 
+   * will fetch all information regarding the content, including but not limited
+   * to{ creatorUID, title, content, thumbnail, dateCreated, readtime, likes,
+   * peopleWhoLiked, bookmarkedBy } from the backend and set the content
    * accordingly.
-   * 
+   *
    * @param contentId - The id of the content to fetch
    */
   function getContent(contentId: string) {
@@ -115,15 +116,15 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       fetchedContent.id = contentId;
       setContents((prevContents) => [...prevContents, fetchedContent]);
     });
-  };
+  }
 
   /**
    * handleFollow() -> void
-   * 
+   *
    * @description
    * Handles the follow/unfollow actions for the user, setting the isFollowing
    * state to the opposite of the current state.
-   * 
+   *
    * @returns void
    */
   const handleFollow = async () => {
@@ -132,15 +133,15 @@ export default function ViewProfile({ id }: ViewProfileProps) {
         console.error("User ID or Target User ID not available");
         return;
       }
-  
+
       if (userUID === user.uid) {
         console.warn("You cannot follow yourself.");
-        alert("You can't follow yourself."); 
+        alert("You can't follow yourself.");
         return;
       }
-  
+
       // Construct the appropriate URL based on the action
-      let url = ""; 
+      let url = "";
       if (isFollowing) {
         url = `${apiURL}/user/${userUID}/unfollow/user/${user.uid}`; // Unfollow
       } else if (user?.isPrivate && !isFollowing) {
@@ -148,9 +149,9 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       } else {
         url = `${apiURL}/user/${userUID}/follow/user/${user.uid}`; // Follow for public accounts
       }
-  
+
       await axios.post(url);
-      
+
       // Update state based on the action
       if (isFollowing) {
         setIsFollowing(false); // Unfollowed
@@ -159,7 +160,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       } else {
         setIsFollowing(true); // Followed
       }
-  
+
       console.log(`Action performed successfully.`);
     } catch (error) {
       console.error("Error following/unfollowing user:", error);
@@ -173,12 +174,12 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   //       console.error("User ID or Target ID not available");
   //       return;
   //     }
-  
+
   //     const url = `${apiURL}/user/${userUID}/request/${user.uid}`;
-  
+
   //     await axios.post(url);
   //     setFollowRequested(true); // Set request state
-  
+
   //     console.log("Follow request sent successfully.");
   //   } catch (error) {
   //     console.error("Error sending follow request:", error);
@@ -210,11 +211,13 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           </div>
 
           <div className='profile-banner-info'>
-            <div className="username-follow">
-              <h1 className="username">{user?.username}</h1>
+            <div className='username-follow'>
+              <h1 className='username'>{user?.username}</h1>
               <button
-                className={`icon-button follow ${isFollowing ? "following" : ""}`}
-                onClick={ handleFollow }                
+                className={`icon-button follow ${
+                  isFollowing ? "following" : ""
+                }`}
+                onClick={handleFollow}
                 title={
                   isFollowing
                     ? "Unfollow User"
@@ -242,7 +245,9 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           </div>
         </div>
 
-        <h2 className='section-title'>{contents.length === 1 ? "Content" : "Contents"}</h2>
+        <h2 className='section-title'>
+          {contents.length === 1 ? "Content" : "Contents"}
+        </h2>
         {contents.length === 0 ? (
           <h2>No content found</h2>
         ) : (
@@ -257,7 +262,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
                 <p>
                   {new Date(content.dateCreated).toLocaleString("en-US", {
                     month: "short",
-                  })} {" "}
+                  })}{" "}
                   {new Date(content.dateCreated).getDate()}
                   {content.readtime ? ` - ${content.readtime} min read` : ""}
                 </p>

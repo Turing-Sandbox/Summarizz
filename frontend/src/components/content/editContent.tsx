@@ -1,6 +1,6 @@
 "use client";
 
-import "../styles/createContent.scss";
+import "@/src/styles/content/createContent.scss";
 // React & NextJs (Import)
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -22,22 +22,22 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 
 // Local Files (Import)
-import Navbar from "@/app/components/Navbar";
-import { useAuth } from "@/app/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
-import { Content } from "../models/Content";
+import { Content } from "@/models/Content";
 import Toolbar from "./toolbar";
 
 // Stylesheets (Import)
-import "../styles/createContent.scss";
+import "@/app/styles/content/createContent.scss";
+import Navbar from "../Navbar";
 
 /**
  * EditContent() -> JSX.Element
- * 
+ *
  * @description
- * This function renders the Edit Content page, allowing users to edit their 
+ * This function renders the Edit Content page, allowing users to edit their
  * content with the ability to change the { title, content, and thumbnail }.
- *  
+ *
  * @returns JSX.Element
  */
 export default function EditContent() {
@@ -74,7 +74,6 @@ export default function EditContent() {
     },
   });
 
-
   // EFFECT: Handle User Authentication
   useEffect(() => {
     if (!loading && !user) {
@@ -84,8 +83,6 @@ export default function EditContent() {
 
   // EFFECT: Fetch Content once Editor and User are ready
   useEffect(() => {
-
-
     if (!loading && user && editor) {
       const getContent = async () => {
         try {
@@ -95,7 +92,6 @@ export default function EditContent() {
           setTitle(data.title);
           setContent(data.content);
           editor.commands.setContent(data.content);
-
         } catch (err: any) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           setError(err.message || "Failed to fetch content. Please try again.");
@@ -108,46 +104,49 @@ export default function EditContent() {
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
-  
+
   /**
    * handleThumbnailChange() -> void
-   * 
-   * @description 
-   * This function handles the file upload for the thumbnail, and sets the thumbnail preview 
+   *
+   * @description
+   * This function handles the file upload for the thumbnail, and sets the thumbnail preview
    * to the file that was uploaded. If the file is not an image, or one was not provided, it
    * will throw and error indicating that the thumbnail was not set and to try again.
-   * 
-   * @param e - Change Event for File 
+   *
+   * @param e - Change Event for File
    */
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
     if (file && file.type.startsWith("image/")) {
       setThumbnail(file);
       setThumbnailPreview(URL.createObjectURL(file));
-
     } else {
       setThumbnail(null);
       setThumbnailPreview(null);
-      setError("Please select a valid image file, thumbnail was not edited. Please Try again.");
+      setError(
+        "Please select a valid image file, thumbnail was not edited. Please Try again."
+      );
     }
   };
 
   /**
    * handleSubmit() -> async
-   * 
+   *
    * @description
-   * This function handles the submission of the content, handling and setting the 
+   * This function handles the submission of the content, handling and setting the
    * title, content, and thumbnail. If the title and content are not provided, it will
    * throw an error and set the error state to the current error message based on the
    * error thrown. If everything is successful, it will set { title, content, thumbnail }.
-   * 
+   *
    * @returns null
    */
   const handleSubmit = async () => {
     setError("");
 
     if (title === "" || content === "") {
-      setError("Title and content are required, and was not provided. Please Try again.");
+      setError(
+        "Title and content are required, and was not provided. Please Try again."
+      );
       return;
     }
 
@@ -156,7 +155,6 @@ export default function EditContent() {
       if (!user_id || !contentId) {
         setError("Missing user or content information. Please Try again.");
         return;
-
       }
 
       if (thumbnail) {
@@ -164,16 +162,24 @@ export default function EditContent() {
         formData.append("thumbnail", thumbnail);
 
         if (page?.thumbnail) {
-          const file_path = decodeURIComponent(page.thumbnail.split("/o/")[1].split("?")[0]);
+          const file_path = decodeURIComponent(
+            page.thumbnail.split("/o/")[1].split("?")[0]
+          );
           const file_name = file_path.split("/")[1];
           formData.append("file_name", file_name);
         }
 
-        const editData = { title: title, content: content, dateUpdated: new Date() };
+        const editData = {
+          title: title,
+          content: content,
+          dateUpdated: new Date(),
+        };
         formData.append("data", JSON.stringify(editData));
 
-        await axios.put(`${apiURL}/content/editThumbnail/${contentId}/${user_id}`, formData);
-
+        await axios.put(
+          `${apiURL}/content/editThumbnail/${contentId}/${user_id}`,
+          formData
+        );
       } else {
         await axios.put(`${apiURL}/content/${contentId}/${user_id}`, {
           data: {
@@ -187,20 +193,22 @@ export default function EditContent() {
       localStorage.removeItem("title");
       Cookies.remove("content");
       router.replace(`../../content/${contentId}?${Date.now()}`);
-
     } catch (error: any) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setError(error.message || "Something went wrong, we are unable to update the content. Please Try again.");
+      setError(
+        error.message ||
+          "Something went wrong, we are unable to update the content. Please Try again."
+      );
     }
-  }
+  };
 
   /**
    * cancelEdit() -> void
-   * 
+   *
    * @description
-   * This function handles the cancellation of the edit, removing all changes made to 
+   * This function handles the cancellation of the edit, removing all changes made to
    * { content, title, thumbnail } and redirecting to the content page.
-   * 
+   *
    * @returns null
    */
   const cancelEdit = () => {
@@ -217,7 +225,7 @@ export default function EditContent() {
     setThumbnail(null);
     setThumbnailPreview(null);
     router.push(`/content/${contentId}`);
-  }
+  };
 
   // NOTE: If the auth state is still loading, show a loading message.
   if (loading) {
@@ -259,7 +267,10 @@ export default function EditContent() {
 
           <Toolbar editor={editor} />
 
-          <EditorContent editor={editor} className='content-input text-editor' />
+          <EditorContent
+            editor={editor}
+            className='content-input text-editor'
+          />
 
           <a
             onClick={() => {

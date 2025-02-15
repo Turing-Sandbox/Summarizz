@@ -1,9 +1,8 @@
-@use "../../styles/colors.scss";
+@use "@/app/styles/colors.scss";
 
 form {
   display: flex;
   flex-direction: column;
-  // space between items evenly based on the available space
 }
 
 .form-buttons {

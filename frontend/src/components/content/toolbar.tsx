@@ -7,7 +7,7 @@ import { Level } from "@tiptap/extension-heading";
 import { Editor } from "@tiptap/react";
 
 // Stylesheets (Import)
-import "../styles/toolbar.scss";
+import "@/app/styles/content/toolbar.scss";
 
 // ToolbarProps for Toolbar 
 interface ToolbarProps {

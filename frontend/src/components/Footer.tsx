@@ -1,4 +1,4 @@
-import "../styles/footer.scss";
+import "@/app/styles/footer.scss";
 import Image from "next/image";
 
 /**
