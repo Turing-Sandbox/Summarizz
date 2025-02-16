@@ -20,13 +20,13 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 
 // Local Files (Import)
-import Navbar from "@/app/components/Navbar";
-import { useAuth } from "@/app/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { apiAIURL, apiURL } from "@/app/scripts/api";
 import Toolbar from "./toolbar";
 
 // Stylesheets (Import)
-import "../styles/createContent.scss";
+import "@/app/styles/content/createContent.scss";
+import Navbar from "../Navbar";
 
 /**
  * CreateContent() -> JSX.Element

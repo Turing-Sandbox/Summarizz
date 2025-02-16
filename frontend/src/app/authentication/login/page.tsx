@@ -1,10 +1,10 @@
 "use client";
 
-import Login from "@/app/authentication/components/Login";
-import Background from "@/app/components/Background";
-import Footer from "@/app/components/Footer";
-import AuthProvider from "@/app/hooks/AuthProvider";
-import "../styles/authentication.scss";
+import Login from "@/components/authentication/Login";
+import Background from "@/components/Background";
+import Footer from "@/components//Footer";
+import AuthProvider from "@/hooks/AuthProvider";
+import "@/app/styles/authentication/authentication.scss";
 
 export default function Page() {
   return (
@@ -12,7 +12,7 @@ export default function Page() {
       <Background />
       <AuthProvider>
         <Login />
-        
+
         <div className='footer'>
           <Footer />
         </div>

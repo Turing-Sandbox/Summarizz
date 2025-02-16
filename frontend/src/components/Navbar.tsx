@@ -11,19 +11,19 @@ import Cookies from "js-cookie";
 
 // Local Files (Import)
 import { useAuth } from "../hooks/AuthProvider";
-import { User } from "../profile/models/User";
-import { apiURL } from "../scripts/api";
 
 // Stylesheets
-import "../styles/navbar.scss";
+import "@/app/styles/navbar.scss";
+import { User } from "@/models/User";
+import { apiURL } from "@/app/scripts/api";
 
 /**
  * Navbar() -> JSX.Element
- * 
+ *
  * @description
  * Renders the Navbar component, containing the user's profile picture,
  * username, toggle for dark and light mode, alongside the Summarize logo.
- * 
+ *
  * @returns JSX.Element (Navbar Component)
  */
 function Navbar() {
@@ -72,16 +72,14 @@ function Navbar() {
       axios.get(`${apiURL}/user/${userUID}`).then((res) => {
         setUserInfo(res.data);
       });
-
     } else {
       setUserInfo(null);
-
     }
   }, [userUID]);
 
   /**
    * toggleTheme() -> void
-   * 
+   *
    * @description
    * Toggles the theme between light and dark mode, setting the
    * data-them attribute to the new theme and updating the theme
@@ -106,7 +104,7 @@ function Navbar() {
           <h1 className='navbar-title summarizz-logo'>SUMMARIZZ</h1>
         </a>
 
-        { /* ANCHOR - Create Search and Filter Bar when Authenticated  */}
+        {/* ANCHOR - Create Search and Filter Bar when Authenticated  */}
         {authenticated ? (
           <>
             <button

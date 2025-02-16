@@ -1,10 +1,11 @@
 "use client";
 
-import Register from "@/app/authentication/components/Register";
-import Background from "@/app/components/Background";
-import Footer from "@/app/components/Footer";
-import AuthProvider from "@/app/hooks/AuthProvider";
-import "../styles/authentication.scss";
+
+import AuthProvider from "@/hooks/AuthProvider";
+import "@/app/styles/authentication/authentication.scss";
+import Background from "@/components/Background";
+import Register from "@/components/authentication/Register";
+import Footer from "@/components/Footer";
 
 export default function Page() {
   return (

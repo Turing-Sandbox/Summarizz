@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "../styles/authentication.scss";
+import "@/app/styles/authentication/authentication.scss";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/lib/firebaseClientConfig";
@@ -152,7 +152,6 @@ function Register() {
           {/* ------------------------- OAUTH ------------------------- */}
           {/* --------------------------------------------------------- */}
 
-
           {/* --------------------------------------------------------- */}
           {/* ------------------------- OAUTH ------------------------- */}
           {/* --------------------------------------------------------- */}
@@ -160,7 +159,6 @@ function Register() {
           <p>
             Already have an account? <a href='/authentication/login'>Login</a>
           </p>
-
         </div>
       </div>
     </>

@@ -104,14 +104,12 @@
   background-color: var(--tile-color);
 }
 
-/* Username and follow button container */
 .username-follow {
-  display: inline-flex; /* Align username and icon horizontally */
+  display: inline-flex; 
   align-items: center;
-  gap: 5px; /* Space between username and icon */
+  gap: 5px; 
 }
 
-/* Follow button styles */
 .icon-button.follow {
   padding: 0;
   border: none;
@@ -120,18 +118,16 @@
   align-items: center;
 }
 
-/* Follow icon styles */
 .icon.follow {
-  width: 16px; /* Match other icons */
-  height: 16px; /* Match other icons */
-  color: #7D7F7C; /* Default gray */
+  width: 16px; 
+  height: 16px; 
+  color: #7D7F7C; 
 }
 
 .icon.follow.following {
-  color: black; /* Black when following */
+  color: black; 
 }
 
-/* Common styles for the like and bookmark buttons */
 .icon-container {
   display: inline-flex;
   justify-content: center;
@@ -144,11 +140,11 @@
   background: none;
   display: inline-flex;
   align-items: center;
-  gap: 1px; /* Space between icon and text */
+  gap: 1px; 
 }
 
 .add-button{
-  color: #7D7F7C; /* Default gray color */
+  color: #7D7F7C; 
   transition: all ease-out 0.3s;
   width: 48px;
   height: 48px;
@@ -167,11 +163,10 @@ h1{
   padding-top: 10px;
 }
 
-/* Icon styles */
 .icon {
-  width: 16px; /* Match h-4 in Tailwind */
-  height: 16px; /* Match w-4 in Tailwind */
-  color: #7D7F7C; /* Default gray color */
+  width: 16px; 
+  height: 16px;
+  color: #7D7F7C;
   transition: all ease-out 0.3s;
 }
 
@@ -182,11 +177,11 @@ h1{
 }
 
 .icon.liked {
-  color: black; /* Black when liked */
+  color: black;
 }
 
 .icon.bookmarked {
-  color: black; /* Black when bookmarked */
+  color: black;
 }
 
 .icon.share:hover{
@@ -214,13 +209,13 @@ h1{
 }
 
 .icon.counter {
-  font-size: 12px; /* Small text */
-  margin-top: 0; /* No extra spacing above */
-  display: none; // same thing as the line below, just doesnt take space until it's visible
+  font-size: 12px;
+  margin-top: 0;
+  display: none; 
 }
 
 .icon.counter.visible {
-  display: inline; // same thing as the line below, but since i set display:none i need to undo that
+  display: inline; 
 }
 
 .comment-edit-textarea, .comment-create-textarea{

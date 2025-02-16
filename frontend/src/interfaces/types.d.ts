@@ -13,7 +13,6 @@
 //     followRequests?: string[];
 // }
 
-
 // export interface Content {
 //     id: string;
 //     creatorUID: string;

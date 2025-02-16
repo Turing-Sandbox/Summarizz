@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import "../styles/authentication.scss";
+import "@/app/styles/authentication/authentication.scss";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/app/lib/firebaseClientConfig";
@@ -100,7 +100,6 @@ function Login() {
           {/* --------------------------------------------------------- */}
           {/* ------------------------- OAUTH ------------------------- */}
           {/* --------------------------------------------------------- */}
-
 
           {/* --------------------------------------------------------- */}
           {/* ------------------------- OAUTH ------------------------- */}
