@@ -7,6 +7,10 @@ contentRoutes.post("/", ContentController.createContent); // Create new content
 contentRoutes.post("/uploadThumbnail", ContentController.uploadThumbnail); // Upload thumbnail
 
 contentRoutes.get("/:contentId", ContentController.getContent); // Get content by ID
+contentRoutes.put("/views/:contentId", ContentController.incrementViewCount); // Increment the view count 
+contentRoutes.put("/shares/:contentId", ContentController.incrementShareCount); // Increment the share count 
+
+
 contentRoutes.delete("/:userId/:contentId/:filePath/:fileName", ContentController.deleteContentAndThumbnail); // Delete content by ID
 contentRoutes.delete("/:userId/:contentId", ContentController.deleteContent); // Delete content by ID
 

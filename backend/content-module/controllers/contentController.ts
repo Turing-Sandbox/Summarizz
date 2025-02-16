@@ -69,15 +69,15 @@ export class ContentController {
     } catch (error) {
       console.log(error);
       res
-          .status(500)
-          .json({ error: error.message || "Failed to fetch content" });
+        .status(500)
+        .json({ error: error.message || "Failed to fetch content" });
     }
   }
 
   static async editContent(req: Request, res: Response) {
     console.log("Fetching Content...");
-    const {contentId, userId} = req.params
-    const {data} = req.body
+    const { contentId, userId } = req.params
+    const { data } = req.body
 
     console.log("edit body: ", req.body)
     console.log(data)
@@ -90,30 +90,30 @@ export class ContentController {
       console.log(owner_id)
       console.log(userId)
       console.log(confirmation)
-      if (userId == owner_id){ //check whether they are allowed to edit the content
+      if (userId == owner_id) { //check whether they are allowed to edit the content
         const response = await ContentService.editContent(contentId, data);
         res.status(200).json(response);
-      } else{
+      } else {
         throw Error("You do not have this permission.")
       }
     } catch (error) {
       console.log(error);
       res
-          .status(401)
-          .json({ error: error.message || "Failed to edit content" });
+        .status(401)
+        .json({ error: error.message || "Failed to edit content" });
     }
   }
 
   static async editContentAndThumbnail(req: Request, res: Response) {
     console.log("Editing Content and Thumbnail...");
-    const {contentId, userId} = req.params
+    const { contentId, userId } = req.params
     console.log("Content ID: ", contentId)
     console.log("User ID: ", userId)
 
     try {
       const confirmation = await ContentService.getContent(contentId)
       const owner_id = confirmation.creatorUID
-      if (userId == owner_id){ //check whether they are allowed to edit the content
+      if (userId == owner_id) { //check whether they are allowed to edit the content
         console.log("User is authorized to edit")
 
         let file_path: string;
@@ -135,7 +135,7 @@ export class ContentController {
           const file = files.thumbnail[0];
           let fileName: string;
 
-          if (file_name){
+          if (file_name) {
             fileName = file_name;
           } else {
             fileName = file.newFilename;
@@ -144,10 +144,10 @@ export class ContentController {
 
           try {
             const response = await StorageService.uploadFile(
-                file,
-                "thumbnails",
-                fileName,
-                fileType
+              file,
+              "thumbnails",
+              fileName,
+              fileType
             );
 
             const updateData = JSON.parse(fields.data)
@@ -160,7 +160,7 @@ export class ContentController {
             res.status(500).json({ error: error.message || "Failed to upload thumbnail" });
           }
         });
-        } else {
+      } else {
         res.status(401).json("You are not authorized to edit this content.");
       }
     } catch (error) {
@@ -171,7 +171,7 @@ export class ContentController {
 
   static async deleteContent(req: Request, res: Response) {
     console.log("Deleting Content...");
-    const { userId, contentId} = req.params;
+    const { userId, contentId } = req.params;
     try {
 
       const confirmation = await ContentService.getContent(contentId)
@@ -183,20 +183,20 @@ export class ContentController {
         console.log(response)
 
         res.status(200).json(response);
-      } else{
+      } else {
         throw new Error("You don't have the permission to delete this!!")
       }
     } catch (error) {
       console.log(error);
       res
-          .status(500)
-          .json({ error: error.message || "Failed to delete content" });
+        .status(500)
+        .json({ error: error.message || "Failed to delete content" });
     }
   }
 
   static async deleteContentAndThumbnail(req: Request, res: Response) {
     console.log("Deleting Content...");
-    const { userId, contentId, filePath, fileName} = req.params;
+    const { userId, contentId, filePath, fileName } = req.params;
     try {
       // delete actual content, thumbnail, and content from user.content list
       const response = await ContentService.deleteContentAndThumbnail(userId, contentId, filePath, fileName);
@@ -206,8 +206,8 @@ export class ContentController {
     } catch (error) {
       console.log(error);
       res
-          .status(500)
-          .json({ error: error.message || "Failed to fetch content" });
+        .status(500)
+        .json({ error: error.message || "Failed to fetch content" });
     }
   }
 
@@ -222,13 +222,13 @@ export class ContentController {
       res.status(200).json(response);
     } catch (error) {
       console.error("Error liking content:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: error instanceof Error ? error.message : "Failed to like content",
         stack: error instanceof Error ? error.stack : null
       });
     }
-  } 
-  
+  }
+
   // Unlike content
   static async unlikeContent(req: Request, res: Response) {
     const { contentId, userId } = req.params;
@@ -251,7 +251,7 @@ export class ContentController {
     try {
       const response = await ContentService.bookmarkContent(contentId, userId);
       res.status(200).json(response);
-      
+
     } catch (error) {
       console.error("Error bookmarking content:", error);
       res.status(500).json({
@@ -304,4 +304,27 @@ export class ContentController {
       });
     }
   }
+
+  // Update the number of times the content was shared
+  static async incrementShareCount(req: Request, res: Response) {
+    const { contentId } = req.params;
+    try {
+      await ContentService.incrementShareCount(contentId)
+      res.status(200).json("Successfully incremented!")
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // Update the number of times the content was viewed
+  static async incrementViewCount(req: Request, res: Response) {
+    const { contentId } = req.params;
+    try {
+      await ContentService.incrementViewCount(contentId);
+      res.status(200).json("Successfully incremented!")
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
 }
