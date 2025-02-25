@@ -155,14 +155,95 @@ export default function ProfileManagement() {
     <>
       <Navbar />
       <div className='main-content'>
+        {/******************** EDIT PROFILE  ********************/}
         <div className='profile-management-section'>
-          <h1>Profile Management</h1>
-          <h2>Change Password</h2>
-          <form
-            onSubmit={handleChangePassword}
-            className='change-password-form'
-          >
+          <h2>Edit Profile</h2>
+
+          <form>
+            {/* TODO: Profile Image */}
+            <div className='input-group'>
+              <label htmlFor='profileImage'>Profile Image</label>
+              <input
+                type='file'
+                id='profileImage'
+                accept='image/*'
+                // onChange={handleProfileImageChange}
+              />
+            </div>
+
             <div className='form-group'>
+              {/* TODO: First Name */}
+              <div className='input-group'>
+                <label htmlFor='firstName'>First Name</label>
+                <input
+                  type='text'
+                  id='firstName'
+                  placeholder='First Name'
+                  // value={firstName}
+                  // onChange={(e) => setFirstName(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* TODO: Last Name */}
+              <div className='input-group'>
+                <label htmlFor='lastName'>Last Name</label>
+                <input
+                  type='text'
+                  id='lastName'
+                  placeholder='Last Name'
+                  // value={lastName}
+                  // onChange={(e) => setLastName(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* TODO: Bio */}
+            <div className='input-group'>
+              <label htmlFor='bio'>Bio</label>
+              <textarea
+                id='bio'
+                placeholder='Tell us about yourself...'
+                // value={bio}
+                // onChange={(e) => setBio(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* TODO: Phone */}
+            <div className='input-group'>
+              <label htmlFor='phone'>Phone</label>
+              <input
+                type='tel'
+                id='phone'
+                placeholder='(123) 321-1234'
+                // value={phone}
+                // onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* TODO: Date of Birth */}
+            <div className='input-group'>
+              <label htmlFor='dob'>Date of Birth</label>
+              <input
+                type='date'
+                id='dob'
+                // value={dob}
+                // onChange={(e) => setDob(e.target.value)}
+                required
+              />
+            </div>
+          </form>
+        </div>
+
+        {/******************** EDIT CREDENTIALS  ********************/}
+        <div className='profile-management-section'>
+          <h2>Edit Credentials</h2>
+          <h3>Change Password</h3>
+          <form onSubmit={handleChangePassword}>
+            <div className='input-group'>
               <label htmlFor='currentPassword'>Current Password</label>
               <input
                 type='password'
@@ -174,48 +255,40 @@ export default function ProfileManagement() {
             </div>
 
             <div className='form-group'>
-              <label htmlFor='newPassword'>New Password</label>
-              <input
-                type='password'
-                id='newPassword'
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-              <label htmlFor='confirmPassword'>Confirm New Password</label>
-              <input
-                type='password'
-                id='confirmPassword'
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              <div className='input-group'>
+                <label htmlFor='newPassword'>New Password</label>
+                <input
+                  type='password'
+                  id='newPassword'
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className='input-group'>
+                <label htmlFor='confirmPassword'>Confirm New Password</label>
+                <input
+                  type='password'
+                  id='confirmPassword'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
             </div>
 
             {error && <p className='error-message'>{error}</p>}
             {success && <p className='success-message'>{success}</p>}
 
-            <button type='submit' className='change-password-button'>
+            <button type='submit' className='save-button'>
               Change Password
             </button>
           </form>
-          <h2>Change Email or Username</h2>
-          <form
-            onSubmit={handleUpdateEmailUsername}
-            className='update-info-form'
-          >
-            <div className='form-group'>
-              <label htmlFor='currentPassword'>Current Password</label>
-              <input
-                type='password'
-                id='currentPassword'
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>
 
-            <div className='form-group'>
+          <h3>Change Email</h3>
+          <form onSubmit={handleUpdateEmailUsername}>
+            <div className='input-group'>
               <label htmlFor='newEmail'>New Email</label>
               <input
                 type='email'
@@ -225,7 +298,28 @@ export default function ProfileManagement() {
               />
             </div>
 
-            <div className='form-group'>
+            <div className='input-group'>
+              <label htmlFor='currentPassword'>Enter Password</label>
+              <input
+                type='password'
+                id='currentPassword'
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <p className='error-message'>{error}</p>}
+            {success && <p className='success-message'>{success}</p>}
+
+            <button type='submit' className='save-button'>
+              Change Email
+            </button>
+          </form>
+
+          <h3>Change Username</h3>
+          <form onSubmit={handleUpdateEmailUsername}>
+            <div className='input-group'>
               <label htmlFor='newUsername'>New Username</label>
               <input
                 type='text'
@@ -235,13 +329,29 @@ export default function ProfileManagement() {
               />
             </div>
 
+            <div className='input-group'>
+              <label htmlFor='currentPassword'>Enter Password</label>
+              <input
+                type='password'
+                id='currentPassword'
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+
             {error && <p className='error-message'>{error}</p>}
             {success && <p className='success-message'>{success}</p>}
 
-            <button type='submit' className='update-info-button'>
-              Update Information
+            <button type='submit' className='save-button'>
+              Change Username
             </button>
           </form>
+        </div>
+
+        {/******************** DELETE ACCOUNT  ********************/}
+        <div className='profile-management-section'>
+          <h2>Delete Account</h2>
         </div>
       </div>
     </>
