@@ -55,6 +55,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [numComments, setNumComments] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [firstRender, setFirstRender] = useState(true); // Used to determine whether to increment the view count on rerenders or not.
 
   // ---------------------------------------
   // -------------- Page INIT --------------
@@ -126,7 +127,10 @@ export default function ViewContent({ id }: ViewContentProps) {
         setBookmarks(0);
       }
 
-      incrementViews();
+      if (firstRender) { // Only increment the view count on the first page load, and not rerenders.
+        incrementViews();
+        setFirstRender(false);
+      }
 
     }).catch((error) => {
       console.error("Error fetching content:", error);
@@ -400,11 +404,12 @@ export default function ViewContent({ id }: ViewContentProps) {
    * incrementShares() -> void
    * 
    * @description
-   * Increments the number of times the content has been viewed.
+   * Increments the number of times the content has been shared.
    */
   const incrementShares = async () => {
     try {
       await axios.put(`${apiURL}/content/shares/${id}`)
+      await getContent();
     } catch (error) {
       console.error(error)
     }
@@ -472,7 +477,7 @@ export default function ViewContent({ id }: ViewContentProps) {
 
               <div className="stats-col-2">
                 <p>
-                  {content?.views ? ` - ${content.views} views` : ""}
+                  {content?.views ? ` ${content.views} views` : ""}
                 </p>
                 <div className="icon-container">
 
@@ -512,6 +517,9 @@ export default function ViewContent({ id }: ViewContentProps) {
                     title="Share Content"
                   >
                     <ShareIcon className="icon" />
+                    {content?.shares ?
+                      <span className={`icon counter ${content.shares > 0 ? "visible" : ""}`}>{content.shares}</span>
+                      : <></>}
                   </button>
 
                   <button
