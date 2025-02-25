@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/hooks/AuthProvider";
@@ -7,7 +7,8 @@ import { redirect, useParams } from "next/navigation";
 import {
   PencilIcon,
   TrashIcon,
-  DocumentPlusIcon,
+  PaperAirplaneIcon,
+  CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
@@ -20,6 +21,7 @@ const CommentList = ({ setNumComments }: any) => {
   const auth = useAuth();
   const userId = auth.userUID;
   const postId = useParams().id;
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   async function refreshComments() {
     setLoading(true);
@@ -43,15 +45,13 @@ const CommentList = ({ setNumComments }: any) => {
 
         console.log("refreshComments Response.data: ", commentArray);
         setComments(commentArray);
-        setNumComments(comments.length)
+        setNumComments(comments.length);
         if (Array.isArray(commentArray)) {
-          setNumComments(commentArray.length)
-        }
-        else if (commentArray) {
-          setNumComments(1)
-        }
-        else {
-          setNumComments(0)
+          setNumComments(commentArray.length);
+        } else if (commentArray) {
+          setNumComments(1);
+        } else {
+          setNumComments(0);
         }
       }
     } catch (error) {
@@ -64,6 +64,13 @@ const CommentList = ({ setNumComments }: any) => {
   useEffect(() => {
     refreshComments();
   }, [postId]);
+
+  useEffect(() => {
+    if (editTextareaRef.current) {
+      editTextareaRef.current.style.height = "auto";
+      editTextareaRef.current.style.height = `${editTextareaRef.current.scrollHeight}px`;
+    }
+  }, [editingCommentText]);
 
   const handleAddComment = async (e: any) => {
     e.preventDefault();
@@ -112,91 +119,122 @@ const CommentList = ({ setNumComments }: any) => {
     await refreshComments();
   };
 
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
+
   if (loading) return <p>Loading comments...</p>;
 
   return (
     <>
-      <div className={"comment-row-1"}>
-        <h1>Add new comment:</h1>
+      <h1>Discussion</h1>
+
+      {/************ ADD COMMENT ************/}
+      <div>
         <form onSubmit={handleAddComment} className={"create-comment"}>
-          <textarea
-            className={"comment-create-textarea"}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder='Add a comment...'
-          />
-          <button type='submit' className={"icon-button"}>
-            <DocumentPlusIcon className={"add-button"} />
-          </button>
+          <div>
+            <textarea
+              className='comment-textarea'
+              value={newComment}
+              onChange={(e) => {
+                setNewComment(e.target.value);
+                (e.target as HTMLTextAreaElement).style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              placeholder='Enter your comment'
+            />
+          </div>
+
+          <div>
+            <button type='submit' className={"icon-button"}>
+              <PaperAirplaneIcon className={"add-button"} />
+            </button>
+          </div>
         </form>
       </div>
-      <div className={"comment-row-2"}>
-        <h1>Comments</h1>
+
+      {/************ EDIT COMMENT ************/}
+      {editingCommentId != null && (
+        <>
+          <div
+            className='overlay'
+            onClick={() => setEditingCommentId(null)}
+          ></div>
+
+          <form onSubmit={handleEditComment} className='edit-comment'>
+            <div
+              onClick={() => {
+                setEditingCommentId(null);
+              }}
+              className='close-button'
+              style={{ cursor: "pointer" }}
+            >
+              <XCircleIcon className='icon cancel' />
+            </div>
+
+            <h1 className='popup-title'>Edit comment</h1>
+
+            <textarea
+              ref={editTextareaRef}
+              className='comment-textarea'
+              value={editingCommentText}
+              onChange={(e) => {
+                setEditingCommentText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = `${e.target.scrollHeight}px`;
+              }}
+              placeholder='Enter your comment'
+            />
+
+            <button type='submit' className='submit-button'>
+              Update
+            </button>
+          </form>
+        </>
+      )}
+
+      {/************ COMMENT LIST ************/}
+      <div>
         {comments.length === 0 ? (
           <p>No comments yet. Be the first to comment!</p>
         ) : (
           comments.map((comment) => (
             <div key={comment.comment_id}>
-              {editingCommentId === comment.comment_id ? (
-                <form onSubmit={handleEditComment} className={"comment"}>
-                  <div className={"comment-icons-edit"}>
-                    <p>Edit comment:</p>
-                    <div>
-                      <button type={"submit"} className={"icon-button"}>
-                        <DocumentPlusIcon className={"icon add"} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingCommentId(null);
-                        }}
-                        className={"icon-button"}
-                      >
-                        <XCircleIcon className={"icon cancel"} />
-                      </button>
-                    </div>
+              <div>
+                <div className={"comment"}>
+                  {/* COMMENT HEADER */}
+                  <div className={"comment-info-container"}>
+                    {/* COMMENT USERNAME */}
+                    <h4 className={"comment-username"}>{comment.username}</h4>
+
+                    {/* COMMENT OWNER SETTINGS */}
+                    {comment.owner_id === userId && (
+                      <div className={"comment-icons"}>
+                        <button
+                          className={"icon-button"}
+                          onClick={() => {
+                            setEditingCommentId(comment.comment_id);
+                            setEditingCommentText(comment.text);
+                          }}
+                        >
+                          <PencilIcon className={"icon edit"} />
+                        </button>
+                        <button
+                          className={"icon-button"}
+                          onClick={() =>
+                            handleDeleteComment(comment.comment_id)
+                          }
+                        >
+                          <TrashIcon className={"icon delete"} />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <textarea
-                    className={"comment-edit-textarea"}
-                    value={editingCommentText}
-                    onChange={(e) => setEditingCommentText(e.target.value)}
-                  />
-                </form>
-              ) : (
-                <div>
-                  <div className={"comment"}>
-                    {/*<p>{comment.post_id}</p>*/}
-                    <div className={"comment-info-container"}>
-                      <h4 className={"comment-username"}>
-                        {comment.username} says:
-                      </h4>
-                      {comment.owner_id === userId ? (
-                        <div className={"comment-icons"}>
-                          <button
-                            className={"icon-button"}
-                            onClick={() => {
-                              setEditingCommentId(comment.comment_id);
-                              setEditingCommentText(comment.text);
-                            }}
-                          >
-                            <PencilIcon className={"icon edit"} />
-                          </button>
-                          <button
-                            className={"icon-button"}
-                            onClick={() =>
-                              handleDeleteComment(comment.comment_id)
-                            }
-                          >
-                            <TrashIcon className={"icon delete"} />
-                          </button>
-                        </div>
-                      ) : (
-                        <></>
-                      )}
-                    </div>
-                    <p>{comment.text}</p>
-                  </div>
+
+                  {/* COMMENT TEXT */}
+                  <p>{comment.text}</p>
                 </div>
-              )}
+              </div>
             </div>
           ))
         )}

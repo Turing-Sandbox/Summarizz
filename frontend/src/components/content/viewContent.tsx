@@ -106,33 +106,33 @@ export default function ViewContent({ id }: ViewContentProps) {
    * @returns void
    */
   const getContent = async () => {
-    axios.get(`${apiURL}/content/${id}`).then((res) => {
-      const fetchedContent = res.data;
-      if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
-        fetchedContent.dateCreated = new Date(
-          fetchedContent.dateCreated.seconds * 1000
-        );
-      } else {
-        fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
-      }
+    axios
+      .get(`${apiURL}/content/${id}`)
+      .then((res) => {
+        const fetchedContent = res.data;
+        if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
+          fetchedContent.dateCreated = new Date(
+            fetchedContent.dateCreated.seconds * 1000
+          );
+        } else {
+          fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+        }
 
-      fetchedContent.id = id;
+        fetchedContent.id = id;
 
-      setContent(fetchedContent);
-      if (fetchedContent.bookmarkedBy) {
-        setBookmarks(fetchedContent.bookmarkedBy.length);
-      }
-      else {
-        setBookmarks(0);
-      }
+        setContent(fetchedContent);
+        if (fetchedContent.bookmarkedBy) {
+          setBookmarks(fetchedContent.bookmarkedBy.length);
+        } else {
+          setBookmarks(0);
+        }
 
-      incrementViews();
-
-    }).catch((error) => {
-      console.error("Error fetching content:", error);
-
-    });
-  }
+        incrementViews();
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  };
 
   /**
    * getUserInfo() -> void
@@ -284,8 +284,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       );
       setIsBookmarked(!isBookmarked);
 
-      await getContent()
-
+      await getContent();
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
     }
@@ -380,36 +379,33 @@ export default function ViewContent({ id }: ViewContentProps) {
     else throw Error("You cannot edit this content");
   };
 
-
   /**
    * incrementViews() -> void
-   * 
+   *
    * @description
    * Increments the number of times the content has been viewed.
    */
   const incrementViews = async () => {
     try {
-      await axios.put(`${apiURL}/content/views/${id}`)
+      await axios.put(`${apiURL}/content/views/${id}`);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
-
+  };
 
   /**
    * incrementShares() -> void
-   * 
+   *
    * @description
    * Increments the number of times the content has been viewed.
    */
   const incrementShares = async () => {
     try {
-      await axios.put(`${apiURL}/content/shares/${id}`)
+      await axios.put(`${apiURL}/content/shares/${id}`);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
-
+  };
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -420,7 +416,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       <Navbar />
       <div className='main-content'>
         <div className='row'>
-          <div className='col-2'>
+          <div className='col-1'>
             {content?.thumbnail && (
               <Image
                 src={content.thumbnail}
@@ -431,9 +427,10 @@ export default function ViewContent({ id }: ViewContentProps) {
               />
             )}
             {/* Future: Discussion/Chat */}
+            <CommentList setNumComments={setNumComments} />
           </div>
 
-          <div className='col-1'>
+          <div className='col-2'>
             <h1>{content?.title}</h1>
 
             <div className='content-header'>
@@ -442,8 +439,8 @@ export default function ViewContent({ id }: ViewContentProps) {
                   {content?.dateCreated?.toLocaleDateString()}
                   {content?.readtime ? ` - ${content.readtime} min` : ""}
                 </p>
-                <div className="username-follow">
-                  <p className="username">{creator?.username}</p>
+                <div className='username-follow'>
+                  <p className='username'>{creator?.username}</p>
                   <button
                     className={`icon-button ${isFollowing ? "following" : ""}`}
                     onClick={handleFollow}
@@ -470,16 +467,18 @@ export default function ViewContent({ id }: ViewContentProps) {
                 )}
               </div>
 
-              <div className="stats-col-2">
-                <p>
-                  {content?.views ? ` - ${content.views} views` : ""}
-                </p>
-                <div className="icon-container">
-
-
-                  <div className="icon-button">
-                    <ChatBubbleBottomCenterTextIcon className="icon" />
-                    <span className={`icon counter ${numComments > 0 ? "visible" : ""}`}>{numComments}</span>
+              <div className='stats-col-2'>
+                <p>{content?.views ? ` - ${content.views} views` : ""}</p>
+                <div className='icon-container'>
+                  <div className='icon-button'>
+                    <ChatBubbleBottomCenterTextIcon className='icon' />
+                    <span
+                      className={`icon counter ${
+                        numComments > 0 ? "visible" : ""
+                      }`}
+                    >
+                      {numComments}
+                    </span>
                   </div>
 
                   <button
@@ -488,41 +487,58 @@ export default function ViewContent({ id }: ViewContentProps) {
                     title={isLiked ? "Unlike Content" : "Like Content"}
                   >
                     <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
-                    <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
+                    <span
+                      className={`icon counter ${likes > 0 ? "visible" : ""}`}
+                    >
+                      {likes}
+                    </span>
                   </button>
 
                   <button
-                    className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
+                    className={`icon-button ${
+                      isBookmarked ? "bookmarked" : ""
+                    }`}
                     onClick={handleBookmark}
-                    title={isBookmarked ? "Unbookmark Content" : "Bookmark Content"}
+                    title={
+                      isBookmarked ? "Unbookmark Content" : "Bookmark Content"
+                    }
                   >
-                    <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
-                    {content?.bookmarkedBy ?
-                      <span className={`icon counter ${bookmarks > 0 ? "visible" : ""}`}>{bookmarks}</span>
-                      : <></>}
+                    <BookmarkIcon
+                      className={`icon ${isBookmarked ? "bookmarked" : ""}`}
+                    />
+                    {content?.bookmarkedBy ? (
+                      <span
+                        className={`icon counter ${
+                          bookmarks > 0 ? "visible" : ""
+                        }`}
+                      >
+                        {bookmarks}
+                      </span>
+                    ) : (
+                      <></>
+                    )}
                   </button>
 
-                  <button className="icon-button" onClick={editContent}>
-                    <PencilIcon className="icon edit" />
+                  <button className='icon-button' onClick={editContent}>
+                    <PencilIcon className='icon edit' />
                   </button>
 
                   <button
-                    className="icon-button"
+                    className='icon-button'
                     onClick={handleShare}
-                    title="Share Content"
+                    title='Share Content'
                   >
-                    <ShareIcon className="icon" />
+                    <ShareIcon className='icon' />
                   </button>
 
                   <button
-                    className="icon-button"
+                    className='icon-button'
                     onClick={handleDelete}
-                    title="Delete Content"
+                    title='Delete Content'
                   >
-                    <TrashIcon className="icon delete" />
+                    <TrashIcon className='icon delete' />
                   </button>
                 </div>
-
               </div>
               <div className='spliter'></div>
 
@@ -535,11 +551,6 @@ export default function ViewContent({ id }: ViewContentProps) {
             ) : (
               ""
             )}
-          </div>
-
-          <div className={"col-3"}>
-            {/*Comment form*/}
-            <CommentList setNumComments={setNumComments} />
           </div>
         </div>
       </div>
