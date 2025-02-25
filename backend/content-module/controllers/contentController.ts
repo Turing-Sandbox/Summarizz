@@ -312,7 +312,11 @@ export class ContentController {
       await ContentService.incrementShareCount(contentId)
       res.status(200).json("Successfully incremented!")
     } catch (error) {
-      console.error(error)
+      res.status(500).json(
+        {
+          error: error instanceof Error ? error.message : "Failed to increment share count"
+        }
+      );
     }
   }
 
@@ -323,7 +327,11 @@ export class ContentController {
       await ContentService.incrementViewCount(contentId);
       res.status(200).json("Successfully incremented!")
     } catch (error) {
-      console.error(error)
+      res.status(500).json(
+        {
+          error: error instanceof Error ? error.message : "Failed to increment view count"
+        }
+      );
     }
   }
 

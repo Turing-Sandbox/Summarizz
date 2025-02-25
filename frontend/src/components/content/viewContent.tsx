@@ -52,6 +52,7 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [likes, setLikes] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarks, setBookmarks] = useState(0);
+  const [views, setViews] = useState(0);
   const [numComments, setNumComments] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
@@ -120,16 +121,16 @@ export default function ViewContent({ id }: ViewContentProps) {
       fetchedContent.id = id;
 
       setContent(fetchedContent);
-      if (fetchedContent.bookmarkedBy) {
-        setBookmarks(fetchedContent.bookmarkedBy.length);
-      }
-      else {
-        setBookmarks(0);
-      }
+      setBookmarks(fetchedContent.bookmarkedBy?.length || 0);
+
+
+
+      setViews(fetchedContent.views)
 
       if (firstRender) { // Only increment the view count on the first page load, and not rerenders.
         incrementViews();
         setFirstRender(false);
+        setViews(fetchedContent.views + 1)
       }
 
     }).catch((error) => {
@@ -477,7 +478,7 @@ export default function ViewContent({ id }: ViewContentProps) {
 
               <div className="stats-col-2">
                 <p>
-                  {content?.views ? ` ${content.views} views` : ""}
+                  {views ? ` ${views} views` : ""}
                 </p>
                 <div className="icon-container">
 
