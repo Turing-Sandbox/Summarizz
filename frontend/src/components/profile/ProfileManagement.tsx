@@ -3,10 +3,8 @@
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
 import { useState } from "react";
-//import "../styles/profile.scss";
 import "@/app/styles/profile/ProfileManagement.scss";
 import { useAuth } from "@/hooks/AuthProvider";
-// import { auth } from "../../lib/firebaseClientConfig";
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
@@ -15,26 +13,23 @@ import {
 } from "firebase/auth";
 import Navbar from "../Navbar";
 
-/**
- * ProfileManagement() -> JSX.Element
- *
- * @description
- * Renders the Profile Management page, allowing users to manage their profile.
- *
- * @returns JSX.Element
- */
 export default function ProfileManagement() {
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------
+  const [initalUserProfil, setInitalUserProfil] = useState<User | null>(null);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+
   const [newEmail, setNewEmail] = useState("");
   const [newUsername, setNewUsername] = useState("");
-  const { user, userUID } = useAuth(); // Get logged in user's UID
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const { user, userUID } = useAuth(); 
 
   // ---------------------------------------
   // ------------ Event Handlers -----------
