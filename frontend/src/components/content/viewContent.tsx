@@ -128,9 +128,16 @@ export default function ViewContent({ id }: ViewContentProps) {
       setViews(fetchedContent.views)
 
       if (firstRender) { // Only increment the view count on the first page load, and not rerenders.
-        incrementViews();
-        setFirstRender(false);
-        setViews(fetchedContent.views + 1)
+        incrementViews()
+          .then(() => {
+            setViews((fetchedContent.views || 0) + 1);
+          })
+          .catch((error) => {
+            console.error("Failed to increment views:", error);
+          })
+          .finally(() => {
+            setFirstRender(false);
+          });
       }
 
     }).catch((error) => {
@@ -508,9 +515,11 @@ export default function ViewContent({ id }: ViewContentProps) {
                       : <></>}
                   </button>
 
-                  <button className="icon-button" onClick={editContent}>
-                    <PencilIcon className="icon edit" />
-                  </button>
+                  {userUID === content?.creatorUID ?
+                    <button className="icon-button" onClick={editContent} title="Edit Content">
+                      <PencilIcon className="icon edit" />
+                    </button>
+                    : <></>}
 
                   <button
                     className="icon-button"
@@ -523,13 +532,17 @@ export default function ViewContent({ id }: ViewContentProps) {
                       : <></>}
                   </button>
 
-                  <button
-                    className="icon-button"
-                    onClick={handleDelete}
-                    title="Delete Content"
-                  >
-                    <TrashIcon className="icon delete" />
-                  </button>
+                  {userUID === content?.creatorUID ?
+
+                    <button
+                      className="icon-button"
+                      onClick={handleDelete}
+                      title="Delete Content"
+                    >
+                      <TrashIcon className="icon delete" />
+                    </button>
+                    : <></>}
+
                 </div>
 
               </div>

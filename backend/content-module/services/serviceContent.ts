@@ -353,7 +353,7 @@ export class ContentService {
       if (!contentDoc.exists()) {
         throw new Error("Content not found.")
       }
-      const data = contentDoc.data().views
+      const data = contentDoc.data()?.views
       const views = data || 0
       // Update the document with the new number of views
       await updateDoc(contentRef, { views: views + 1 })
@@ -375,7 +375,7 @@ export class ContentService {
       if (!contentDoc.exists()) {
         throw new Error("Content not found");
       }
-      const data = contentDoc.data().shares;
+      const data = contentDoc.data()?.shares;
       const shares = data || 0;
       // Update the document with the new number of shares
       await updateDoc(contentRef, { shares: shares + 1 });
