@@ -12,7 +12,7 @@ import { UserPlusIcon } from "@heroicons/react/24/solid";
 // Local Files (Import)
 import { useAuth } from "@/hooks/AuthProvider";
 import { Content } from "@/models/Content";
-import { User } from "../../models/User";
+import { User } from "@/models/User";
 import { apiURL } from "@/app/scripts/api";
 
 // Stylesheets
@@ -36,9 +36,9 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const { userUID } = useAuth(); // Get logged in user's UID
   const router = useRouter();
 
-  // ---------------------------------------
+  // ----------------------------------------
   // ------------ Event Handlers ------------
-  // ---------------------------------------
+  // ----------------------------------------
   /**
    * hasFetchedData() -> void
    *

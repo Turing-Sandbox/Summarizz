@@ -2,7 +2,7 @@
 
 import { apiURL } from "@/app/scripts/api";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "@/app/styles/profile/ProfileManagement.scss";
 import { useAuth } from "@/hooks/AuthProvider";
 import {
@@ -13,27 +13,71 @@ import {
 } from "firebase/auth";
 import Navbar from "../Navbar";
 
-export default function ProfileManagement() {
+import { User } from "@/models/User";
+
+interface ViewProfileProps {
+  id: string;
+}
+
+export default function ProfileManagement({ id }: ViewProfileProps) {
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------
-  const [initalUserProfil, setInitalUserProfil] = useState<User | null>(null);
+  const { userUID } = useAuth();
+  const [user, setUser] = useState<User | null>(null);
+  const [errorEditProfile, setErrorEditProfile] = useState("");
+  const [successEditProfile, setSuccessEditProfile] = useState("");
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorEditPassword, setErrorEditPassword] = useState("");
+  const [successEditPassord, setSuccessEditPassord] = useState("");
 
   const [newEmail, setNewEmail] = useState("");
+  const [errorEditEmail, setErrorEditEmail] = useState("");
+  const [successEditEmail, setSuccessEditEmail] = useState("");
+
   const [newUsername, setNewUsername] = useState("");
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const { user, userUID } = useAuth(); 
+  const [errorEditUsername, setErrorEditUsername] = useState("");
+  const [successEditUsername, setSuccessEditUsername] = useState("");
 
   // ---------------------------------------
   // ------------ Event Handlers -----------
   // ---------------------------------------
+  /**
+   * hasFetchedData() -> void
+   *
+   * @description
+   * Used to prevent fetching user data on page load.
+   *
+   * @returns void
+   */
+  const hasFetchedData = useRef(false);
+  useEffect(() => {
+    if (!hasFetchedData.current && userUID) {
+      getUserInfo(userUID);
+      hasFetchedData.current = true;
+      console.log("User UID:", userUID);
+      console.log("User:", user);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userUID]);
+
+  const handleEditProfile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorEditProfile("");
+    setSuccessEditProfile("");
+
+    // 1- Validation
+
+    // 2- Send request to backend
+
+    // 3- Update user hook
+
+    // 3- Handle response
+  };
+
   /**
    * handleChangePassword() -> void
    *
@@ -46,11 +90,11 @@ export default function ProfileManagement() {
    */
   const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
+    setErrorEditPassword("");
+    setSuccessEditPassord("");
 
     if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
+      setErrorEditPassword("New passwords do not match.");
       return;
     }
 
@@ -61,10 +105,10 @@ export default function ProfileManagement() {
         currentPassword,
         newPassword,
       });
-      setSuccess("Password has been successfully updated.");
+      setSuccessEditPassord("Password has been successfully updated.");
     } catch (error) {
       console.error("Error changing password:", error);
-      setError(
+      setErrorEditPassword(
         "Failed to update password. Please check your current password and try again."
       );
     }
@@ -80,68 +124,93 @@ export default function ProfileManagement() {
    * @param e - Form Event
    * @returns void
    */
-  const handleUpdateEmailUsername = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  // const handleUpdateEmailUsername = async (
+  //   e: React.FormEvent<HTMLFormElement>
+  // ) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setSuccess("");
 
-    const auth = getAuth();
-    const user = auth.currentUser;
+  //   const auth = getAuth();
+  //   const user = auth.currentUser;
 
-    if (!user) {
-      setError("No user is signed in.");
-      return;
-    }
+  //   if (!user) {
+  //     setError("No user is signed in.");
+  //     return;
+  //   }
 
-    if (!user.email) {
-      setError("User does not have an email associated with their account.");
-      return;
-    }
+  //   if (!user.email) {
+  //     setError("User does not have an email associated with their account.");
+  //     return;
+  //   }
 
-    if (!currentPassword) {
-      setError("Please provide your current password.");
-      return;
-    }
+  //   if (!currentPassword) {
+  //     setError("Please provide your current password.");
+  //     return;
+  //   }
 
-    // Check if at least one field is provided
-    if (!newEmail && !newUsername) {
-      setError("Please provide a new email or username.");
-      return;
-    }
+  //   // Check if at least one field is provided
+  //   if (!newEmail && !newUsername) {
+  //     setError("Please provide a new email or username.");
+  //     return;
+  //   }
 
-    try {
-      // Re-authenticate the user
-      const credential = EmailAuthProvider.credential(
-        user.email,
-        currentPassword
-      );
-      await reauthenticateWithCredential(user, credential);
+  //   try {
+  //     // Re-authenticate the user
+  //     const credential = EmailAuthProvider.credential(
+  //       user.email,
+  //       currentPassword
+  //     );
+  //     await reauthenticateWithCredential(user, credential);
 
-      // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
+  //     // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
 
-      if (newEmail && newEmail !== user?.email) {
-        await verifyBeforeUpdateEmail(user!, newEmail);
-        setSuccess(
-          "A verification link has been sent to your new email. Please verify it to complete the update."
-        );
-      }
+  //     if (newEmail && newEmail !== user?.email) {
+  //       await verifyBeforeUpdateEmail(user!, newEmail);
+  //       setSuccess(
+  //         "A verification link has been sent to your new email. Please verify it to complete the update."
+  //       );
+  //     }
 
-      // If a new username is provided, update it via server
-      if (newUsername) {
-        await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
-        setSuccess((prev) =>
-          prev
-            ? prev + " Username updated successfully."
-            : "Username updated successfully."
-        );
-      }
-    } catch (err: any) {
-      console.error("Error updating email/username:", err);
-      setError(err.message || "Failed to update information.");
-    }
-  };
+  //     // If a new username is provided, update it via server
+  //     if (newUsername) {
+  //       await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
+  //       setSuccess((prev) =>
+  //         prev
+  //           ? prev + " Username updated successfully."
+  //           : "Username updated successfully."
+  //       );
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Error updating email/username:", err);
+  //     setError(err.message || "Failed to update information.");
+  //   }
+  // };
+
+  // --------------------------------------
+  // ------------- Functions --------------
+  // --------------------------------------
+
+  /**
+   * getUserInfo() -> void
+   *
+   * @description
+   * Fetches user data from the backend using the id provided in the route, this
+   * will fetch { firstName, lastName, bio, profileImage, followedBy, followRequests }
+   * from the backend and set the user accordingly.
+   *
+   * @param userId - The id of the user to fetch
+   */
+  function getUserInfo(userId: string = id) {
+    axios
+      .get(`${apiURL}/user/${userId}`)
+      .then((res) => {
+        setUser(res.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching user info:", error);
+      });
+  }
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -174,7 +243,7 @@ export default function ProfileManagement() {
                   type='text'
                   id='firstName'
                   placeholder='First Name'
-                  // value={firstName}
+                  value={user?.firstName ? user.firstName : ""}
                   // onChange={(e) => setFirstName(e.target.value)}
                   required
                 />
@@ -187,7 +256,7 @@ export default function ProfileManagement() {
                   type='text'
                   id='lastName'
                   placeholder='Last Name'
-                  // value={lastName}
+                  value={user?.lastName ? user.lastName : ""}
                   // onChange={(e) => setLastName(e.target.value)}
                   required
                 />
@@ -200,7 +269,7 @@ export default function ProfileManagement() {
               <textarea
                 id='bio'
                 placeholder='Tell us about yourself...'
-                // value={bio}
+                value={user?.bio ? user.bio : ""}
                 // onChange={(e) => setBio(e.target.value)}
                 required
               />
@@ -213,7 +282,7 @@ export default function ProfileManagement() {
                 type='tel'
                 id='phone'
                 placeholder='(123) 321-1234'
-                // value={phone}
+                value={user?.phone ? user.phone : ""}
                 // onChange={(e) => setPhone(e.target.value)}
                 required
               />
@@ -225,7 +294,7 @@ export default function ProfileManagement() {
               <input
                 type='date'
                 id='dob'
-                // value={dob}
+                value={user?.dateOfBirth ? user.dateOfBirth : ""}
                 // onChange={(e) => setDob(e.target.value)}
                 required
               />
@@ -273,8 +342,8 @@ export default function ProfileManagement() {
               </div>
             </div>
 
-            {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>}
+            {/* {error && <p className='error-message'>{error}</p>}
+            {success && <p className='success-message'>{success}</p>} */}
 
             <button type='submit' className='save-button'>
               Change Password
@@ -282,7 +351,7 @@ export default function ProfileManagement() {
           </form>
 
           <h3>Change Email</h3>
-          <form onSubmit={handleUpdateEmailUsername}>
+          <form>
             <div className='input-group'>
               <label htmlFor='newEmail'>New Email</label>
               <input
@@ -304,8 +373,8 @@ export default function ProfileManagement() {
               />
             </div>
 
-            {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>}
+            {/* {error && <p className='error-message'>{error}</p>}
+            {success && <p className='success-message'>{success}</p>} */}
 
             <button type='submit' className='save-button'>
               Change Email
@@ -313,7 +382,7 @@ export default function ProfileManagement() {
           </form>
 
           <h3>Change Username</h3>
-          <form onSubmit={handleUpdateEmailUsername}>
+          <form>
             <div className='input-group'>
               <label htmlFor='newUsername'>New Username</label>
               <input
@@ -335,8 +404,8 @@ export default function ProfileManagement() {
               />
             </div>
 
-            {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>}
+            {/* {error && <p className='error-message'>{error}</p>}
+            {success && <p className='success-message'>{success}</p>} */}
 
             <button type='submit' className='save-button'>
               Change Username

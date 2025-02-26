@@ -8,6 +8,7 @@ export interface User {
   profileImage?: string; // Optional profile image
   bio?: string; // Optional bio
   phone?: string; // Optional phone number
+  dateOfBirth?: string; // Optional date of birth
   location?: string; // Optional location
   website?: string; // Optional website
   content?: string[]; // Optional content
