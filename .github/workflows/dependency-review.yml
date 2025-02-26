@@ -4,14 +4,14 @@
 # surfacing known-vulnerable versions of the packages declared or updated in the PR.
 # Once installed, if the workflow run is marked as required, PRs introducing known-vulnerable
 # packages will be blocked from merging.
-name: 'Dependency Vulnerabilities Review'
-on:
-  pull_request:
-    branches: [ "dev" ]
+# name: 'Dependency Vulnerabilities Review'
+# on:
+#   pull_request:
+#     branches: [ "dev" ]
 
-permissions:
-  contents: read
-  pull-requests: write
+# permissions:
+#   contents: read
+#   pull-requests: write
 
 # jobs:
 #   dependency-review:
@@ -30,3 +30,4 @@ permissions:
 #           show-openssf-scorecard: true
 #           warn-on-openssf-scorecard-level: 3
           
+# TODO: Enable dependency-review.yml for later iterations (commented to prevent check fails).

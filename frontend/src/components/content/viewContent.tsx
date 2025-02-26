@@ -52,9 +52,11 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [likes, setLikes] = useState(0);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [bookmarks, setBookmarks] = useState(0);
+  const [views, setViews] = useState(0);
   const [numComments, setNumComments] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [firstRender, setFirstRender] = useState(true); // Used to determine whether to increment the view count on rerenders or not.
 
   // ---------------------------------------
   // -------------- Page INIT --------------
@@ -106,19 +108,37 @@ export default function ViewContent({ id }: ViewContentProps) {
    * @returns void
    */
   const getContent = async () => {
-    axios
-      .get(`${apiURL}/content/${id}`)
-      .then((res) => {
-        const fetchedContent = res.data;
-        if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
-          fetchedContent.dateCreated = new Date(
-            fetchedContent.dateCreated.seconds * 1000
-          );
-        } else {
-          fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
-        }
+    axios.get(`${apiURL}/content/${id}`).then((res) => {
+      const fetchedContent = res.data;
+      if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
+        fetchedContent.dateCreated = new Date(
+          fetchedContent.dateCreated.seconds * 1000
+        );
+      } else {
+        fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+      }
 
-        fetchedContent.id = id;
+      fetchedContent.id = id;
+
+      setContent(fetchedContent);
+      setBookmarks(fetchedContent.bookmarkedBy?.length || 0);
+
+
+
+      setViews(fetchedContent.views)
+
+      if (firstRender) { // Only increment the view count on the first page load, and not rerenders.
+        incrementViews()
+          .then(() => {
+            setViews((fetchedContent.views || 0) + 1);
+          })
+          .catch((error) => {
+            console.error("Failed to increment views:", error);
+          })
+          .finally(() => {
+            setFirstRender(false);
+          });
+      }
 
         setContent(fetchedContent);
         if (fetchedContent.bookmarkedBy) {
@@ -390,6 +410,8 @@ export default function ViewContent({ id }: ViewContentProps) {
       await axios.put(`${apiURL}/content/views/${id}`);
     } catch (error) {
       console.error(error);
+
+      throw error;
     }
   };
 
@@ -397,13 +419,15 @@ export default function ViewContent({ id }: ViewContentProps) {
    * incrementShares() -> void
    *
    * @description
-   * Increments the number of times the content has been viewed.
+   * Increments the number of times the content has been shared.
    */
   const incrementShares = async () => {
     try {
-      await axios.put(`${apiURL}/content/shares/${id}`);
+      await axios.put(`${apiURL}/content/shares/${id}`)
+      await getContent();
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
@@ -467,18 +491,16 @@ export default function ViewContent({ id }: ViewContentProps) {
                 )}
               </div>
 
-              <div className='stats-col-2'>
-                <p>{content?.views ? ` - ${content.views} views` : ""}</p>
-                <div className='icon-container'>
-                  <div className='icon-button'>
-                    <ChatBubbleBottomCenterTextIcon className='icon' />
-                    <span
-                      className={`icon counter ${
-                        numComments > 0 ? "visible" : ""
-                      }`}
-                    >
-                      {numComments}
-                    </span>
+              <div className="stats-col-2">
+                <p>
+                  {views ? ` ${views} views` : ""}
+                </p>
+                <div className="icon-container">
+
+
+                  <div className="icon-button">
+                    <ChatBubbleBottomCenterTextIcon className="icon" />
+                    <span className={`icon counter ${numComments > 0 ? "visible" : ""}`}>{numComments}</span>
                   </div>
 
                   <button
@@ -519,25 +541,35 @@ export default function ViewContent({ id }: ViewContentProps) {
                     )}
                   </button>
 
-                  <button className='icon-button' onClick={editContent}>
-                    <PencilIcon className='icon edit' />
-                  </button>
+                  {userUID === content?.creatorUID ?
+                    <button className="icon-button" onClick={editContent} title="Edit Content">
+                      <PencilIcon className="icon edit" />
+                    </button>
+                    : <></>}
 
                   <button
                     className='icon-button'
                     onClick={handleShare}
                     title='Share Content'
                   >
-                    <ShareIcon className='icon' />
+
+                    <ShareIcon className="icon" />
+                    {content?.shares ?
+                      <span className={`icon counter ${content.shares > 0 ? "visible" : ""}`}>{content.shares}</span>
+                      : <></>}
                   </button>
 
-                  <button
-                    className='icon-button'
-                    onClick={handleDelete}
-                    title='Delete Content'
-                  >
-                    <TrashIcon className='icon delete' />
-                  </button>
+                  {userUID === content?.creatorUID ?
+
+                    <button
+                      className="icon-button"
+                      onClick={handleDelete}
+                      title="Delete Content"
+                    >
+                      <TrashIcon className="icon delete" />
+                    </button>
+                    : <></>}
+
                 </div>
               </div>
               <div className='spliter'></div>
