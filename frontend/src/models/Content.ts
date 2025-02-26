@@ -8,6 +8,9 @@ export interface Content {
   thumbnail?: string;
   readtime?: number;
   likes?: number;
+  titleLower?: string;
+  views?: number;
+  shares?: number;
   peopleWhoLiked?: string[];
   bookmarkedBy?: string[];
 }

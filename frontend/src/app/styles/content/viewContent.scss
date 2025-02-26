@@ -34,26 +34,29 @@
   overflow: hidden;
   word-break: break-word;
 }
-.comment-row-1{
+
+.comment-row-1 {
   //padding-top: 12px;
   height: fit-content;
   min-height: 30%;
 }
-.comment-row-2{
+
+.comment-row-2 {
   height: 70%;
   max-height: 400px;
   margin-bottom: 120px;
   overflow: auto;
 }
 
-.comment-row-1, .comment-row-2{
+.comment-row-1,
+.comment-row-2 {
   background-color: var(--comment-background-color);
   padding: 0 0 0 1rem;
   margin-bottom: 0.5rem;
   border-radius: 15px;
 }
 
-.comment{
+.comment {
   display: flex;
   flex-direction: column;
   background-color: var(--comment-background-color);
@@ -63,19 +66,19 @@
   border: 1px solid gray;
 }
 
-.create-comment{
+.create-comment {
   width: auto;
   max-width: 100%;
   display: flex;
   flex-direction: row;
 }
 
-.create-comment > textarea {
+.create-comment>textarea {
   width: 70%;
   border: none;
 }
 
-.comment > p{
+.comment>p {
   background-color: var(--comment-text-color);
   max-width: 100%;
   //margin: 10px 10px;
@@ -83,13 +86,13 @@
   border-radius: 15px;
 }
 
-.comment-info-container{
+.comment-info-container {
   display: flex;
   //flex-direction: row-reverse;
   justify-content: space-between;
 }
 
-.comment-username{
+.comment-username {
   font-weight: bolder;
   margin: 0px;
   //padding-right: 3rem;
@@ -105,9 +108,9 @@
 }
 
 .username-follow {
-  display: inline-flex; 
+  display: inline-flex;
   align-items: center;
-  gap: 5px; 
+  gap: 5px;
 }
 
 .icon-button.follow {
@@ -119,13 +122,13 @@
 }
 
 .icon.follow {
-  width: 16px; 
-  height: 16px; 
-  color: #7D7F7C; 
+  width: 16px;
+  height: 16px;
+  color: #7D7F7C;
 }
 
 .icon.follow.following {
-  color: black; 
+  color: black;
 }
 
 .icon-container {
@@ -140,37 +143,52 @@
   background: none;
   display: inline-flex;
   align-items: center;
-  gap: 1px; 
+  gap: 1px;
 }
 
-.add-button{
-  color: #7D7F7C; 
+.add-button {
+  color: #7D7F7C;
   transition: all ease-out 0.3s;
   width: 48px;
   height: 48px;
 }
 
-.add-button:hover{
+.add-button:hover {
   transition: all ease-out 0.1s;
-  width : 48px;
+  width: 48px;
   height: 48px;
   color: var(--add-hover-color);
   border: 3px solid var(--add-hover-color);
   border-radius: 15px;
 }
 
-h1{
+h1 {
   padding-top: 10px;
 }
 
+.content-info>p,
+.stats-col-2>p {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.stats-col-2 {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column-reverse;
+  text-align: right;
+  gap: 0.3rem;
+}
+
+/* Icon styles */
 .icon {
-  width: 16px; 
+  width: 16px;
   height: 16px;
   color: #7D7F7C;
   transition: all ease-out 0.3s;
 }
 
-.icon:hover{
+.icon:hover {
   color: var(--icon-hover-color);
   width: 24px;
   height: 24px;
@@ -184,54 +202,56 @@ h1{
   color: black;
 }
 
-.icon.share:hover{
+.icon.share:hover {
   color: var(--edit-hover-color);
 }
 
-.icon.like:hover{
+.icon.like:hover {
   color: var(--edit-hover-color);
 }
 
-.icon.delete:hover{
+.icon.delete:hover {
   color: var(--delete-hover-color);
 }
 
-.icon.edit:hover{
+.icon.edit:hover {
   color: var(--edit-hover-color);
 }
 
-.icon.add:hover{
+.icon.add:hover {
   color: var(--add-hover-color);
 }
 
-.icon.cancel:hover{
+.icon.cancel:hover {
   color: var(--cancel-hover-color);
 }
 
 .icon.counter {
   font-size: 12px;
   margin-top: 0;
-  display: none; 
+  width: fit-content;
+  display: none;
 }
 
 .icon.counter.visible {
-  display: inline; 
+  display: inline;
 }
 
-.comment-edit-textarea, .comment-create-textarea{
+.comment-edit-textarea,
+.comment-create-textarea {
   background-color: var(--comment-text-color);
   color: var(--text-color);
   padding: 1rem;
 }
 
-.comment-icons-edit{
+.comment-icons-edit {
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
   align-items: center;
 }
 
-.comment-icons-edit > p{
+.comment-icons-edit>p {
   font-weight: bolder;
   font-size: larger;
 }
@@ -250,7 +270,7 @@ h1{
     width: 100%;
   }
 
-  .col-3{
+  .col-3 {
     width: 100%;
     max-width: 100%;
   }

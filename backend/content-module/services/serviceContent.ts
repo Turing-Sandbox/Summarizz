@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc } from "firebase/firestore";
+import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc } from "firebase/firestore";
 import {
   addContentToUser,
   removeContentFromUser,
@@ -11,7 +11,6 @@ import {
   removeSharedContentFromUser,
 } from "../../user-module/services/userService";
 import { StorageService } from "../../storage-module/services/serviceStorage"
-import { increment, update } from "firebase/database";
 import { Content } from "../models/contentModel";
 
 export class ContentService {
@@ -341,6 +340,49 @@ export class ContentService {
     } catch (error) {
       console.error("Error unsharing content:", error);
       throw new Error(error.message || "Failed to unshare content");
+    }
+  }
+
+  //Increment the number of views on an article
+  static async incrementViewCount(contentID: string) {
+    try {
+      // Get the content reference to update
+      const contentRef = doc(db, "contents", contentID);
+      // Get the content of the document to increment the views
+      const contentDoc = await getDoc(contentRef);
+      if (!contentDoc.exists()) {
+        throw new Error("Content not found.")
+      }
+      const data = contentDoc.data()?.views
+      const views = data || 0
+      // Update the document with the new number of views
+      await updateDoc(contentRef, { views: views + 1 })
+      return "Successfully incremented view count!"
+    } catch (error) {
+      console.error("Error incrementing the view count: ", error);
+      throw error;
+    }
+
+  }
+
+  //Increment the number of recorded shares on an article
+  static async incrementShareCount(contentID: string) {
+    try {
+      // Get the content reference to update
+      const contentRef = doc(db, "contents", contentID);
+      // Get the content of the document to increment the shares
+      const contentDoc = await getDoc(contentRef);
+      if (!contentDoc.exists()) {
+        throw new Error("Content not found");
+      }
+      const data = contentDoc.data()?.shares;
+      const shares = data || 0;
+      // Update the document with the new number of shares
+      await updateDoc(contentRef, { shares: shares + 1 });
+      return "Successfully incremented share count!"
+    } catch (error) {
+      console.error("Error incrementing the share count: ", error);
+      throw error;
     }
   }
 }

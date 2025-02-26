@@ -11,7 +11,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
-const CommentList = () => {
+const CommentList = ({ setNumComments }: any) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -43,6 +43,16 @@ const CommentList = () => {
 
         console.log("refreshComments Response.data: ", commentArray);
         setComments(commentArray);
+        setNumComments(comments.length)
+        if (Array.isArray(commentArray)) {
+          setNumComments(commentArray.length)
+        }
+        else if (commentArray) {
+          setNumComments(1)
+        }
+        else {
+          setNumComments(0)
+        }
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
