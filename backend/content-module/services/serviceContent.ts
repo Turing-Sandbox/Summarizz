@@ -163,7 +163,6 @@ export class ContentService {
       await addLikedContentToUser(userId, contentID);
 
       // Fetch the updated document and return it
-      const updatedContentDoc = await getDoc(contentRef);
       const updatedContent = {
         ...contentData,
         likes: typeof contentData.likes === 'number' ? contentData.likes + 1 : 1, // Ensure likes is always a number

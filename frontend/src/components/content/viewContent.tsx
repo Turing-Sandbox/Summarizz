@@ -140,11 +140,19 @@ export default function ViewContent({ id }: ViewContentProps) {
           });
       }
 
-    }).catch((error) => {
-      console.error("Error fetching content:", error);
+        setContent(fetchedContent);
+        if (fetchedContent.bookmarkedBy) {
+          setBookmarks(fetchedContent.bookmarkedBy.length);
+        } else {
+          setBookmarks(0);
+        }
 
-    });
-  }
+        incrementViews();
+      })
+      .catch((error) => {
+        console.error("Error fetching content:", error);
+      });
+  };
 
   /**
    * getUserInfo() -> void
@@ -296,8 +304,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       );
       setIsBookmarked(!isBookmarked);
 
-      await getContent()
-
+      await getContent();
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
     }
@@ -392,26 +399,25 @@ export default function ViewContent({ id }: ViewContentProps) {
     else throw Error("You cannot edit this content");
   };
 
-
   /**
    * incrementViews() -> void
-   * 
+   *
    * @description
    * Increments the number of times the content has been viewed.
    */
   const incrementViews = async () => {
     try {
-      await axios.put(`${apiURL}/content/views/${id}`)
+      await axios.put(`${apiURL}/content/views/${id}`);
     } catch (error) {
       console.error(error);
+
       throw error;
     }
-  }
-
+  };
 
   /**
    * incrementShares() -> void
-   * 
+   *
    * @description
    * Increments the number of times the content has been shared.
    */
@@ -423,8 +429,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       console.error(error);
       throw error;
     }
-  }
-
+  };
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -435,7 +440,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       <Navbar />
       <div className='main-content'>
         <div className='row'>
-          <div className='col-2'>
+          <div className='col-1'>
             {content?.thumbnail && (
               <Image
                 src={content.thumbnail}
@@ -446,9 +451,10 @@ export default function ViewContent({ id }: ViewContentProps) {
               />
             )}
             {/* Future: Discussion/Chat */}
+            <CommentList setNumComments={setNumComments} />
           </div>
 
-          <div className='col-1'>
+          <div className='col-2'>
             <h1>{content?.title}</h1>
 
             <div className='content-header'>
@@ -457,8 +463,8 @@ export default function ViewContent({ id }: ViewContentProps) {
                   {content?.dateCreated?.toLocaleDateString()}
                   {content?.readtime ? ` - ${content.readtime} min` : ""}
                 </p>
-                <div className="username-follow">
-                  <p className="username">{creator?.username}</p>
+                <div className='username-follow'>
+                  <p className='username'>{creator?.username}</p>
                   <button
                     className={`icon-button ${isFollowing ? "following" : ""}`}
                     onClick={handleFollow}
@@ -503,18 +509,36 @@ export default function ViewContent({ id }: ViewContentProps) {
                     title={isLiked ? "Unlike Content" : "Like Content"}
                   >
                     <HeartIcon className={`icon ${isLiked ? "liked" : ""}`} />
-                    <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>{likes}</span>
+                    <span
+                      className={`icon counter ${likes > 0 ? "visible" : ""}`}
+                    >
+                      {likes}
+                    </span>
                   </button>
 
                   <button
-                    className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
+                    className={`icon-button ${
+                      isBookmarked ? "bookmarked" : ""
+                    }`}
                     onClick={handleBookmark}
-                    title={isBookmarked ? "Unbookmark Content" : "Bookmark Content"}
+                    title={
+                      isBookmarked ? "Unbookmark Content" : "Bookmark Content"
+                    }
                   >
-                    <BookmarkIcon className={`icon ${isBookmarked ? "bookmarked" : ""}`} />
-                    {content?.bookmarkedBy ?
-                      <span className={`icon counter ${bookmarks > 0 ? "visible" : ""}`}>{bookmarks}</span>
-                      : <></>}
+                    <BookmarkIcon
+                      className={`icon ${isBookmarked ? "bookmarked" : ""}`}
+                    />
+                    {content?.bookmarkedBy ? (
+                      <span
+                        className={`icon counter ${
+                          bookmarks > 0 ? "visible" : ""
+                        }`}
+                      >
+                        {bookmarks}
+                      </span>
+                    ) : (
+                      <></>
+                    )}
                   </button>
 
                   {userUID === content?.creatorUID ?
@@ -524,10 +548,11 @@ export default function ViewContent({ id }: ViewContentProps) {
                     : <></>}
 
                   <button
-                    className="icon-button"
+                    className='icon-button'
                     onClick={handleShare}
-                    title="Share Content"
+                    title='Share Content'
                   >
+
                     <ShareIcon className="icon" />
                     {content?.shares ?
                       <span className={`icon counter ${content.shares > 0 ? "visible" : ""}`}>{content.shares}</span>
@@ -546,7 +571,6 @@ export default function ViewContent({ id }: ViewContentProps) {
                     : <></>}
 
                 </div>
-
               </div>
               <div className='spliter'></div>
 
@@ -559,11 +583,6 @@ export default function ViewContent({ id }: ViewContentProps) {
             ) : (
               ""
             )}
-          </div>
-
-          <div className={"col-3"}>
-            {/*Comment form*/}
-            <CommentList setNumComments={setNumComments} />
           </div>
         </div>
       </div>
