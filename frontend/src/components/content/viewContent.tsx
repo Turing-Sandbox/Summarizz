@@ -403,7 +403,8 @@ export default function ViewContent({ id }: ViewContentProps) {
     try {
       await axios.put(`${apiURL}/content/views/${id}`)
     } catch (error) {
-      console.error(error)
+      console.error(error);
+      throw error;
     }
   }
 
@@ -419,7 +420,8 @@ export default function ViewContent({ id }: ViewContentProps) {
       await axios.put(`${apiURL}/content/shares/${id}`)
       await getContent();
     } catch (error) {
-      console.error(error)
+      console.error(error);
+      throw error;
     }
   }
 
