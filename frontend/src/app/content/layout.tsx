@@ -17,13 +17,13 @@ export default function Layout({ children }: LayoutProps) {
     <>
       <Background />
       <AuthProvider>
-        <>
-          <Navbar />
-          <div>{children}</div>
-          <div className='footer'>
-            <Footer />
-          </div>
-        </>
+        <Navbar />
+
+        <div>{children}</div>
+
+        <div className='footer'>
+          <Footer />
+        </div>
       </AuthProvider>
     </>
   );

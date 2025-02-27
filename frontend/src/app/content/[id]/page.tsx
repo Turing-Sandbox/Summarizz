@@ -4,17 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { redirect, useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
-import AuthProvider, { useAuth } from "@/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import DOMPurify from "dompurify";
 import { Content } from "@/models/Content";
 import { User } from "@/models/User";
 
-import Background from "@/components/Background";
-import Navbar from "@/components/Navbar";
 import Image from "next/image";
 import CommentList from "@/components/content/CommentList";
-import Footer from "@/components/Footer";
 
 import {
   BookmarkIcon as BookmarkIconSolid,
@@ -86,12 +83,13 @@ export default function Page() {
 
   // EFFECT: Handling Fetching Content
   useEffect(() => {
-    getUserInfo();
+    fetchLoggedInUser();
+    getCreatorInfo();
     if (content) {
       const sanitizedContent = DOMPurify.sanitize(content.content);
       setFormatedContent(sanitizedContent);
 
-      const likesCount = typeof content.likes === "number" ? content.likes : 0;
+      const likesCount = content.peopleWhoLiked?.length ?? 0;
       setLikes(likesCount);
 
       const userLiked = content.peopleWhoLiked
@@ -105,6 +103,16 @@ export default function Page() {
       setIsBookmarked(userBookmarked);
     }
   }, [content, userUID]);
+
+  useEffect(() => {
+    console.log("authUser:", authUser);
+    console.log("User following:", user?.following);
+    console.log("Content:", content);
+
+    if (user && user.following && content) {
+      setIsFollowing(user.following?.includes(content.creatorUID));
+    }
+  }, [user, content]);
 
   /**
    * getContent() -> void
@@ -165,7 +173,7 @@ export default function Page() {
    *
    * @returns void
    */
-  const getUserInfo = async () => {
+  const getCreatorInfo = async () => {
     if (content) {
       axios
         .get(`${apiURL}/user/${content.creatorUID}`)
@@ -192,6 +200,7 @@ export default function Page() {
       axios
         .get(`${apiURL}/user/${userUID}`)
         .then((res) => {
+          console.log("Fetched User:", res.data);
           setUser(res.data);
         })
         .catch((error) => {
@@ -377,13 +386,9 @@ export default function Page() {
       }
 
       const action = isFollowing ? "unfollow" : "follow";
-      const url = `${apiURL}/user/${userUID}/${action}/${content.creatorUID}`;
+      const url = `${apiURL}/user/${userUID}/${action}/user/${content.creatorUID}`;
 
-      await axios.post(
-        url,
-        {},
-        { headers: { "Content-Type": "application/json" } }
-      );
+      await axios.post(url);
       setIsFollowing(!isFollowing);
     } catch (error) {
       console.error("Error following/unfollowing creator:", error);
@@ -600,10 +605,8 @@ export default function Page() {
                   <p>Article Summary</p>
                 </div>
               </div>
-              {formatedContent ? (
+              {formatedContent && (
                 <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
-              ) : (
-                ""
               )}
             </div>
           </div>

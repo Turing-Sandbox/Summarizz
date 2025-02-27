@@ -8,7 +8,7 @@ export interface User {
   profileImage?: string;
   content?: string[];
   isPrivate?: boolean;
-  followedCreators?: string[];
-  followedBy?: string[];
+  followers?: string[];
+  following?: string[];
   followRequests?: string[];
 }
