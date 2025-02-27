@@ -127,6 +127,25 @@ export default function Page() {
       return;
     }
 
+    if (profileImage && profileImage.size > 5000000) {
+      setErrorEditProfile("Profile image must be less than 5MB.");
+      return;
+    }
+
+    if (user?.phone && user.phone.length > 15) {
+      setErrorEditProfile("Please provide a valid phone number.");
+      return;
+    }
+
+    if (user?.dateOfBirth) {
+      const dob = new Date(user.dateOfBirth);
+      const currentDate = new Date();
+      if (dob > currentDate) {
+        setErrorEditProfile("Please provide a valid date of birth.");
+        return;
+      }
+    }
+
     // 2- Send upload image request to backend if profile image exists
     if (profileImage) {
       await uploadProfileImage();
