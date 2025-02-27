@@ -165,7 +165,7 @@ export default function Page() {
       return;
     }
 
-    const oldProfileImage = user.profileImage!;
+    const oldProfileImage = user.profileImage || "";
 
     try {
       const formData = new FormData();
