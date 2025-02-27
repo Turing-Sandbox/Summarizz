@@ -1,6 +1,5 @@
 "use client";
 
-import "@/src/styles/content/createContent.scss";
 // React & NextJs (Import)
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";

@@ -56,6 +56,61 @@ textarea {
   max-height: 200px;
 }
 
+.profile-image-section {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-edit-image {
+  display: inline-block;
+
+  padding: 0.8rem;
+  box-sizing: border-box;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
+  color: var(--text-color);
+}
+
+.profile-image-upload {
+  display: inline-block;
+  width: 200px;
+
+  margin-bottom: 20px;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  user-select: none;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  cursor: pointer;
+}
+
+.profile-image-upload:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
+}
+
+input[type="file"] {
+  display: none;
+}
+
 .save-button {
   width: 100%;
 

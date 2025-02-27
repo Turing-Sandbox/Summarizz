@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import axios from "axios";
 
 import { apiURL } from "@/app/scripts/api";
@@ -29,6 +30,11 @@ export default function Page() {
   const { id } = useParams();
 
   const [user, setUser] = useState<User | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(
+    null
+  );
+  const [imageError, setImageError] = useState("");
   const [errorEditProfile, setErrorEditProfile] = useState("");
   const [successEditProfile, setSuccessEditProfile] = useState("");
 
@@ -67,6 +73,30 @@ export default function Page() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /**
+   * handleThumbnailChange() -> void
+   *
+   * @description
+   * Handles the file upload for the thumbnail, and sets the thumbnail preview
+   * to the file that was uploaded. If the file is not an image, or one was not provided, it
+   * will throw and error indicating that the thumbnail was not set and to try again.
+   *
+   * @param e - Change Event for Thumbnail File
+   */
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setImageError("");
+    const file = e.target.files ? e.target.files[0] : null;
+
+    if (file && file.type.startsWith("image/")) {
+      setProfileImage(file);
+      setProfileImagePreview(URL.createObjectURL(file));
+    } else {
+      setProfileImage(null);
+      setProfileImagePreview(null);
+      setImageError("Please select a valid image file.");
+    }
+  };
 
   const handleEditProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -240,14 +270,38 @@ export default function Page() {
 
             <form>
               {/* TODO: Profile Image */}
-              <div className='input-group'>
-                <label htmlFor='profileImage'>Profile Image</label>
-                <input
-                  type='file'
-                  id='profileImage'
-                  accept='image/*'
-                  // onChange={handleProfileImageChange}
-                />
+              <div className='profile-image-section'>
+                <div className='input-group'>
+                  {user && user.profileImage ? (
+                    <Image
+                      src={user.profileImage}
+                      width={200}
+                      height={200}
+                      alt='Profile Picture'
+                      className='profile-edit-image'
+                    />
+                  ) : (
+                    <h1 className='profile-initial'>
+                      {user?.username[0].toUpperCase()}
+                    </h1>
+                  )}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor='profile-image'
+                    className='profile-image-upload'
+                  >
+                    {profileImage ? "Change" : "Upload"} Profile Image
+                  </label>
+                  <input
+                    id='profile-image'
+                    type='file'
+                    accept='image/*'
+                    onChange={handleProfileImageChange}
+                  />
+                </div>
+                {imageError && <p className='error-message'>{imageError}</p>}
               </div>
 
               <div className='form-group'>
