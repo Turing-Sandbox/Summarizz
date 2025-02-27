@@ -73,7 +73,7 @@ export class StorageService {
     }
 
     if (filePath.includes("https://firebasestorage.googleapis.com")) {
-      filePath = await this.extractFilePathFromUrl(filePath);
+      filePath = await StorageService.extractFilePathFromUrl(filePath);
     }
 
     const fileRef = ref(storage, `${filePath}`);
