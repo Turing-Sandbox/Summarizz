@@ -13,6 +13,8 @@ import {
   changePassword,
   changeEmailUsername,
 } from "../services/userService";
+import { IncomingForm } from "formidable";
+import { StorageService } from "../../storage-module/services/serviceStorage";
 
 // Register User
 export async function registerUserController(req: Request, res: Response) {
@@ -46,6 +48,53 @@ export async function loginUserController(req: Request, res: Response) {
     console.log(error);
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
+}
+
+export async function uploadProfileImageController(
+  req: Request,
+  res: Response
+) {
+  console.log("Uploading Profile Image...");
+  const form = new IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error("Error parsing form: ", err);
+      return res.status(500).json({ error: "Failed to upload profile image." });
+    }
+
+    const file = files.profileImage[0];
+    const fileName = file.newFilename;
+    const fileType = file.mimetype;
+
+    // Delete old profile image if it exists
+    const oldProfileImage = fields.oldProfileImage;
+    if (oldProfileImage) {
+      try {
+        await StorageService.deleteFile(oldProfileImage);
+      } catch (error) {
+        console.error("Error deleting old profile image: ", error);
+      }
+    }
+
+    // Upload profile image to storage
+    try {
+      // Upload profile image
+      const response = await StorageService.uploadFile(
+        file,
+        "profileImage",
+        fileName,
+        fileType
+      );
+
+      res.status(201).json(response);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to upload profile image" });
+    }
+  });
 }
 
 // Create User

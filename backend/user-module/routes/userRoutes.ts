@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getUserController,
   updateUserController,
+  uploadProfileImageController,
   deleteUserController,
   registerUserController,
   loginUserController,
@@ -20,6 +21,7 @@ router.post("/login", loginUserController); // Login a user
 router.get("/:uid", getUserController); // Get a user by UID
 router.put("/:uid", updateUserController); // Update a user by UID
 router.delete("/:uid", deleteUserController); // Delete a user by UID
+router.post("/upload-profile-image", uploadProfileImageController); // Upload Profile Image
 
 // Profile View - Follow/Unfollow User
 router.post("/:userId/follow/user/:targetId", followUserController); // Follow User

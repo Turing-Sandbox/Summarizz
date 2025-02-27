@@ -79,6 +79,20 @@ textarea {
   color: var(--text-color);
 }
 
+.profile-initial {
+  width: 200px;
+  height: 200px;
+
+  font-size: 100px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .profile-image-upload {
   display: inline-block;
   width: 200px;

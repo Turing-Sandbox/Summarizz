@@ -56,8 +56,6 @@ export default function Page() {
   // ------------ Event Handlers -----------
   // ---------------------------------------
   /**
-   * hasFetchedData() -> void
-   *
    * @description
    * Used to prevent fetching user data on page load.
    *
@@ -74,15 +72,21 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Update profile image if it exists
+  useEffect(() => {
+    if (user?.profileImage) {
+      setProfileImagePreview(user.profileImage);
+    }
+  }, [user]);
+
   /**
-   * handleThumbnailChange() -> void
-   *
    * @description
    * Handles the file upload for the thumbnail, and sets the thumbnail preview
    * to the file that was uploaded. If the file is not an image, or one was not provided, it
    * will throw and error indicating that the thumbnail was not set and to try again.
    *
    * @param e - Change Event for Thumbnail File
+   * @returns void
    */
   const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setImageError("");
@@ -98,6 +102,15 @@ export default function Page() {
     }
   };
 
+  /**
+   * @description
+   * Handles the edit profile form, setting the error and success states
+   * to an empty string and calling the backend to update the user profile.
+   *
+   * @param e - Form Event
+   * @returns void
+   */
+
   const handleEditProfile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorEditProfile("");
@@ -110,15 +123,71 @@ export default function Page() {
     }
 
     if (!user?.firstName || !user?.lastName) {
-      setErrorEditProfile("Please fill out all fields.");
+      setErrorEditProfile("Please fill out all fields with: *.");
       return;
     }
 
-    // 2- Send request to backend
+    // 2- Send upload image request to backend if profile image exists
+    if (profileImage) {
+      await uploadProfileImage();
+    }
 
-    // 3- Update user hook
+    // 3- Update user profile
+    try {
+      const res = await axios.put(`${apiURL}/user/${id}`, user);
 
-    // 4- Handle response
+      // 3- Handle response
+      if (res.status === 200 || res.status === 201) {
+        setSuccessEditProfile("Profile updated successfully.");
+      } else {
+        setErrorEditProfile("An error occurred. Please try again.");
+      }
+    } catch (error) {
+      setErrorEditProfile("Failed to update profile. Please try again.");
+    }
+  };
+
+  /**
+   * @description
+   * Uploads the profile image to the backend, and sets the user's profile image
+   * to the new profile image.
+   *
+   * @returns void
+   */
+  const uploadProfileImage = async () => {
+    if (!user) {
+      setErrorEditProfile("No user found.");
+      return;
+    }
+
+    if (!profileImage) {
+      setErrorEditProfile("No profile image found.");
+      return;
+    }
+
+    const oldProfileImage = user.profileImage!;
+
+    try {
+      const formData = new FormData();
+      formData.append("profileImage", profileImage);
+      formData.append("oldProfileImage", oldProfileImage);
+
+      const res = await axios.post(
+        `${apiURL}/user/upload-profile-image`,
+        formData
+      );
+
+      if (res.status === 200 || res.status === 201) {
+        user.profileImage = res.data.url;
+      } else {
+        console.error("Error uploading profile image:", res);
+        setErrorEditProfile("An error occurred. Please try again.");
+        return;
+      }
+    } catch (error) {
+      setErrorEditProfile("Failed to upload profile image. Please try again.");
+      return;
+    }
   };
 
   /**
@@ -268,20 +337,20 @@ export default function Page() {
           <div className='profile-management-section'>
             <h2>Edit Profile</h2>
 
-            <form>
+            <form onSubmit={handleEditProfile}>
               {/* TODO: Profile Image */}
               <div className='profile-image-section'>
                 <div className='input-group'>
-                  {user && user.profileImage ? (
+                  {profileImagePreview ? (
                     <Image
-                      src={user.profileImage}
+                      src={profileImagePreview}
                       width={200}
                       height={200}
                       alt='Profile Picture'
                       className='profile-edit-image'
                     />
                   ) : (
-                    <h1 className='profile-initial'>
+                    <h1 className='profile-edit-image profile-initial'>
                       {user?.username[0].toUpperCase()}
                     </h1>
                   )}
@@ -300,14 +369,14 @@ export default function Page() {
                     accept='image/*'
                     onChange={handleProfileImageChange}
                   />
+                  {imageError && <p className='error-message'>{imageError}</p>}
                 </div>
-                {imageError && <p className='error-message'>{imageError}</p>}
               </div>
 
               <div className='form-group'>
                 {/* TODO: First Name */}
                 <div className='input-group'>
-                  <label htmlFor='firstName'>First Name</label>
+                  <label htmlFor='firstName'>First Name *</label>
                   <input
                     type='text'
                     id='firstName'
@@ -318,13 +387,12 @@ export default function Page() {
                         user ? { ...user, firstName: e.target.value } : null
                       )
                     }
-                    required
                   />
                 </div>
 
                 {/* TODO: Last Name */}
                 <div className='input-group'>
-                  <label htmlFor='lastName'>Last Name</label>
+                  <label htmlFor='lastName'>Last Name *</label>
                   <input
                     type='text'
                     id='lastName'
@@ -335,7 +403,6 @@ export default function Page() {
                         user ? { ...user, lastName: e.target.value } : null
                       )
                     }
-                    required
                   />
                 </div>
               </div>
@@ -350,7 +417,6 @@ export default function Page() {
                   onChange={(e) =>
                     setUser(user ? { ...user, bio: e.target.value } : null)
                   }
-                  required
                 />
               </div>
 
@@ -365,7 +431,6 @@ export default function Page() {
                   onChange={(e) =>
                     setUser(user ? { ...user, phone: e.target.value } : null)
                   }
-                  required
                 />
               </div>
 
@@ -381,9 +446,20 @@ export default function Page() {
                       user ? { ...user, dateOfBirth: e.target.value } : null
                     )
                   }
-                  required
                 />
               </div>
+
+              {errorEditProfile && (
+                <p className='error-message'>{errorEditProfile}</p>
+              )}
+
+              {successEditProfile && (
+                <p className='success-message'>{successEditProfile}</p>
+              )}
+
+              <button type='submit' className='save-button'>
+                Save Changes
+              </button>
             </form>
           </div>
 
@@ -501,6 +577,11 @@ export default function Page() {
           {/******************** DELETE ACCOUNT  ********************/}
           <div className='profile-management-section'>
             <h2>Delete Account</h2>
+            <p>
+              By checking this box, I acknoledge the account will be deleted
+              from this platform as well as all the content related. There is no
+              recovery once an account is deleted.
+            </p>
           </div>
         </div>
 
