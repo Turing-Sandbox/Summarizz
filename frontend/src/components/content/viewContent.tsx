@@ -140,14 +140,6 @@ export default function ViewContent({ id }: ViewContentProps) {
           });
       }
 
-        setContent(fetchedContent);
-        if (fetchedContent.bookmarkedBy) {
-          setBookmarks(fetchedContent.bookmarkedBy.length);
-        } else {
-          setBookmarks(0);
-        }
-
-        incrementViews();
       })
       .catch((error) => {
         console.error("Error fetching content:", error);
