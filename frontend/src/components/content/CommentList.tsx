@@ -12,11 +12,12 @@ import {
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
-const CommentList = ({ setNumComments }: any) => {
+const CommentList = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState("");
+  const [numComments, setNumComments] = useState(0);
   const [loading, setLoading] = useState(true);
   const auth = useAuth();
   const userId = auth.userUID;
@@ -127,7 +128,7 @@ const CommentList = ({ setNumComments }: any) => {
 
   return (
     <>
-      <h1>Discussion</h1>
+      <h2>Discussion ({numComments})</h2>
 
       {/************ ADD COMMENT ************/}
       <div>
