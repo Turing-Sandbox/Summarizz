@@ -2,11 +2,10 @@ import { Router } from "express";
 import {
   getUserController,
   updateUserController,
+  uploadProfileImageController,
   deleteUserController,
   registerUserController,
   loginUserController,
-  followCreatorController,
-  unfollowCreatorController,
   followUserController,
   unfollowUserController,
   requestFollowController,
@@ -22,10 +21,7 @@ router.post("/login", loginUserController); // Login a user
 router.get("/:uid", getUserController); // Get a user by UID
 router.put("/:uid", updateUserController); // Update a user by UID
 router.delete("/:uid", deleteUserController); // Delete a user by UID
-
-// Content View - Follow/Unfollow Creator
-router.post("/:userId/follow/creator/:creatorId", followCreatorController); // Follow Creator
-router.post("/:userId/unfollow/creator/:creatorId", unfollowCreatorController); // Unfollow Creator
+router.post("/upload-profile-image", uploadProfileImageController); // Upload Profile Image
 
 // Profile View - Follow/Unfollow User
 router.post("/:userId/follow/user/:targetId", followUserController); // Follow User

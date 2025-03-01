@@ -1,14 +1,24 @@
-import { getDownloadURL, ref, uploadBytes, deleteObject } from "firebase/storage";
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  deleteObject,
+} from "firebase/storage";
 import { storage } from "../../shared/firebaseConfig";
 import fs from "fs/promises";
 
 export class StorageService {
-  // Upload file to Firebase Storage
-  /// @param file - File object
-  /// @param filePath - Path to store the file in Firebase Storage
-  /// @param fileName - Name of the file
-  /// @param fileType - Type of the file
-  /// @returns - URL of the uploaded file
+  /**
+   * @description Uploads a file to Firebase Storage
+   *
+   * @param file
+   * @param filePath
+   * @param fileName
+   * @param fileType
+   *
+   * @returns - Object containing the download URL of the uploaded file
+   * @throws - Error if file upload fails
+   */
   static async uploadFile(
     file,
     filePath: string,
@@ -25,14 +35,14 @@ export class StorageService {
       const fileBuffer = await fs.readFile(file.filepath);
 
       const snapshot = await uploadBytes(storageRef, fileBuffer, metadata);
-      console.log("====================================")
-      console.log("   file: ", file)
-      console.log("   fileBuffer: ", fileBuffer)
-      console.log("   path: ", filePath)
-      console.log("   fileName",fileName)
-      console.log("   storageRef: ", storageRef)
+      console.log("====================================");
+      console.log("   file: ", file);
+      console.log("   fileBuffer: ", fileBuffer);
+      console.log("   path: ", filePath);
+      console.log("   fileName", fileName);
+      console.log("   storageRef: ", storageRef);
       console.log("   Uploaded file successfully!");
-      console.log("====================================")
+      console.log("====================================");
 
       // Get the download URL
       const downloadURL = await getDownloadURL(snapshot.ref);
@@ -49,8 +59,25 @@ export class StorageService {
     }
   }
 
-  static async deleteFile (filePath: string) {
+  /**
+   *
+   * @description - Deletes a file from Firebase Storage
+   *
+   * @param filePath - Path to the file in Firebase Storage (can be a URL)
+   * @returns - void
+   * @throws - Error if file path is not provided
+   */
+  static async deleteFile(filePath: string) {
+    if (!filePath) {
+      throw new Error("File path is required.");
+    }
+
+    if (filePath.includes("https://firebasestorage.googleapis.com")) {
+      filePath = await StorageService.extractFilePathFromUrl(filePath);
+    }
+
     const fileRef = ref(storage, `${filePath}`);
+
     try {
       await deleteObject(fileRef);
       console.log(`File ${filePath} deleted.`);
@@ -59,4 +86,18 @@ export class StorageService {
     }
   }
 
+  /**
+   * Extracts the file path from a Firebase Storage URL.
+   *
+   * @param url - The full URL of the file in Firebase Storage.
+   * @returns The file path to be used with Firebase Storage methods.
+   */
+  static async extractFilePathFromUrl(url: string): Promise<string> {
+    const decodedUrl = decodeURIComponent(url);
+    const match = decodedUrl.match(/\/o\/(.*?)\?/);
+    if (match && match[1]) {
+      return match[1];
+    }
+    throw new Error("Invalid Firebase Storage URL");
+  }
 }
