@@ -203,15 +203,12 @@ export async function changePasswordController(req: Request, res: Response) {
 }
 
 // Change Email/Username Controller
-export async function changeEmailUsernameController(
-  req: Request,
-  res: Response
-) {
+export async function changeEmailController(req: Request, res: Response) {
   const { userId } = req.params;
-  const { currentPassword, newEmail, newUsername } = req.body;
+  const { currentPassword, newEmail } = req.body;
 
   try {
-    await changeEmailUsername(userId, currentPassword, newEmail, newUsername);
+    await changeEmail(userId, currentPassword, newEmail);
 
     // If a new email was requested, let the user know about the verification email
     if (newEmail) {

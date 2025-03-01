@@ -1,6 +1,5 @@
 "use client";
 
-
 import AuthProvider from "@/hooks/AuthProvider";
 import "@/app/styles/authentication/authentication.scss";
 import Background from "@/components/Background";
@@ -12,7 +11,9 @@ export default function Page() {
     <>
       <Background />
       <AuthProvider>
-        <Register />
+        <div className='authentication'>
+          <Register />
+        </div>
 
         <div className='footer'>
           <Footer />

@@ -255,68 +255,39 @@ export default function Page() {
    * @param e - Form Event
    * @returns void
    */
-  // const handleUpdateEmailUsername = async (
-  //   e: React.FormEvent<HTMLFormElement>
-  // ) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   setSuccess("");
+  const handleUpdateEmail = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorEditEmail("");
+    setSuccessEditEmail("");
 
-  //   const auth = getAuth();
-  //   const user = auth.currentUser;
+    if (!user) {
+      setErrorEditEmail("No user is signed in.");
+      return;
+    }
 
-  //   if (!user) {
-  //     setError("No user is signed in.");
-  //     return;
-  //   }
+    if (!user.email) {
+      setErrorEditEmail(
+        "User does not have an email associated with their account."
+      );
+      return;
+    }
 
-  //   if (!user.email) {
-  //     setError("User does not have an email associated with their account.");
-  //     return;
-  //   }
+    if (!currentPassword) {
+      setErrorEditEmail("Please provide your current password.");
+      return;
+    }
 
-  //   if (!currentPassword) {
-  //     setError("Please provide your current password.");
-  //     return;
-  //   }
+    if (!newEmail) {
+      setErrorEditEmail("Please provide a new email.");
+      return;
+    }
 
-  //   // Check if at least one field is provided
-  //   if (!newEmail && !newUsername) {
-  //     setError("Please provide a new email or username.");
-  //     return;
-  //   }
-
-  //   try {
-  //     // Re-authenticate the user
-  //     const credential = EmailAuthProvider.credential(
-  //       user.email,
-  //       currentPassword
-  //     );
-  //     await reauthenticateWithCredential(user, credential);
-
-  //     // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
-
-  //     if (newEmail && newEmail !== user?.email) {
-  //       await verifyBeforeUpdateEmail(user!, newEmail);
-  //       setSuccess(
-  //         "A verification link has been sent to your new email. Please verify it to complete the update."
-  //       );
-  //     }
-
-  //     // If a new username is provided, update it via server
-  //     if (newUsername) {
-  //       await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
-  //       setSuccess((prev) =>
-  //         prev
-  //           ? prev + " Username updated successfully."
-  //           : "Username updated successfully."
-  //       );
-  //     }
-  //   } catch (err: any) {
-  //     console.error("Error updating email/username:", err);
-  //     setError(err.message || "Failed to update information.");
-  //   }
-  // };
+    try {
+    } catch (err: any) {
+      console.error("Error updating email:", err);
+      setErrorEditEmail(err.message || "Failed to update information.");
+    }
+  };
 
   // --------------------------------------
   // ------------- Functions --------------

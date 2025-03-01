@@ -19,7 +19,6 @@ import {
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import jwt from "jsonwebtoken";
-import { adminAuth } from "../../shared/firebaseAdminConfig";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -164,11 +163,10 @@ export async function changePassword(
   }
 }
 
-export async function changeEmailUsername(
+export async function changeEmail(
   userId: string,
   currentPassword: string,
   newEmail?: string,
-  newUsername?: string
 ) {
   const auth = getAuth();
   const userRef = doc(db, "users", userId);
@@ -190,11 +188,6 @@ export async function changeEmailUsername(
   const firebaseUser = userCredential.user;
 
   const updates: Partial<{ username: string; email: string }> = {};
-
-  // If a new username is provided and is different, update Firestore immediately
-  if (newUsername && newUsername !== userData.username) {
-    updates.username = newUsername;
-  }
 
   // If a new email is provided and different from the current one:
   if (newEmail && newEmail !== existingEmail) {
