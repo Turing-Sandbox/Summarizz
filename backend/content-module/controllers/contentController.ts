@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
+import { arrayUnion, doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../shared/firebaseConfig";
+import { addSharedContentToUser } from "../../user-module/services/userService";
 import axios from "axios";
 
 export class ContentController {
@@ -277,11 +280,29 @@ export class ContentController {
 
   // Share content
   static async shareContent(req: Request, res: Response) {
-    const { contentId, userId } = req.params;
-
+    const { userId, contentId } = req.params;
+  
+    console.log("Share Content triggered with contentId:", contentId, "userId:", userId);
+  
     try {
-      const response = await ContentService.shareContent(contentId, userId);
-      res.status(200).json(response);
+      // Update shared content in the content document (sharedBy)
+      const contentRef = doc(db, "contents", contentId);
+      await updateDoc(contentRef, {
+        sharedBy: arrayUnion(userId),  // This will add userId to sharedBy if not already present
+      });
+  
+      // Add the content to the user's sharedContent array
+      await addSharedContentToUser(userId, contentId);
+  
+      // Fetch the updated content - CORRECTED
+      const updatedContentDoc = await getDoc(contentRef); // Use getDoc directly
+      if (!updatedContentDoc.exists()) {  // Now this check works!
+          throw new Error("Content not found after update.");
+      }
+      const updatedContent = updatedContentDoc.data();
+  
+      // Return success response
+      res.status(200).json({content: updatedContent}); // Return the updated content
     } catch (error) {
       console.error("Error sharing content:", error);
       res.status(500).json({

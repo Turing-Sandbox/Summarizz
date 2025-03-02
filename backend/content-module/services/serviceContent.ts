@@ -38,7 +38,8 @@ export class ContentService {
         readtime,
         likes: 0,
         peopleWhoLiked: [],
-        bookmarkedBy: []
+        bookmarkedBy: [],
+        sharedBy: []
       };
 
       const docRef = await addDoc(collection(db, "contents"), newContent);
@@ -295,22 +296,26 @@ export class ContentService {
   // Share content
   static async shareContent(contentID: string, userId: string) {
     try {
-      // Get the content document from Firestore
       const contentRef = doc(db, "contents", contentID);
-      const contentDoc = await getDoc(contentRef);
-
-      if (!contentDoc.exists()) {
-        throw new Error("Content not found");
-      }
-
+  
+      // Only update sharedBy
+      await updateDoc(contentRef, {
+        sharedBy: arrayUnion(userId), // Add userId if not already present
+        // shares: increment(1)  REMOVED - Let the other function handle this
+      });
+  
       // Add this content to the user's shared content list
       await addSharedContentToUser(userId, contentID);
-
-      // Fetch the updated document and return it
-      const updatedContentDoc = await getDoc(contentRef);
+  
+      // Fetch updated document - still needed for accurate response
+      const updatedContentDoc = await getDoc(contentRef); //Keep this as we do still check
+      //if (!updatedContentDoc.exists()) {   <-- REMOVE THIS LINE
+      //    throw new Error("Content not found after update.");
+      //}
       const updatedContent = updatedContentDoc.data();
-
+  
       return { content: updatedContent }; // Return updated content
+  
     } catch (error) {
       console.error("Error sharing content:", error);
       throw new Error(error.message || "Failed to share content");

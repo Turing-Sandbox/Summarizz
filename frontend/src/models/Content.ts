@@ -1,8 +1,8 @@
 export interface Content {
   id: string;
   creatorUID: string;
-  dateCreated: Date;
-  dateUpdated: Date;
+  dateCreated: Date | null;
+  dateUpdated: Date | null;
   title: string;
   content: string;
   thumbnail?: string;
@@ -13,4 +13,5 @@ export interface Content {
   shares?: number;
   peopleWhoLiked?: string[];
   bookmarkedBy?: string[];
+  sharedBy?: string[];
 }

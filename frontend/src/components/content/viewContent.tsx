@@ -108,42 +108,42 @@ export default function ViewContent({ id }: ViewContentProps) {
    * @returns void
    */
   const getContent = async () => {
-    axios.get(`${apiURL}/content/${id}`).then((res) => {
-      const fetchedContent = res.data;
-      if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
-        fetchedContent.dateCreated = new Date(
-          fetchedContent.dateCreated.seconds * 1000
-        );
+    try {
+      const res = await axios.get(`${apiURL}/content/${id}`);
+      let fetchedContent = res.data;
+
+      if (fetchedContent.dateCreated) {
+          if (typeof fetchedContent.dateCreated === 'string') {
+              fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+          } else if (fetchedContent.dateCreated.seconds) {
+              // Handle Firestore Timestamp
+              fetchedContent.dateCreated = new Date(fetchedContent.dateCreated.seconds * 1000);
+          } else if (!(fetchedContent.dateCreated instanceof Date)) {
+              // If it's not a string, a Timestamp, or a Date, set to null
+              fetchedContent.dateCreated = null; // Or some other default, like new Date()
+          }
       } else {
-        fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+          fetchedContent.dateCreated = null; // Handle cases where dateCreated is missing
       }
 
       fetchedContent.id = id;
-
       setContent(fetchedContent);
       setBookmarks(fetchedContent.bookmarkedBy?.length || 0);
-
-
-
       setViews(fetchedContent.views)
 
-      if (firstRender) { // Only increment the view count on the first page load, and not rerenders.
-        incrementViews()
-          .then(() => {
+      if (firstRender) {
+        try {
+            await incrementViews();
             setViews((fetchedContent.views || 0) + 1);
-          })
-          .catch((error) => {
+        } catch (error) {
             console.error("Failed to increment views:", error);
-          })
-          .finally(() => {
+        } finally {
             setFirstRender(false);
-          });
+        }
       }
-
-      })
-      .catch((error) => {
+    } catch (error) {
         console.error("Error fetching content:", error);
-      });
+    }
   };
 
   /**
@@ -319,23 +319,23 @@ export default function ViewContent({ id }: ViewContentProps) {
       alert("Please log in to share this article.");
       return;
     }
-
-    // Use Firestore user data if available, otherwise fallback
+  
+    // Use Firestore user data if available, otherwise fallback (keeping this for now)
     const username =
       user?.username ||
       authUser.displayName ||
       authUser.email ||
       "Summarizz User"; // Fallback Username
-
+  
     const shareMessage = `${username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
     const shareOption = window.prompt(
       "How do you want to share?\nType '1' to Copy to Clipboard\nType '2' to Share via Email"
     );
-
+  
     if (shareOption === "1") {
       try {
         await navigator.clipboard.writeText(shareMessage);
-        incrementShares();
+        // incrementShares(); REMOVED - We'll use the API call instead
         alert("Message copied to clipboard!");
       } catch (err) {
         console.error("Failed to copy: ", err);
@@ -345,9 +345,29 @@ export default function ViewContent({ id }: ViewContentProps) {
       window.location.href = `mailto:?subject=Check out this article&body=${encodeURIComponent(
         shareMessage
       )}`;
-      incrementShares();
+      // incrementShares(); REMOVED - We'll use the API call instead
     } else {
       alert("Invalid option. Please choose '1' or '2'.");
+      return; // Exit if the user cancels or enters an invalid option
+    }
+  
+    // API calls (these happen regardless of copy/email choice)
+    try {
+      const contentId = id;
+      const userId = authUser.uid;
+  
+      // FIRST, call YOUR shareContent endpoint
+      const shareResponse = await axios.post(`${apiURL}/content/user/${userId}/share/${contentId}`);
+       // Update the local state with the UPDATED content from YOUR endpoint
+      setContent(shareResponse.data.content);
+  
+      // SECOND, call the incrementShares endpoint
+      await axios.put(`${apiURL}/content/shares/${contentId}`);
+  
+      console.log("Content shared successfully");
+    } catch (error) {
+      console.error("Error sharing content:", error);
+      alert("Failed to share content. Please try again."); // Consistent error message
     }
   };
 
@@ -452,8 +472,17 @@ export default function ViewContent({ id }: ViewContentProps) {
             <div className='content-header'>
               <div className='content-info'>
                 <p>
-                  {content?.dateCreated?.toLocaleDateString()}
-                  {content?.readtime ? ` - ${content.readtime} min` : ""}
+                  {content?.dateCreated ? (
+                      <>
+                          {content.dateCreated.toLocaleDateString("en-US", {
+                              month: "short",
+                          })}{" "}
+                          {content.dateCreated.getDate()}
+                          {content.readtime ? ` - ${content.readtime} min read` : ""}
+                      </>
+                  ) : (
+                      "" // Or "Date Not Available", or any other placeholder
+                  )}
                 </p>
                 <div className='username-follow'>
                   <p className='username'>{creator?.username}</p>
