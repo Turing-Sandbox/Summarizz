@@ -14,16 +14,7 @@ import Footer from "@/components/Footer";
 
 import "@/app/styles/profile/ProfileManagement.scss";
 import { useParams } from "next/navigation";
-import { error } from "console";
 
-/**
- * Page() -> JSX.Element
- *
- * @description
- * Renders the Profile Management page, allowing users to manage their profile.
- *
- * @returns JSX.Element
- */
 export default function Page() {
   // ---------------------------------------
   // -------------- Variables --------------
@@ -225,8 +216,42 @@ export default function Page() {
     setErrorEditPassword("");
     setSuccessEditPassord("");
 
+    // Validation
+    if (!currentPassword) {
+      setErrorEditPassword("Please provide your current password.");
+      return;
+    }
+
+    if (!newPassword || !confirmPassword) {
+      setErrorEditPassword("Please provide a new password.");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setErrorEditPassword("New passwords do not match.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setErrorEditPassword("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      setErrorEditPassword(
+        "New password cannot be the same as the current password."
+      );
+      return;
+    }
+
+    if (
+      !/[a-z]/.test(newPassword) ||
+      !/[A-Z]/.test(newPassword) ||
+      !/[0-9]/.test(newPassword)
+    ) {
+      setErrorEditPassword(
+        "Password must contain at least one number, one lowercase and one uppercase letter."
+      );
       return;
     }
 
@@ -534,7 +559,6 @@ export default function Page() {
                   id='currentPassword'
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
                 />
               </div>
 
@@ -546,7 +570,6 @@ export default function Page() {
                     id='newPassword'
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    required
                   />
                 </div>
 
@@ -557,13 +580,16 @@ export default function Page() {
                     id='confirmPassword'
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
                   />
                 </div>
               </div>
 
-              {/* {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>} */}
+              {errorEditPassword && (
+                <p className='error-message'>{errorEditPassword}</p>
+              )}
+              {successEditPassord && (
+                <p className='success-message'>{successEditPassord}</p>
+              )}
 
               <button type='submit' className='save-button'>
                 Change Password
