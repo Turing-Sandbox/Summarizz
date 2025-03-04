@@ -1,103 +1,167 @@
 /* Profile Management Page Styles */
 
+// Mixins for reusable styles
+@mixin glassmorphic-background {
+  background-color: var(--tile-color);
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 .profile-management-section {
-  padding: 40px;
-  max-width: 100%;
-  margin: 0 auto;
-  background-color: var(--background-color);
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  @include glassmorphic-background;
+  padding: 20px 40px;
+  border-radius: 25px;
+  margin-bottom: 30px;
 }
 
-.change-password-form, .update-info-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Styling for individual form groups */
 .form-group {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin: 10px 0;
+}
+
+.form-group .input-group {
+  margin: 0;
+}
+
+.input-group {
+  text-align: left;
+  margin: 10px 0;
+}
+
+input,
+textarea {
+  width: 100%;
+
+  margin: 0.5rem auto;
+  padding: 0.8rem;
+  box-sizing: border-box;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
+  color: var(--text-color);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 50px;
+  max-height: 200px;
+}
+
+.profile-image-section {
+  text-align: center;
   display: flex;
   flex-direction: column;
-}
-
-/* Place current password input on its own line */
-.form-group:first-child {
-  flex-direction: row;
   align-items: center;
-  gap: 20px;
+  justify-content: center;
 }
 
-.form-group label {
-  font-size: 1rem;
-  color: var(--text-color);
-  padding-bottom: 1%;
-  padding-top: 1%;
-}
+.profile-edit-image {
+  display: inline-block;
 
-input[type="password"], input[type="email"], input[type="text"] {
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid var(--input-border-color);
+  padding: 0.8rem;
+  box-sizing: border-box;
+
   border-radius: 10px;
-  background-color: var(--input-background-color);
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
   color: var(--text-color);
-  max-width: 30%;
 }
 
-input[type="password"]:focus, input[type="email"]:focus, input[type="text"]:focus {
-  outline: none;
-  border-color: var(--primary-color);
-}
+.profile-initial {
+  width: 200px;
+  height: 200px;
 
-/* Arrange new password and confirm password inputs side by side */
-.form-group:nth-child(2) {
+  font-size: 100px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
+
   display: flex;
-  flex-direction: row;
-  gap: 20px;
+  align-items: center;
+  justify-content: center;
 }
 
-.change-password-button, .update-info-button {
-  align-self: flex-start;
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: grey;
-  color: white;
-  border: none;
-  border-radius: 5px;
+.profile-image-upload {
+  display: inline-block;
+  width: 200px;
+
+  margin-bottom: 20px;
+  padding: 1rem;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  user-select: none;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-.change-password-button:hover, .update-info-button:hover {
-  background-color: var(--primary-color-hover);
+.profile-image-upload:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
 }
 
-.error-message {
-  color: red;
-  font-size: 0.9rem;
+input[type="file"] {
+  display: none;
+}
+
+.save-button {
+  width: 100%;
+
+  margin: 1rem auto;
+  padding: 15px;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  // font-size: 1.1rem;
+}
+
+.save-button:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
 }
 
 .success-message {
   color: green;
-  font-size: 0.9rem;
+  margin: 2rem auto 0;
 }
 
 @media screen and (max-width: 768px) {
   .profile-management-section {
-    padding: 10px;
+    padding: 10px 20px;
   }
 
-  .form-group:first-child {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .form-group:nth-child(2) {
-    flex-direction: column;
-  }
-
-  .change-password-button, .update-info-button {
-    width: 100%;
+  .form-group {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }

@@ -7,14 +7,14 @@ import {
   deleteUser,
   register,
   login,
-  followCreator,
-  unfollowCreator,
   followUser,
   unfollowUser,
   requestFollow,
   changePassword,
   changeEmailUsername,
 } from "../services/userService";
+import { IncomingForm } from "formidable";
+import { StorageService } from "../../storage-module/services/serviceStorage";
 
 // Register User
 export async function registerUserController(req: Request, res: Response) {
@@ -48,6 +48,53 @@ export async function loginUserController(req: Request, res: Response) {
     console.log(error);
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
+}
+
+export async function uploadProfileImageController(
+  req: Request,
+  res: Response
+) {
+  console.log("Uploading Profile Image...");
+  const form = new IncomingForm();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      console.error("Error parsing form: ", err);
+      return res.status(500).json({ error: "Failed to upload profile image." });
+    }
+
+    const file = files.profileImage[0];
+    const fileName = file.newFilename;
+    const fileType = file.mimetype;
+
+    // Delete old profile image if it exists
+    const oldProfileImage = fields.oldProfileImage;
+    if (oldProfileImage) {
+      try {
+        await StorageService.deleteFile(oldProfileImage);
+      } catch (error) {
+        console.error("Error deleting old profile image: ", error);
+      }
+    }
+
+    // Upload profile image to storage
+    try {
+      // Upload profile image
+      const response = await StorageService.uploadFile(
+        file,
+        "profileImage",
+        fileName,
+        fileType
+      );
+
+      res.status(201).json(response);
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ error: error.message || "Failed to upload profile image" });
+    }
+  });
 }
 
 // Create User
@@ -100,31 +147,6 @@ export async function deleteUserController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to delete user" });
-  }
-}
-
-// Content View - Follow Creator
-export async function followCreatorController(req: Request, res: Response) {
-  console.log("Following creator...");
-  const { userId, creatorId } = req.params;
-  try {
-    await followCreator(userId, creatorId);
-    res.status(200).json({ message: "Creator followed successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Failed to follow creator" });
-  }
-}
-
-// Content View - Unfollow Creator
-export async function unfollowCreatorController(req: Request, res: Response) {
-  const { userId, creatorId } = req.params;
-  try {
-    await unfollowCreator(userId, creatorId);
-    res.status(200).json({ message: "Creator unfollowed successfully" });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Failed to unfollow creator" });
   }
 }
 
