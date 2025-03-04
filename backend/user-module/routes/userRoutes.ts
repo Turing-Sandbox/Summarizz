@@ -11,6 +11,7 @@ import {
   requestFollowController,
   changePasswordController,
   changeEmailController,
+  changeUsernameController,
 } from "../controllers/userController";
 
 const router = Router();
@@ -35,5 +36,6 @@ router.post("/:userId/change-password", changePasswordController); // Change Pas
 
 // Profile Management - Change Email/Username
 router.post("/:userId/change-email", changeEmailController);
+router.post("/:userId/change-username", changeUsernameController);
 
 export default router;

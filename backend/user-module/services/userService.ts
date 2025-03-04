@@ -190,6 +190,26 @@ export async function changeEmail(
   console.log("Email updated successfully for user:", userId);
 }
 
+export async function changeUsername(userId: string, newUsername: string) {
+  // Get user
+  const userRef = doc(db, "users", userId);
+  const userSnapshot = await getDoc(userRef);
+
+  if (!userSnapshot.exists()) {
+    throw new Error("User not found");
+  }
+
+  // Username already exists
+  const user = userSnapshot.data();
+  if (user.username === newUsername) {
+    throw new Error("Username already exists");
+  }
+
+  const userData = userSnapshot.data();
+  userData.username = newUsername;
+  await updateDoc(userRef, userData);
+}
+
 // ----------------------------------------------------------
 // -------------------- User Interactions -------------------
 // ----------------------------------------------------------

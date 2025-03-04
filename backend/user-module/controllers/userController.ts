@@ -12,11 +12,15 @@ import {
   requestFollow,
   changePassword,
   changeEmail,
+  changeUsername,
 } from "../services/userService";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
 
-// Register User
+// ----------------------------------------------------------
+// --------------------- Authentication ---------------------
+// ----------------------------------------------------------
+
 export async function registerUserController(req: Request, res: Response) {
   console.log("Registering user...");
   const { firstName, lastName, username, email, password } = req.body;
@@ -36,7 +40,6 @@ export async function registerUserController(req: Request, res: Response) {
   }
 }
 
-// Login User
 export async function loginUserController(req: Request, res: Response) {
   console.log("Logging in user...");
   const { email, password } = req.body;
@@ -49,6 +52,10 @@ export async function loginUserController(req: Request, res: Response) {
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
 }
+
+// ----------------------------------------------------------
+// ---------------------- User - CRUD -----------------------
+// ----------------------------------------------------------
 
 export async function uploadProfileImageController(
   req: Request,
@@ -138,6 +145,60 @@ export async function updateUserController(req: Request, res: Response) {
   }
 }
 
+// Change Password
+export async function changePasswordController(req: Request, res: Response) {
+  const { userId } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  try {
+    await changePassword(userId, currentPassword, newPassword);
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error: any) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to update password" });
+  }
+}
+
+// Change Email Controller
+export async function changeEmailController(req: Request, res: Response) {
+  const { userId } = req.params;
+  const { currentPassword, newEmail } = req.body;
+
+  try {
+    await changeEmail(userId, currentPassword, newEmail);
+
+    // If a new email was requested, let the user know about the verification email
+    res.status(200).json({
+      message:
+        "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update.",
+    });
+  } catch (error: any) {
+    console.error("Error updating email/username:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to update email/username" });
+  }
+}
+
+// Update username
+export async function changeUsernameController(req: Request, res: Response) {
+  const { userId } = req.params;
+  const { newUsername } = req.body;
+
+  try {
+    await changeUsername(userId, newUsername);
+
+    res.status(200).json({ message: "Username updated successfully" });
+  } catch (error: any) {
+    console.error("Error updating email/username:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to update email/username" });
+  }
+}
+
 // Delete User
 export async function deleteUserController(req: Request, res: Response) {
   const { uid } = req.params;
@@ -149,6 +210,10 @@ export async function deleteUserController(req: Request, res: Response) {
     res.status(500).json({ error: "Failed to delete user" });
   }
 }
+
+// ----------------------------------------------------------
+// -------------------- User Interactions -------------------
+// ----------------------------------------------------------
 
 // Profile View - Follow User
 export async function followUserController(req: Request, res: Response) {
@@ -183,42 +248,5 @@ export async function requestFollowController(req: Request, res: Response) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Failed to send follow request" });
-  }
-}
-
-// Change Password
-export async function changePasswordController(req: Request, res: Response) {
-  const { userId } = req.params;
-  const { currentPassword, newPassword } = req.body;
-
-  try {
-    await changePassword(userId, currentPassword, newPassword);
-    res.status(200).json({ message: "Password updated successfully" });
-  } catch (error) {
-    console.log(error);
-    res
-      .status(500)
-      .json({ error: error.message || "Failed to update password" });
-  }
-}
-
-// Change Email/Username Controller
-export async function changeEmailController(req: Request, res: Response) {
-  const { userId } = req.params;
-  const { currentPassword, newEmail } = req.body;
-
-  try {
-    await changeEmail(userId, currentPassword, newEmail);
-
-    // If a new email was requested, let the user know about the verification email
-    res.status(200).json({
-      message:
-        "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update.",
-    });
-  } catch (error: any) {
-    console.error("Error updating email/username:", error);
-    res
-      .status(500)
-      .json({ error: error.message || "Failed to update email/username" });
   }
 }
