@@ -41,9 +41,10 @@ interface ViewContentProps {
 export default function ViewContent({ id }: ViewContentProps) {
   // useAuth Hook for Authentication
   const { userUID, user: authUser } = useAuth();
+  const router = useRouter();
 
   // ---------------------------------------
-  // -------------- Variables --------------
+  // ---------------- State ----------------
   // ---------------------------------------
   const [content, setContent] = useState<Content | null>(null);
   const [creator, setCreator] = useState<User | null>(null);
@@ -58,94 +59,31 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [user, setUser] = useState<User | null>(null);
 
   // ---------------------------------------
-  // -------------- Page INIT --------------
+  // -------------- Helpers --------------
   // ---------------------------------------
 
-  const router = useRouter();
-
-    // Fetch logged-in user data (only if userUID exists)
-    useEffect(() => {
-        if (userUID) {
-            fetchLoggedInUser();
-        }
-    }, [userUID]); // Only re-run if userUID changes
-
-  // Fetch content data and creator data.
-  useEffect(() => {
-    const fetchData = async () => {
-        try {
-            const contentResponse = await axios.get(`${apiURL}/content/${id}`);
-            let fetchedContent = contentResponse.data;
-
-            // --- Date Handling ---
-            if (fetchedContent.dateCreated) {
-                if (typeof fetchedContent.dateCreated === 'string') {
-                    fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
-                } else if (fetchedContent.dateCreated.seconds) {
-                    fetchedContent.dateCreated = new Date(fetchedContent.dateCreated.seconds * 1000);
-                } else if (!(fetchedContent.dateCreated instanceof Date)) {
-                    fetchedContent.dateCreated = null;
-                }
-            }
-            if (fetchedContent.dateUpdated) { 
-                if (typeof fetchedContent.dateUpdated === 'string') {
-                    fetchedContent.dateUpdated = new Date(fetchedContent.dateUpdated);
-                } else if (fetchedContent.dateUpdated.seconds) {
-                    fetchedContent.dateUpdated = new Date(fetchedContent.dateUpdated.seconds * 1000);
-                } else if (!(fetchedContent.dateUpdated instanceof Date)) {
-                    fetchedContent.dateUpdated = null;
-                }
-            }
-          // --- End Date Handling ---
-            fetchedContent.id = id;
-            setContent(fetchedContent);
-
-           // Fetch creator info *ONLY IF* creatorUID exists.
-           if (fetchedContent.creatorUID) {
-              const creatorResponse = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
-              setCreator(creatorResponse.data);
-            }
-
-            // Update like/bookmark status after setting content
-            if (userUID) {
-                setIsLiked(fetchedContent.peopleWhoLiked?.includes(userUID) || false);
-                setIsBookmarked(fetchedContent.bookmarkedBy?.includes(userUID) || false);
-            }
-            // Increment views only on initial load of the component.
-            await incrementViews();
-
-        } catch (error) {
-            console.error("Error fetching content or creator:", error);
-        }
-    };
-
-    fetchData();
-  }, [id, userUID]); // Re-fetch if content ID or logged-in user changes
-
-  // Sanitize and set content, update like/bookmark status when content changes.
-  useEffect(() => {
-    if (content) {
-      let rawContent: string;
-      if (typeof content.content === "string") {
-        rawContent = content.content;
-      } else if (typeof content.content === "object" && (content.content as any).content) {
-        // Cast to any so that TS knows we expect a "content" property.
-        rawContent = (content.content as any).content;
-      } else {
-        rawContent = "";
-      }
-      
-      const sanitized = DOMPurify.sanitize(rawContent);
-    
-      setFormatedContent(sanitized);
-      setLikes(typeof content.likes === "number" ? content.likes : 0);
-      setViews(content.views || 0);  // Ensure views is a number
-      if(userUID){
-        setIsLiked(content.peopleWhoLiked?.includes(userUID) || false);
-        setIsBookmarked(content.bookmarkedBy?.includes(userUID) || false);
+  // Normalizes date fields so they're proper Date objects.
+  function normalizeContentDates(contentObj: any): any {
+    if (contentObj.dateCreated) {
+      if (typeof contentObj.dateCreated === "string") {
+        contentObj.dateCreated = new Date(contentObj.dateCreated);
+      } else if (contentObj.dateCreated.seconds) {
+        contentObj.dateCreated = new Date(contentObj.dateCreated.seconds * 1000);
       }
     }
-  }, [content, userUID]);
+    if (contentObj.dateUpdated) {
+      if (typeof contentObj.dateUpdated === "string") {
+        contentObj.dateUpdated = new Date(contentObj.dateUpdated);
+      } else if (contentObj.dateUpdated.seconds) {
+        contentObj.dateUpdated = new Date(contentObj.dateUpdated.seconds * 1000);
+      }
+    }
+    return contentObj;
+  }
+
+  // ---------------------------------------
+  // -------------- Data Fetching ----------
+  // ---------------------------------------
 
   /**
    * fetchLoggedInuser() -> void
@@ -166,6 +104,83 @@ export default function ViewContent({ id }: ViewContentProps) {
       }
     }
   };
+
+   // Fetches the content data and, if available, its creator data.
+   const fetchContentData = async () => {
+    try {
+      const contentResponse = await axios.get(`${apiURL}/content/${id}`);
+      let fetchedContent = contentResponse.data;
+
+      // Normalize dates.
+      fetchedContent = normalizeContentDates(fetchedContent);
+      fetchedContent.id = id;
+      setContent(fetchedContent);
+
+      // Update like/bookmark status.
+      if (userUID) {
+        setIsLiked(fetchedContent.peopleWhoLiked?.includes(userUID) || false);
+        setIsBookmarked(fetchedContent.bookmarkedBy?.includes(userUID) || false);
+      }
+
+      // Fetch creator info if available.
+      if (fetchedContent.creatorUID) {
+        const creatorResponse = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+        setCreator(creatorResponse.data);
+      }
+
+      // Increment views on initial load.
+      await incrementViews();
+    } catch (error) {
+      console.error("Error fetching content or creator:", error);
+    }
+  };
+
+  // ---------------------------------------
+  // -------------- useEffects -------------
+  // ---------------------------------------
+
+  // Fetch logged-in user when userUID changes.
+  useEffect(() => {
+      if (userUID) {
+          fetchLoggedInUser();
+      }
+  }, [userUID]);
+
+  // Fetch content data and creator data on mount or when id/userUID changes.
+  useEffect(() => {
+     fetchContentData();
+  }, [id, userUID]);
+
+  // Sanitize content and update related state whenever content changes.
+  useEffect(() => {
+    if (content) {
+      let rawContent: string;
+      // Use content.content (which is expected to be a string).
+      if (typeof content.content === "string") {
+        rawContent = content.content;
+      } else if (
+        typeof content.content === "object" &&
+        (content.content as any).content
+      ) {
+        // If it accidentally becomes an object, extract the inner value.
+        rawContent = (content.content as any).content;
+      } else {
+        rawContent = "";
+      }
+      const sanitized = DOMPurify.sanitize(rawContent);
+      setFormatedContent(sanitized);
+      setLikes(typeof content.likes === "number" ? content.likes : 0);
+      setViews(content.views || 0);
+      if (userUID) {
+        setIsLiked(content.peopleWhoLiked?.includes(userUID) || false);
+        setIsBookmarked(content.bookmarkedBy?.includes(userUID) || false);
+      }
+    }
+  }, [content, userUID]);
+
+  // ---------------------------------------
+  // -------------- Handlers ---------------
+  // ---------------------------------------
 
   /**
    * handleDelete() -> void
@@ -225,13 +240,13 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       const action = isLiked ? "unlike" : "like";
       const url = `${apiURL}/content/${id}/${action}/${userUID}`;
-
       const response = await axios.post(url, {}, { headers: { "Content-Type": "application/json" }, });
 
-      // Normalize the content dates before updating the state.
-      const updatedContent = normalizeContentDates(response.data.content);
-      setContent(updatedContent);
-
+      // Normalize the response before setting state.
+      const normalizedContent = normalizeContentDates(response.data.content);
+      setContent(normalizedContent);
+      // Optionally re-fetch to ensure full data is up-to-date.
+      await fetchContentData();
     } catch (error) {
       console.error("Error liking/unliking content:", error);
     }
@@ -255,13 +270,13 @@ export default function ViewContent({ id }: ViewContentProps) {
 
       const action = isBookmarked ? "unbookmark" : "bookmark";
       const url = `${apiURL}/content/${userUID}/${action}/${id}`;
-
       const response = await axios.post(url, {}, { headers: { "Content-Type": "application/json" } });
 
-      // Normalize the content dates before updating the state.
-      const updatedContent = normalizeContentDates(response.data.content);
-      setContent(updatedContent);
-
+      // Normalize the response before setting state.
+      const normalizedContent = normalizeContentDates(response.data.content);
+      setContent(normalizedContent);
+      // Optionally re-fetch to ensure full data is up-to-date.
+      await fetchContentData();
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
     }
@@ -285,13 +300,7 @@ export default function ViewContent({ id }: ViewContentProps) {
       return;
     }
   
-    // Use Firestore user data if available, otherwise fallback (keeping this for now)
-    const username =
-      user?.username ||
-      authUser.displayName ||
-      authUser.email ||
-      "Summarizz User"; // Fallback Username
-  
+    const username = user?.username || authUser.displayName || authUser.email || "Summarizz User"; // Fallback Username
     const shareMessage = `${username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
     const shareOption = window.prompt(
       "How do you want to share?\nType '1' to Copy to Clipboard\nType '2' to Share via Email"
@@ -314,21 +323,19 @@ export default function ViewContent({ id }: ViewContentProps) {
       return;
     }
   
-    // API call
+    // Call the share endpoint.
     try {
       const contentId = id;
       const userId = authUser.uid;
-  
-      // Call the combined shareContent endpoint
       const shareResponse = await axios.post(`${apiURL}/content/user/${userId}/share/${contentId}`);
       console.log("Shared content response:", shareResponse.data.content);
-      setContent(shareResponse.data.content); // setContent after date fix
-
-      // Navigate to the profile page of the logged-in user
-      router.push(`/profile/${userUID}`);
+      // Option 1: Update state from response then re-fetch full content.
+      setContent(shareResponse.data.content);
+      await fetchContentData();
+      // Option 2: Redirect to the user's profile page.
+      // router.push(`/profile/${userUID}`);
      
-      console.log("Content shared successfully");
-  
+      console.log("Content shared successfully");  
     } catch (error) {
       console.error("Error sharing content:", error);
       alert("Failed to share content. Please try again."); 
@@ -397,24 +404,6 @@ export default function ViewContent({ id }: ViewContentProps) {
         console.error(error);
     }
   };
-
-  function normalizeContentDates(contentObj: any): any {
-    if (contentObj.dateCreated) {
-      if (typeof contentObj.dateCreated === "string") {
-        contentObj.dateCreated = new Date(contentObj.dateCreated);
-      } else if (contentObj.dateCreated.seconds) {
-        contentObj.dateCreated = new Date(contentObj.dateCreated.seconds * 1000);
-      }
-    }
-    if (contentObj.dateUpdated) {
-      if (typeof contentObj.dateUpdated === "string") {
-        contentObj.dateUpdated = new Date(contentObj.dateUpdated);
-      } else if (contentObj.dateUpdated.seconds) {
-        contentObj.dateUpdated = new Date(contentObj.dateUpdated.seconds * 1000);
-      }
-    }
-    return contentObj;
-  }
 
   // --------------------------------------
   // -------------- Render ----------------
