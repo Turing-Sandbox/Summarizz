@@ -56,117 +56,84 @@ export default function ViewContent({ id }: ViewContentProps) {
   const [numComments, setNumComments] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [firstRender, setFirstRender] = useState(true); // Used to determine whether to increment the view count on rerenders or not.
 
   // ---------------------------------------
   // -------------- Page INIT --------------
   // ---------------------------------------
 
-  const hasFetchedData = useRef(false);
   const router = useRouter();
 
-  // EFFECT: Handle Fetching Logged In User
-  useEffect(() => {
-    if (!hasFetchedData.current) {
-      fetchLoggedInUser();
-      getContent();
-      hasFetchedData.current = true;
-    }
-  }, []);
-
-  // EFFECT: Handling Fetching Content
-  useEffect(() => {
-    getUserInfo();
-    if (content) {
-      const sanitizedContent = DOMPurify.sanitize(content.content);
-      setFormatedContent(sanitizedContent);
-
-      const likesCount = typeof content.likes === "number" ? content.likes : 0;
-      setLikes(likesCount);
-
-      const userLiked = content.peopleWhoLiked
-        ? content.peopleWhoLiked.includes(userUID || "")
-        : false;
-      setIsLiked(userLiked);
-
-      const userBookmarked = content.bookmarkedBy
-        ? content.bookmarkedBy.includes(userUID || "")
-        : false;
-      setIsBookmarked(userBookmarked);
-    }
-  }, [content, userUID]);
-
-  /**
-   * getContent() -> void
-   *
-   * @description
-   * Fetches content from the backend using the id provided in the route, this
-   * will fetch { datecreated, creatorUID, title, content, thumbnail, readtime,
-   * likes, peopleWhoLiked, bookmarkedBy } from the backend and set the content
-   * accordingly.
-   *
-   * @returns void
-   */
-  const getContent = async () => {
-    try {
-      const res = await axios.get(`${apiURL}/content/${id}`);
-      let fetchedContent = res.data;
-
-      if (fetchedContent.dateCreated) {
-          if (typeof fetchedContent.dateCreated === 'string') {
-              fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
-          } else if (fetchedContent.dateCreated.seconds) {
-              // Handle Firestore Timestamp
-              fetchedContent.dateCreated = new Date(fetchedContent.dateCreated.seconds * 1000);
-          } else if (!(fetchedContent.dateCreated instanceof Date)) {
-              // If it's not a string, a Timestamp, or a Date, set to null
-              fetchedContent.dateCreated = null; // Or some other default, like new Date()
-          }
-      } else {
-          fetchedContent.dateCreated = null; // Handle cases where dateCreated is missing
-      }
-
-      fetchedContent.id = id;
-      setContent(fetchedContent);
-      setBookmarks(fetchedContent.bookmarkedBy?.length || 0);
-      setViews(fetchedContent.views)
-
-      if (firstRender) {
-        try {
-            await incrementViews();
-            setViews((fetchedContent.views || 0) + 1);
-        } catch (error) {
-            console.error("Failed to increment views:", error);
-        } finally {
-            setFirstRender(false);
+    // Fetch logged-in user data (only if userUID exists)
+    useEffect(() => {
+        if (userUID) {
+            fetchLoggedInUser();
         }
-      }
-    } catch (error) {
-        console.error("Error fetching content:", error);
-    }
-  };
+    }, [userUID]); // Only re-run if userUID changes
 
-  /**
-   * getUserInfo() -> void
-   *
-   * @description
-   * Fetches user info from the backend using the creatorUID from the content,
-   * this will set the creator accordingly.
-   *
-   * @returns void
-   */
-  const getUserInfo = async () => {
+  // Fetch content data and creator data.
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const contentResponse = await axios.get(`${apiURL}/content/${id}`);
+            let fetchedContent = contentResponse.data;
+
+            // --- Date Handling ---
+            if (fetchedContent.dateCreated) {
+                if (typeof fetchedContent.dateCreated === 'string') {
+                    fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+                } else if (fetchedContent.dateCreated.seconds) {
+                    fetchedContent.dateCreated = new Date(fetchedContent.dateCreated.seconds * 1000);
+                } else if (!(fetchedContent.dateCreated instanceof Date)) {
+                    fetchedContent.dateCreated = null;
+                }
+            }
+            if (fetchedContent.dateUpdated) { 
+                if (typeof fetchedContent.dateUpdated === 'string') {
+                    fetchedContent.dateUpdated = new Date(fetchedContent.dateUpdated);
+                } else if (fetchedContent.dateUpdated.seconds) {
+                    fetchedContent.dateUpdated = new Date(fetchedContent.dateUpdated.seconds * 1000);
+                } else if (!(fetchedContent.dateUpdated instanceof Date)) {
+                    fetchedContent.dateUpdated = null;
+                }
+            }
+          // --- End Date Handling ---
+            fetchedContent.id = id;
+            setContent(fetchedContent);
+
+           // Fetch creator info *ONLY IF* creatorUID exists.
+           if (fetchedContent.creatorUID) {
+              const creatorResponse = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+              setCreator(creatorResponse.data);
+            }
+
+            // Update like/bookmark status after setting content
+            if (userUID) {
+                setIsLiked(fetchedContent.peopleWhoLiked?.includes(userUID) || false);
+                setIsBookmarked(fetchedContent.bookmarkedBy?.includes(userUID) || false);
+            }
+            // Increment views only on initial load of the component.
+            await incrementViews();
+
+        } catch (error) {
+            console.error("Error fetching content or creator:", error);
+        }
+    };
+
+    fetchData();
+  }, [id, userUID]); // Re-fetch if content ID or logged-in user changes
+
+  // Sanitize and set content, update like/bookmark status when content changes.
+  useEffect(() => {
     if (content) {
-      axios
-        .get(`${apiURL}/user/${content.creatorUID}`)
-        .then((res) => {
-          setCreator(res.data);
-        })
-        .catch((error) => {
-          throw Error("Error fetching user info:", error);
-        });
+        setFormatedContent(DOMPurify.sanitize(content.content));
+        setLikes(typeof content.likes === "number" ? content.likes : 0);
+        setViews(content.views || 0);  // Ensure views is a number
+        if(userUID){
+            setIsLiked(content.peopleWhoLiked?.includes(userUID) || false);
+            setIsBookmarked(content.bookmarkedBy?.includes(userUID) || false);
+          }
     }
-  };
+}, [content, userUID]);
 
   /**
    * fetchLoggedInuser() -> void
@@ -179,14 +146,12 @@ export default function ViewContent({ id }: ViewContentProps) {
    */
   const fetchLoggedInUser = async () => {
     if (userUID) {
-      axios
-        .get(`${apiURL}/user/${userUID}`)
-        .then((res) => {
+      try {
+          const res = await axios.get(`${apiURL}/user/${userUID}`);
           setUser(res.data);
-        })
-        .catch((error) => {
-          throw Error("Error fetching logged in user:", error);
-        });
+      } catch (error) {
+          console.error("Error fetching logged-in user:", error);
+      }
     }
   };
 
@@ -208,7 +173,6 @@ export default function ViewContent({ id }: ViewContentProps) {
         const content_id = content?.id;
 
         if (content.thumbnail) {
-          // console.log("deleting but with thumbnail")
           const file_path = decodeURIComponent(
             content?.thumbnail.split("/o/")[1].split("?")[0]
           );
@@ -216,7 +180,6 @@ export default function ViewContent({ id }: ViewContentProps) {
             `${apiURL}/content/${user_id}/${content_id}/${file_path}`
           );
         } else {
-          // console.log("deleting but without thumbnail")
           await axios.delete(`${apiURL}/content/${user_id}/${content_id}`);
         }
       } catch (error) {
@@ -259,12 +222,10 @@ export default function ViewContent({ id }: ViewContentProps) {
         }
       );
 
-      const updatedContent = response.data.content;
-      const updatedLikes =
-        typeof updatedContent.likes === "number" ? updatedContent.likes : 0;
+      // Use the returned content data to update the state.
+      setContent(response.data.content);
 
-      setLikes(updatedLikes);
-      setIsLiked(!isLiked);
+      // The isLiked state will be updated in the second useEffect.
     } catch (error) {
       console.error("Error liking/unliking content:", error);
     }
@@ -289,14 +250,15 @@ export default function ViewContent({ id }: ViewContentProps) {
       const action = isBookmarked ? "unbookmark" : "bookmark";
       const url = `${apiURL}/content/${userUID}/${action}/${id}`;
 
-      await axios.post(
+      const response = await axios.post(
         url,
         {},
         { headers: { "Content-Type": "application/json" } }
       );
-      setIsBookmarked(!isBookmarked);
 
-      await getContent();
+      // Use the returned content data to update the state.
+      setContent(response.data.content);
+
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
     }
@@ -335,7 +297,6 @@ export default function ViewContent({ id }: ViewContentProps) {
     if (shareOption === "1") {
       try {
         await navigator.clipboard.writeText(shareMessage);
-        // incrementShares(); REMOVED - We'll use the API call instead
         alert("Message copied to clipboard!");
       } catch (err) {
         console.error("Failed to copy: ", err);
@@ -345,29 +306,27 @@ export default function ViewContent({ id }: ViewContentProps) {
       window.location.href = `mailto:?subject=Check out this article&body=${encodeURIComponent(
         shareMessage
       )}`;
-      // incrementShares(); REMOVED - We'll use the API call instead
     } else {
       alert("Invalid option. Please choose '1' or '2'.");
-      return; // Exit if the user cancels or enters an invalid option
+      return;
     }
   
-    // API calls (these happen regardless of copy/email choice)
+    // API call
     try {
       const contentId = id;
       const userId = authUser.uid;
   
-      // FIRST, call YOUR shareContent endpoint
+      // Call the combined shareContent endpoint
       const shareResponse = await axios.post(`${apiURL}/content/user/${userId}/share/${contentId}`);
-       // Update the local state with the UPDATED content from YOUR endpoint
-      setContent(shareResponse.data.content);
+
+       // Update the local state with the UPDATED content
+       setContent(shareResponse.data.content); // setContent after date fix
+
+       console.log("Content shared successfully");
   
-      // SECOND, call the incrementShares endpoint
-      await axios.put(`${apiURL}/content/shares/${contentId}`);
-  
-      console.log("Content shared successfully");
     } catch (error) {
       console.error("Error sharing content:", error);
-      alert("Failed to share content. Please try again."); // Consistent error message
+      alert("Failed to share content. Please try again."); 
     }
   };
 
@@ -394,9 +353,15 @@ export default function ViewContent({ id }: ViewContentProps) {
         {},
         { headers: { "Content-Type": "application/json" } }
       );
-      setIsFollowing(!isFollowing);
+       // After following/unfollowing, re-fetch the creator info. 
+        const creatorResponse = await axios.get(`${apiURL}/user/${content.creatorUID}`);
+        setCreator(creatorResponse.data);
+
+        //Also fetch the logged in user info, as their follow list has changed.
+        fetchLoggedInUser();
+
     } catch (error) {
-      console.error("Error following/unfollowing creator:", error);
+        console.error("Error following/unfollowing creator:", error);
     }
   };
 
@@ -407,8 +372,11 @@ export default function ViewContent({ id }: ViewContentProps) {
    * Redirects user to the edit page for the current content.
    */
   const editContent = () => {
-    if (content?.creatorUID === userUID) redirect(`edit/${content?.id}`);
-    else throw Error("You cannot edit this content");
+    if (content?.creatorUID === userUID) {
+        router.push(`edit/${content?.id}`);
+    } else {
+        console.error("You cannot edit this content");
+    }
   };
 
   /**
@@ -419,27 +387,9 @@ export default function ViewContent({ id }: ViewContentProps) {
    */
   const incrementViews = async () => {
     try {
-      await axios.put(`${apiURL}/content/views/${id}`);
+        await axios.put(`${apiURL}/content/views/${id}`);
     } catch (error) {
-      console.error(error);
-
-      throw error;
-    }
-  };
-
-  /**
-   * incrementShares() -> void
-   *
-   * @description
-   * Increments the number of times the content has been shared.
-   */
-  const incrementShares = async () => {
-    try {
-      await axios.put(`${apiURL}/content/shares/${id}`)
-      await getContent();
-    } catch (error) {
-      console.error(error);
-      throw error;
+        console.error(error);
     }
   };
 
@@ -481,7 +431,7 @@ export default function ViewContent({ id }: ViewContentProps) {
                           {content.readtime ? ` - ${content.readtime} min read` : ""}
                       </>
                   ) : (
-                      "" // Or "Date Not Available", or any other placeholder
+                      "" // Or "Date Not Available", or other placeholder
                   )}
                 </p>
                 <div className='username-follow'>
@@ -514,7 +464,7 @@ export default function ViewContent({ id }: ViewContentProps) {
 
               <div className="stats-col-2">
                 <p>
-                  {views ? ` ${views} views` : ""}
+                  {content?.views ? ` ${content.views} views` : ""}
                 </p>
                 <div className="icon-container">
 

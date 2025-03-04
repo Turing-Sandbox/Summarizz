@@ -7,7 +7,7 @@ import Image from "next/image";
 
 // Third-Party Libraries (Import)
 import axios from "axios";
-import { UserPlusIcon } from "@heroicons/react/24/solid";
+import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 // Local Files (Import)
 import { useAuth } from "@/hooks/AuthProvider";
@@ -42,37 +42,27 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // ------------ Event Handlers ------------
   // ----------------------------------------
   
-  /** 
-   * Fetch content of the user. 
- * 
- * @description 
- * This effect runs when the user data is available and fetches the content that 
- * the user has created and then loads (if any) the content the user has shared. 
- * 
- * @returns {void} 
-   */ 
-  // Consolidated data fetching useEffect
   useEffect(() => {
     const fetchData = async () => {
         setIsLoading(true);
         try {
-          // 1. Fetch User Data
+          // Fetch User Data
           const userResponse = await axios.get(`${apiURL}/user/${id}`);
           const userData = userResponse.data;
           setUser(userData);
 
-          // 2. Fetch User's Created Content
+          // Fetch User's Created Content
           if (userData?.content) {
               const contentPromises = userData.content.map((contentId: string) => getContent(contentId));
               await Promise.all(contentPromises);
           }
-          // 3. Fetch Shared Content (only if sharedContent exists)
+          // Fetch Shared Content (only if sharedContent exists)
           if (userData?.sharedContent) {
               const validSharedContent = await getAndFilterSharedContent(userData.sharedContent);
               setSharedContent(validSharedContent);
           }
 
-          // 4. Check follow status (only if viewing another user's profile)
+          // Check follow status (only if viewing another user's profile)
           if (userUID && userUID !== id) {
               setIsFollowing(userData.followedBy?.includes(userUID));
               setFollowRequested(userData.followRequests?.includes(userUID));
@@ -87,10 +77,10 @@ export default function ViewProfile({ id }: ViewProfileProps) {
 
   fetchData();
 
-}, [id, userUID]); // Only depend on id and userUID
+}, [id, userUID]);
 
 
-  // Helper function to fetch and *filter* shared content
+  // Helper function to fetch and filter shared content
   async function getAndFilterSharedContent(contentIds: string[]): Promise<Content[]> {
   const validContent: Content[] = [];
 
@@ -107,23 +97,23 @@ export default function ViewProfile({ id }: ViewProfileProps) {
                   } else if (fetchedContent.dateCreated.seconds) {
                       fetchedContent.dateCreated = new Date(fetchedContent.dateCreated.seconds * 1000);
                   } else if (!(fetchedContent.dateCreated instanceof Date)) {
-                      fetchedContent.dateCreated = null; // Or some other default
+                      fetchedContent.dateCreated = null;
                   }
               }
 
-              fetchedContent.id = contentId; // Ensure content has ID
-              validContent.push(fetchedContent); // Add to the array
+              fetchedContent.id = contentId; 
+              validContent.push(fetchedContent); 
           }
       } catch (error) {
           if (axios.isAxiosError(error) && error.response?.status === 404) {
-              console.log(`Content ID ${contentId} not found, skipping.`); // Log, but do nothing else
+              console.log(`Content ID ${contentId} not found, skipping.`);
           } else {
               console.error("Error fetching shared content:", error);
           }
       }
   }
 
-  return validContent; // Return ONLY the valid content
+  return validContent; 
   }
 
   /**
@@ -213,6 +203,29 @@ export default function ViewProfile({ id }: ViewProfileProps) {
     }
   };
 
+  const handleUnshare = async (contentId: string) => {
+    if (!userUID) {
+      console.error("User not logged in.");
+      return;
+    }
+
+    try {
+      // Make API call to unshare
+      await axios.post(`${apiURL}/content/${userUID}/unshare/${contentId}`);
+
+      // Update the UI: Filter out the unshared content
+      setSharedContent(prevSharedContent =>
+        prevSharedContent.filter(content => content.id !== contentId)
+      );
+      // Refetch
+      const userResponse = await axios.get(`${apiURL}/user/${id}`);
+      setUser(userResponse.data);
+
+    } catch (error) {
+      console.error("Error unsharing content:", error);
+    }
+  };
+
   function renderContentItem(content: Content, index: number) { 
     return ( 
       <div 
@@ -243,6 +256,19 @@ export default function ViewProfile({ id }: ViewProfileProps) {
             /> 
           </div> 
         )} 
+        {/* Unshare Button */}
+        {sharedContent.some(sharedItem => sharedItem.id === content.id) && (
+            <button
+                className="icon-button"
+                onClick={(e) => {
+                    e.stopPropagation(); // Prevent content item click
+                    handleUnshare(content.id);
+                }}
+                title="Unshare Content"
+            >
+                <TrashIcon className="icon delete" />
+            </button>
+          )}
       </div> 
     ); 
   }

@@ -107,6 +107,32 @@
   transform: scale(1.1);
 }
 
+.icon-button {
+  padding: 0;
+  border: none;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  gap: 1px;
+}
+
+.icon {
+  width: 16px;  /* Or whatever size you want */
+  height: 16px;
+  color: var(--icon-color); /* Use CSS variables if you have them */
+  transition: all ease-out 0.3s;
+}
+
+.icon:hover {
+  color: var(--icon-hover-color);
+}
+
+/* Specific style for the delete icon's hover state */
+.icon.delete:hover {
+  color: var(--delete-hover-color); /* Use a specific variable for delete hover */
+}
+
 // media queries
 @media screen and (max-width: 1024px) {
   .content-list {
