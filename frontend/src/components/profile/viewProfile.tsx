@@ -7,7 +7,7 @@ import Image from "next/image";
 
 // Third-Party Libraries (Import)
 import axios from "axios";
-import { UserPlusIcon } from "@heroicons/react/24/solid";
+import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 
 // Local Files (Import)
 import { useAuth } from "@/hooks/AuthProvider";
@@ -32,6 +32,8 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const [bookmarkedContents, setBookmarkedContents] = useState<Content[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followRequested, setFollowRequested] = useState(false);
+  const [sharedContent, setSharedContent] = useState<Content[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { userUID } = useAuth(); // Get logged in user's UID
   const router = useRouter();
@@ -39,53 +41,79 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // ----------------------------------------
   // ------------ Event Handlers ------------
   // ----------------------------------------
-  /**
-   * hasFetchedData() -> void
-   *
-   * @description
-   * Used to prevent fetching user data on page load.
-   *
-   * @returns void
-   */
-  const hasFetchedData = useRef(false);
+  
   useEffect(() => {
-    if (!hasFetchedData.current) {
-      getUserInfo(id);
-      hasFetchedData.current = true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+          // Fetch User Data
+          const userResponse = await axios.get(`${apiURL}/user/${id}`);
+          const userData = userResponse.data;
+          setUser(userData);
 
-  /**
-   * getUserInfo() -> void
-   *
-   * @description
-   * Fetches user data from the backend using the id provided in the route, this
-   * will fetch { firstName, lastName, bio, profileImage, followedBy, followRequests }
-   * from the backend and set the user accordingly.
-   *
-   * @param userId - The id of the user to fetch
-   */
-  function getUserInfo(userId: string = id) {
-    axios
-      .get(`${apiURL}/user/${userId}`)
-      .then((res) => {
-        setUser(res.data);
-
-        if (res.data?.content) {
-          for (let i = 0; i < res.data.content.length; i++) {
-            getContent(res.data.content[i]);
+          // Fetch User's Created Content
+          if (userData?.content) {
+              const contentPromises = userData.content.map((contentId: string) => getContent(contentId));
+              await Promise.all(contentPromises);
           }
-        }
+          // Fetch Shared Content (only if sharedContent exists)
+          if (userData?.sharedContent) {
+              const validSharedContent = await getAndFilterSharedContent(userData.sharedContent);
+              setSharedContent(validSharedContent);
+          }
 
-        if (userUID) {
-          setIsFollowing(res.data.followedBy?.includes(userUID)); // Logged-in user is following
-          setFollowRequested(res.data.followRequests?.includes(userUID)); // Follow request is pending
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching user info:", error);
-      });
+          // Check follow status (only if viewing another user's profile)
+          if (userUID && userUID !== id) {
+              setIsFollowing(userData.followedBy?.includes(userUID));
+              setFollowRequested(userData.followRequests?.includes(userUID));
+          }
+
+      } catch (error) {
+          console.error("Error fetching data:", error);
+      } finally {
+          setIsLoading(false);
+      }
+  };
+
+  fetchData();
+
+}, [id, userUID]);
+
+
+  // Helper function to fetch and filter shared content
+  async function getAndFilterSharedContent(contentIds: string[]): Promise<Content[]> {
+  const validContent: Content[] = [];
+
+  for (const contentId of contentIds) {
+      try {
+          const response = await axios.get(`${apiURL}/content/${contentId}`);
+          if (response.status === 200) {
+              const fetchedContent = response.data;
+
+              // Date conversion
+              if (fetchedContent.dateCreated) {
+                  if (typeof fetchedContent.dateCreated === 'string') {
+                      fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+                  } else if (fetchedContent.dateCreated.seconds) {
+                      fetchedContent.dateCreated = new Date(fetchedContent.dateCreated.seconds * 1000);
+                  } else if (!(fetchedContent.dateCreated instanceof Date)) {
+                      fetchedContent.dateCreated = null;
+                  }
+              }
+
+              fetchedContent.id = contentId; 
+              validContent.push(fetchedContent); 
+          }
+      } catch (error) {
+          if (axios.isAxiosError(error) && error.response?.status === 404) {
+              console.log(`Content ID ${contentId} not found, skipping.`);
+          } else {
+              console.error("Error fetching shared content:", error);
+          }
+      }
+  }
+
+  return validContent; 
   }
 
   /**
@@ -100,22 +128,30 @@ export default function ViewProfile({ id }: ViewProfileProps) {
    *
    * @param contentId - The id of the content to fetch
    */
-  function getContent(contentId: string) {
-    axios.get(`${apiURL}/content/${contentId}`).then((res) => {
-      const fetchedContent = res.data;
+  async function getContent(contentId: string) {
+    try{
+        const res = await axios.get(`${apiURL}/content/${contentId}`);
+        const fetchedContent = res.data;
 
-      // Convert Firestore Timestamp to JavaScript Date
-      if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
-        fetchedContent.dateCreated = new Date(
-          fetchedContent.dateCreated.seconds * 1000
-        );
-      } else {
-        fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
-      }
+        if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
+            fetchedContent.dateCreated = new Date(
+              fetchedContent.dateCreated.seconds * 1000
+            );
+        } else if (fetchedContent.dateCreated){
+             fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+        }
 
-      fetchedContent.id = contentId;
-      setContents((prevContents) => [...prevContents, fetchedContent]);
-    });
+        fetchedContent.id = contentId; // Ensure the ID is set
+        setContents((prevContents) => {
+          // Prevent duplicates
+          if(!prevContents.some(c => c.id === fetchedContent.id)) {
+            return [...prevContents, fetchedContent];
+          }
+          return prevContents;
+        });
+    } catch (err) {
+        console.error("Error in getContent:", err);
+    }
   }
 
   /**
@@ -166,6 +202,84 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       console.error("Error following/unfollowing user:", error);
     }
   };
+
+  const handleUnshare = async (contentId: string) => {
+    if (!userUID) {
+      console.error("User not logged in.");
+      return;
+    }
+
+    try {
+      // Make API call to unshare
+      await axios.post(`${apiURL}/content/${userUID}/unshare/${contentId}`);
+
+      // Update the UI: Filter out the unshared content
+      setSharedContent(prevSharedContent =>
+        prevSharedContent.filter(content => content.id !== contentId)
+      );
+      // Refetch
+      const userResponse = await axios.get(`${apiURL}/user/${id}`);
+      setUser(userResponse.data);
+
+    } catch (error) {
+      console.error("Error unsharing content:", error);
+    }
+  };
+
+  function renderContentItem(content: Content, index: number) { 
+    return ( 
+      <div 
+        key={content.id || index} 
+        className='content-list-item' 
+        onClick={() => router.push(`/content/${content.id}`)} 
+      > 
+        <h3 className='content-item-title'>{content.title}</h3>
+         <p>
+            {content.dateCreated ? (
+                `${content.dateCreated.toLocaleString("en-US", {
+                month: "short",
+                })} ${content.dateCreated.getDate()}${
+                content.readtime ? ` - ${content.readtime} min read` : ""
+                }`
+            ) : (
+                ""
+            )}
+        </p>  
+        {content.thumbnail && ( 
+          <div className='content-thumbnail-container'> 
+            <Image 
+              src={content.thumbnail} 
+              alt='Thumbnail' 
+              width={200} 
+              height={200} 
+              className='content-thumbnail' 
+            /> 
+          </div> 
+        )} 
+        {/* Unshare Button */}
+        {sharedContent.some(sharedItem => sharedItem.id === content.id) && (
+            <button
+                className="icon-button"
+                onClick={(e) => {
+                    e.stopPropagation(); // Prevent content item click
+                    handleUnshare(content.id);
+                }}
+                title="Unshare Content"
+            >
+                <TrashIcon className="icon delete" />
+            </button>
+          )}
+      </div> 
+    ); 
+  }
+
+  if (isLoading) {
+    return <div>Loading profile...</div>;
+  }
+
+  if (!user) {
+    return <div>User not found.</div>;
+  }
 
   // ANCHOR - What do we do with this?
   // const handleRequestFollow = async () => {
@@ -245,43 +359,27 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           </div>
         </div>
 
-        <h2 className='section-title'>
-          {contents.length === 1 ? "Content" : "Contents"}
-        </h2>
-        {contents.length === 0 ? (
-          <h2>No content found</h2>
-        ) : (
-          <div className='content-list'>
-            {contents.map((content, index) => (
-              <div
-                key={content.id || index}
-                className='content-list-item'
-                onClick={() => router.push(`/content/${content.id}`)}
-              >
-                <h3 className='content-item-title'>{content.title}</h3>
-                <p>
-                  {new Date(content.dateCreated).toLocaleString("en-US", {
-                    month: "short",
-                  })}{" "}
-                  {new Date(content.dateCreated).getDate()}
-                  {content.readtime ? ` - ${content.readtime} min read` : ""}
-                </p>
-
-                {content.thumbnail && (
-                  <div className='content-thumbnail-container'>
-                    <Image
-                      src={content.thumbnail}
-                      alt='Thumbnail'
-                      width={200}
-                      height={200}
-                      className='content-thumbnail'
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        {/* User's Created Content */} 
+        <h2 className='section-title'> 
+          {contents.length === 1 ? "Content" : "Contents"} 
+        </h2> 
+        {contents.length === 0 ? ( 
+          <h3>No content found</h3> 
+        ) : ( 
+          <div className='content-list'> 
+            {contents.map((content, index) => renderContentItem(content, index))} 
+          </div> 
+        )} 
+        
+        {/* User's Shared Content */} 
+        <h3 className="section-title">Shared Content</h3> 
+        {sharedContent.length === 0 ? ( 
+          <h4>No shared content found</h4> 
+        ) : ( 
+          <div className="content-list"> 
+            {sharedContent.map((content, index) => renderContentItem(content, index))} 
+          </div> 
+        )}   
       </div>
     </>
   );
