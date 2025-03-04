@@ -293,10 +293,11 @@ export class ContentService {
     }
   }
 
-  // Share content (COMBINED LOGIC)
+  // Share content with all updates in a single transaction
 static async shareContent(contentID: string, userId: string) {
   try {
       const contentRef = doc(db, "contents", contentID);
+      const userRef = doc(db, "users", userId);
 
       const updatedContent = await runTransaction(db, async (transaction) => {
           // Get the current content document
@@ -318,16 +319,19 @@ static async shareContent(contentID: string, userId: string) {
           const currentShares = contentData.shares || 0;
           transaction.update(contentRef, { shares: currentShares + 1 });
 
-          // 3. Update the user's sharedContent (using helper function)
-           await addSharedContentToUser(userId, contentID); 
+          // 3. Update the user's sharedContent
+           transaction.update(userRef, {
+                sharedContent: arrayUnion(contentID),
+            });
 
-           const updatedDoc = await getDoc(contentRef); //get doc after transaction
+            // 4. Fetch the updated document after transaction writes
+           const updatedDoc = await transaction.get(contentRef);
            if (!updatedDoc.exists) {
-               throw new Error("Content disappeared during transaction!"); // Should never happen
+               throw new Error("Content disappeared during transaction!"); 
            }
            const updatedData = updatedDoc.data();
 
-           // *** IMPORTANT: Convert dates to JavaScript Date objects here ***
+           // Convert dates to JavaScript Date objects here
            if (updatedData && updatedData.dateCreated) {
              if (updatedData.dateCreated instanceof Timestamp) {
                // Handle Firestore Timestamp correctly
@@ -349,7 +353,7 @@ static async shareContent(contentID: string, userId: string) {
              }
            }
 
-           return updatedData; // Return the updated data *with converted dates*
+           return updatedData; // Return the updated data with converted dates
        });
 
        return { content: updatedContent }; // Return the updated content
