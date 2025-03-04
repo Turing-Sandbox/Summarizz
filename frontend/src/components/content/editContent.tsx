@@ -41,7 +41,7 @@ import Navbar from "../Navbar";
  */
 export default function EditContent() {
   // Hooks for Authentication and Routing
-  const { user, userUID, loading } = useAuth();
+  const auth = useAuth();
   const router = useRouter();
   const contentId = useParams().id;
 
@@ -73,16 +73,9 @@ export default function EditContent() {
     },
   });
 
-  // EFFECT: Handle User Authentication
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/authentication/login");
-    }
-  }, [user, loading, router]);
-
   // EFFECT: Fetch Content once Editor and User are ready
   useEffect(() => {
-    if (!loading && user && editor) {
+    if (editor) {
       const getContent = async () => {
         try {
           const res = await axios.get(`${apiURL}/content/${contentId}`);
@@ -98,7 +91,7 @@ export default function EditContent() {
       };
       getContent();
     }
-  }, [editor, loading, user, contentId]);
+  }, [editor, contentId]);
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -150,7 +143,7 @@ export default function EditContent() {
     }
 
     try {
-      const user_id = userUID;
+      const user_id = auth.getUserUID();
       if (!user_id || !contentId) {
         setError("Missing user or content information. Please Try again.");
         return;
@@ -226,16 +219,14 @@ export default function EditContent() {
     router.push(`/content/${contentId}`);
   };
 
-  // NOTE: If the auth state is still loading, show a loading message.
-  if (loading) {
-    return <p>Loading...</p>;
+  // User must be authenticated to create content
+  if (auth.getUserUID() === null || auth.getToken() === null) {
+    router.push("/authentication/login");
   }
 
-  // NOTE: If the user is null after loading, it means redirect has started. Don't render the rest.
-  if (!user) {
-    return null;
-  }
-
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <Navbar />

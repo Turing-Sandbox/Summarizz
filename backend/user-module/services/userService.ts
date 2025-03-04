@@ -1,24 +1,15 @@
 import { db } from "../../shared/firebaseConfig";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  deleteDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updatePassword,
+  updateEmail,
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
-import jwt from "jsonwebtoken";
+import jwt, { verify } from "jsonwebtoken";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -166,7 +157,7 @@ export async function changePassword(
 export async function changeEmail(
   userId: string,
   currentPassword: string,
-  newEmail?: string,
+  newEmail?: string
 ) {
   const auth = getAuth();
   const userRef = doc(db, "users", userId);
@@ -187,17 +178,16 @@ export async function changeEmail(
   );
   const firebaseUser = userCredential.user;
 
-  const updates: Partial<{ username: string; email: string }> = {};
-
   // If a new email is provided and different from the current one:
-  if (newEmail && newEmail !== existingEmail) {
-    await verifyBeforeUpdateEmail(firebaseUser, newEmail);
-  }
+  // Update Firebase Authentication
+  // await updateEmail(firebaseUser, newEmail);
+  await verifyBeforeUpdateEmail(firebaseUser, newEmail);
 
-  // Update Firestore for username changes if any
-  if (Object.keys(updates).length > 0) {
-    await updateDoc(userRef, updates);
-  }
+  // Update Firestore Database
+  // userData.email = newEmail;
+  // await updateDoc(userRef, userData);
+
+  console.log("Email updated successfully for user:", userId);
 }
 
 // ----------------------------------------------------------

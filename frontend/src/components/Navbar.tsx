@@ -1,44 +1,36 @@
 "use client";
 
-// React & NextJs (Import)
 import { useEffect, useState } from "react";
+import "@/app/styles/navbar.scss";
+import { useAuth } from "../hooks/AuthProvider";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-
-// Third-Party Libraries (Import)
 import axios from "axios";
 import Cookies from "js-cookie";
-
-// Local Files (Import)
-import { useAuth } from "../hooks/AuthProvider";
-
-// Stylesheets
-import "@/app/styles/navbar.scss";
-import { User } from "@/models/User";
 import { apiURL } from "@/app/scripts/api";
+import { User } from "@/models/User";
 
-/**
- * Navbar() -> JSX.Element
- *
- * @description
- * Renders the Navbar component, containing the user's profile picture,
- * username, toggle for dark and light mode, alongside the Summarize logo.
- *
- * @returns JSX.Element (Navbar Component)
- */
 function Navbar() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>();
 
-  const { user, userUID, getToken, logout } = useAuth();
+  const auth = useAuth();
   const router = useRouter();
 
-  const authenticated = user !== null && getToken() !== null;
+  // ---------------------------------------
+  // ------------ Event Handler ------------
+  // ---------------------------------------
 
-  // EFFECT: Handle Dark Mode Preference
+  // Dark Mode handling
   useEffect(() => {
     const preferenceMode = localStorage.getItem("isDarkMode");
+
+    // Check if user has a saved preference in cookies
     if (preferenceMode) {
       if (preferenceMode === "true") {
         document.documentElement.setAttribute("data-theme", "dark");
@@ -47,64 +39,67 @@ function Navbar() {
         document.documentElement.setAttribute("data-theme", "light");
         setIsDarkMode(false);
       }
-    } else {
-      // Check system preference if no local setting
+    }
+
+    // If notCheck system preference as default.
+    if (!preferenceMode) {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
 
       if (mq.matches) {
-        document.documentElement.setAttribute("data-theme", "dark");
         setIsDarkMode(true);
       }
 
-      mq.addEventListener("change", (evt) => {
-        setIsDarkMode(evt.matches);
-        document.documentElement.setAttribute(
-          "data-theme",
-          evt.matches ? "dark" : "light"
-        );
-      });
+      // This callback will fire if the perferred color scheme changes without a reload
+      mq.addEventListener("change", (evt) => setIsDarkMode(evt.matches));
     }
   }, []);
 
-  // EFFECT: Fetch User Information If Logged In
+  // Update user info
   useEffect(() => {
-    if (userUID) {
-      axios.get(`${apiURL}/user/${userUID}`).then((res) => {
-        setUserInfo(res.data);
-      });
-    } else {
-      setUserInfo(null);
-    }
-  }, [userUID]);
+    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
+    getUserInfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  /**
-   * toggleTheme() -> void
-   *
-   * @description
-   * Toggles the theme between light and dark mode, setting the
-   * data-them attribute to the new theme and updating the theme
-   * preference in localStorage.
-   */
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
   const toggleTheme = () => {
     const newTheme = isDarkMode ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
     setIsDarkMode(!isDarkMode);
-    localStorage.setItem("isDarkMode", (!isDarkMode).toString());
+    localStorage.setItem("isDarkMode", isDarkMode ? "false" : "true");
   };
 
+  const updateAuthenticated = () => {
+    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
+  };
+
+  function getUserInfo() {
+    const userID = auth.getUserUID();
+    if (!userID) return;
+
+    axios.get(`${apiURL}/user/${userID}`).then((res) => {
+      setUser(res.data);
+    });
+  }
+
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <div className='navbar-background'>
+        {/* App Name */}
         <a
           onClick={() => {
             setShowMenu(false);
             router.push("/");
           }}
         >
-          <h1 className='navbar-title summarizz-logo'>SUMMARIZZ</h1>
+          <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
         </a>
-
-        {/* ANCHOR - Create Search and Filter Bar when Authenticated  */}
+        {/* Create New Content */}
         {authenticated ? (
           <>
             <button
@@ -118,15 +113,17 @@ function Navbar() {
               Create Content
             </button>
 
+            {/* Profile Picture */}
             <div
               className='profile-picture-container'
               onClick={() => {
-                setShowMenu((prev) => !prev);
+                updateAuthenticated();
+                setShowMenu(!showMenu);
               }}
             >
-              {userInfo && userInfo.profileImage ? (
+              {user && user.profileImage ? (
                 <Image
-                  src={userInfo.profileImage}
+                  src={user.profileImage}
                   width={50}
                   height={50}
                   alt='Profile Picture'
@@ -135,12 +132,13 @@ function Navbar() {
               ) : (
                 <div className='no-profile-picture-container'>
                   <h1 className='no-profile-picture'>
-                    {userInfo?.username?.[0].toUpperCase() || "U"}
+                    {user?.username[0].toUpperCase()}
                   </h1>
                 </div>
               )}
             </div>
 
+            {/* Theme Slider */}
             <label className='theme-toggle'>
               <input
                 type='checkbox'
@@ -165,6 +163,7 @@ function Navbar() {
               Register
             </a>
 
+            {/* Theme Slider */}
             <label className='theme-toggle-auth'>
               <input
                 type='checkbox'
@@ -177,6 +176,7 @@ function Navbar() {
         )}
       </div>
 
+      {/* Profile Menu */}
       {showMenu && (
         <div className='menu'>
           {!authenticated ? (
@@ -206,7 +206,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  router.push(`/profile/${userUID}`);
+                  router.push(`/profile/${auth.getUserUID()}`);
                 }}
               >
                 View Profile
@@ -216,7 +216,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  router.push(`/profile/${userUID}/manage`);
+                  router.push(`/profile/${auth.getUserUID()}/manage`);
                 }}
               >
                 Manage Profile
@@ -226,7 +226,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  logout();
+                  auth.logout();
                 }}
               >
                 Logout

@@ -283,6 +283,13 @@ export default function Page() {
     }
 
     try {
+      // Send a request to the backend to change the email
+      let res = await axios.post(`${apiURL}/user/${id}/change-email`, {
+        currentPassword,
+        newEmail,
+      });
+
+      setSuccessEditEmail(res.data.message);
     } catch (err: any) {
       console.error("Error updating email:", err);
       setErrorEditEmail(err.message || "Failed to update information.");
@@ -502,7 +509,7 @@ export default function Page() {
             </form>
 
             <h3>Change Email</h3>
-            <form>
+            <form onSubmit={handleUpdateEmail}>
               <div className='input-group'>
                 <label htmlFor='newEmail'>New Email</label>
                 <input
@@ -524,8 +531,12 @@ export default function Page() {
                 />
               </div>
 
-              {/* {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>} */}
+              {errorEditEmail && (
+                <p className='error-message'>{errorEditEmail}</p>
+              )}
+              {successEditEmail && (
+                <p className='success-message'>{successEditEmail}</p>
+              )}
 
               <button type='submit' className='save-button'>
                 Change Email

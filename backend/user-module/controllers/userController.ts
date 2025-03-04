@@ -11,7 +11,7 @@ import {
   unfollowUser,
   requestFollow,
   changePassword,
-  changeEmailUsername,
+  changeEmail,
 } from "../services/userService";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
@@ -211,16 +211,10 @@ export async function changeEmailController(req: Request, res: Response) {
     await changeEmail(userId, currentPassword, newEmail);
 
     // If a new email was requested, let the user know about the verification email
-    if (newEmail) {
-      res.status(200).json({
-        message:
-          "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update.",
-      });
-      return;
-    }
-
-    // If only the username was changed
-    res.status(200).json({ message: "Username updated successfully." });
+    res.status(200).json({
+      message:
+        "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update.",
+    });
   } catch (error: any) {
     console.error("Error updating email/username:", error);
     res

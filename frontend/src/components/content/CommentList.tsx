@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/hooks/AuthProvider";
-import { Comment } from "@/app/models/Comment";
 import { redirect, useParams } from "next/navigation";
 import {
   PencilIcon,
@@ -11,6 +10,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
+import { Comment } from "@/models/Comment";
 
 const CommentList = ({ setNumComments }: any) => {
   const [comments, setComments] = useState<Comment[]>([]);
@@ -198,7 +198,7 @@ const CommentList = ({ setNumComments }: any) => {
         {comments.length === 0 ? (
           <p>No comments yet. Be the first to comment!</p>
         ) : (
-          comments.map((comment) => (
+          comments.map((comment: Comment) => (
             <div key={comment.comment_id}>
               <div>
                 <div className={"comment"}>
