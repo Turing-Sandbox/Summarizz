@@ -1,5 +1,15 @@
 import { db } from "../../shared/firebaseConfig";
-import { doc, setDoc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  where,
+  getDocs,
+  query,
+} from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
   getAuth,
@@ -167,6 +177,15 @@ export async function changeEmail(
     throw new Error("User not found");
   }
 
+  // Check if the new email already exists in the database
+  const usersCollection = collection(db, "users");
+  const emailQuery = query(usersCollection, where("email", "==", newEmail));
+  const emailQuerySnapshot = await getDocs(emailQuery);
+
+  if (!emailQuerySnapshot.empty) {
+    throw new Error("Email already exists");
+  }
+
   const userData = userSnapshot.data();
   const existingEmail = userData.email;
 
@@ -199,9 +218,15 @@ export async function changeUsername(userId: string, newUsername: string) {
     throw new Error("User not found");
   }
 
-  // Username already exists
-  const user = userSnapshot.data();
-  if (user.username === newUsername) {
+  // Username already exists in the database
+  const usersCollection = collection(db, "users");
+  const usernameQuery = query(
+    usersCollection,
+    where("username", "==", newUsername)
+  );
+  const usernameQuerySnapshot = await getDocs(usernameQuery);
+
+  if (!usernameQuerySnapshot.empty) {
     throw new Error("Username already exists");
   }
 
