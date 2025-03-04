@@ -17,5 +17,5 @@ export interface User {
   following?: string[]; // Optional followed creators
   followers?: string[]; // Optional followed by users
   sharedContent?: string[]; // Optional shared content
-  isPrivate?: boolean; // Optional privacy setting
+  isPrivate?: boolean; // Optional private account
 }

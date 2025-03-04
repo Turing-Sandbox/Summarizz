@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/hooks/AuthProvider";
-import { Comment } from "@/app/models/Comment";
 import { redirect, useParams } from "next/navigation";
 import {
   PencilIcon,
@@ -11,12 +10,14 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
+import { Comment } from "@/models/Comment";
 
-const CommentList = ({ setNumComments }: any) => {
+const CommentList = () => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState("");
+  const [numComments, setNumComments] = useState(0);
   const [loading, setLoading] = useState(true);
   const auth = useAuth();
   const userId = auth.userUID;
@@ -127,7 +128,7 @@ const CommentList = ({ setNumComments }: any) => {
 
   return (
     <>
-      <h1>Discussion</h1>
+      <h2>Discussion ({numComments})</h2>
 
       {/************ ADD COMMENT ************/}
       <div>
@@ -198,7 +199,7 @@ const CommentList = ({ setNumComments }: any) => {
         {comments.length === 0 ? (
           <p>No comments yet. Be the first to comment!</p>
         ) : (
-          comments.map((comment) => (
+          comments.map((comment: Comment) => (
             <div key={comment.comment_id}>
               <div>
                 <div className={"comment"}>

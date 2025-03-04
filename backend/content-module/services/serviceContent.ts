@@ -138,6 +138,7 @@ export class ContentService {
   // Like content
   static async likeContent(contentID: string, userId: string) {
     try {
+      
       // Get the content document from Firestore
       const contentRef = doc(db, "contents", contentID);
       const contentDoc = await getDoc(contentRef);

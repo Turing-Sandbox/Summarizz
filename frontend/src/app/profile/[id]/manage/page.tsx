@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 
 import "@/app/styles/profile/ProfileManagement.scss";
 import { useParams } from "next/navigation";
+import { error } from "console";
 
 /**
  * Page() -> JSX.Element
@@ -237,11 +238,12 @@ export default function Page() {
         newPassword,
       });
       setSuccessEditPassord("Password has been successfully updated.");
-    } catch (error) {
-      console.error("Error changing password:", error);
-      setErrorEditPassword(
-        "Failed to update password. Please check your current password and try again."
-      );
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update password.";
+      setErrorEditPassword(errorMessage);
     }
   };
 
@@ -255,68 +257,106 @@ export default function Page() {
    * @param e - Form Event
    * @returns void
    */
-  // const handleUpdateEmailUsername = async (
-  //   e: React.FormEvent<HTMLFormElement>
-  // ) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   setSuccess("");
+  const handleUpdateEmail = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorEditEmail("");
+    setSuccessEditEmail("");
 
-  //   const auth = getAuth();
-  //   const user = auth.currentUser;
+    if (!user) {
+      setErrorEditEmail("No user is signed in.");
+      return;
+    }
 
-  //   if (!user) {
-  //     setError("No user is signed in.");
-  //     return;
-  //   }
+    if (!user.email) {
+      setErrorEditEmail(
+        "User does not have an email associated with their account."
+      );
+      return;
+    }
 
-  //   if (!user.email) {
-  //     setError("User does not have an email associated with their account.");
-  //     return;
-  //   }
+    if (!currentPassword) {
+      setErrorEditEmail("Please provide your current password.");
+      return;
+    }
 
-  //   if (!currentPassword) {
-  //     setError("Please provide your current password.");
-  //     return;
-  //   }
+    if (!newEmail) {
+      setErrorEditEmail("Please provide a new email.");
+      return;
+    }
 
-  //   // Check if at least one field is provided
-  //   if (!newEmail && !newUsername) {
-  //     setError("Please provide a new email or username.");
-  //     return;
-  //   }
+    try {
+      // Send a request to the backend to change the email
+      let res = await axios.post(`${apiURL}/user/${id}/change-email`, {
+        currentPassword,
+        newEmail,
+      });
 
-  //   try {
-  //     // Re-authenticate the user
-  //     const credential = EmailAuthProvider.credential(
-  //       user.email,
-  //       currentPassword
-  //     );
-  //     await reauthenticateWithCredential(user, credential);
+      setSuccessEditEmail(res.data.message);
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update information.";
+      setErrorEditEmail(errorMessage);
+    }
+  };
 
-  //     // If a new email is provided, initiate verifyBeforeUpdateEmail client-side
+  /**
+   * handleUpdateUsername() -> void
+   *
+   * @description
+   * Handles the update username form, setting the error and success states
+   * to an empty string and calling the backend to update the username.
+   *
+   * @param e - Form Event
+   * @returns void
+   */
+  const handleUpdateUsername = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  //     if (newEmail && newEmail !== user?.email) {
-  //       await verifyBeforeUpdateEmail(user!, newEmail);
-  //       setSuccess(
-  //         "A verification link has been sent to your new email. Please verify it to complete the update."
-  //       );
-  //     }
+    setErrorEditUsername("");
+    setSuccessEditUsername("");
 
-  //     // If a new username is provided, update it via server
-  //     if (newUsername) {
-  //       await axios.put(`${apiURL}/user/${userUID}`, { username: newUsername });
-  //       setSuccess((prev) =>
-  //         prev
-  //           ? prev + " Username updated successfully."
-  //           : "Username updated successfully."
-  //       );
-  //     }
-  //   } catch (err: any) {
-  //     console.error("Error updating email/username:", err);
-  //     setError(err.message || "Failed to update information.");
-  //   }
-  // };
+    if (!user) {
+      setErrorEditUsername("No user is signed in.");
+      return;
+    }
+
+    if (!newUsername) {
+      setErrorEditUsername("Please provide a new username.");
+      return;
+    }
+
+    // Valid format for username
+    if (newUsername.length < 3 || newUsername.length > 20) {
+      setErrorEditUsername(
+        "Username must be between 3 and 20 characters in length."
+      );
+      return;
+    }
+
+    if (!/^[a-zA-Z0-9_]*$/.test(newUsername)) {
+      setErrorEditUsername(
+        "Username must only contain letters, numbers, and underscores."
+      );
+      return;
+    }
+
+    try {
+      // Send a request to the backend to change the email
+      let res = await axios.post(`${apiURL}/user/${id}/change-username`, {
+        newUsername,
+      });
+
+      setSuccessEditUsername(res.data.message);
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to update information.";
+      setErrorEditUsername(errorMessage);
+    }
+  };
 
   // --------------------------------------
   // ------------- Functions --------------
@@ -531,7 +571,7 @@ export default function Page() {
             </form>
 
             <h3>Change Email</h3>
-            <form>
+            <form onSubmit={handleUpdateEmail}>
               <div className='input-group'>
                 <label htmlFor='newEmail'>New Email</label>
                 <input
@@ -553,8 +593,12 @@ export default function Page() {
                 />
               </div>
 
-              {/* {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>} */}
+              {errorEditEmail && (
+                <p className='error-message'>{errorEditEmail}</p>
+              )}
+              {successEditEmail && (
+                <p className='success-message'>{successEditEmail}</p>
+              )}
 
               <button type='submit' className='save-button'>
                 Change Email
@@ -562,7 +606,7 @@ export default function Page() {
             </form>
 
             <h3>Change Username</h3>
-            <form>
+            <form onSubmit={handleUpdateUsername}>
               <div className='input-group'>
                 <label htmlFor='newUsername'>New Username</label>
                 <input
@@ -573,19 +617,12 @@ export default function Page() {
                 />
               </div>
 
-              <div className='input-group'>
-                <label htmlFor='currentPassword'>Enter Password</label>
-                <input
-                  type='password'
-                  id='currentPassword'
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              {/* {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>} */}
+              {errorEditUsername && (
+                <p className='error-message'>{errorEditUsername}</p>
+              )}
+              {successEditUsername && (
+                <p className='success-message'>{successEditUsername}</p>
+              )}
 
               <button type='submit' className='save-button'>
                 Change Username
