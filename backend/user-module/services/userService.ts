@@ -6,9 +6,9 @@ import {
   updateDoc,
   deleteDoc,
   collection,
+  where,
   getDocs,
   query,
-  where,
 } from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
@@ -16,10 +16,10 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updatePassword,
+  updateEmail,
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
-import jwt from "jsonwebtoken";
-import { adminAuth } from "../../shared/firebaseAdminConfig";
+import jwt, { verify } from "jsonwebtoken";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -164,11 +164,10 @@ export async function changePassword(
   }
 }
 
-export async function changeEmailUsername(
+export async function changeEmail(
   userId: string,
   currentPassword: string,
-  newEmail?: string,
-  newUsername?: string
+  newEmail?: string
 ) {
   const auth = getAuth();
   const userRef = doc(db, "users", userId);
@@ -176,6 +175,15 @@ export async function changeEmailUsername(
 
   if (!userSnapshot.exists()) {
     throw new Error("User not found");
+  }
+
+  // Check if the new email already exists in the database
+  const usersCollection = collection(db, "users");
+  const emailQuery = query(usersCollection, where("email", "==", newEmail));
+  const emailQuerySnapshot = await getDocs(emailQuery);
+
+  if (!emailQuerySnapshot.empty) {
+    throw new Error("Email already exists");
   }
 
   const userData = userSnapshot.data();
@@ -189,22 +197,42 @@ export async function changeEmailUsername(
   );
   const firebaseUser = userCredential.user;
 
-  const updates: Partial<{ username: string; email: string }> = {};
-
-  // If a new username is provided and is different, update Firestore immediately
-  if (newUsername && newUsername !== userData.username) {
-    updates.username = newUsername;
-  }
-
   // If a new email is provided and different from the current one:
-  if (newEmail && newEmail !== existingEmail) {
-    await verifyBeforeUpdateEmail(firebaseUser, newEmail);
+  // Update Firebase Authentication
+  // await updateEmail(firebaseUser, newEmail);
+  await verifyBeforeUpdateEmail(firebaseUser, newEmail);
+
+  // Update Firestore Database
+  // userData.email = newEmail;
+  // await updateDoc(userRef, userData);
+
+  console.log("Email updated successfully for user:", userId);
+}
+
+export async function changeUsername(userId: string, newUsername: string) {
+  // Get user
+  const userRef = doc(db, "users", userId);
+  const userSnapshot = await getDoc(userRef);
+
+  if (!userSnapshot.exists()) {
+    throw new Error("User not found");
   }
 
-  // Update Firestore for username changes if any
-  if (Object.keys(updates).length > 0) {
-    await updateDoc(userRef, updates);
+  // Username already exists in the database
+  const usersCollection = collection(db, "users");
+  const usernameQuery = query(
+    usersCollection,
+    where("username", "==", newUsername)
+  );
+  const usernameQuerySnapshot = await getDocs(usernameQuery);
+
+  if (!usernameQuerySnapshot.empty) {
+    throw new Error("Username already exists");
   }
+
+  const userData = userSnapshot.data();
+  userData.username = newUsername;
+  await updateDoc(userRef, userData);
 }
 
 // ----------------------------------------------------------
