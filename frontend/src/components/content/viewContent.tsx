@@ -322,9 +322,11 @@ export default function ViewContent({ id }: ViewContentProps) {
       // Call the combined shareContent endpoint
       const shareResponse = await axios.post(`${apiURL}/content/user/${userId}/share/${contentId}`);
       console.log("Shared content response:", shareResponse.data.content);
-      // Update the local state with the UPDATED content
       setContent(shareResponse.data.content); // setContent after date fix
 
+      // Navigate to the profile page of the logged-in user
+      router.push(`/profile/${userUID}`);
+     
       console.log("Content shared successfully");
   
     } catch (error) {
