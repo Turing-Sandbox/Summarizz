@@ -125,15 +125,27 @@ export default function ViewContent({ id }: ViewContentProps) {
   // Sanitize and set content, update like/bookmark status when content changes.
   useEffect(() => {
     if (content) {
-        setFormatedContent(DOMPurify.sanitize(content.content));
-        setLikes(typeof content.likes === "number" ? content.likes : 0);
-        setViews(content.views || 0);  // Ensure views is a number
-        if(userUID){
-            setIsLiked(content.peopleWhoLiked?.includes(userUID) || false);
-            setIsBookmarked(content.bookmarkedBy?.includes(userUID) || false);
-          }
+      let rawContent: string;
+      if (typeof content.content === "string") {
+        rawContent = content.content;
+      } else if (typeof content.content === "object" && (content.content as any).content) {
+        // Cast to any so that TS knows we expect a "content" property.
+        rawContent = (content.content as any).content;
+      } else {
+        rawContent = "";
+      }
+      
+      const sanitized = DOMPurify.sanitize(rawContent);
+    
+      setFormatedContent(sanitized);
+      setLikes(typeof content.likes === "number" ? content.likes : 0);
+      setViews(content.views || 0);  // Ensure views is a number
+      if(userUID){
+        setIsLiked(content.peopleWhoLiked?.includes(userUID) || false);
+        setIsBookmarked(content.bookmarkedBy?.includes(userUID) || false);
+      }
     }
-}, [content, userUID]);
+  }, [content, userUID]);
 
   /**
    * fetchLoggedInuser() -> void
@@ -214,18 +226,12 @@ export default function ViewContent({ id }: ViewContentProps) {
       const action = isLiked ? "unlike" : "like";
       const url = `${apiURL}/content/${id}/${action}/${userUID}`;
 
-      const response = await axios.post(
-        url,
-        {},
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await axios.post(url, {}, { headers: { "Content-Type": "application/json" }, });
 
-      // Use the returned content data to update the state.
-      setContent(response.data.content);
+      // Normalize the content dates before updating the state.
+      const updatedContent = normalizeContentDates(response.data.content);
+      setContent(updatedContent);
 
-      // The isLiked state will be updated in the second useEffect.
     } catch (error) {
       console.error("Error liking/unliking content:", error);
     }
@@ -250,14 +256,11 @@ export default function ViewContent({ id }: ViewContentProps) {
       const action = isBookmarked ? "unbookmark" : "bookmark";
       const url = `${apiURL}/content/${userUID}/${action}/${id}`;
 
-      const response = await axios.post(
-        url,
-        {},
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const response = await axios.post(url, {}, { headers: { "Content-Type": "application/json" } });
 
-      // Use the returned content data to update the state.
-      setContent(response.data.content);
+      // Normalize the content dates before updating the state.
+      const updatedContent = normalizeContentDates(response.data.content);
+      setContent(updatedContent);
 
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
@@ -318,11 +321,11 @@ export default function ViewContent({ id }: ViewContentProps) {
   
       // Call the combined shareContent endpoint
       const shareResponse = await axios.post(`${apiURL}/content/user/${userId}/share/${contentId}`);
+      console.log("Shared content response:", shareResponse.data.content);
+      // Update the local state with the UPDATED content
+      setContent(shareResponse.data.content); // setContent after date fix
 
-       // Update the local state with the UPDATED content
-       setContent(shareResponse.data.content); // setContent after date fix
-
-       console.log("Content shared successfully");
+      console.log("Content shared successfully");
   
     } catch (error) {
       console.error("Error sharing content:", error);
@@ -392,6 +395,24 @@ export default function ViewContent({ id }: ViewContentProps) {
         console.error(error);
     }
   };
+
+  function normalizeContentDates(contentObj: any): any {
+    if (contentObj.dateCreated) {
+      if (typeof contentObj.dateCreated === "string") {
+        contentObj.dateCreated = new Date(contentObj.dateCreated);
+      } else if (contentObj.dateCreated.seconds) {
+        contentObj.dateCreated = new Date(contentObj.dateCreated.seconds * 1000);
+      }
+    }
+    if (contentObj.dateUpdated) {
+      if (typeof contentObj.dateUpdated === "string") {
+        contentObj.dateUpdated = new Date(contentObj.dateUpdated);
+      } else if (contentObj.dateUpdated.seconds) {
+        contentObj.dateUpdated = new Date(contentObj.dateUpdated.seconds * 1000);
+      }
+    }
+    return contentObj;
+  }
 
   // --------------------------------------
   // -------------- Render ----------------
