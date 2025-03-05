@@ -10,7 +10,13 @@ import oauthRoutes from "../user-module/routes/oauthRoutes";
 
 const app = express();
 const port = 3000;
-app.use(cors());
+
+app.use(
+    cors({
+      origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
+    })
+);
+
 app.use(express.json());
 
 app.use("/comment", commentRoutes);
