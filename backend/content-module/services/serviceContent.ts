@@ -308,7 +308,6 @@ static async shareContent(contentID: string, userId: string) {
         if (!contentDoc.exists()) {
             throw new Error("Content not found");
         }
-        // Optionally check userDoc.exists() here
         if (!userDoc.exists()) {
             throw new Error("User not found");
         }
@@ -318,22 +317,34 @@ static async shareContent(contentID: string, userId: string) {
         // Step 2: Compute new values.
         const currentShares = contentData.shares || 0;
         const sharedBy = contentData.sharedBy || [];
-        const newSharedBy = !sharedBy.includes(userId) ? [...sharedBy, userId] : sharedBy;
+        
+        let newSharedBy: string[];
+        let updatedShares: number;
 
-        // Step 3: Write updates.
-        transaction.update(contentRef, {
-          sharedBy: newSharedBy,
-          shares: currentShares + 1,
-        });
-        transaction.update(userRef, {
-          sharedContent: arrayUnion(contentID),
-        });
+        if (!sharedBy.includes(userId)) {
+          // If the user hasn't shared yet, add them and increment.
+          newSharedBy = [...sharedBy, userId];
+          updatedShares = currentShares + 1;
+          // Write updates for content document.
+          transaction.update(contentRef, {
+            sharedBy: newSharedBy,
+            shares: updatedShares,
+          });
+          // Also update the user's sharedContent field.
+          transaction.update(userRef, {
+            sharedContent: arrayUnion(contentID),
+          });
+        } else {
+          // The user has already shared—do not change anything.
+          newSharedBy = sharedBy;
+          updatedShares = currentShares;
+        }
 
-        // Step 4: Construct the updated data manually (without re-reading).
+        // Step 3: Construct the updated data manually (without re-reading).
         const updatedData = {
           ...contentData,
           sharedBy: newSharedBy,
-          shares: currentShares + 1,
+          shares: updatedShares,
         } as Content;
   
         // Normalize date fields.
@@ -352,10 +363,10 @@ static async shareContent(contentID: string, userId: string) {
           }
         }
 
-        return updatedData; // Return the updated data with converted dates
+        return updatedData; 
       });
 
-      return { content: updatedContent }; // Return the updated content
+      return { content: updatedContent }; 
     } catch (error) {
         console.error("Error sharing content:", error);
         throw new Error(error.message || "Failed to share content");
@@ -365,20 +376,75 @@ static async shareContent(contentID: string, userId: string) {
   // Unshare content
   static async unshareContent(contentID: string, userId: string) {
     try {
-       // Get the content document reference
-       const contentRef = doc(db, "contents", contentID);
+      const contentRef = doc(db, "contents", contentID);
+      const userRef = doc(db, "users", userId);
 
-       // Remove this content from the user's shared content list
-       await removeSharedContentFromUser(userId, contentID);
-
-       // Fetch the updated document and return it
-       const updatedContentDoc = await getDoc(contentRef); 
-       const updatedContent = updatedContentDoc.data(); 
-
-       return { content: updatedContent };
+      const updatedContent = await runTransaction(db, async (transaction) => {
+        // Read both documents.
+        const contentDoc = await transaction.get(contentRef);
+        const userDoc = await transaction.get(userRef);
+        
+        if (!contentDoc.exists()) {
+          throw new Error("Content not found");
+        }
+        if (!userDoc.exists()) {
+          throw new Error("User not found");
+        }
+        
+        const contentData = contentDoc.data() as Content;
+        const sharedBy = contentData.sharedBy || [];
+        const currentShares = contentData.shares || 0;
+        
+        let newSharedBy: string[];
+        let updatedShares: number;
+        
+        if (sharedBy.includes(userId)) {
+          // Remove the user from sharedBy and decrement share count.
+          newSharedBy = sharedBy.filter(id => id !== userId);
+          updatedShares = currentShares > 0 ? currentShares - 1 : 0;
+          transaction.update(contentRef, {
+            sharedBy: newSharedBy,
+            shares: updatedShares,
+          });
+          // Also remove the content from user's sharedContent.
+          transaction.update(userRef, {
+            sharedContent: arrayRemove(contentID),
+          });
+        } else {
+          // If the user hadn't shared, nothing changes.
+          newSharedBy = sharedBy;
+          updatedShares = currentShares;
+        }
+        
+        const updatedData = {
+          ...contentData,
+          sharedBy: newSharedBy,
+          shares: updatedShares,
+        } as Content;
+        
+        // Normalize date fields.
+        if (updatedData.dateCreated) {
+          if (updatedData.dateCreated instanceof Timestamp) {
+            updatedData.dateCreated = updatedData.dateCreated.toDate();
+          } else if (typeof updatedData.dateCreated === "string") {
+            updatedData.dateCreated = new Date(updatedData.dateCreated);
+          }
+        }
+        if (updatedData.dateUpdated) {
+          if (updatedData.dateUpdated instanceof Timestamp) {
+            updatedData.dateUpdated = updatedData.dateUpdated.toDate();
+          } else if (typeof updatedData.dateUpdated === "string") {
+            updatedData.dateUpdated = new Date(updatedData.dateUpdated);
+          }
+        }
+        
+        return updatedData;
+      });
+      
+      return { content: updatedContent };
     } catch (error) {
-       console.error("Error unsharing content:", error);
-       throw new Error(error.message || "Failed to unshare content");
+      console.error("Error unsharing content:", error);
+      throw new Error(error.message || "Failed to unshare content");
     }
   }
 

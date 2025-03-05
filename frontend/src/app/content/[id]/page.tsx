@@ -71,6 +71,7 @@ export default function Page() {
 
   const hasFetchedData = useRef(false);
   const router = useRouter();
+  const isShared = userUID ? content?.sharedBy?.includes(userUID) : false;
 
   // ---------------------------------------
   // -------------- Helpers ----------------
@@ -483,6 +484,7 @@ export default function Page() {
                     className='icon-button'
                     onClick={handleShare}
                     title='Share Content'
+                    disabled={isShared}
                   >
                     <ShareIconOutline className='icon' />
                     {content?.shares && (
