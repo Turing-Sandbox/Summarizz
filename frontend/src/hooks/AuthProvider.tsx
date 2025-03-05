@@ -3,9 +3,7 @@ import PropTypes from "prop-types";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-// ---------------------------------------
-// -------------- INTERFACE --------------
-// ---------------------------------------
+
 interface AuthContextType {
   userUID: string | null;
   setUserUID: (arg0: string) => void;
@@ -19,9 +17,7 @@ interface AuthContextType {
   logout: () => void;
 }
 
-// -------------------------------------
-// -------------- CONTEXT --------------
-// -------------------------------------
+
 const AuthContext = createContext<AuthContextType>({
   userUID: null,
   setUserUID: () => {},
@@ -35,15 +31,10 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
 });
 
+
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // ---------------------------------------
-  // -------------- Variables --------------
-  // ---------------------------------------
   const router = useRouter();
 
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
   function setUserUID(userUID: string) {
     localStorage.setItem("userUID", userUID);
   }
@@ -89,11 +80,14 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
+
 export default AuthProvider;
+
 
 export const useAuth = () => {
   return useContext(AuthContext);
