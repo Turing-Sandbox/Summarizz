@@ -16,10 +16,11 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updatePassword,
-  updateEmail,
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
-import jwt, { verify } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import { ContentService } from "../../content-module/services/serviceContent";
+import { StorageService } from "../../storage-module/services/serviceStorage";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -102,10 +103,6 @@ export async function updateUser(
   data: Partial<{ email: string; username: string }>
 ) {
   await updateDoc(doc(db, "users", uid), data);
-}
-
-export async function deleteUser(uid: string) {
-  await deleteDoc(doc(db, "users", uid));
 }
 
 export async function createUser(
@@ -233,6 +230,49 @@ export async function changeUsername(userId: string, newUsername: string) {
   const userData = userSnapshot.data();
   userData.username = newUsername;
   await updateDoc(userRef, userData);
+}
+
+export async function deleteUser(uid: string, password: string, email: string) {
+  // Get user
+  const userRef = doc(db, "users", uid);
+  const userSnapshot = await getDoc(userRef);
+  const user = userSnapshot.data() as User;
+
+  const auth = getAuth();
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
+  const firebaseUser = userCredential.user;
+
+  // Validate user exists and is authorized
+  if (!userSnapshot.exists()) {
+    throw new Error("User not found");
+  }
+
+  if (firebaseUser.uid !== uid) {
+    throw new Error("User not authorized");
+  }
+
+  // 1 - Delete all content created by the user
+  for (const contentId of user.content) {
+    // Delete content
+    await ContentService.deleteContent(contentId);
+  }
+
+  // 2 - Delete the user profile image
+  if (user.profileImage) {
+    StorageService.deleteFile(user.profileImage);
+  }
+
+  // 3 - Delete the user document
+  if (userSnapshot.exists()) {
+    await deleteDoc(userRef);
+  }
+
+  // 4 - Delete the user from Firebase Authentication
+  firebaseUser.delete();
 }
 
 // ----------------------------------------------------------

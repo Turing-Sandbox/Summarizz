@@ -1,7 +1,6 @@
 "use client";
 
 import { ReactNode } from "react";
-import AuthProvider from "@/hooks/AuthProvider";
 import Background from "@/components/Background";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,17 +13,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <>
+    <div className='layout'>
       <Background />
-      <AuthProvider>
-        <Navbar />
-
-        <div>{children}</div>
-
-        <div className='footer'>
-          <Footer />
-        </div>
-      </AuthProvider>
-    </>
+      <Navbar />
+      <div>{children}</div>
+      <div className='footer'>
+        <Footer />
+      </div>
+    </div>
   );
 }

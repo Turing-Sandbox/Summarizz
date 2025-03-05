@@ -221,23 +221,20 @@ export default function Page() {
   const handleDelete = async () => {
     if (localStorage.getItem("userUID") === content?.creatorUID) {
       try {
+        // Delete comments
         const user_id = content?.creatorUID;
         await axios.delete(`${apiURL}/comment/post/${content.id}/${user_id}`);
 
+        // Delete content
         const content_id = content?.id;
-
-        if (content.thumbnail) {
-          // console.log("deleting but with thumbnail")
-          const file_path = decodeURIComponent(
-            content?.thumbnail.split("/o/")[1].split("?")[0]
-          );
-          await axios.delete(
-            `${apiURL}/content/${user_id}/${content_id}/${file_path}`
-          );
-        } else {
-          // console.log("deleting but without thumbnail")
-          await axios.delete(`${apiURL}/content/${user_id}/${content_id}`);
-        }
+        await axios({
+          method: "delete",
+          url: `${apiURL}/content/${content_id}`,
+          headers: {},
+          data: {
+            userId: user_id,
+          },
+        });
       } catch (error) {
         console.error(error);
         alert(error);

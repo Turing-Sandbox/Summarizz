@@ -5,16 +5,12 @@ import Image from "next/image";
 import axios from "axios";
 
 import { apiURL } from "@/app/scripts/api";
-import AuthProvider from "@/hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { User } from "@/models/User";
-
-import Navbar from "@/components/Navbar";
-import Background from "@/components/Background";
-import Footer from "@/components/Footer";
 
 import "@/app/styles/profile/ProfileManagement.scss";
 import { useParams } from "next/navigation";
-import { error } from "console";
+import Layout from "@/app/content/layout";
 
 /**
  * Page() -> JSX.Element
@@ -29,6 +25,7 @@ export default function Page() {
   // -------------- Variables --------------
   // ---------------------------------------
   const { id } = useParams();
+  const auth = useAuth();
 
   const [user, setUser] = useState<User | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -52,6 +49,11 @@ export default function Page() {
   const [newUsername, setNewUsername] = useState("");
   const [errorEditUsername, setErrorEditUsername] = useState("");
   const [successEditUsername, setSuccessEditUsername] = useState("");
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorDeleteAccount, setErrorDeleteAccount] = useState("");
+  const [successDeleteAccount, setSuccessDeleteAccount] = useState("");
 
   // ---------------------------------------
   // ------------ Event Handlers -----------
@@ -358,6 +360,46 @@ export default function Page() {
     }
   };
 
+  const handleDeleteAccount = async (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.preventDefault();
+
+    setErrorDeleteAccount("");
+    setSuccessDeleteAccount("");
+
+    if (!email) {
+      setErrorDeleteAccount("Please provide your email.");
+      return;
+    }
+
+    if (!password) {
+      setErrorDeleteAccount("Please provide your password.");
+      return;
+    }
+
+    try {
+      // Send a request to the backend to delete the account
+      let res = await axios.delete(`${apiURL}/user/${id}`, {
+        data: {
+          email,
+          password,
+        },
+      });
+
+      setSuccessDeleteAccount(res.data.message);
+
+      // Log the user out
+      auth.logout();
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to delete account.";
+      setErrorDeleteAccount(errorMessage);
+    }
+  };
+
   // --------------------------------------
   // ------------- Functions --------------
   // --------------------------------------
@@ -387,264 +429,292 @@ export default function Page() {
   // -------------- Render ----------------
   // --------------------------------------
   return (
-    <>
-      <Background />
-      <AuthProvider>
-        <Navbar />
-        <div className='main-content'>
-          {/******************** EDIT PROFILE  ********************/}
-          <div className='profile-management-section'>
-            <h2>Edit Profile</h2>
+    <Layout>
+      <div className='main-content'>
+        {/******************** EDIT PROFILE  ********************/}
+        <div className='profile-management-section'>
+          <button
+            onClick={() => {
+              console.log("Logging out...");
+              auth.logout();
+            }}
+            className='logout-button'
+          >
+            LOGOUT
+          </button>
+          <h2>Edit Profile</h2>
 
-            <form onSubmit={handleEditProfile}>
-              {/* TODO: Profile Image */}
-              <div className='profile-image-section'>
-                <div className='input-group'>
-                  {profileImagePreview ? (
-                    <Image
-                      src={profileImagePreview}
-                      width={200}
-                      height={200}
-                      alt='Profile Picture'
-                      className='profile-edit-image'
-                    />
-                  ) : (
-                    <h1 className='profile-edit-image profile-initial'>
-                      {user?.username[0].toUpperCase()}
-                    </h1>
-                  )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor='profile-image'
-                    className='profile-image-upload'
-                  >
-                    {profileImage ? "Change" : "Upload"} Profile Image
-                  </label>
-                  <input
-                    id='profile-image'
-                    type='file'
-                    accept='image/*'
-                    onChange={handleProfileImageChange}
-                  />
-                  {imageError && <p className='error-message'>{imageError}</p>}
-                </div>
-              </div>
-
-              <div className='form-group'>
-                {/* TODO: First Name */}
-                <div className='input-group'>
-                  <label htmlFor='firstName'>First Name *</label>
-                  <input
-                    type='text'
-                    id='firstName'
-                    placeholder='First Name'
-                    value={user?.firstName ? user.firstName : ""}
-                    onChange={(e) =>
-                      setUser(
-                        user ? { ...user, firstName: e.target.value } : null
-                      )
-                    }
-                  />
-                </div>
-
-                {/* TODO: Last Name */}
-                <div className='input-group'>
-                  <label htmlFor='lastName'>Last Name *</label>
-                  <input
-                    type='text'
-                    id='lastName'
-                    placeholder='Last Name'
-                    value={user?.lastName ? user.lastName : ""}
-                    onChange={(e) =>
-                      setUser(
-                        user ? { ...user, lastName: e.target.value } : null
-                      )
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* TODO: Bio */}
+          <form onSubmit={handleEditProfile}>
+            {/* TODO: Profile Image */}
+            <div className='profile-image-section'>
               <div className='input-group'>
-                <label htmlFor='bio'>Bio</label>
-                <textarea
-                  id='bio'
-                  placeholder='Tell us about yourself...'
-                  value={user?.bio ? user.bio : ""}
-                  onChange={(e) =>
-                    setUser(user ? { ...user, bio: e.target.value } : null)
-                  }
-                />
+                {profileImagePreview ? (
+                  <Image
+                    src={profileImagePreview}
+                    width={200}
+                    height={200}
+                    alt='Profile Picture'
+                    className='profile-edit-image'
+                  />
+                ) : (
+                  <h1 className='profile-edit-image profile-initial'>
+                    {user?.username[0].toUpperCase()}
+                  </h1>
+                )}
               </div>
 
-              {/* TODO: Phone */}
-              <div className='input-group'>
-                <label htmlFor='phone'>Phone</label>
+              <div>
+                <label htmlFor='profile-image' className='profile-image-upload'>
+                  {profileImage ? "Change" : "Upload"} Profile Image
+                </label>
                 <input
-                  type='tel'
-                  id='phone'
-                  placeholder='(123) 321-1234'
-                  value={user?.phone ? user.phone : ""}
-                  onChange={(e) =>
-                    setUser(user ? { ...user, phone: e.target.value } : null)
-                  }
+                  id='profile-image'
+                  type='file'
+                  accept='image/*'
+                  onChange={handleProfileImageChange}
                 />
+                {imageError && <p className='error-message'>{imageError}</p>}
               </div>
+            </div>
 
-              {/* TODO: Date of Birth */}
+            <div className='form-group'>
+              {/* TODO: First Name */}
               <div className='input-group'>
-                <label htmlFor='dob'>Date of Birth</label>
+                <label htmlFor='firstName'>First Name *</label>
                 <input
-                  type='date'
-                  id='dob'
-                  value={user?.dateOfBirth ? user.dateOfBirth : ""}
+                  type='text'
+                  id='firstName'
+                  placeholder='First Name'
+                  value={user?.firstName ? user.firstName : ""}
                   onChange={(e) =>
                     setUser(
-                      user ? { ...user, dateOfBirth: e.target.value } : null
+                      user ? { ...user, firstName: e.target.value } : null
                     )
                   }
                 />
               </div>
 
-              {errorEditProfile && (
-                <p className='error-message'>{errorEditProfile}</p>
-              )}
-
-              {successEditProfile && (
-                <p className='success-message'>{successEditProfile}</p>
-              )}
-
-              <button type='submit' className='save-button'>
-                Save Changes
-              </button>
-            </form>
-          </div>
-
-          {/******************** EDIT CREDENTIALS  ********************/}
-          <div className='profile-management-section'>
-            <h2>Edit Credentials</h2>
-            <h3>Change Password</h3>
-            <form onSubmit={handleChangePassword}>
+              {/* TODO: Last Name */}
               <div className='input-group'>
-                <label htmlFor='currentPassword'>Current Password</label>
-                <input
-                  type='password'
-                  id='currentPassword'
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className='form-group'>
-                <div className='input-group'>
-                  <label htmlFor='newPassword'>New Password</label>
-                  <input
-                    type='password'
-                    id='newPassword'
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className='input-group'>
-                  <label htmlFor='confirmPassword'>Confirm New Password</label>
-                  <input
-                    type='password'
-                    id='confirmPassword'
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>} */}
-
-              <button type='submit' className='save-button'>
-                Change Password
-              </button>
-            </form>
-
-            <h3>Change Email</h3>
-            <form onSubmit={handleUpdateEmail}>
-              <div className='input-group'>
-                <label htmlFor='newEmail'>New Email</label>
-                <input
-                  type='email'
-                  id='newEmail'
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
-                />
-              </div>
-
-              <div className='input-group'>
-                <label htmlFor='currentPassword'>Enter Password</label>
-                <input
-                  type='password'
-                  id='currentPassword'
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              {errorEditEmail && (
-                <p className='error-message'>{errorEditEmail}</p>
-              )}
-              {successEditEmail && (
-                <p className='success-message'>{successEditEmail}</p>
-              )}
-
-              <button type='submit' className='save-button'>
-                Change Email
-              </button>
-            </form>
-
-            <h3>Change Username</h3>
-            <form onSubmit={handleUpdateUsername}>
-              <div className='input-group'>
-                <label htmlFor='newUsername'>New Username</label>
+                <label htmlFor='lastName'>Last Name *</label>
                 <input
                   type='text'
-                  id='newUsername'
-                  value={newUsername}
-                  onChange={(e) => setNewUsername(e.target.value)}
+                  id='lastName'
+                  placeholder='Last Name'
+                  value={user?.lastName ? user.lastName : ""}
+                  onChange={(e) =>
+                    setUser(user ? { ...user, lastName: e.target.value } : null)
+                  }
+                />
+              </div>
+            </div>
+
+            {/* TODO: Bio */}
+            <div className='input-group'>
+              <label htmlFor='bio'>Bio</label>
+              <textarea
+                id='bio'
+                placeholder='Tell us about yourself...'
+                value={user?.bio ? user.bio : ""}
+                onChange={(e) =>
+                  setUser(user ? { ...user, bio: e.target.value } : null)
+                }
+              />
+            </div>
+
+            {/* TODO: Phone */}
+            <div className='input-group'>
+              <label htmlFor='phone'>Phone</label>
+              <input
+                type='tel'
+                id='phone'
+                placeholder='(123) 321-1234'
+                value={user?.phone ? user.phone : ""}
+                onChange={(e) =>
+                  setUser(user ? { ...user, phone: e.target.value } : null)
+                }
+              />
+            </div>
+
+            {/* TODO: Date of Birth */}
+            <div className='input-group'>
+              <label htmlFor='dob'>Date of Birth</label>
+              <input
+                type='date'
+                id='dob'
+                value={user?.dateOfBirth ? user.dateOfBirth : ""}
+                onChange={(e) =>
+                  setUser(
+                    user ? { ...user, dateOfBirth: e.target.value } : null
+                  )
+                }
+              />
+            </div>
+
+            {errorEditProfile && (
+              <p className='error-message'>{errorEditProfile}</p>
+            )}
+
+            {successEditProfile && (
+              <p className='success-message'>{successEditProfile}</p>
+            )}
+
+            <button type='submit' className='save-button'>
+              Save Changes
+            </button>
+          </form>
+        </div>
+
+        {/******************** EDIT CREDENTIALS  ********************/}
+        <div className='profile-management-section'>
+          <h2>Edit Credentials</h2>
+          <h3>Change Password</h3>
+          <form onSubmit={handleChangePassword}>
+            <div className='input-group'>
+              <label htmlFor='currentPassword'>Current Password</label>
+              <input
+                type='password'
+                id='currentPassword'
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className='form-group'>
+              <div className='input-group'>
+                <label htmlFor='newPassword'>New Password</label>
+                <input
+                  type='password'
+                  id='newPassword'
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
                 />
               </div>
 
-              {errorEditUsername && (
-                <p className='error-message'>{errorEditUsername}</p>
-              )}
-              {successEditUsername && (
-                <p className='success-message'>{successEditUsername}</p>
-              )}
+              <div className='input-group'>
+                <label htmlFor='confirmPassword'>Confirm New Password</label>
+                <input
+                  type='password'
+                  id='confirmPassword'
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
-              <button type='submit' className='save-button'>
-                Change Username
-              </button>
-            </form>
-          </div>
+            {/* {error && <p className='error-message'>{error}</p>}
+            {success && <p className='success-message'>{success}</p>} */}
 
-          {/******************** DELETE ACCOUNT  ********************/}
-          <div className='profile-management-section'>
-            <h2>Delete Account</h2>
-            <p>
-              By checking this box, I acknoledge the account will be deleted
-              from this platform as well as all the content related. There is no
-              recovery once an account is deleted.
-            </p>
-          </div>
+            <button type='submit' className='save-button'>
+              Change Password
+            </button>
+          </form>
+
+          <h3>Change Email</h3>
+          <form onSubmit={handleUpdateEmail}>
+            <div className='input-group'>
+              <label htmlFor='newEmail'>New Email</label>
+              <input
+                type='email'
+                id='newEmail'
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+            </div>
+
+            <div className='input-group'>
+              <label htmlFor='currentPassword'>Enter Password</label>
+              <input
+                type='password'
+                id='currentPassword'
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {errorEditEmail && (
+              <p className='error-message'>{errorEditEmail}</p>
+            )}
+            {successEditEmail && (
+              <p className='success-message'>{successEditEmail}</p>
+            )}
+
+            <button type='submit' className='save-button'>
+              Change Email
+            </button>
+          </form>
+
+          <h3>Change Username</h3>
+          <form onSubmit={handleUpdateUsername}>
+            <div className='input-group'>
+              <label htmlFor='newUsername'>New Username</label>
+              <input
+                type='text'
+                id='newUsername'
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+            </div>
+
+            {errorEditUsername && (
+              <p className='error-message'>{errorEditUsername}</p>
+            )}
+            {successEditUsername && (
+              <p className='success-message'>{successEditUsername}</p>
+            )}
+
+            <button type='submit' className='save-button'>
+              Change Username
+            </button>
+          </form>
         </div>
 
-        <div className='footer'>
-          <Footer />
+        {/******************** DELETE ACCOUNT  ********************/}
+        <div className='profile-management-section'>
+          <h2>Delete Account</h2>
+
+          <div className='input-group'>
+            <label htmlFor='email'>Enter Email</label>
+            <input
+              type='email'
+              id='email'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className='input-group'>
+            <label htmlFor='password'>Enter Password</label>
+            <input
+              type='password'
+              id='password'
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <p>
+            By pressing "Delete Account", I acknowledge the account will be
+            deleted from this platform as well as all the content related. There
+            is no recovery once an account is deleted.
+          </p>
+
+          {errorDeleteAccount && (
+            <p className='error-message'>{errorDeleteAccount}</p>
+          )}
+          {successDeleteAccount && (
+            <p className='success-message'>{successDeleteAccount}</p>
+          )}
+
+          <button onClick={handleDeleteAccount} className='save-button warning'>
+            Delete Account
+          </button>
         </div>
-      </AuthProvider>
-    </>
+      </div>
+    </Layout>
   );
 }

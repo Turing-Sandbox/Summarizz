@@ -1,4 +1,6 @@
-import { useContext, createContext, useState } from "react";
+"use client";
+
+import { useContext, createContext } from "react";
 import PropTypes from "prop-types";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -66,6 +68,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   function logout() {
+    console.log("Logging out!");
     localStorage.removeItem("token");
     localStorage.removeItem("userUID");
     router.push("/authentication/login");
