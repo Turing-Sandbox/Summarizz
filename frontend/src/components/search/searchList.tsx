@@ -18,6 +18,13 @@ import Navbar from "@/components/Navbar";
 import "@/app/styles/search/search.scss"
 
 const SearchList = () => {
+
+
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
+
+  // Retrieve the search text from the url.
   const param = useSearchParams().get("query");
   const [usersReturned, setUsersReturned] = useState([]);
   const [contentReturned, setContentReturned] = useState([]);
@@ -25,11 +32,25 @@ const SearchList = () => {
   const [userStartingPoint, setUserStartingPoint] = useState(null);
   const [contentStartingPoint, setContentStartingPoint] = useState(null);
 
+
+  // ---------------------------------------
+  // -------------- Page INIT --------------
+  // ---------------------------------------
+
+  // Fetch both user data and content data on first page load.
   useEffect(() => {
     fetchUserData();
     fetchContentData();
   }, [])
 
+  /**
+   * fetchUserData() -> void
+   *
+   * @description
+   *Send a get request to the api endpoint for searching for users.
+   *
+   * @returns void
+   */
   const fetchUserData = async () => {
     const response = await axios.get(`${apiURL}/search/users/`, {
       params: {
@@ -41,6 +62,14 @@ const SearchList = () => {
     setUserStartingPoint(response.data.newStartingPoint);
   }
 
+  /**
+   * fetchUserData() -> void
+   *
+   * @description
+   *Send a get request to the api endpoint for searching for articles.
+   *
+   * @returns void
+   */
   const fetchContentData = async () => {
     const response = await axios.get(`${apiURL}/search/content/`, {
       params: {

@@ -8,6 +8,15 @@ import "@/app/styles/navbar.scss"
 const UserResult = ({ user }: { user: User }) => {
   const router = useRouter();
 
+
+  /**
+   * handleClick() -> void
+   *
+   * @description
+   * On a click, this redirects the user to the selected user's page.
+   *
+   * @returns void
+   */
   const handleClick = () => {
     router.push(`/user/${user.uid}`);
   };

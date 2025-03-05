@@ -7,6 +7,14 @@ import { useRouter } from "next/navigation";
 const UserResult = ({ content }: { content: Content }) => {
   const router = useRouter();
 
+  /**
+   * handleClick() -> void
+   *
+   * @description
+   * On a click, this redirects the user to the selected content's page.
+   *
+   * @returns void
+   */
   const handleClick = () => {
     router.push(`/content/${content.id}`);
   };

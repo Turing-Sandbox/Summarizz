@@ -2,6 +2,15 @@ import { db } from "../../shared/firebaseConfig";
 import { collection, query, getDocs, where, startAt, endAt, orderBy, limit, startAfter } from "firebase/firestore";
 
 export class SearchService {
+
+	/**
+	 * searchUsers(searchText: string, startingPoint:string)
+	 *
+	 * @description
+	 * Fetches 5 users at a time where their username matches or starts with the text provided to the search query.
+	 * If a starting point is provided, the search query starts from the provided starting point. 
+	 *
+	 */
 	static async searchUsers(searchText: string, startingPoint = null) {
 		console.log("Searching... (from service)")
 		console.log("Searching for specific users...")
@@ -48,6 +57,14 @@ export class SearchService {
 
 	}
 
+	/**
+	 * searchContent(searchText: string, startingPoint:string)
+	 *
+	 * @description
+	 * Fetches 5 items at a time where their titles match or start with the text provided to the search query.
+	 * If a starting point is provided, the search query starts from the provided starting point. 
+	 *
+	 */
 	static async searchContent(searchText: string, startingPoint = null) {
 		console.log("Searching... (from service)")
 		console.log("Searching for specific content...")
