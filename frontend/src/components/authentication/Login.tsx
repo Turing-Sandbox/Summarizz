@@ -30,39 +30,39 @@ function Login() {
 
     // 2 - Login user
     await axios
-      .post(`${apiURL}/user/login`, user)
-      .then((res) => {
-        if (res.status === 200 || res.status === 201) {
-          const userUID = res.data.userUID;
-          const token = res.data.token;
+        .post(`${apiURL}/user/login`, user)
+        .then((res) => {
+          if (res.status === 200 || res.status === 201) {
+            const userUID = res.data.userUID;
+            const token = res.data.token;
 
-          // 3 - Set User Session (Save Token and User UID)
-          auth.login(token, userUID);
+            // 3 - Set User Session (Save Token and User UID)
+            auth.login(token, userUID);
 
-          // Update user email
-          axios.put(`${apiURL}/user/${userUID}`, {
-            email: user.email,
-          });
+            // Update user email
+            axios.put(`${apiURL}/user/${userUID}`, {
+              email: user.email,
+            });
 
-          // 4 - Redirect to home page
-          router.push("/");
+            // 4 - Redirect to home page
+            router.push("/");
 
-          // 5 - Error Handling
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.error
-        ) {
-          setError(error.response.data.error);
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-      });
+            // 5 - Error Handling
+          } else {
+            setError("An error occurred. Please try again.");
+          }
+        })
+        .catch((error) => {
+          if (
+              error.response &&
+              error.response.data &&
+              error.response.data.error
+          ) {
+            setError(error.response.data.error);
+          } else {
+            setError("An error occurred. Please try again.");
+          }
+        });
   };
 
   // Authenticated users should not be able to access the login page
@@ -71,50 +71,51 @@ function Login() {
   }
 
   return (
-    <>
-      <div className='container'>
-        <div className='auth-box'>
-          <h1 className='summarizz-logo auth-title'>Summarizz</h1>
-          <form onSubmit={handleSubmit}>
-            <input
-              type='email'
-              value={user.email}
-              onChange={handleChange}
-              name='email'
-              id='email'
-              placeholder='Email'
-              className='auth-input'
-              required
-            />
-            <input
-              type='password'
-              value={user.password}
-              onChange={handleChange}
-              name='password'
-              id='password'
-              placeholder='Password'
-              className='auth-input'
-              required
-            />
+      <>
+        <div className='container'>
+          <div className='auth-box'>
+            <h1 className='summarizz-logo auth-title'>Summarizz</h1>
+            <form onSubmit={handleSubmit}>
+              <input
+                  type='email'
+                  value={user.email}
+                  onChange={handleChange}
+                  name='email'
+                  id='email'
+                  placeholder='Email'
+                  className='auth-input'
+                  required
+              />
+              <input
+                  type='password'
+                  value={user.password}
+                  onChange={handleChange}
+                  name='password'
+                  id='password'
+                  placeholder='Password'
+                  className='auth-input'
+                  required
+              />
 
-            {error && <p className='auth-error'>{error}</p>}
+              {error && <p className='auth-error'>{error}</p>}
 
-            <button type='submit' className='auth-button'>
-              Login
-            </button>
+              <button type='submit' className='auth-button'>
+                Login
+              </button>
 
-            <OAuthButtons />
-          </form>
+              <OAuthButtons />
+            </form>
 
-          <p>
-            Don&apos;t have an account?{" "}
-            <a href='/authentication/register'>Register</a>
-            <br />
-            Forgot your password? <a>Reset your password.</a>
-          </p>
+            <p>
+              Don&apos;t have an account?{" "}
+              <a href='/authentication/register'>Register</a>
+              <br />
+              Forgot your password?{" "}
+              <a href='/authentication/reset-password'>Reset your password</a>
+            </p>
+          </div>
         </div>
-      </div>
-    </>
+      </>
   );
 }
 
