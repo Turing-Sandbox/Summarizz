@@ -9,9 +9,6 @@ import { apiURL } from "@/app/scripts/api";
 import { OAuthButtons } from "./OAuthButtons";
 
 function Register() {
-  // ---------------------------------------
-  // -------------- Variables --------------
-  // ---------------------------------------
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     firstName: "",
@@ -25,10 +22,6 @@ function Register() {
   const router = useRouter();
   const auth = useAuth();
 
-  // ---------------------------------------
-  // ------------ Event Handler ------------
-  // ---------------------------------------
-
   // Check if passwords match
   useEffect(() => {
     if (user.password !== user.confirmPassword) {
@@ -37,10 +30,6 @@ function Register() {
       setError("");
     }
   }, [user.password, user.confirmPassword]);
-
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -95,9 +84,6 @@ function Register() {
     router.push("/");
   }
 
-  // --------------------------------------
-  // -------------- Render ----------------
-  // --------------------------------------
   return (
     <>
       <div className='container'>
@@ -165,17 +151,8 @@ function Register() {
               Register
             </button>
 
-            {/* ------------------------- OAUTH ------------------------- */}
             <OAuthButtons />
           </form>
-
-          {/* --------------------------------------------------------- */}
-          {/* ------------------------- OAUTH ------------------------- */}
-          {/* --------------------------------------------------------- */}
-
-          {/* --------------------------------------------------------- */}
-          {/* ------------------------- OAUTH ------------------------- */}
-          {/* --------------------------------------------------------- */}
 
           <p>
             Already have an account? <a href='/authentication/login'>Login</a>

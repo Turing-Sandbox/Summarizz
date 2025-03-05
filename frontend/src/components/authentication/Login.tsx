@@ -9,9 +9,6 @@ import { apiURL } from "@/app/scripts/api";
 import { OAuthButtons } from "./OAuthButtons";
 
 function Login() {
-  // ---------------------------------------
-  // -------------- Variables --------------
-  // ---------------------------------------
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     email: "",
@@ -21,9 +18,6 @@ function Login() {
   const router = useRouter();
   const auth = useAuth();
 
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
@@ -76,9 +70,6 @@ function Login() {
     router.push("/");
   }
 
-  // --------------------------------------
-  // -------------- Render ----------------
-  // --------------------------------------
   return (
     <>
       <div className='container'>
@@ -112,17 +103,9 @@ function Login() {
               Login
             </button>
 
-            {/* ------------------------- OAUTH ------------------------- */}
             <OAuthButtons />
           </form>
 
-          {/* --------------------------------------------------------- */}
-          {/* ------------------------- OAUTH ------------------------- */}
-          {/* --------------------------------------------------------- */}
-
-          {/* --------------------------------------------------------- */}
-          {/* ------------------------- OAUTH ------------------------- */}
-          {/* --------------------------------------------------------- */}
           <p>
             Don&apos;t have an account?{" "}
             <a href='/authentication/register'>Register</a>
