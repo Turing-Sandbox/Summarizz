@@ -68,9 +68,6 @@ export async function login(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-
-    console.log("User signed in: ", user);
-
     const token = jwt.sign({ _id: user.uid, email: email }, "YOUR_SECRET", {
       expiresIn: "30d",
     });
@@ -112,7 +109,6 @@ export async function createUser(
   username: string,
   email: string
 ) {
-  console.log("Creating user...");
   const user: User = {
     uid: uid,
     firstName: firstName,
@@ -150,7 +146,6 @@ export async function changePassword(
 
     // Update password
     await updatePassword(firebaseUser, newPassword);
-    console.log("Password updated successfully for user:", userId);
   } catch (error) {
     let errorMessage = error.message;
     // Remove "Firebase: " prefix from the error message
@@ -198,12 +193,6 @@ export async function changeEmail(
   // Update Firebase Authentication
   // await updateEmail(firebaseUser, newEmail);
   await verifyBeforeUpdateEmail(firebaseUser, newEmail);
-
-  // Update Firestore Database
-  // userData.email = newEmail;
-  // await updateDoc(userRef, userData);
-
-  console.log("Email updated successfully for user:", userId);
 }
 
 export async function changeUsername(userId: string, newUsername: string) {
@@ -300,13 +289,12 @@ export async function removeContentFromUser(
   contentUID: string
 ) {
   const userDoc = await getDoc(doc(db, "users", userUID));
-  console.log(`Removing content: ${contentUID} from user: ${userUID}`);
+
   if (userDoc.exists()) {
     const user = userDoc.data();
-    console.log("initial user content: ", user.content);
+
     if (user?.content) {
       user.content = user.content.filter((uid: string) => uid !== contentUID);
-      console.log("after removing: ", user.content);
     } else {
       console.error("user has no content!!!!! ", user);
     }

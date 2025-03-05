@@ -227,8 +227,42 @@ export default function Page() {
     setErrorEditPassword("");
     setSuccessEditPassord("");
 
+    // Validation
+    if (!currentPassword) {
+      setErrorEditPassword("Please provide your current password.");
+      return;
+    }
+
+    if (!newPassword || !confirmPassword) {
+      setErrorEditPassword("Please provide a new password.");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setErrorEditPassword("New passwords do not match.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setErrorEditPassword("Password must be at least 8 characters long.");
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      setErrorEditPassword(
+        "New password cannot be the same as the current password."
+      );
+      return;
+    }
+
+    if (
+      !/[a-z]/.test(newPassword) ||
+      !/[A-Z]/.test(newPassword) ||
+      !/[0-9]/.test(newPassword)
+    ) {
+      setErrorEditPassword(
+        "Password must contain at least one number, one lowercase and one uppercase letter."
+      );
       return;
     }
 
@@ -586,10 +620,55 @@ export default function Page() {
                 <label htmlFor='newPassword'>New Password</label>
                 <input
                   type='password'
-                  id='newPassword'
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
+                  id='currentPassword'
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
+              </div>
+
+              <div className='form-group'>
+                <div className='input-group'>
+                  <label htmlFor='newPassword'>New Password</label>
+                  <input
+                    type='password'
+                    id='newPassword'
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className='input-group'>
+                  <label htmlFor='confirmPassword'>Confirm New Password</label>
+                  <input
+                    type='password'
+                    id='confirmPassword'
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {errorEditPassword && (
+                <p className='error-message'>{errorEditPassword}</p>
+              )}
+              {successEditPassord && (
+                <p className='success-message'>{successEditPassord}</p>
+              )}
+
+              <button type='submit' className='save-button'>
+                Change Password
+              </button>
+            </form>
+
+            <h3>Change Email</h3>
+            <form onSubmit={handleUpdateEmail}>
+              <div className='input-group'>
+                <label htmlFor='newEmail'>New Email</label>
+                <input
+                  type='email'
+                  id='newEmail'
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
                 />
               </div>
 

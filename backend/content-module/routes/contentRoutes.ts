@@ -34,9 +34,7 @@ contentRoutes.post(
   ContentController.unbookmarkContent
 ); // Unbookmark content
 
-contentRoutes.post("/:userId/share/:contentId", ContentController.shareContent); // Share content
-contentRoutes.post(
-  "/:userId/unshare/:contentId",
-  ContentController.unshareContent
-); // Unshare content
+contentRoutes.post("/user/:userId/share/:contentId", ContentController.shareContent); // Share content
+contentRoutes.post("/:userId/unshare/:contentId", ContentController.unshareContent); // Unshare content
+
 export default contentRoutes;

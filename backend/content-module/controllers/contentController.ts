@@ -3,6 +3,11 @@ import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
 
+import { arrayUnion, doc, updateDoc, getDoc } from "firebase/firestore";
+import { db } from "../../shared/firebaseConfig";
+import { addSharedContentToUser } from "../../user-module/services/userService";
+import axios from "axios";
+
 export class ContentController {
   static async createContent(req: Request, res: Response) {
     console.log("Creating Content...");
@@ -277,20 +282,22 @@ export class ContentController {
   }
 
   // Share content
-  static async shareContent(req: Request, res: Response) {
-    const { contentId, userId } = req.params;
+static async shareContent(req: Request, res: Response) {
+  const { userId, contentId } = req.params;
 
-    try {
-      const response = await ContentService.shareContent(contentId, userId);
-      res.status(200).json(response);
-    } catch (error) {
+  try {
+      // Call the service layer to handle *both* sharing and incrementing
+      const updatedContent = await ContentService.shareContent(contentId, userId);
+
+      // Return success response
+      res.status(200).json({ content: updatedContent }); // Return the updated content
+  } catch (error) {
       console.error("Error sharing content:", error);
       res.status(500).json({
-        error:
-          error instanceof Error ? error.message : "Failed to share content",
+          error: error instanceof Error ? error.message : "Failed to share content",
       });
-    }
   }
+}
 
   // Unshare content
   static async unshareContent(req: Request, res: Response) {
