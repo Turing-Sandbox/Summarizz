@@ -133,6 +133,44 @@
   color: var(--delete-hover-color); /* Use a specific variable for delete hover */
 }
 
+/* Tabs container */
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem; /* spacing between tabs and content */
+
+  /* Center tabs horizontally */
+  justify-content: center;
+}
+
+/* Base tab button styles */
+.tab-active,
+.tab-inactive {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+
+  /* Transparent background so it blends with the page */
+  background-color: transparent;
+  color: #7D7F7C;
+
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+/* Active tab styling */
+.tab-active {
+  font-weight: bold;
+  text-decoration: underline;
+  color: black;
+}
+
+/* Inactive tab styling */
+.tab-inactive:hover {
+  color: black;
+}
+
 // media queries
 @media screen and (max-width: 1024px) {
   .content-list {
