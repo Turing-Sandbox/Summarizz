@@ -467,15 +467,6 @@ export default function Page() {
       <div className='main-content'>
         {/******************** EDIT PROFILE  ********************/}
         <div className='profile-management-section'>
-          <button
-            onClick={() => {
-              console.log("Logging out...");
-              auth.logout();
-            }}
-            className='logout-button'
-          >
-            LOGOUT
-          </button>
           <h2>Edit Profile</h2>
 
           <form onSubmit={handleEditProfile}>
@@ -613,62 +604,16 @@ export default function Page() {
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
               />
-            </div>
-
+            </div>  
+            
             <div className='form-group'>
               <div className='input-group'>
                 <label htmlFor='newPassword'>New Password</label>
                 <input
                   type='password'
-                  id='currentPassword'
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-              </div>
-
-              <div className='form-group'>
-                <div className='input-group'>
-                  <label htmlFor='newPassword'>New Password</label>
-                  <input
-                    type='password'
-                    id='newPassword'
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                </div>
-
-                <div className='input-group'>
-                  <label htmlFor='confirmPassword'>Confirm New Password</label>
-                  <input
-                    type='password'
-                    id='confirmPassword'
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {errorEditPassword && (
-                <p className='error-message'>{errorEditPassword}</p>
-              )}
-              {successEditPassord && (
-                <p className='success-message'>{successEditPassord}</p>
-              )}
-
-              <button type='submit' className='save-button'>
-                Change Password
-              </button>
-            </form>
-
-            <h3>Change Email</h3>
-            <form onSubmit={handleUpdateEmail}>
-              <div className='input-group'>
-                <label htmlFor='newEmail'>New Email</label>
-                <input
-                  type='email'
-                  id='newEmail'
-                  value={newEmail}
-                  onChange={(e) => setNewEmail(e.target.value)}
+                  id='newPassword'
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                 />
               </div>
 
@@ -679,9 +624,43 @@ export default function Page() {
                   id='confirmPassword'
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
                 />
               </div>
+            </div>
+
+            {errorEditPassword && (
+              <p className='error-message'>{errorEditPassword}</p>
+            )}
+            {successEditPassord && (
+              <p className='success-message'>{successEditPassord}</p>
+            )}
+
+            <button type='submit' className='save-button'>
+              Change Password
+            </button>
+          </form>
+
+          <h3>Change Email</h3>
+          <form onSubmit={handleUpdateEmail}>
+            <div className='input-group'>
+              <label htmlFor='newEmail'>New Email</label>
+              <input
+                type='email'
+                id='newEmail'
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+              />
+            </div>
+
+            <div className='input-group'>
+              <label htmlFor='confirmPassword'>Confirm New Password</label>
+              <input
+                type='password'
+                id='confirmPassword'
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
             </div>
 
             {/* {error && <p className='error-message'>{error}</p>}

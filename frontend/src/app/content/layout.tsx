@@ -13,13 +13,15 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className='layout'>
+    <>
       <Background />
       <Navbar />
+
       <div>{children}</div>
+
       <div className='footer'>
         <Footer />
       </div>
-    </div>
+    </>
   );
 }

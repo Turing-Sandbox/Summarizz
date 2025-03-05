@@ -68,7 +68,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   function logout() {
-    console.log("Logging out!");
     localStorage.removeItem("token");
     localStorage.removeItem("userUID");
     router.push("/authentication/login");
