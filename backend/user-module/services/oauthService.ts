@@ -91,7 +91,7 @@ export async function verifyOAuthToken(req: Request, res: Response) {
         }
 
         // Generate JWT token for the client
-        const token = jwt.sign({ uid }, process.env.JWT_SECRET || 'your_jwt_secret', {
+        const token = jwt.sign({ uid }, process.env.JWT_SECRET, {
             expiresIn: '30d'
         });
 
@@ -287,7 +287,7 @@ export async function handleOAuthCallback(req: Request, res: Response) {
         }
 
         // Generate JWT token for the client
-        const token = jwt.sign({ uid: userData.uid }, process.env.JWT_SECRET || 'your_jwt_secret', {
+        const token = jwt.sign({ uid: userData.uid }, process.env.JWT_SECRET, {
             expiresIn: '30d'
         });
 
