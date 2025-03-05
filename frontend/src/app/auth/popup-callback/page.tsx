@@ -18,6 +18,12 @@ export default function PopupCallbackPage() {
             const uid = searchParams.get('uid');
             const errorMsg = searchParams.get('error');
 
+            // Verify window.opener exists
+            if (!window.opener) {
+                setError('Authentication window was not opened correctly');
+                return;
+            }
+
             // Send message to parent window
             if (errorMsg) {
                 window.opener.postMessage({ error: decodeURIComponent(errorMsg) }, window.location.origin);
@@ -30,7 +36,8 @@ export default function PopupCallbackPage() {
             // Close the popup after sending the message
             window.close();
         } catch (err: any) {
-            setError(err.message || 'Failed to process authentication');
+            console.error('Error in popup callback:', err);
+            setError(err instanceof Error ? err.message : 'Failed to process authentication');
         }
     }, [searchParams]);
 
