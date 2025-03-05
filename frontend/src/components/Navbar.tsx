@@ -8,6 +8,7 @@ import Image from "next/image";
 // Third-Party Libraries (Import)
 import axios from "axios";
 import Cookies from "js-cookie";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 // Local Files (Import)
 import { useAuth } from "../hooks/AuthProvider";
@@ -30,11 +31,13 @@ function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [query, setQuery] = useState('');
 
   const { user, userUID, getToken, logout } = useAuth();
   const router = useRouter();
 
   const authenticated = user !== null && getToken() !== null;
+
 
   // EFFECT: Handle Dark Mode Preference
   useEffect(() => {
@@ -92,6 +95,23 @@ function Navbar() {
     localStorage.setItem("isDarkMode", (!isDarkMode).toString());
   };
 
+
+  /**
+   * handleSearch() -> void
+   *
+   * @description
+   * Uses the Next.js router to push the user to the search results page,
+   * with the user's input as a url query parameter.
+   */
+  const handleSearch = () => {
+    if (query) {
+      // Redirect to the search results page, where the actual searching happens.
+      router.push(`/search?query=${encodeURIComponent(query)}`);
+    } else {
+      alert("You didn't search for anything.")
+    }
+  }
+
   return (
     <>
       <div className='navbar-background'>
@@ -107,6 +127,11 @@ function Navbar() {
         {/* ANCHOR - Create Search and Filter Bar when Authenticated  */}
         {authenticated ? (
           <>
+            <form onSubmit={handleSearch} className="searchBarContainer">
+              <input type="text" className="searchBar" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search for something!" required />
+              <button className="searchButton"><MagnifyingGlassIcon /></button>
+            </form>
+
             <button
               className='navbar-button'
               onClick={() => {

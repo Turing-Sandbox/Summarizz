@@ -38,7 +38,8 @@ export class ContentService {
         readtime,
         likes: 0,
         peopleWhoLiked: [],
-        bookmarkedBy: []
+        bookmarkedBy: [],
+        titleLower: title.toLowerCase()
       };
 
       const docRef = await addDoc(collection(db, "contents"), newContent);
@@ -118,6 +119,9 @@ export class ContentService {
     console.log("Editing content...")
     console.log(content_id);
     console.log(data);
+    data.titleLower = data.title.toLowerCase();
+    console.log(data.titleLower)
+    console.log(data)
     try {
       await updateDoc(doc(db, `contents/${content_id}`), data);
       console.log("EDIT^^^^^^^^^^^^^^^^^EDIT")
