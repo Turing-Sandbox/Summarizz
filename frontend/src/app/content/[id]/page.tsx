@@ -305,8 +305,7 @@ export default function Page() {
    * handleShare() -> void
    *
    * @description
-   * Handles the share action for the content, displaying a pop up window
-   * with the option to share the content through email copy the share
+   * Handles the share action for the content, copying the share
    * link to the clipboard.
    *
    * @returns void
@@ -322,24 +321,14 @@ export default function Page() {
     // Use Firestore user data if available, otherwise fallback
     const username = user?.username || user?.firstName || user?.email || "Summarizz User"; // Fallback Username
     const shareMessage = `${username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
-    const shareOption = window.prompt(
-      "How do you want to share?\nType '1' to Copy to Clipboard\nType '2' to Share via Email"
-    );
-
-    if (shareOption === "1") {
-      try {
-        await navigator.clipboard.writeText(shareMessage);
-        alert("Message copied to clipboard!");
-      } catch (err) {
-        console.error("Failed to copy: ", err);
-        alert("Failed to copy the message. Please try again.");
-      }
-    } else if (shareOption === "2") {
-      window.location.href = `mailto:?subject=Check out this article&body=${encodeURIComponent(
-        shareMessage
-      )}`;
-    } else {
-      alert("Invalid option. Please choose '1' or '2'.");
+    
+    // Default to copying to clipboard 
+    try {
+      await navigator.clipboard.writeText(shareMessage);
+      console.log("Message copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+      alert("Failed to copy the message. Please try again.");
       return;
     }
 
