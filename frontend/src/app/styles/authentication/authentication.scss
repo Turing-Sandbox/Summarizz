@@ -121,14 +121,25 @@
   background-color: var(--background-color);
   color: var(--text-color);
 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   font-size: 1.1rem;
+}
+
+.auth-oauth-button svg, img {
+  height: 20px;
+  width: 20px;
+  margin-right: 10px;
 }
 
 .auth-oauth-section {
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
+  display: flex;
+  border-top: 1px solid var(--input-border-color);
+  padding-top: 1rem;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
