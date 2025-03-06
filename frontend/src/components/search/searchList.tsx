@@ -61,10 +61,6 @@ const SearchList = () => {
         userStartingPoint: userStartingPoint,
       }
     });
-    if (response.data.documents.length < 5) {
-      setUserDisabled(true);
-      setUserStartingPoint(null);
-    }
 
     console.log(response.data.newStartingPoint);
 
@@ -110,11 +106,6 @@ const SearchList = () => {
         contentStartingPoint: contentStartingPoint
       }
     });
-    if (response.data.documents.length < 5) {
-      setContentDisabled(true);
-      setContentStartingPoint(null);
-      return;
-    }
     console.log(response.data.newStartingPoint);
 
     const newDocuments = response.data.documents;
