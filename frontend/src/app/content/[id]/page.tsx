@@ -48,7 +48,7 @@ export default function Page() {
   const { id } = useParams();
 
   // useAuth Hook for Authentication
-  const { userUID, user: authUser } = useAuth();
+  const { userUID } = useAuth();
 
   // ---------------------------------------
   // -------------- Variables --------------
@@ -71,120 +71,34 @@ export default function Page() {
 
   const hasFetchedData = useRef(false);
   const router = useRouter();
+  const isShared = userUID ? content?.sharedBy?.includes(userUID) : false;
 
-  // EFFECT: Handle Fetching Logged In User
-  useEffect(() => {
-    if (!hasFetchedData.current) {
-      fetchLoggedInUser();
-      getContent();
-      hasFetchedData.current = true;
+  // ---------------------------------------
+  // -------------- Helpers ----------------
+  // ---------------------------------------
+
+  // Normalizes date fields into proper Date objects
+  function normalizeContentDates(contentObj: any): any {
+    if (contentObj.dateCreated) {
+      if (typeof contentObj.dateCreated === "string") {
+        contentObj.dateCreated = new Date(contentObj.dateCreated);
+      } else if (contentObj.dateCreated.seconds) {
+        contentObj.dateCreated = new Date(contentObj.dateCreated.seconds * 1000);
+      }
     }
-  }, []);
-
-  // EFFECT: Handling Fetching Content
-  useEffect(() => {
-    fetchLoggedInUser();
-    getCreatorInfo();
-    if (content) {
-      const sanitizedContent = DOMPurify.sanitize(content.content);
-      setFormatedContent(sanitizedContent);
-
-      const likesCount = content.peopleWhoLiked?.length ?? 0;
-      setLikes(likesCount);
-
-      const userLiked = content.peopleWhoLiked
-        ? content.peopleWhoLiked.includes(userUID || "")
-        : false;
-      setIsLiked(userLiked);
-
-      const userBookmarked = content.bookmarkedBy
-        ? content.bookmarkedBy.includes(userUID || "")
-        : false;
-      setIsBookmarked(userBookmarked);
+    if (contentObj.dateUpdated) {
+      if (typeof contentObj.dateUpdated === "string") {
+        contentObj.dateUpdated = new Date(contentObj.dateUpdated);
+      } else if (contentObj.dateUpdated.seconds) {
+        contentObj.dateUpdated = new Date(contentObj.dateUpdated.seconds * 1000);
+      }
     }
-  }, [content, userUID]);
+    return contentObj;
+  }
 
-  useEffect(() => {
-    console.log("authUser:", authUser);
-    console.log("User following:", user?.following);
-    console.log("Content:", content);
-
-    if (user && user.following && content) {
-      setIsFollowing(user.following?.includes(content.creatorUID));
-    }
-  }, [user, content]);
-
-  /**
-   * getContent() -> void
-   *
-   * @description
-   * Fetches content from the backend using the id provided in the route, this
-   * will fetch { datecreated, creatorUID, title, content, thumbnail, readtime,
-   * likes, peopleWhoLiked, bookmarkedBy } from the backend and set the content
-   * accordingly.
-   *
-   * @returns void
-   */
-  const getContent = async () => {
-    axios
-      .get(`${apiURL}/content/${id}`)
-      .then((res) => {
-        const fetchedContent = res.data;
-        if (fetchedContent.dateCreated && fetchedContent.dateCreated.seconds) {
-          fetchedContent.dateCreated = new Date(
-            fetchedContent.dateCreated.seconds * 1000
-          );
-        } else {
-          fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
-        }
-
-        fetchedContent.id = id;
-
-        setContent(fetchedContent);
-        setBookmarks(fetchedContent.bookmarkedBy?.length || 0);
-
-        setViews(fetchedContent.views);
-
-        if (firstRender) {
-          // Only increment the view count on the first page load, and not rerenders.
-          incrementViews()
-            .then(() => {
-              setViews((fetchedContent.views || 0) + 1);
-            })
-            .catch((error) => {
-              console.error("Failed to increment views:", error);
-            })
-            .finally(() => {
-              setFirstRender(false);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching content:", error);
-      });
-  };
-
-  /**
-   * getUserInfo() -> void
-   *
-   * @description
-   * Fetches user info from the backend using the creatorUID from the content,
-   * this will set the creator accordingly.
-   *
-   * @returns void
-   */
-  const getCreatorInfo = async () => {
-    if (content) {
-      axios
-        .get(`${apiURL}/user/${content.creatorUID}`)
-        .then((res) => {
-          setCreator(res.data);
-        })
-        .catch((error) => {
-          throw Error("Error fetching user info:", error);
-        });
-    }
-  };
+  // ---------------------------------------
+  // -------------- Data Fetching ----------
+  // ---------------------------------------
 
   /**
    * fetchLoggedInuser() -> void
@@ -197,18 +111,95 @@ export default function Page() {
    */
   const fetchLoggedInUser = async () => {
     if (userUID) {
-      axios
-        .get(`${apiURL}/user/${userUID}`)
-        .then((res) => {
-          console.log("Fetched User:", res.data);
-          setUser(res.data);
-        })
-        .catch((error) => {
-          throw Error("Error fetching logged in user:", error);
-        });
+      try {
+        const res = await axios.get(`${apiURL}/user/${userUID}`);
+        setUser(res.data);
+      } catch (error) {
+        console.error("Error fetching logged-in user:", error);
+      }
     }
   };
 
+  // Fetch content data and, if available, its creator data.
+  const fetchContentData = async () => {
+    try {
+      const contentResponse = await axios.get(`${apiURL}/content/${id}`);
+      let fetchedContent = contentResponse.data;
+
+      // Normalize date fields.
+      fetchedContent = normalizeContentDates(fetchedContent);
+      fetchedContent.id = id;
+      setContent(fetchedContent);
+
+      // Update like/bookmark status.
+      if (userUID) {
+        setIsLiked(fetchedContent.peopleWhoLiked?.includes(userUID) || false);
+        setIsBookmarked(fetchedContent.bookmarkedBy?.includes(userUID) || false);
+      }
+
+      // Fetch creator info if available.
+      if (fetchedContent.creatorUID) {
+        const creatorResponse = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+        setCreator(creatorResponse.data);
+      }
+
+      // Increment views only on first page load.
+      if (firstRender) {
+        await incrementViews();
+        setFirstRender(false);
+      }
+    } catch (error) {
+      console.error("Error fetching content or creator:", error);
+    }
+  };
+
+  // ---------------------------------------
+  // -------------- useEffects -------------
+  // ---------------------------------------
+
+  // Fetch logged-in user when userUID changes.
+  useEffect(() => {
+    if (userUID) {
+        fetchLoggedInUser();
+    }
+  }, [userUID]);
+
+  // Fetch content data and creator data on mount or when id/userUID changes.
+  useEffect(() => {
+    fetchContentData();
+  }, [id, userUID]);
+
+  // Sanitize content and update related state whenever content changes.
+  useEffect(() => {
+    if (content) {
+      let rawContent: string;
+      // Use content.content (which is expected to be a string).
+      if (typeof content.content === "string") {
+        rawContent = content.content;
+      } else if (
+        typeof content.content === "object" &&
+        (content.content as any).content
+      ) {
+        // If it accidentally becomes an object, extract the inner value.
+        rawContent = (content.content as any).content;
+      } else {
+        rawContent = "";
+      }
+      const sanitized = DOMPurify.sanitize(rawContent);
+      setFormatedContent(sanitized);
+      setLikes(typeof content.likes === "number" ? content.likes : 0);
+      setViews(content.views || 0);
+      if (userUID) {
+        setIsLiked(content.peopleWhoLiked?.includes(userUID) || false);
+        setIsBookmarked(content.bookmarkedBy?.includes(userUID) || false);
+      }
+    }
+  }, [content, userUID]);
+
+  // ---------------------------------------
+  // -------------- Handlers ---------------
+  // ---------------------------------------
+  
   /**
    * handleDelete() -> void
    *
@@ -269,21 +260,13 @@ export default function Page() {
 
       const action = isLiked ? "unlike" : "like";
       const url = `${apiURL}/content/${id}/${action}/${userUID}`;
+      const response = await axios.post(url, {}, { headers: { "Content-Type": "application/json" }, });
 
-      const response = await axios.post(
-        url,
-        {},
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      // Normalize the response before setting state.
+      const normalizedContent = normalizeContentDates(response.data.content);
+      setContent(normalizedContent);
 
-      const updatedContent = response.data.content;
-      const updatedLikes =
-        typeof updatedContent.likes === "number" ? updatedContent.likes : 0;
-
-      setLikes(updatedLikes);
-      setIsLiked(!isLiked);
+      await fetchContentData();
     } catch (error) {
       console.error("Error liking/unliking content:", error);
     }
@@ -307,15 +290,13 @@ export default function Page() {
 
       const action = isBookmarked ? "unbookmark" : "bookmark";
       const url = `${apiURL}/content/${userUID}/${action}/${id}`;
+      const response = await axios.post(url, {}, { headers: { "Content-Type": "application/json" } });
+      
+      // Normalize the response before setting state.
+      const normalizedContent = normalizeContentDates(response.data.content);
+      setContent(normalizedContent);
 
-      await axios.post(
-        url,
-        {},
-        { headers: { "Content-Type": "application/json" } }
-      );
-      setIsBookmarked(!isBookmarked);
-
-      await getContent();
+      await fetchContentData();
     } catch (error) {
       console.error("Error bookmarking/unbookmarking content:", error);
     }
@@ -325,48 +306,49 @@ export default function Page() {
    * handleShare() -> void
    *
    * @description
-   * Handles the share action for the content, displaying a pop up window
-   * with the option to share the content through email copy the share
+   * Handles the share action for the content, copying the share
    * link to the clipboard.
    *
    * @returns void
    */
   const handleShare = async () => {
     // Check if the user is logged in via AuthProvider
-    if (!authUser) {
+    if (!userUID) {
       console.error("User is not authenticated");
       alert("Please log in to share this article.");
       return;
     }
 
     // Use Firestore user data if available, otherwise fallback
-    const username =
-      user?.username ||
-      authUser.displayName ||
-      authUser.email ||
-      "Summarizz User"; // Fallback Username
-
+    const username = user?.username || user?.firstName || user?.email || "Summarizz User"; // Fallback Username
     const shareMessage = `${username} invites you to read this article! ${window.location.href}\nJoin Summarizz today!`;
-    const shareOption = window.prompt(
-      "How do you want to share?\nType '1' to Copy to Clipboard\nType '2' to Share via Email"
-    );
+    
+    // Default to copying to clipboard 
+    try {
+      await navigator.clipboard.writeText(shareMessage);
+      console.log("Message copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy: ", err);
+      alert("Failed to copy the message. Please try again.");
+      return;
+    }
 
-    if (shareOption === "1") {
-      try {
-        await navigator.clipboard.writeText(shareMessage);
-        incrementShares();
-        alert("Message copied to clipboard!");
-      } catch (err) {
-        console.error("Failed to copy: ", err);
-        alert("Failed to copy the message. Please try again.");
-      }
-    } else if (shareOption === "2") {
-      window.location.href = `mailto:?subject=Check out this article&body=${encodeURIComponent(
-        shareMessage
-      )}`;
-      incrementShares();
-    } else {
-      alert("Invalid option. Please choose '1' or '2'.");
+    // Call the share endpoint.
+    try {
+      const contentId = id;
+      const userId = userUID;
+      const shareResponse = await axios.post(`${apiURL}/content/user/${userId}/share/${contentId}`);
+      console.log("Shared content response:", shareResponse.data.content);
+      // Option 1: Update state from response then re-fetch full content.
+      setContent(shareResponse.data.content);
+      await fetchContentData();
+      // Option 2: Redirect to the user's profile page.
+      // router.push(`/profile/${userUID}`);
+     
+      console.log("Content shared successfully");  
+    } catch (error) {
+      console.error("Error sharing content:", error);
+      alert("Failed to share content. Please try again."); 
     }
   };
 
@@ -384,12 +366,22 @@ export default function Page() {
         console.error("User ID or Creator ID not available");
         return;
       }
-
+  
       const action = isFollowing ? "unfollow" : "follow";
-      const url = `${apiURL}/user/${userUID}/${action}/user/${content.creatorUID}`;
-
-      await axios.post(url);
-      setIsFollowing(!isFollowing);
+      const url = `${apiURL}/user/${userUID}/${action}/${content.creatorUID}`;
+  
+      await axios.post(
+        url,
+        {},
+        { headers: { "Content-Type": "application/json" } }
+      );
+      // After following/unfollowing, re-fetch the creator info.
+      const creatorResponse = await axios.get(`${apiURL}/user/${content.creatorUID}`);
+      setCreator(creatorResponse.data);
+  
+      // Also fetch the logged in user info, as their follow list has changed.
+      fetchLoggedInUser();
+  
     } catch (error) {
       console.error("Error following/unfollowing creator:", error);
     }
@@ -417,24 +409,6 @@ export default function Page() {
       await axios.put(`${apiURL}/content/views/${id}`);
     } catch (error) {
       console.error(error);
-
-      throw error;
-    }
-  };
-
-  /**
-   * incrementShares() -> void
-   *
-   * @description
-   * Increments the number of times the content has been shared.
-   */
-  const incrementShares = async () => {
-    try {
-      await axios.put(`${apiURL}/content/shares/${id}`);
-      await getContent();
-    } catch (error) {
-      console.error(error);
-      throw error;
     }
   };
 
@@ -446,6 +420,7 @@ export default function Page() {
       <Layout>
         <div className='main-content'>
           <div className='row'>
+            {/* Left Column: Thumbnail and Comments */}
             <div className='col-1'>
               {content?.thumbnail && (
                 <Image
@@ -460,7 +435,9 @@ export default function Page() {
               <CommentList />
             </div>
 
+            {/* Right Column: Content Details */}
             <div className='col-2'>
+              {/* Title and Interaction Buttons */}
               <div className='content-title-bar'>
                 <h1 className='content-title'>{content?.title}</h1>
 
@@ -476,34 +453,26 @@ export default function Page() {
                     ) : (
                       <HeartIconOutline className='icon ' />
                     )}
-                    <span
-                      className={`icon counter ${likes > 0 ? "visible" : ""}`}
-                    >
+                    <span className={`icon counter ${likes > 0 ? "visible" : ""}`}>
                       {likes}
                     </span>
                   </button>
 
                   {/* BOOKMARK BUTTON */}
                   <button
-                    className={`icon-button ${
-                      isBookmarked ? "bookmarked" : ""
-                    }`}
+                    className={`icon-button ${isBookmarked ? "bookmarked" : ""}`}
                     onClick={handleBookmark}
                     title={
-                      isBookmarked ? "Unbookmark Content" : "Bookmark Content"
-                    }
+                      isBookmarked ? "Unbookmark Content" : "Bookmark Content"}
                   >
                     {isBookmarked ? (
                       <BookmarkIconSolid className='icon' />
                     ) : (
                       <BookmarkIconOutline className='icon' />
                     )}
-
                     {content?.bookmarkedBy && (
                       <span
-                        className={`icon counter ${
-                          bookmarks > 0 ? "visible" : ""
-                        }`}
+                        className={`icon counter ${bookmarks > 0 ? "visible" : ""}`}
                       >
                         {bookmarks}
                       </span>
@@ -515,13 +484,12 @@ export default function Page() {
                     className='icon-button'
                     onClick={handleShare}
                     title='Share Content'
+                    disabled={isShared}
                   >
                     <ShareIconOutline className='icon' />
                     {content?.shares && (
                       <span
-                        className={`icon counter ${
-                          content.shares > 0 ? "visible" : ""
-                        }`}
+                        className={`icon counter ${content.shares > 0 ? "visible" : ""}`}
                       >
                         {content.shares}
                       </span>
@@ -529,6 +497,7 @@ export default function Page() {
                   </button>
                 </div>
 
+                {/* EDIT & DELETE (Only for Creator) */}
                 {userUID === content?.creatorUID && (
                   <div className='content-interactions'>
                     <div className='icon-container'>
@@ -539,7 +508,6 @@ export default function Page() {
                       >
                         <PencilIconSolid className='icon edit' />
                       </button>
-
                       <button
                         className='icon-button'
                         onClick={handleDelete}
@@ -552,6 +520,7 @@ export default function Page() {
                 )}
               </div>
 
+              {/* Content Header: Info and Creator */}
               <div className='content-header'>
                 <div className='content-info'>
                   {/* LEFT SIDE (VIEW, DATE, READ TIME AND CREATOR) */}
@@ -563,7 +532,7 @@ export default function Page() {
                   <p>{views ? ` ${views} views` : ""}</p>
 
                   <div className='creator-follow-section'>
-                    {/* CLICK IMAGE TO NAVIGATE TO PROFILE */}
+                    {/* CLICK CREATOR IMAGE TO NAVIGATE TO THEIR PROFILE */}
                     <div
                       onClick={() => router.push(`/profile/${creator?.uid}`)}
                     >
@@ -605,6 +574,8 @@ export default function Page() {
                   <p>Article Summary</p>
                 </div>
               </div>
+
+              {/* Render the Main Content */}
               {formatedContent && (
                 <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
               )}

@@ -301,87 +301,150 @@ static async shareContent(contentID: string, userId: string) {
       const userRef = doc(db, "users", userId);
 
       const updatedContent = await runTransaction(db, async (transaction) => {
-          // Get the current content document
-          const contentDoc = await transaction.get(contentRef);
-          if (!contentDoc.exists()) {
-              throw new Error("Content not found");
+        // Step 1: Read all required documents first.
+        const contentDoc = await transaction.get(contentRef);
+        const userDoc = await transaction.get(userRef);
+
+        if (!contentDoc.exists()) {
+            throw new Error("Content not found");
+        }
+        if (!userDoc.exists()) {
+            throw new Error("User not found");
+        }
+
+        const contentData = contentDoc.data() as Content;
+
+        // Step 2: Compute new values.
+        const currentShares = contentData.shares || 0;
+        const sharedBy = contentData.sharedBy || [];
+        
+        let newSharedBy: string[];
+        let updatedShares: number;
+
+        if (!sharedBy.includes(userId)) {
+          // If the user hasn't shared yet, add them and increment.
+          newSharedBy = [...sharedBy, userId];
+          updatedShares = currentShares + 1;
+          // Write updates for content document.
+          transaction.update(contentRef, {
+            sharedBy: newSharedBy,
+            shares: updatedShares,
+          });
+          // Also update the user's sharedContent field.
+          transaction.update(userRef, {
+            sharedContent: arrayUnion(contentID),
+          });
+        } else {
+          // The user has already shared—do not change anything.
+          newSharedBy = sharedBy;
+          updatedShares = currentShares;
+        }
+
+        // Step 3: Construct the updated data manually (without re-reading).
+        const updatedData = {
+          ...contentData,
+          sharedBy: newSharedBy,
+          shares: updatedShares,
+        } as Content;
+  
+        // Normalize date fields.
+        if (updatedData.dateCreated) {
+          if (updatedData.dateCreated instanceof Timestamp) {
+            updatedData.dateCreated = updatedData.dateCreated.toDate();
+          } else if (typeof updatedData.dateCreated === "string") {
+            updatedData.dateCreated = new Date(updatedData.dateCreated);
           }
-          const contentData = contentDoc.data();
-
-          // 1. Add to sharedBy array (if not already present)
-          const sharedBy = contentData.sharedBy || [];
-          if (!sharedBy.includes(userId)) {
-            transaction.update(contentRef, {
-                sharedBy: arrayUnion(userId),
-            });
+        }
+        if (updatedData.dateUpdated) {
+          if (updatedData.dateUpdated instanceof Timestamp) {
+            updatedData.dateUpdated = updatedData.dateUpdated.toDate();
+          } else if (typeof updatedData.dateUpdated === "string") {
+            updatedData.dateUpdated = new Date(updatedData.dateUpdated);
           }
+        }
 
-          // 2. Increment the shares count
-          const currentShares = contentData.shares || 0;
-          transaction.update(contentRef, { shares: currentShares + 1 });
+        return updatedData; 
+      });
 
-          // 3. Update the user's sharedContent
-           transaction.update(userRef, {
-                sharedContent: arrayUnion(contentID),
-            });
-
-            // 4. Fetch the updated document after transaction writes
-           const updatedDoc = await transaction.get(contentRef);
-           if (!updatedDoc.exists) {
-               throw new Error("Content disappeared during transaction!"); 
-           }
-           const updatedData = updatedDoc.data();
-
-           // Convert dates to JavaScript Date objects here
-           if (updatedData && updatedData.dateCreated) {
-             if (updatedData.dateCreated instanceof Timestamp) {
-               // Handle Firestore Timestamp correctly
-               updatedData.dateCreated = updatedData.dateCreated.toDate();
-             } else if (typeof updatedData.dateCreated === 'string') {
-                 updatedData.dateCreated = new Date(updatedData.dateCreated);
-             } else if (!(updatedData.dateCreated instanceof Date)) {
-               updatedData.dateCreated = null; // Or a default date
-             }
-           }
-
-           if (updatedData && updatedData.dateUpdated) { //ALSO FOR DATE UPDATED
-             if (updatedData.dateUpdated instanceof Timestamp) {
-               updatedData.dateUpdated = updatedData.dateUpdated.toDate();
-             } else if (typeof updatedData.dateUpdated === 'string'){
-                 updatedData.dateUpdated = new Date(updatedData.dateUpdated);
-             } else if (!(updatedData.dateUpdated instanceof Date)) {
-               updatedData.dateUpdated = null;
-             }
-           }
-
-           return updatedData; // Return the updated data with converted dates
-       });
-
-       return { content: updatedContent }; // Return the updated content
-
-  } catch (error) {
-      console.error("Error sharing content:", error);
-      throw new Error(error.message || "Failed to share content");
+      return { content: updatedContent }; 
+    } catch (error) {
+        console.error("Error sharing content:", error);
+        throw new Error(error.message || "Failed to share content");
+    }
   }
-}
 
   // Unshare content
   static async unshareContent(contentID: string, userId: string) {
     try {
-       // Get the content document reference
-       const contentRef = doc(db, "contents", contentID);
+      const contentRef = doc(db, "contents", contentID);
+      const userRef = doc(db, "users", userId);
 
-       // Remove this content from the user's shared content list
-       await removeSharedContentFromUser(userId, contentID);
-
-       // Fetch the updated document and return it
-       const updatedContentDoc = await getDoc(contentRef); 
-       const updatedContent = updatedContentDoc.data(); 
-
-       return { content: updatedContent };
+      const updatedContent = await runTransaction(db, async (transaction) => {
+        // Read both documents.
+        const contentDoc = await transaction.get(contentRef);
+        const userDoc = await transaction.get(userRef);
+        
+        if (!contentDoc.exists()) {
+          throw new Error("Content not found");
+        }
+        if (!userDoc.exists()) {
+          throw new Error("User not found");
+        }
+        
+        const contentData = contentDoc.data() as Content;
+        const sharedBy = contentData.sharedBy || [];
+        const currentShares = contentData.shares || 0;
+        
+        let newSharedBy: string[];
+        let updatedShares: number;
+        
+        if (sharedBy.includes(userId)) {
+          // Remove the user from sharedBy and decrement share count.
+          newSharedBy = sharedBy.filter(id => id !== userId);
+          updatedShares = currentShares > 0 ? currentShares - 1 : 0;
+          transaction.update(contentRef, {
+            sharedBy: newSharedBy,
+            shares: updatedShares,
+          });
+          // Also remove the content from user's sharedContent.
+          transaction.update(userRef, {
+            sharedContent: arrayRemove(contentID),
+          });
+        } else {
+          // If the user hadn't shared, nothing changes.
+          newSharedBy = sharedBy;
+          updatedShares = currentShares;
+        }
+        
+        const updatedData = {
+          ...contentData,
+          sharedBy: newSharedBy,
+          shares: updatedShares,
+        } as Content;
+        
+        // Normalize date fields.
+        if (updatedData.dateCreated) {
+          if (updatedData.dateCreated instanceof Timestamp) {
+            updatedData.dateCreated = updatedData.dateCreated.toDate();
+          } else if (typeof updatedData.dateCreated === "string") {
+            updatedData.dateCreated = new Date(updatedData.dateCreated);
+          }
+        }
+        if (updatedData.dateUpdated) {
+          if (updatedData.dateUpdated instanceof Timestamp) {
+            updatedData.dateUpdated = updatedData.dateUpdated.toDate();
+          } else if (typeof updatedData.dateUpdated === "string") {
+            updatedData.dateUpdated = new Date(updatedData.dateUpdated);
+          }
+        }
+        
+        return updatedData;
+      });
+      
+      return { content: updatedContent };
     } catch (error) {
-       console.error("Error unsharing content:", error);
-       throw new Error(error.message || "Failed to unshare content");
+      console.error("Error unsharing content:", error);
+      throw new Error(error.message || "Failed to unshare content");
     }
   }
 
