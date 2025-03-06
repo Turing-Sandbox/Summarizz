@@ -18,7 +18,7 @@ const UserResult = ({ user }: { user: User }) => {
    * @returns void
    */
   const handleClick = () => {
-    router.push(`/user/${user.uid}`);
+    router.push(`/profile/${user.uid}`);
   };
 
   return (
