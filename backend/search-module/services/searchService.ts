@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, query, getDocs, where, startAt, endAt, orderBy, limit, startAfter } from "firebase/firestore";
+import { collection, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
 
 export class SearchService {
 
@@ -15,6 +15,7 @@ export class SearchService {
 		console.log("Searching... (from service)")
 		console.log("Searching for specific users...")
 		const userRef = collection(db, 'users');
+		const limitNumber: number = 5;
 
 		// Create the base user query (no previous query)
 		const userQuery = query(
@@ -22,7 +23,7 @@ export class SearchService {
 			where('usernameLower', '>=', searchText.toLowerCase()),
 			where('usernameLower', '<', searchText.toLowerCase() + '\uf8ff'),
 			orderBy('usernameLower'),
-			limit(5)
+			limit(limitNumber)
 		);
 
 		// If there's a starting point, create a new query starting at that point
@@ -35,12 +36,17 @@ export class SearchService {
 				where('usernameLower', '>=', searchText.toLowerCase()),
 				where('usernameLower', '<', searchText.toLowerCase() + '\uf8ff'),
 				orderBy('usernameLower'),
-				limit(5),
+				limit(limitNumber),
 				startAfter(startingPoint));
 
 			const results = await getDocs(nextUserQuery);
 			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			const nextStartingPoint = results.docs[results.docs.length - 1]?.data().usernameLower;
+			let nextStartingPoint = null;
+
+			if (documents.length >= limitNumber) {
+				// const nextStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
+				nextStartingPoint = results.docs[results.docs.length - 1]?.data().usernameLower;
+			}
 
 			console.log("setting starting point: ", nextStartingPoint)
 			return { documents, nextStartingPoint };
@@ -49,7 +55,12 @@ export class SearchService {
 			console.log("no starting point")
 			const results = await getDocs(userQuery);
 			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			const newStartingPoint = results.docs[results.docs.length - 1]?.data().usernameLower;
+			let newStartingPoint = null;
+
+			if (documents.length >= limitNumber) {
+				// newStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
+				newStartingPoint = results.docs[results.docs.length - 1]?.data().usernameLower;
+			}
 
 			console.log("setting starting point: ", newStartingPoint)
 			return { documents, newStartingPoint };
@@ -69,6 +80,7 @@ export class SearchService {
 		console.log("Searching... (from service)")
 		console.log("Searching for specific content...")
 		const contentRef = collection(db, 'contents');
+		const limitNumber: number = 5;
 
 		// Create the base query
 		const contentQuery = query(
@@ -76,7 +88,7 @@ export class SearchService {
 			where('titleLower', '>=', searchText.toLowerCase()),
 			where('titleLower', '<', searchText.toLowerCase() + '\uf8ff'),
 			orderBy('titleLower'),
-			limit(5)
+			limit(limitNumber)
 		);
 
 		// If there's a starting point, create a new query starting at that point
@@ -88,12 +100,17 @@ export class SearchService {
 				where('titleLower', '>=', searchText.toLowerCase()),
 				where('titleLower', '<', searchText.toLowerCase() + '\uf8ff'),
 				orderBy('titleLower'),
-				limit(5),
+				limit(limitNumber),
 				startAfter(startingPoint));
 
 			const results = await getDocs(nextContentQuery);
 			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			const nextStartingPoint = results.docs[results.docs.length - 1]?.data().titleLower;
+
+			let nextStartingPoint = null;
+			if (documents.length >= limitNumber) {
+				// const nextStartingPoint = results.docs[results.docs.length - 1]?.id;
+				nextStartingPoint = results.docs[results.docs.length - 1]?.data().titleLower;
+			}
 
 			console.log("setting starting point: ", nextStartingPoint)
 			return { documents, nextStartingPoint };
@@ -102,7 +119,12 @@ export class SearchService {
 			console.log("no starting point")
 			const results = await getDocs(contentQuery);
 			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			const newStartingPoint = results.docs[results.docs.length - 1]?.data().titleLower;
+			let newStartingPoint = null;
+
+			if (documents.length >= limitNumber) {
+				// const newStartingPoint = results.docs[results.docs.length - 1]?.id;
+				newStartingPoint = results.docs[results.docs.length - 1]?.data().titleLower;
+			}
 
 			console.log("setting starting point: ", newStartingPoint)
 			return { documents, newStartingPoint };
