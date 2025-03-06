@@ -37,6 +37,10 @@
   flex-direction: column;
 }
 
+.searchResults>h1 {
+  border-bottom: 4px solid var(--icon-hover-color);
+}
+
 .fetchMoreButton {
   text-align: center;
   align-self: center;

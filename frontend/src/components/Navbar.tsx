@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "@/app/styles/navbar.scss";
-import { useAuth } from "../hooks/AuthProvider";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
@@ -11,11 +9,12 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 // Local Files (Import)
 import { useAuth } from "../hooks/AuthProvider";
+import { apiURL } from "@/app/scripts/api";
+import { User } from "@/models/User";
 
 // Stylesheets
 import "@/app/styles/navbar.scss";
-import { apiURL } from "@/app/scripts/api";
-import { User } from "@/models/User";
+import "@/app/styles/navbar.scss";
 
 function Navbar() {
   // ---------------------------------------
