@@ -36,6 +36,10 @@ export default function Page() {
   const [errorEditProfile, setErrorEditProfile] = useState("");
   const [successEditProfile, setSuccessEditProfile] = useState("");
 
+  const [activeTab, setActiveTab] = useState<"password" | "email" | "username">(
+    "password"
+  );
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -593,142 +597,156 @@ export default function Page() {
         {/******************** EDIT CREDENTIALS  ********************/}
         <div className='profile-management-section'>
           <h2>Edit Credentials</h2>
-          <h3>Change Password</h3>
-          <form onSubmit={handleChangePassword}>
-            <div className='input-group'>
-              <label htmlFor='currentPassword'>Current Password</label>
-              <input
-                type='password'
-                id='currentPassword'
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>  
-            
-            <div className='form-group'>
-              <div className='input-group'>
-                <label htmlFor='newPassword'>New Password</label>
-                <input
-                  type='password'
-                  id='newPassword'
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
 
-              <div className='input-group'>
-                <label htmlFor='confirmPassword'>Confirm New Password</label>
-                <input
-                  type='password'
-                  id='confirmPassword'
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-            </div>
-
-            {errorEditPassword && (
-              <p className='error-message'>{errorEditPassword}</p>
-            )}
-            {successEditPassord && (
-              <p className='success-message'>{successEditPassord}</p>
-            )}
-
-            <button type='submit' className='save-button'>
+          {/* TABS */}
+          <div className='tabs'>
+            <button
+              className={
+                "tab first-tab" + (activeTab === "password" ? " active-tab" : "")
+              }
+              onClick={() => setActiveTab("password")}
+            >
               Change Password
             </button>
-          </form>
-
-          <h3>Change Email</h3>
-          <form onSubmit={handleUpdateEmail}>
-            <div className='input-group'>
-              <label htmlFor='newEmail'>New Email</label>
-              <input
-                type='email'
-                id='newEmail'
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-              />
-            </div>
-
-            <div className='input-group'>
-              <label htmlFor='confirmPassword'>Confirm New Password</label>
-              <input
-                type='password'
-                id='confirmPassword'
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {/* {error && <p className='error-message'>{error}</p>}
-            {success && <p className='success-message'>{success}</p>} */}
-
-            <button type='submit' className='save-button'>
-              Change Password
-            </button>
-          </form>
-
-          <h3>Change Email</h3>
-          <form onSubmit={handleUpdateEmail}>
-            <div className='input-group'>
-              <label htmlFor='newEmail'>New Email</label>
-              <input
-                type='email'
-                id='newEmail'
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-              />
-            </div>
-
-            <div className='input-group'>
-              <label htmlFor='currentPassword'>Enter Password</label>
-              <input
-                type='password'
-                id='currentPassword'
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            {errorEditEmail && (
-              <p className='error-message'>{errorEditEmail}</p>
-            )}
-            {successEditEmail && (
-              <p className='success-message'>{successEditEmail}</p>
-            )}
-
-            <button type='submit' className='save-button'>
+            <button
+              className={"tab" + (activeTab === "email" ? " active-tab" : "")}
+              onClick={() => setActiveTab("email")}
+            >
               Change Email
             </button>
-          </form>
-
-          <h3>Change Username</h3>
-          <form onSubmit={handleUpdateUsername}>
-            <div className='input-group'>
-              <label htmlFor='newUsername'>New Username</label>
-              <input
-                type='text'
-                id='newUsername'
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-              />
-            </div>
-
-            {errorEditUsername && (
-              <p className='error-message'>{errorEditUsername}</p>
-            )}
-            {successEditUsername && (
-              <p className='success-message'>{successEditUsername}</p>
-            )}
-
-            <button type='submit' className='save-button'>
+            <button
+              className={
+                "tab last-tab" + (activeTab === "username" ? " active-tab" : "")
+              }
+              onClick={() => setActiveTab("username")}
+            >
               Change Username
             </button>
-          </form>
+          </div>
+
+          {/* PASSWORD */}
+          {activeTab === "password" && (
+            <div className='tab-content'>
+              <h3>Change Password</h3>
+              <form onSubmit={handleChangePassword}>
+                <div className='input-group'>
+                  <label htmlFor='currentPassword'>Current Password</label>
+                  <input
+                    type='password'
+                    id='currentPassword'
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className='form-group'>
+                  <div className='input-group'>
+                    <label htmlFor='newPassword'>New Password</label>
+                    <input
+                      type='password'
+                      id='newPassword'
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <div className='input-group'>
+                    <label htmlFor='confirmPassword'>
+                      Confirm New Password
+                    </label>
+                    <input
+                      type='password'
+                      id='confirmPassword'
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {errorEditPassword && (
+                  <p className='error-message'>{errorEditPassword}</p>
+                )}
+                {successEditPassord && (
+                  <p className='success-message'>{successEditPassord}</p>
+                )}
+
+                <button type='submit' className='save-button'>
+                  Change Password
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* EMAIL */}
+
+          {activeTab === "email" && (
+            <div className='tab-content'>
+              <h3>Change Email</h3>
+              <form onSubmit={handleUpdateEmail}>
+                <div className='input-group'>
+                  <label htmlFor='newEmail'>New Email</label>
+                  <input
+                    type='email'
+                    id='newEmail'
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className='input-group'>
+                  <label htmlFor='currentPassword'>Enter Password</label>
+                  <input
+                    type='password'
+                    id='currentPassword'
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {errorEditEmail && (
+                  <p className='error-message'>{errorEditEmail}</p>
+                )}
+                {successEditEmail && (
+                  <p className='success-message'>{successEditEmail}</p>
+                )}
+
+                <button type='submit' className='save-button'>
+                  Change Email
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* USERNAME */}
+          {activeTab === "username" && (
+            <div className='tab-content'>
+              <h3>Change Username</h3>
+              <form onSubmit={handleUpdateUsername}>
+                <div className='input-group'>
+                  <label htmlFor='newUsername'>New Username</label>
+                  <input
+                    type='text'
+                    id='newUsername'
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                  />
+                </div>
+
+                {errorEditUsername && (
+                  <p className='error-message'>{errorEditUsername}</p>
+                )}
+                {successEditUsername && (
+                  <p className='success-message'>{successEditUsername}</p>
+                )}
+
+                <button type='submit' className='save-button'>
+                  Change Username
+                </button>
+              </form>
+            </div>
+          )}
         </div>
 
         {/******************** DELETE ACCOUNT  ********************/}
