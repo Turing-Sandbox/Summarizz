@@ -88,7 +88,6 @@
     }
   }
 }
-
 .profile {
   &-picture {
     &-container {
@@ -108,28 +107,46 @@
     border-radius: 50%;
     object-fit: cover;
   }
+}
 
-  &-no {
-    &-picture {
-      &-container {
-        width: var(--profile-size);
-        height: var(--profile-size);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        align-items: center;
-      }
+//   &-no {
+//     &-picture {
+//       &-container {
+//         width: var(--profile-size);
+//         height: var(--profile-size);
+//         display: flex;
+//         align-items: center;
+//         justify-content: center;
+//         align-items: center;
+//       }
 
-      font-size: 20px;
-      color: var(--text-color);
-      margin: 0;
-      user-select: none;
-    }
+//       font-size: 20px;
+//       color: var(--text-color);
+//       margin: 0;
+//       user-select: none;
+//     }
 
-    align-items: center;
-    justify-content: center;
-    align-items: center;
-  }
+//     align-items: center;
+//     justify-content: center;
+//     align-items: center;
+//   }
+
+.no-profile-picture-container {
+  width: var(--profile-size);
+  height: var(--profile-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--background-color);
+}
+
+.-no-profile-picture {
+  font-size: 20px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
+  padding: 0;
 }
 
 .menu {
@@ -219,6 +236,7 @@
 }
 
 
+
 .searchBarContainer {
   display: flex;
   flex-direction: row;
@@ -255,3 +273,4 @@
   width: 1.5rem;
   color: var(--text-color);
 }
+

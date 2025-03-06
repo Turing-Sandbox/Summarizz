@@ -10,7 +10,7 @@ import {
   addSharedContentToUser,
   removeSharedContentFromUser,
 } from "../../user-module/services/userService";
-import { StorageService } from "../../storage-module/services/serviceStorage"
+import { StorageService } from "../../storage-module/services/serviceStorage";
 import { Content } from "../models/contentModel";
 
 export class ContentService {
@@ -76,48 +76,35 @@ export class ContentService {
     // }
   }
 
-  static async deleteContentAndThumbnail(user_id: string, content_id: string, filePath: string, fileName: string) {
-    console.log("Deleting content (with thumbnail)...");
-    // Delete content from Firestore
-    console.log(user_id);
-    console.log(content_id);
-    const file_path = `${filePath}/${fileName}`
-    console.log(file_path);
+  static async deleteContent(content_id: string) {
+    console.log("Deleting content...");
 
     try {
-      // delete actual content
+      // 1- Get Content
+      const contentRef = doc(db, "contents", content_id);
+      const contentDoc = await getDoc(contentRef);
+      const contentData = contentDoc.data() as Content;
+
+      // 2- Delete thumbnail
+      const thumbnail = contentData?.thumbnail;
+      if (thumbnail) {
+        await StorageService.deleteFile(thumbnail);
+      }
+
+      // 3- Delete actual content
       await deleteDoc(doc(db, "contents", content_id));
-      // delete thumbnail
-      await StorageService.deleteFile(file_path);
-      // delete content from user
-      await removeContentFromUser(user_id, content_id);
+
+      // 4- Remove content from user list
+      await removeContentFromUser(contentData.creatorUID, content_id);
     } catch (error) {
       console.error("Error! ", error);
-      throw new Error(error)
-    }
-    return "Successfully deleted!";
-  }
-
-  static async deleteContent(user_id: string, content_id: string) {
-    console.log("Deleting content (without thumbnail)...");
-    // Delete content from Firestore
-    console.log(user_id);
-    console.log(content_id);
-
-    try {
-      // delete actual content
-      await deleteDoc(doc(db, "contents", content_id));
-      // remove content from user list
-      await removeContentFromUser(user_id, content_id); // tested. it works
-    } catch (error) {
-      console.error("Error! ", error);
-      throw new Error(error)
+      throw new Error(error);
     }
     return "Successfully deleted!";
   }
 
   static async editContent(content_id: string, data: Partial<Content>) {
-    console.log("Editing content...")
+    console.log("Editing content...");
     console.log(content_id);
     console.log(data);
     data.titleLower = data.title.toLowerCase();
@@ -125,10 +112,10 @@ export class ContentService {
     console.log(data)
     try {
       await updateDoc(doc(db, `contents/${content_id}`), data);
-      console.log("EDIT^^^^^^^^^^^^^^^^^EDIT")
+      console.log("EDIT^^^^^^^^^^^^^^^^^EDIT");
     } catch (error) {
       console.error("Error while editing content! ", error);
-      throw new Error(error)
+      throw new Error(error);
     }
     return "Successfully edited!";
   }
@@ -142,7 +129,6 @@ export class ContentService {
   // Like content
   static async likeContent(contentID: string, userId: string) {
     try {
-      
       // Get the content document from Firestore
       const contentRef = doc(db, "contents", contentID);
       const contentDoc = await getDoc(contentRef);
@@ -162,7 +148,7 @@ export class ContentService {
       // Update the likes count and add the user to the peopleWhoLiked list
       await updateDoc(contentRef, {
         likes: (contentData?.likes ?? 0) + 1, // Increment likes
-        peopleWhoLiked: arrayUnion(userId),  // Add user to the list of people who liked
+        peopleWhoLiked: arrayUnion(userId), // Add user to the list of people who liked
       });
 
       // Add this content to the user's liked content list
@@ -171,12 +157,12 @@ export class ContentService {
       // Fetch the updated document and return it
       const updatedContent = {
         ...contentData,
-        likes: typeof contentData.likes === 'number' ? contentData.likes + 1 : 1, // Ensure likes is always a number
+        likes:
+          typeof contentData.likes === "number" ? contentData.likes + 1 : 1, // Ensure likes is always a number
         peopleWhoLiked: [...contentData.peopleWhoLiked, userId],
       };
 
       return { content: updatedContent }; // Return updated content
-
     } catch (error) {
       console.error("Error liking content:", error);
       throw new Error(error.message || "Failed to like content");
@@ -215,7 +201,6 @@ export class ContentService {
       const updatedContent = updatedContentDoc.data();
 
       return { content: { ...updatedContent, id: contentID } }; // Return updated content with id
-
     } catch (error) {
       console.error("Error unliking content:", error);
       throw new Error(error.message || "Failed to unlike content");
@@ -305,87 +290,150 @@ static async shareContent(contentID: string, userId: string) {
       const userRef = doc(db, "users", userId);
 
       const updatedContent = await runTransaction(db, async (transaction) => {
-          // Get the current content document
-          const contentDoc = await transaction.get(contentRef);
-          if (!contentDoc.exists()) {
-              throw new Error("Content not found");
+        // Step 1: Read all required documents first.
+        const contentDoc = await transaction.get(contentRef);
+        const userDoc = await transaction.get(userRef);
+
+        if (!contentDoc.exists()) {
+            throw new Error("Content not found");
+        }
+        if (!userDoc.exists()) {
+            throw new Error("User not found");
+        }
+
+        const contentData = contentDoc.data() as Content;
+
+        // Step 2: Compute new values.
+        const currentShares = contentData.shares || 0;
+        const sharedBy = contentData.sharedBy || [];
+        
+        let newSharedBy: string[];
+        let updatedShares: number;
+
+        if (!sharedBy.includes(userId)) {
+          // If the user hasn't shared yet, add them and increment.
+          newSharedBy = [...sharedBy, userId];
+          updatedShares = currentShares + 1;
+          // Write updates for content document.
+          transaction.update(contentRef, {
+            sharedBy: newSharedBy,
+            shares: updatedShares,
+          });
+          // Also update the user's sharedContent field.
+          transaction.update(userRef, {
+            sharedContent: arrayUnion(contentID),
+          });
+        } else {
+          // The user has already shared—do not change anything.
+          newSharedBy = sharedBy;
+          updatedShares = currentShares;
+        }
+
+        // Step 3: Construct the updated data manually (without re-reading).
+        const updatedData = {
+          ...contentData,
+          sharedBy: newSharedBy,
+          shares: updatedShares,
+        } as Content;
+  
+        // Normalize date fields.
+        if (updatedData.dateCreated) {
+          if (updatedData.dateCreated instanceof Timestamp) {
+            updatedData.dateCreated = updatedData.dateCreated.toDate();
+          } else if (typeof updatedData.dateCreated === "string") {
+            updatedData.dateCreated = new Date(updatedData.dateCreated);
           }
-          const contentData = contentDoc.data();
-
-          // 1. Add to sharedBy array (if not already present)
-          const sharedBy = contentData.sharedBy || [];
-          if (!sharedBy.includes(userId)) {
-            transaction.update(contentRef, {
-                sharedBy: arrayUnion(userId),
-            });
+        }
+        if (updatedData.dateUpdated) {
+          if (updatedData.dateUpdated instanceof Timestamp) {
+            updatedData.dateUpdated = updatedData.dateUpdated.toDate();
+          } else if (typeof updatedData.dateUpdated === "string") {
+            updatedData.dateUpdated = new Date(updatedData.dateUpdated);
           }
+        }
 
-          // 2. Increment the shares count
-          const currentShares = contentData.shares || 0;
-          transaction.update(contentRef, { shares: currentShares + 1 });
+        return updatedData; 
+      });
 
-          // 3. Update the user's sharedContent
-           transaction.update(userRef, {
-                sharedContent: arrayUnion(contentID),
-            });
-
-            // 4. Fetch the updated document after transaction writes
-           const updatedDoc = await transaction.get(contentRef);
-           if (!updatedDoc.exists) {
-               throw new Error("Content disappeared during transaction!"); 
-           }
-           const updatedData = updatedDoc.data();
-
-           // Convert dates to JavaScript Date objects here
-           if (updatedData && updatedData.dateCreated) {
-             if (updatedData.dateCreated instanceof Timestamp) {
-               // Handle Firestore Timestamp correctly
-               updatedData.dateCreated = updatedData.dateCreated.toDate();
-             } else if (typeof updatedData.dateCreated === 'string') {
-                 updatedData.dateCreated = new Date(updatedData.dateCreated);
-             } else if (!(updatedData.dateCreated instanceof Date)) {
-               updatedData.dateCreated = null; // Or a default date
-             }
-           }
-
-           if (updatedData && updatedData.dateUpdated) { //ALSO FOR DATE UPDATED
-             if (updatedData.dateUpdated instanceof Timestamp) {
-               updatedData.dateUpdated = updatedData.dateUpdated.toDate();
-             } else if (typeof updatedData.dateUpdated === 'string'){
-                 updatedData.dateUpdated = new Date(updatedData.dateUpdated);
-             } else if (!(updatedData.dateUpdated instanceof Date)) {
-               updatedData.dateUpdated = null;
-             }
-           }
-
-           return updatedData; // Return the updated data with converted dates
-       });
-
-       return { content: updatedContent }; // Return the updated content
-
-  } catch (error) {
-      console.error("Error sharing content:", error);
-      throw new Error(error.message || "Failed to share content");
+      return { content: updatedContent }; 
+    } catch (error) {
+        console.error("Error sharing content:", error);
+        throw new Error(error.message || "Failed to share content");
+    }
   }
-}
 
   // Unshare content
   static async unshareContent(contentID: string, userId: string) {
     try {
-       // Get the content document reference
-       const contentRef = doc(db, "contents", contentID);
+      const contentRef = doc(db, "contents", contentID);
+      const userRef = doc(db, "users", userId);
 
-       // Remove this content from the user's shared content list
-       await removeSharedContentFromUser(userId, contentID);
-
-       // Fetch the updated document and return it
-       const updatedContentDoc = await getDoc(contentRef); 
-       const updatedContent = updatedContentDoc.data(); 
-
-       return { content: updatedContent };
+      const updatedContent = await runTransaction(db, async (transaction) => {
+        // Read both documents.
+        const contentDoc = await transaction.get(contentRef);
+        const userDoc = await transaction.get(userRef);
+        
+        if (!contentDoc.exists()) {
+          throw new Error("Content not found");
+        }
+        if (!userDoc.exists()) {
+          throw new Error("User not found");
+        }
+        
+        const contentData = contentDoc.data() as Content;
+        const sharedBy = contentData.sharedBy || [];
+        const currentShares = contentData.shares || 0;
+        
+        let newSharedBy: string[];
+        let updatedShares: number;
+        
+        if (sharedBy.includes(userId)) {
+          // Remove the user from sharedBy and decrement share count.
+          newSharedBy = sharedBy.filter(id => id !== userId);
+          updatedShares = currentShares > 0 ? currentShares - 1 : 0;
+          transaction.update(contentRef, {
+            sharedBy: newSharedBy,
+            shares: updatedShares,
+          });
+          // Also remove the content from user's sharedContent.
+          transaction.update(userRef, {
+            sharedContent: arrayRemove(contentID),
+          });
+        } else {
+          // If the user hadn't shared, nothing changes.
+          newSharedBy = sharedBy;
+          updatedShares = currentShares;
+        }
+        
+        const updatedData = {
+          ...contentData,
+          sharedBy: newSharedBy,
+          shares: updatedShares,
+        } as Content;
+        
+        // Normalize date fields.
+        if (updatedData.dateCreated) {
+          if (updatedData.dateCreated instanceof Timestamp) {
+            updatedData.dateCreated = updatedData.dateCreated.toDate();
+          } else if (typeof updatedData.dateCreated === "string") {
+            updatedData.dateCreated = new Date(updatedData.dateCreated);
+          }
+        }
+        if (updatedData.dateUpdated) {
+          if (updatedData.dateUpdated instanceof Timestamp) {
+            updatedData.dateUpdated = updatedData.dateUpdated.toDate();
+          } else if (typeof updatedData.dateUpdated === "string") {
+            updatedData.dateUpdated = new Date(updatedData.dateUpdated);
+          }
+        }
+        
+        return updatedData;
+      });
+      
+      return { content: updatedContent };
     } catch (error) {
-       console.error("Error unsharing content:", error);
-       throw new Error(error.message || "Failed to unshare content");
+      console.error("Error unsharing content:", error);
+      throw new Error(error.message || "Failed to unshare content");
     }
   }
 
@@ -397,18 +445,17 @@ static async shareContent(contentID: string, userId: string) {
       // Get the content of the document to increment the views
       const contentDoc = await getDoc(contentRef);
       if (!contentDoc.exists()) {
-        throw new Error("Content not found.")
+        throw new Error("Content not found.");
       }
-      const data = contentDoc.data()?.views
-      const views = data || 0
+      const data = contentDoc.data()?.views;
+      const views = data || 0;
       // Update the document with the new number of views
-      await updateDoc(contentRef, { views: views + 1 })
-      return "Successfully incremented view count!"
+      await updateDoc(contentRef, { views: views + 1 });
+      return "Successfully incremented view count!";
     } catch (error) {
       console.error("Error incrementing the view count: ", error);
       throw error;
     }
-
   }
 
   //Increment the number of recorded shares on an article
@@ -425,7 +472,7 @@ static async shareContent(contentID: string, userId: string) {
       const shares = data || 0;
       // Update the document with the new number of shares
       await updateDoc(contentRef, { shares: shares + 1 });
-      return "Successfully incremented share count!"
+      return "Successfully incremented share count!";
     } catch (error) {
       console.error("Error incrementing the share count: ", error);
       throw error;

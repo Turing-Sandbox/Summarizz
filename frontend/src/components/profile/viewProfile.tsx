@@ -34,6 +34,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const [followRequested, setFollowRequested] = useState(false);
   const [sharedContent, setSharedContent] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [tab, setTab] = useState<"created" | "shared">("created");
 
   const { userUID } = useAuth(); // Get logged in user's UID
   const router = useRouter();
@@ -359,28 +360,51 @@ export default function ViewProfile({ id }: ViewProfileProps) {
           </div>
         </div>
 
-        {/* User's Created Content */} 
-        <h2 className='section-title'> 
-          {contents.length === 1 ? "Content" : "Contents"} 
-        </h2> 
-        {contents.length === 0 ? ( 
-          <h3>No content found</h3> 
-        ) : ( 
-          <div className='content-list'> 
-            {contents.map((content, index) => renderContentItem(content, index))} 
-          </div> 
-        )} 
-        
-        {/* User's Shared Content */} 
-        <h3 className="section-title">Shared Content</h3> 
-        {sharedContent.length === 0 ? ( 
-          <h4>No shared content found</h4> 
-        ) : ( 
-          <div className="content-list"> 
-            {sharedContent.map((content, index) => renderContentItem(content, index))} 
-          </div> 
-        )}   
+        {/* Tabs */}
+      <div className="tabs">
+        <button
+          onClick={() => setTab("created")}
+          className={tab === "created" ? "tab-active" : "tab-inactive"}
+        >
+          Created
+        </button>
+        <button
+          onClick={() => setTab("shared")}
+          className={tab === "shared" ? "tab-active" : "tab-inactive"}
+        >
+          Shared
+        </button>
       </div>
+
+      {/* Conditionally Render the Created vs Shared Section */}
+      {tab === "created" && (
+        <>
+          <h2 className="section-title">
+            {contents.length === 1 ? "Content" : "Contents"}
+          </h2>
+          {contents.length === 0 ? (
+            <h3>No content found</h3>
+          ) : (
+            <div className="content-list">
+              {contents.map((content, index) => renderContentItem(content, index))}
+            </div>
+          )}
+        </>
+      )}
+
+      {tab === "shared" && (
+        <>
+          <h3 className="section-title">Shared Content</h3>
+          {sharedContent.length === 0 ? (
+            <h4>No shared content found</h4>
+          ) : (
+            <div className="content-list">
+              {sharedContent.map((content, index) => renderContentItem(content, index))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
     </>
   );
 }

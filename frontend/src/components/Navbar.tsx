@@ -14,7 +14,6 @@ import { User } from "@/models/User";
 
 // Stylesheets
 import "@/app/styles/navbar.scss";
-import "@/app/styles/navbar.scss";
 
 function Navbar() {
   // ---------------------------------------
