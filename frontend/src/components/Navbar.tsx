@@ -86,10 +86,12 @@ function Navbar() {
    * Uses the Next.js router to push the user to the search results page,
    * with the user's input as a url query parameter.
    */
-  const handleSearch = () => {
+  const handleSearch = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
     if (query) {
       // Redirect to the search results page, where the actual searching happens.
-      router.push(`/search?query=${encodeURIComponent(query)}`);
+      // router.push(`/search?query=${encodeURIComponent(query)}`);
+      window.location.href = `/search?query=${encodeURIComponent(query)}`;
     } else {
       alert("You didn't search for anything.")
     }
