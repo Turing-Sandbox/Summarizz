@@ -29,8 +29,8 @@ router.delete("/:uid", deleteUserController); // Delete a user by UID
 router.post("/upload-profile-image", uploadProfileImageController); // Upload Profile Image
 
 // Profile View - Follow/Unfollow User
-router.post("/:userId/follow/user/:targetId", followUserController); // Follow User
-router.post("/:userId/unfollow/user/:targetId", unfollowUserController); // Unfollow User
+router.post("/:userId/follow/:targetId", followUserController); // Follow User
+router.post("/:userId/unfollow/:targetId", unfollowUserController); // Unfollow User
 
 // Profile View - Request Follow for Private Account
 router.post("/:userId/request/:targetId", requestFollowController); // Request Follow
