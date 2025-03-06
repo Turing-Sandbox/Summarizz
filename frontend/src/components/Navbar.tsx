@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "@/app/styles/navbar.scss";
-import { useAuth } from "../hooks/AuthProvider";
+import { useAuth } from "@/hooks/AuthProvider";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";

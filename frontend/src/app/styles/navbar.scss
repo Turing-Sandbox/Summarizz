@@ -86,7 +86,6 @@
     }
   }
 }
-
 .profile {
   &-picture {
     &-container {
@@ -106,23 +105,24 @@
     border-radius: 50%;
     object-fit: cover;
   }
+}
 
-  &-no {
-    &-picture {
-      &-container {
-        width: var(--profile-size);
-        height: var(--profile-size);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+.no-profile-picture-container {
+  width: var(--profile-size);
+  height: var(--profile-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--background-color);
+}
 
-      font-size: 20px;
-      color: var(--text-color);
-      margin: 0;
-      user-select: none;
-    }
-  }
+.-no-profile-picture {
+  font-size: 20px;
+  color: var(--text-color);
+  margin: 0;
+  user-select: none;
+  padding: 0;
 }
 
 .menu {
@@ -174,7 +174,8 @@
     border-radius: 50%;
   }
 
-  &, &-auth {
+  &,
+  &-auth {
     @include toggle-base;
     right: 15px;
     bottom: 10px;
@@ -191,7 +192,8 @@
     top: 2px;
   }
 
-  .slider, .slider-auth {
+  .slider,
+  .slider-auth {
     @include slider-base;
 
     &:before {

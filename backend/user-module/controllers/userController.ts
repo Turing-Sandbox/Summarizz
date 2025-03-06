@@ -195,9 +195,10 @@ export async function changeUsernameController(req: Request, res: Response) {
 export async function deleteUserController(req: Request, res: Response) {
   console.log("Deleting user...");
   const { uid } = req.params;
+  const { password, email } = req.body;
 
   try {
-    await deleteUser(uid);
+    await deleteUser(uid, password, email);
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message || "Failed to delete user" });
