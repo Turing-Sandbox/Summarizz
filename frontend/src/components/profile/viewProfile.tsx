@@ -304,6 +304,12 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
+
+  const followersCount = user?.followers ? user.followers.length : 0;
+  const followingCount = user?.following ? user.following.length : 0;
+  const createdCount = user?.content ? user.content.length : 0;
+  const sharedCount = user?.sharedContent ? user.sharedContent.length : 0;
+
   return (
     <>
       <Navbar />
@@ -353,14 +359,37 @@ export default function ViewProfile({ id }: ViewProfileProps) {
                 />
               </button>
             </div>
+
+            {/* Stats */}
+            <div className="profile-stats">
+              <div className="stat-item">
+                <span className="stat-number">{followersCount}</span>
+                <span className="stat-label">Followers</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{followingCount}</span>
+                <span className="stat-label">Following</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{createdCount}</span>
+                <span className="stat-label">Created</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-number">{sharedCount}</span>
+                <span className="stat-label">Shared</span>
+              </div>
+            </div>   
+
             <p>
               {user?.firstName} {user?.lastName}
             </p>
             <p>{user?.bio}</p>
-          </div>
-        </div>
 
-        {/* Tabs */}
+            
+          </div>
+        </div>      
+
+      {/* Tabs for Created/Shared Content */}
       <div className="tabs">
         <button
           onClick={() => setTab("created")}
