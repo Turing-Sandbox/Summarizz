@@ -44,7 +44,7 @@
 .icon.follow {
   width: 16px; /* Match other icons */
   height: 16px; /* Match other icons */
-  color: #7D7F7C; /* Default gray */
+  color: #7d7f7c; /* Default gray */
 }
 
 .icon.follow.following {
@@ -118,7 +118,7 @@
 }
 
 .icon {
-  width: 16px;  /* Or whatever size you want */
+  width: 16px; /* Or whatever size you want */
   height: 16px;
   color: var(--icon-color); /* Use CSS variables if you have them */
   transition: all ease-out 0.3s;
@@ -130,7 +130,9 @@
 
 /* Specific style for the delete icon's hover state */
 .icon.delete:hover {
-  color: var(--delete-hover-color); /* Use a specific variable for delete hover */
+  color: var(
+    --delete-hover-color
+  ); /* Use a specific variable for delete hover */
 }
 
 /* Tabs container */
@@ -153,22 +155,23 @@
 
   /* Transparent background so it blends with the page */
   background-color: transparent;
-  color: #7D7F7C;
+  color: var(--text-color);
 
   cursor: pointer;
   transition: color 0.3s ease;
+  font-size: 1rem;
 }
 
 /* Active tab styling */
 .tab-active {
   font-weight: bold;
   text-decoration: underline;
-  color: black;
+  color: var(--text-color);
 }
 
 /* Inactive tab styling */
 .tab-inactive:hover {
-  color: black;
+  color: var(--icon-hover-color);
 }
 
 // media queries
