@@ -1,5 +1,6 @@
 .profile-banner {
   display: flex;
+  gap: 1rem;
 }
 
 .profile-banner-image {
@@ -20,7 +21,14 @@
 }
 
 .profile-banner-info {
-  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+ 
+  p {
+    margin: 0;
+    margin-bottom: 0.5rem; /* small gap between paragraphs */
+  }
 }
 
 /* Username and follow button container */
@@ -49,6 +57,31 @@
 
 .icon.follow.following {
   color: black; /* Black when following */
+}
+
+.profile-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;           /* Space between each stat item */
+  margin-bottom: 1.25rem;    /* Spacing below stats */
+  font-family: var(--font-body); 
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* Center number and label horizontally */
+  font-size: 0.7rem;    /* Smaller font size for stats */
+}
+
+.stat-number {
+  font-size: 0.9rem; 
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  color: #7d7f7c;
 }
 
 .section-title {
