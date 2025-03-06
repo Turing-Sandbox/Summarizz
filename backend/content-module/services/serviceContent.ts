@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc } from "firebase/firestore";
+import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc, runTransaction, Timestamp } from "firebase/firestore";
 import {
   addContentToUser,
   removeContentFromUser,
@@ -39,7 +39,8 @@ export class ContentService {
         likes: 0,
         peopleWhoLiked: [],
         bookmarkedBy: [],
-        titleLower: title.toLowerCase()
+        titleLower: title.toLowerCase(),
+        sharedBy: []
       };
 
       const docRef = await addDoc(collection(db, "contents"), newContent);
@@ -141,6 +142,7 @@ export class ContentService {
   // Like content
   static async likeContent(contentID: string, userId: string) {
     try {
+      
       // Get the content document from Firestore
       const contentRef = doc(db, "contents", contentID);
       const contentDoc = await getDoc(contentRef);
@@ -296,53 +298,94 @@ export class ContentService {
     }
   }
 
-  // Share content
-  static async shareContent(contentID: string, userId: string) {
-    try {
-      // Get the content document from Firestore
+  // Share content with all updates in a single transaction
+static async shareContent(contentID: string, userId: string) {
+  try {
       const contentRef = doc(db, "contents", contentID);
-      const contentDoc = await getDoc(contentRef);
+      const userRef = doc(db, "users", userId);
 
-      if (!contentDoc.exists()) {
-        throw new Error("Content not found");
-      }
+      const updatedContent = await runTransaction(db, async (transaction) => {
+          // Get the current content document
+          const contentDoc = await transaction.get(contentRef);
+          if (!contentDoc.exists()) {
+              throw new Error("Content not found");
+          }
+          const contentData = contentDoc.data();
 
-      // Add this content to the user's shared content list
-      await addSharedContentToUser(userId, contentID);
+          // 1. Add to sharedBy array (if not already present)
+          const sharedBy = contentData.sharedBy || [];
+          if (!sharedBy.includes(userId)) {
+            transaction.update(contentRef, {
+                sharedBy: arrayUnion(userId),
+            });
+          }
 
-      // Fetch the updated document and return it
-      const updatedContentDoc = await getDoc(contentRef);
-      const updatedContent = updatedContentDoc.data();
+          // 2. Increment the shares count
+          const currentShares = contentData.shares || 0;
+          transaction.update(contentRef, { shares: currentShares + 1 });
 
-      return { content: updatedContent }; // Return updated content
-    } catch (error) {
+          // 3. Update the user's sharedContent
+           transaction.update(userRef, {
+                sharedContent: arrayUnion(contentID),
+            });
+
+            // 4. Fetch the updated document after transaction writes
+           const updatedDoc = await transaction.get(contentRef);
+           if (!updatedDoc.exists) {
+               throw new Error("Content disappeared during transaction!"); 
+           }
+           const updatedData = updatedDoc.data();
+
+           // Convert dates to JavaScript Date objects here
+           if (updatedData && updatedData.dateCreated) {
+             if (updatedData.dateCreated instanceof Timestamp) {
+               // Handle Firestore Timestamp correctly
+               updatedData.dateCreated = updatedData.dateCreated.toDate();
+             } else if (typeof updatedData.dateCreated === 'string') {
+                 updatedData.dateCreated = new Date(updatedData.dateCreated);
+             } else if (!(updatedData.dateCreated instanceof Date)) {
+               updatedData.dateCreated = null; // Or a default date
+             }
+           }
+
+           if (updatedData && updatedData.dateUpdated) { //ALSO FOR DATE UPDATED
+             if (updatedData.dateUpdated instanceof Timestamp) {
+               updatedData.dateUpdated = updatedData.dateUpdated.toDate();
+             } else if (typeof updatedData.dateUpdated === 'string'){
+                 updatedData.dateUpdated = new Date(updatedData.dateUpdated);
+             } else if (!(updatedData.dateUpdated instanceof Date)) {
+               updatedData.dateUpdated = null;
+             }
+           }
+
+           return updatedData; // Return the updated data with converted dates
+       });
+
+       return { content: updatedContent }; // Return the updated content
+
+  } catch (error) {
       console.error("Error sharing content:", error);
       throw new Error(error.message || "Failed to share content");
-    }
   }
+}
 
   // Unshare content
   static async unshareContent(contentID: string, userId: string) {
     try {
-      // Get the content document from Firestore
-      const contentRef = doc(db, "contents", contentID);
-      const contentDoc = await getDoc(contentRef);
+       // Get the content document reference
+       const contentRef = doc(db, "contents", contentID);
 
-      if (!contentDoc.exists()) {
-        throw new Error("Content not found");
-      }
+       // Remove this content from the user's shared content list
+       await removeSharedContentFromUser(userId, contentID);
 
-      // Remove this content from the user's shared content list
-      await removeSharedContentFromUser(userId, contentID);
+       // Fetch the updated document and return it
+       const updatedContentDoc = await getDoc(contentRef); 
+       const updatedContent = updatedContentDoc.data(); 
 
-      // Fetch the updated document and return it
-      const updatedContentDoc = await getDoc(contentRef);
-      const updatedContent = updatedContentDoc.data();
-
-      return { content: updatedContent }; // Return updated content
+       return { content: updatedContent };
     } catch (error) {
-      console.error("Error unsharing content:", error);
-      throw new Error(error.message || "Failed to unshare content");
+       console.error("Error unsharing content:", error);
+       throw new Error(error.message || "Failed to unshare content");
     }
   }
 

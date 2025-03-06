@@ -39,6 +39,9 @@ import Navbar from "../Navbar";
  * @returns JSX.Element
  */
 export default function CreateContent() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   // State for Editro and Content
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -47,7 +50,7 @@ export default function CreateContent() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSummarizing, setIsSummarizing] = useState(false);
-  const { user, loading } = useAuth();
+  const auth = useAuth();
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -71,7 +74,9 @@ export default function CreateContent() {
     },
   });
 
-  // EFFECT: Handle Setting/Saving Content
+  // ---------------------------------------
+  // ----------- Event Handlers ------------
+  // ---------------------------------------
   useEffect(() => {
     const savedTitle = localStorage.getItem("title");
     const savedContent = Cookies.get("content");
@@ -86,24 +91,9 @@ export default function CreateContent() {
     }
   }, [editor]);
 
-  // EFFECT: Handle User Authentication
-  useEffect(() => {
-    // Only redirect after we know loading is false
-    if (!loading && !user) {
-      router.push("/authentication/login");
-    }
-  }, [user, loading, router]);
-
-  // If the auth state is still loading, show a loading message.
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  // If the user is null after loading, the redirect already happened in useEffect
-  if (!user) {
-    return null;
-  }
-
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
   /**
    * handleThumbnailChange() -> void
    *
@@ -211,14 +201,9 @@ export default function CreateContent() {
       return;
     }
 
-    if (!user) {
-      setError("No user is signed in, please sign in to create content.");
-      return;
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newContent: Record<string, any> = {
-      creatorUID: user.uid,
+      creatorUID: auth.getUserUID(),
       title,
       content,
     };
@@ -274,6 +259,14 @@ export default function CreateContent() {
     }
   }
 
+  // User must be authenticated to create content
+  if (auth.getUserUID() === null || auth.getToken() === null) {
+    router.push("/authentication/login");
+  }
+
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <Navbar />

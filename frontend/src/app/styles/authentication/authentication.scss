@@ -1,7 +1,7 @@
 @use "@/app/styles/colors.scss";
 
-body,
-html {
+.authentication body,
+.authentication html {
   height: 100vh;
   margin: 0;
   flex-direction: column;
@@ -10,12 +10,12 @@ html {
   align-items: center;
 }
 
-p {
+.authentication p {
   user-select: none;
   cursor: default;
 }
 
-a {
+.authentication a {
   cursor: pointer;
   font-weight: bold;
   color: var(--text-color);

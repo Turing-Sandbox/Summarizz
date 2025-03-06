@@ -6,11 +6,12 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/app/lib/firebaseClientConfig";
 import { OAuthButtons } from "./OAuthButtons";
 
 function Register() {
+  // ---------------------------------------
+  // -------------- Variables --------------
+  // ---------------------------------------
   const [error, setError] = useState("");
   const [user, setUser] = useState({
     firstName: "",
@@ -22,8 +23,13 @@ function Register() {
   });
 
   const router = useRouter();
-  const authContext = useAuth();
+  const auth = useAuth();
 
+  // ---------------------------------------
+  // ------------ Event Handler ------------
+  // ---------------------------------------
+
+  // Check if passwords match
   useEffect(() => {
     if (user.password !== user.confirmPassword) {
       setError("Passwords do not match");
@@ -32,51 +38,66 @@ function Register() {
     }
   }, [user.password, user.confirmPassword]);
 
-  // If user is already logged in, redirect to homepage
-  useEffect(() => {
-    if (authContext.user) {
-      router.push("/");
-    }
-  }, [authContext.user, router]);
+  // ---------------------------------------
+  // -------------- Functions --------------
+  // ---------------------------------------
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // 1 - Reset Error Message
     setError("");
 
+    // 2 - Validate user input
     if (user.password !== user.confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    try {
-      const res = await axios.post(`${apiURL}/user/register`, user);
-      if (res.status === 200 || res.status === 201) {
-        const userUID = res.data.userUID;
-        const token = res.data.token;
+    // 3 - Register user
+    axios
+      .post(`${apiURL}/user/register`, user)
+      .then((res) => {
+        if (res.status === 200 || res.status === 201) {
+          const userUID = res.data.userUID;
+          const token = res.data.token;
 
-        // Sign in with Firebase
-        await signInWithEmailAndPassword(auth, user.email, user.password);
+          // 3 - Set User Session (Save Token and User UID)
+          auth.login(token, userUID);
 
-        // Store token and UID
-        authContext.login(token, userUID);
+          // 4 - Redirect to home page
+          router.push("/");
 
-        router.push("/");
-      } else {
-        setError("An error occurred. Please try again.");
-      }
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.error) {
-        setError(error.response.data.error);
-      } else {
-        setError("An error occurred. Please try again.");
-      }
-    }
+          // 5 - Error Handling
+        } else {
+          setError("An error occurred. Please try again.");
+        }
+      })
+      .catch((error) => {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          setError(error.response.data.error);
+        } else {
+          setError("An error occurred. Please try again.");
+        }
+      });
   };
 
+  // Redirect to home page if user is already logged in
+  if (auth.getUserUID() !== null && auth.getToken() !== null) {
+    router.push("/");
+  }
+
+  // --------------------------------------
+  // -------------- Render ----------------
+  // --------------------------------------
   return (
     <>
       <div className='container'>

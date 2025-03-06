@@ -23,6 +23,6 @@ contentRoutes.post("/:contentId/unlike/:userId", ContentController.unlikeContent
 contentRoutes.post("/:userId/bookmark/:contentId", ContentController.bookmarkContent); // Bookmark content
 contentRoutes.post("/:userId/unbookmark/:contentId", ContentController.unbookmarkContent); // Unbookmark content
 
-contentRoutes.post("/:userId/share/:contentId", ContentController.shareContent); // Share content
+contentRoutes.post("/user/:userId/share/:contentId", ContentController.shareContent); // Share content
 contentRoutes.post("/:userId/unshare/:contentId", ContentController.unshareContent); // Unshare content
 export default contentRoutes;

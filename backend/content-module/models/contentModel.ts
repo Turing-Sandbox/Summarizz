@@ -16,4 +16,5 @@ export interface Content {
   views?: number; // Amount of times this page was viewed. This gets populated and updated with each GET request to the content id.
   shares?: number; // Amount of times shared. This gets populated after someone clicks the share icon button.
   titleLower?: string; // Lowercase title, used for sharing.
+  sharedBy?: string[]; // List of user IDs who shared the post
 }

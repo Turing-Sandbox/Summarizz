@@ -1,19 +1,25 @@
 "use client";
 
+import { ReactNode } from "react";
 import AuthProvider from "@/hooks/AuthProvider";
-import "@/app/styles/authentication/authentication.scss";
 import Background from "@/components/Background";
-import Register from "@/components/authentication/Register";
+import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export default function Page() {
+import "@/app/styles/global.scss";
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
   return (
     <>
       <Background />
       <AuthProvider>
-        <div className='authentication'>
-          <Register />
-        </div>
+        <Navbar />
+
+        <div>{children}</div>
 
         <div className='footer'>
           <Footer />
