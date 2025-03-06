@@ -25,7 +25,7 @@
 .auth-box {
   background-color: var(--tile-color);
   box-shadow: 0 0px 25px var(--shadow-color),
-    inset 0 0px 25px var(--shadow-color);
+  inset 0 0px 25px var(--shadow-color);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
@@ -83,6 +83,33 @@
   text-align: left;
 }
 
+.auth-message {
+  color: var(--text-color);
+  font-size: 0.9rem;
+  margin: 1rem 0;
+  text-align: center;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+}
+
+.auth-success {
+  color: #2e7d32;
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 1rem 0;
+  text-align: center;
+  padding: 12px;
+  background-color: rgba(46, 125, 50, 0.1);
+  border-radius: 5px;
+  border-left: 4px solid #2e7d32;
+}
+
+.auth-error-container {
+  text-align: center;
+  width: 100%;
+}
+
 .auth-button {
   width: 100%;
 
@@ -106,6 +133,11 @@
   color: var(--background-color);
 
   cursor: pointer;
+}
+
+.auth-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .auth-oauth-button {
