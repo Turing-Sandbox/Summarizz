@@ -580,6 +580,19 @@ export default function Page() {
               />
             </div>
 
+            {/* Privacy Setting */}
+            <div className="input-group">
+              <label htmlFor="isPrivate">Make Profile Private</label>
+              <input
+                type="checkbox"
+                id="isPrivate"
+                checked={user?.isPrivate || false}
+                onChange={(e) =>
+                  setUser(user ? { ...user, isPrivate: e.target.checked } : null)
+                }
+              />
+            </div>
+
             {errorEditProfile && (
               <p className='error-message'>{errorEditProfile}</p>
             )}

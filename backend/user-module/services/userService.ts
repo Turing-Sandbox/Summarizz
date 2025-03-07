@@ -97,7 +97,7 @@ export async function getUser(uid: string) {
 
 export async function updateUser(
   uid: string,
-  data: Partial<{ email: string; username: string }>
+  data: Partial<{ email: string; username: string; isPrivate: boolean }>
 ) {
   await updateDoc(doc(db, "users", uid), data);
 }
@@ -116,6 +116,7 @@ export async function createUser(
     username: username,
     email: email,
     createdAt: new Date(),
+    isPrivate: false,
   };
 
   await setDoc(doc(db, "users", uid), user);
