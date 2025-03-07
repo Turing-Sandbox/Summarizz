@@ -21,7 +21,7 @@ const ContentResult = ({ content }: { content: Content }) => {
 
   return (
     <div className="contentSearchResults" onClick={handleClick}>
-      <img className="thumbnail" src={content.thumbnail} alt={``} />
+      <img src={content.thumbnail} alt={``} />
       <h1>{content.title}</h1>
     </div>
   );
