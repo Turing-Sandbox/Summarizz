@@ -57,6 +57,7 @@ const SearchList = () => {
    * @returns void
    */
   const fetchUserData = async () => {
+    if (!param) { return; }
 
     if (fetching) {
       alert("Already Fetching!!!!");
@@ -97,8 +98,6 @@ const SearchList = () => {
     } finally {
       setFetching(false)
     }
-
-
   }
 
   /**
@@ -110,6 +109,8 @@ const SearchList = () => {
    * @returns void
    */
   const fetchContentData = async () => {
+    if (!param) { return; }
+
     if (fetching) {
       alert("Already Fetching!!!!");
       return;
