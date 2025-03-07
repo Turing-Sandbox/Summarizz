@@ -4,7 +4,7 @@ import { Content } from "@/models/Content";
 import { useRouter } from "next/navigation";
 
 
-const UserResult = ({ content }: { content: Content }) => {
+const ContentResult = ({ content }: { content: Content }) => {
   const router = useRouter();
 
   /**
@@ -27,4 +27,4 @@ const UserResult = ({ content }: { content: Content }) => {
   );
 };
 
-export default UserResult;
+export default ContentResult;

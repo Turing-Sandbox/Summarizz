@@ -16,6 +16,7 @@ import Navbar from "@/components/Navbar";
 
 //styles
 import "@/app/styles/search/search.scss"
+import Error from "next/error";
 
 const SearchList = () => {
 
@@ -34,6 +35,7 @@ const SearchList = () => {
   const [userStartingPoint, setUserStartingPoint] = useState(null);
   const [contentStartingPoint, setContentStartingPoint] = useState(null);
 
+  const [fetching, setFetching] = useState(false);
 
   // ---------------------------------------
   // -------------- Page INIT --------------
@@ -55,40 +57,48 @@ const SearchList = () => {
    * @returns void
    */
   const fetchUserData = async () => {
-    const response = await axios.get(`${apiURL}/search/users/`, {
-      params: {
-        searchText: param,
-        userStartingPoint: userStartingPoint,
-      }
-    });
 
-    console.log(response.data.newStartingPoint);
-
-    const newDocuments = response.data.documents;
-    // Create a set to easily check if the last query has duplicates
-    const usersSet = new Set(usersReturned.map((doc: { id: string }) => { doc.id }));
-    // Create a get each user document id from the GET response, then check 
-    // for whether at least one is not in the stored user set.
-    const uniqueDocuments = newDocuments.filter((doc: { id: string }) => {
-      return !usersSet.has(doc.id)
-    });
-
-    console.log("returned user documents: ", newDocuments);
-    console.log("stored user documents: ", usersReturned);
-    console.log("usersSet: ", usersSet);
-    console.log("Unique user documents: ", uniqueDocuments);
-
-    // If there are unique documents, update the state
-    if (uniqueDocuments.length > 0) {
-      setUsersReturned(prev => [...prev, ...uniqueDocuments]);
-      // Update the starting point for the next fetch
-      setUserStartingPoint(uniqueDocuments[uniqueDocuments.length - 1].usernameLower);
-    } else {
-      // If no unique documents, disable the button
-      setUserDisabled(true);
+    if (fetching) {
+      alert("Already Fetching!!!!");
+      return;
     }
-    // setUsersReturned(prev => [...prev, ...response.data.documents]);
-    // setUserStartingPoint(response.data.newStartingPoint);
+    setFetching(true)
+
+    try {
+      const response = await axios.get(`${apiURL}/search/users/`, {
+        params: {
+          searchText: param,
+          userStartingPoint: userStartingPoint,
+        }
+      });
+
+      const newDocuments = response.data.documents;
+      // Create a set to easily check if the last query has duplicates
+      const usersSet = new Set(usersReturned.map((doc: { id: string }) => { doc.id }));
+      // Create a get each user document id from the GET response, then check 
+      // for whether at least one is not in the stored user set.
+      const uniqueDocuments = newDocuments.filter((doc: { id: string }) => {
+        return !usersSet.has(doc.id)
+      });
+
+      // If there are unique documents, update the state
+      if (uniqueDocuments.length > 0 && !fetching) {
+        setUsersReturned(prev => [...prev, ...uniqueDocuments]);
+        // Update the starting point for the next fetch
+        setUserStartingPoint(uniqueDocuments[uniqueDocuments.length - 1].usernameLower);
+      } else {
+        // If there are no unique documents, disable the button
+        setUserDisabled(true);
+      }
+    } catch (error: any) {
+      alert(`USER FETCHING ERROR: ${error}`)
+      console.error("User fetching error: ", error)
+      throw new Error(error);
+    } finally {
+      setFetching(false)
+    }
+
+
   }
 
   /**
@@ -100,37 +110,47 @@ const SearchList = () => {
    * @returns void
    */
   const fetchContentData = async () => {
-    const response = await axios.get(`${apiURL}/search/content/`, {
-      params: {
-        searchText: param,
-        contentStartingPoint: contentStartingPoint
+    if (fetching) {
+      alert("Already Fetching!!!!");
+      return;
+    }
+    setFetching(true)
+
+    try {
+      const response = await axios.get(`${apiURL}/search/content/`, {
+        params: {
+          searchText: param,
+          contentStartingPoint: contentStartingPoint
+        }
+      })
+
+      // Obtain the documents from the response data.
+      const newDocuments = response.data.documents;
+      // Create a set to easily check if the last query has duplicates
+      const contentSet = new Set(contentReturned.map((doc: Content) => { doc.id }));
+      // Get each document id from the GET response, then check 
+      // for whether at least one is not in the stored content set.
+      const uniqueDocuments = newDocuments.filter((doc: { id: string }) => {
+        return !contentSet.has(doc.id)
+      });
+
+      // If there are unique documents, update the state
+      if (uniqueDocuments.length > 0 && !fetching) {
+        // Append the new data to the list of stored articles.
+        setContentReturned(prev => [...prev, ...uniqueDocuments]);
+        // Update the starting point for the next fetch.
+        setContentStartingPoint(uniqueDocuments[uniqueDocuments.length - 1].titleLower);
+      } else {
+        // If no unique documents, disable the button.
+        setContentDisabled(true);
       }
-    });
-    console.log(response.data.newStartingPoint);
-
-    const newDocuments = response.data.documents;
-
-    // Create a set to easily check if the last query has duplicates
-    const contentSet = new Set(contentReturned.map((doc: Content) => { doc.id }));
-    // Create a get each document id from the GET response, then check 
-    // for whether at least one is not in the stored content set.
-    const uniqueDocuments = newDocuments.filter((doc: { id: string }) => {
-      return !contentSet.has(doc.id)
-    });
-
-    console.log("returned documents: ", newDocuments);
-    console.log("stored documents: ", contentReturned);
-    console.log("contentSet: ", contentSet);
-    console.log("Unique documents: ", uniqueDocuments);
-
-    // If there are unique documents, update the state
-    if (uniqueDocuments.length > 0) {
-      setContentReturned(prev => [...prev, ...uniqueDocuments]);
-      // Update the starting point for the next fetch
-      setContentStartingPoint(uniqueDocuments[uniqueDocuments.length - 1].titleLower);
-    } else {
-      // If no unique documents, disable the button
-      setContentDisabled(true);
+    } catch (error: any) {
+      alert(`CONTENT ERROR ${error}`)
+      console.error("Error fetching contents: ", error)
+      throw new Error(error)
+    } finally {
+      alert("Setting CONTENT \"fetching\" To False")
+      setFetching(false)
     }
   }
 

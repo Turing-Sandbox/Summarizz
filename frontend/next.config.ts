@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
     includePaths: [path.join(__dirname, "styles")],
     silenceDeprecations: ["legacy-js-api"],
   },
+  reactStrictMode: false,
 };
 
 export default nextConfig;
