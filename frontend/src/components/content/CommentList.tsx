@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/hooks/AuthProvider";
+import { Comment } from "@/models/Comment";
 import { redirect, useParams } from "next/navigation";
 import {
   PencilIcon,

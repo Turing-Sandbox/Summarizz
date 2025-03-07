@@ -39,6 +39,7 @@ export class ContentService {
         likes: 0,
         peopleWhoLiked: [],
         bookmarkedBy: [],
+        titleLower: title.toLowerCase(),
         sharedBy: []
       };
 
@@ -106,6 +107,9 @@ export class ContentService {
     console.log("Editing content...");
     console.log(content_id);
     console.log(data);
+    data.titleLower = data.title.toLowerCase();
+    console.log(data.titleLower)
+    console.log(data)
     try {
       await updateDoc(doc(db, `contents/${content_id}`), data);
       console.log("EDIT^^^^^^^^^^^^^^^^^EDIT");

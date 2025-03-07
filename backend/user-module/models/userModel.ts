@@ -17,4 +17,5 @@ export interface User {
   following?: string[]; // Optional followed creators
   followers?: string[]; // Optional followed by users
   sharedContent?: string[]; // Optional shared content
+  usernameLower?: string; // Field for lowercase username, used for search queries.
 }

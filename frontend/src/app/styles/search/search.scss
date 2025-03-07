@@ -1,0 +1,57 @@
+.userSearchResults,
+.contentSearchResults {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+}
+
+.userSearchResults>h1,
+.contentSearchResults>h1 {
+  display: inline;
+  width: fit-content;
+  cursor: pointer;
+  margin-left: 2rem;
+}
+
+
+.userSearchResults>img,
+.contentSearchResults>img {
+  width: 5rem;
+  min-height: 5rem;
+  margin-top: 0.5rem;
+  border-radius: 15px;
+  background-color: var(--comment-background-color);
+  border: 6px solid var(--input-border-color);
+}
+
+.searchItem {
+  list-style-type: none;
+}
+
+.searchResults {
+  background-color: var(--tile-color);
+  padding-inline: 2rem;
+  padding-block: 1rem;
+  border-radius: 2rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchResults>h1 {
+  border-bottom: 4px solid var(--icon-hover-color);
+}
+
+.fetchMoreButton {
+  text-align: center;
+  align-self: center;
+  height: 3rem;
+  color: var(--text-color);
+  background-color: var(--tile-color);
+  border: 3px solid var(--input-border-color);
+  border-radius: 15px;
+  font-size: x-large;
+}
+
+.fetchMoreButton:disabled {
+  display: none;
+}
