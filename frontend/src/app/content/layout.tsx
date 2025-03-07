@@ -19,7 +19,7 @@ export default function Layout({ children }: LayoutProps) {
 
       <div>{children}</div>
 
-      <div className='footer' id="layout-footer">
+      <div className='footer'>
         <Footer />
       </div>
     </>
