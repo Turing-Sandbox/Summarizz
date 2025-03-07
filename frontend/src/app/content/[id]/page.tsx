@@ -29,7 +29,6 @@ import {
 
 // Styles
 import "@/app/styles/content/viewContent.scss";
-import Layout from "../layout";
 
 /**
  * Page() -> JSX.Element
@@ -423,7 +422,6 @@ export default function Page() {
   // --------------------------------------
   return (
     <>
-      <Layout>
         <div className='main-content'>
           <div className='row'>
             {/* Left Column: Thumbnail and Comments */}
@@ -578,10 +576,10 @@ export default function Page() {
               {formatedContent && (
                 <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
               )}
+
             </div>
           </div>
         </div>
-      </Layout>
     </>
   );
 }

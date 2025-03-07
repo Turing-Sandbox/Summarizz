@@ -4,7 +4,6 @@
 import AuthProvider from "@/hooks/AuthProvider";
 import EditContent from "../../../../components/content/editContent";
 import Background from "@/components/Background";
-import Footer from "@/components/Footer";
 
 /**
  * Page() -> JSX.Element
@@ -21,10 +20,6 @@ export default function Page() {
       <Background />
       <AuthProvider>
         <EditContent />
-
-        <div className='footer'>
-          <Footer />
-        </div>
       </AuthProvider>
     </>
   );
