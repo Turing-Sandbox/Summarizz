@@ -6,16 +6,11 @@ from langchain.schema import (
 )
 from langchain_core.language_models import BaseChatModel
 
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
 from config.rich_logging import logger as log
 from config.llm_config import Providers, ProviderConfig
 from models.prompt import DEFAULT_SYSTEM_PROMPT, DEFAULT_USER_PROMPT_FORMAT
 
-
+# TODO: Fix LCSummarizerAI Class & Functionality
 class LCSummarizerAI:
     def __init__(self, provider: Providers, model: Optional[str] = None):
         self.provider = provider
@@ -24,10 +19,10 @@ class LCSummarizerAI:
         self.llm = self._initialize_llm()
 
     def _get_provider_config(self) -> ProviderConfig:
-        if self.provider not in PROVIDER_CONFIG:
+        if self.provider not in ProviderConfig:
             raise ValueError(f"Unsupported provider: {self.provider}")
 
-        return PROVIDER_CONFIG[self.provider]
+        return ProviderConfig[self.provider]
 
     def _initialize_llm(self) -> BaseChatModel:
         try:

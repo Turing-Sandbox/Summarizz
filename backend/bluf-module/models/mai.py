@@ -1,8 +1,3 @@
-import os
-import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
 from lib.constants import OPENROUTER_API_KEY
 from config.rich_logging import logger as log
 from models.prompt import Prompt, Params
@@ -35,7 +30,6 @@ class Mai:
                  f"and estimate tokens: {len(input_text.split())}")
 
         try:
-            # TODO: Improve content for model (use prompting techniques)
             response = self.client.chat.completions.create(
                 model=model or "meta-llama/llama-3.1-8b-instruct:free",
                 messages=[

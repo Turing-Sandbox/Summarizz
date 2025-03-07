@@ -1,19 +1,14 @@
-import os
-import sys
 import datetime
 from typing import Optional
 
 from config.llm_config import Models, PROVIDER_CONFIG
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from config.rich_logging import logger as log
 from config.langchain_ai import LCSummarizerAI
 from config.llm_config import Providers, ProviderConfig
 from models.mai import Mai
 from models.prompt import Prompt, Params
 from lib.sanitizer import sanitize_text
-from validator.response import success_response, error_response
+from .validator.response import success_response, error_response
 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address

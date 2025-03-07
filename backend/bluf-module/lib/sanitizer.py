@@ -1,6 +1,7 @@
 import re
 import unicodedata
 from urllib.parse import unquote
+
 from config.rich_logging import logger as log
 
 HTML_REGEX = re.compile("<.*?>")

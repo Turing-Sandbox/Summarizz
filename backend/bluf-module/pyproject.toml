@@ -1,10 +1,9 @@
 [tool.poetry]
 name = "bluf-module"
-version = "1.0.1"
-package-mode = false
+version = "1.0.2"
 description = "Summarizer API for Summarizz and all related entities"
 authors = ["Muhammad Bilal Khan <@Hi-kue>"]
-license = "MIT"
+license = "GNU GPLv3"
 
 [tool.poetry.dependencies]
 python=">=3.9,<4.0"
@@ -25,6 +24,7 @@ langchain-together = "^0.3.0"
 langchain-groq = "^0.2.4"
 langchain-mistralai = "^0.2.6"
 poetry-core = "^2.1.0"
+flask-smorest = "^0.45.0"
 
 [build-system]
 requires = ["poetry-core"]

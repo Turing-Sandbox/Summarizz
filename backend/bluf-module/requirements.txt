@@ -1,5 +1,6 @@
 flask-cors
 flask-limiter
+flask-smorest
 flask
 rich
 pydantic

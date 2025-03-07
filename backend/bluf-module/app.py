@@ -1,18 +1,12 @@
-# External Dependencies (Imports)
-from flask import Flask, make_response, request, Response
-from flask_cors import CORS
-
-# Internal Dependencies (Imports)
-import os
-import sys
 import datetime
 import logging
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from .config.rich_logging import logger as log
+from .blueprints.general import general_bp
+from .blueprints.summarize import summary_bp
 
-from config.rich_logging import logger as log
-from blueprints.general import general_bp
-from blueprints.summarize import summary_bp
+from flask import Flask, make_response, request, Response
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.logger.handlers = log.handlers

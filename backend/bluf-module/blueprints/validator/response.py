@@ -1,8 +1,13 @@
-from typing import Dict, Any, Tuple, Optional
-from flask import jsonify, Response
+import os
+import sys
 import datetime
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from config.rich_logging import logger as log
+
+from typing import Dict, Any, Tuple, Optional
+from flask import jsonify, Response
 
 def error_response(error_message: str, status_code: int = 400) -> Tuple[Response, int] | None:
    try:

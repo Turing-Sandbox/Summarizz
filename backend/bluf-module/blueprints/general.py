@@ -1,9 +1,4 @@
-import os
-import sys
 import datetime
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from config.rich_logging import logger as log
 
 from flask import jsonify, Response

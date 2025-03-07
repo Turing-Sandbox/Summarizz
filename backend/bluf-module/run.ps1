@@ -1,1 +1,1 @@
-flask run --reload
+flask --app app:app run --reload
