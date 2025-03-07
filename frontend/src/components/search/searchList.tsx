@@ -149,7 +149,6 @@ const SearchList = () => {
       console.error("Error fetching contents: ", error)
       throw new Error(error)
     } finally {
-      alert("Setting CONTENT \"fetching\" To False")
       setFetching(false)
     }
   }

@@ -16,11 +16,11 @@
 
 .userSearchResults>img,
 .contentSearchResults>img {
-  max-width: 5rem;
-  min-width: 4rem;
-  min-height: 3rem;
+  width: 5rem;
+  min-height: 5rem;
+  margin-top: 0.5rem;
   border-radius: 15px;
-  background-color: var(--tile-color);
+  background-color: var(--comment-background-color);
   border: 6px solid var(--input-border-color);
 }
 
