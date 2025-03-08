@@ -14,15 +14,18 @@ import {
 
 export class SearchService {
   private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;
-  private static readonly ALGOLIA_INDEX_NAME = "contents";
+  private static readonly ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME;
 
   private static getAlgoliaClient() {
-    if (!this.algoliaClient) {
-      const ALGOLIA_APP_ID = "8F81LZVEMB";
-      const ALGOLIA_ADMIN_KEY = "b6d95c4b470a24c70cfc547807a53f3c";
-      this.algoliaClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
+    if (!SearchService.algoliaClient) {
+      const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
+      const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY;
+      SearchService.algoliaClient = algoliasearch(
+        ALGOLIA_APP_ID,
+        ALGOLIA_ADMIN_KEY
+      );
     }
-    return this.algoliaClient;
+    return SearchService.algoliaClient;
   }
 
   /**
