@@ -309,6 +309,7 @@ export default function ViewProfile({ id }: ViewProfileProps) {
   const followingCount = user?.following ? user.following.length : 0;
   const createdCount = user?.content ? user.content.length : 0;
   const sharedCount = user?.sharedContent ? user.sharedContent.length : 0;
+  const canViewFullProfile = !user?.isPrivate || userUID === id;
 
   return (
     <>
@@ -359,26 +360,32 @@ export default function ViewProfile({ id }: ViewProfileProps) {
                 />
               </button>
             </div>
-
-            {/* Stats */}
-            <div className="profile-stats">
-              <div className="stat-item">
-                <span className="stat-number">{followersCount}</span>
-                <span className="stat-label">Followers</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{followingCount}</span>
-                <span className="stat-label">Following</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{createdCount}</span>
-                <span className="stat-label">Created</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{sharedCount}</span>
-                <span className="stat-label">Shared</span>
-              </div>
-            </div>   
+            
+            {canViewFullProfile ? (
+              <>
+                {/* Stats */}
+                <div className="profile-stats">
+                  <div className="stat-item">
+                    <span className="stat-number">{followersCount}</span>
+                    <span className="stat-label">Followers</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{followingCount}</span>
+                    <span className="stat-label">Following</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{createdCount}</span>
+                    <span className="stat-label">Created</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-number">{sharedCount}</span>
+                    <span className="stat-label">Shared</span>
+                  </div>
+                </div> 
+              </>  
+            ) : (
+              <p>This account is private.</p>
+            )}
 
             <p>
               {user?.firstName} {user?.lastName}
@@ -424,12 +431,16 @@ export default function ViewProfile({ id }: ViewProfileProps) {
       {tab === "shared" && (
         <>
           <h3 className="section-title">Shared Content</h3>
-          {sharedContent.length === 0 ? (
-            <h4>No shared content found</h4>
+                {canViewFullProfile ? (
+            sharedContent.length === 0 ? (
+              <h4>No shared content found</h4>
+            ) : (
+              <div className="content-list">
+                {sharedContent.map((content, index) => renderContentItem(content, index))}
+              </div>
+            )
           ) : (
-            <div className="content-list">
-              {sharedContent.map((content, index) => renderContentItem(content, index))}
-            </div>
+            <p>This account is private.</p>
           )}
         </>
       )}

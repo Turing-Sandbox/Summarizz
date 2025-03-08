@@ -97,7 +97,7 @@ export async function getUser(uid: string) {
 
 export async function updateUser(
   uid: string,
-  data: Partial<{ email: string; username: string; usernameLower: string }>
+  data: Partial<{ email: string; username: string; isPrivate: boolean; usernameLower: string }>
 ) {
   data.usernameLower = data.username.toLowerCase();
   console.log(`updating user ${data.username}: ${JSON.stringify(data)}`)
@@ -118,6 +118,7 @@ export async function createUser(
     username: username,
     email: email,
     createdAt: new Date(),
+    isPrivate: false,
     usernameLower: username.toLowerCase(),
   };
 
