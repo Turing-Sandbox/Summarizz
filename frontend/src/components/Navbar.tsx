@@ -14,6 +14,8 @@ import { User } from "@/models/User";
 
 // Stylesheets
 import "@/app/styles/navbar.scss";
+import SearchList from "./search/searchList";
+import { Content } from "@/models/Content";
 
 function Navbar() {
   // ---------------------------------------
@@ -22,9 +24,15 @@ function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>();
+  const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const [userSearchResults, setUserSearchResults] = useState<User[]>([]);
+  const [contentSearchResults, setContentSearchResults] = useState<Content[]>(
+    []
+  );
 
   const auth = useAuth();
   const router = useRouter();
@@ -78,7 +86,6 @@ function Navbar() {
     localStorage.setItem("isDarkMode", isDarkMode ? "false" : "true");
   };
 
-
   /**
    * handleSearch() -> void
    *
@@ -86,16 +93,39 @@ function Navbar() {
    * Uses the Next.js router to push the user to the search results page,
    * with the user's input as a url query parameter.
    */
-  const handleSearch = (e: { preventDefault: () => void; }) => {
+  const handleSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (query) {
       // Redirect to the search results page, where the actual searching happens.
       // router.push(`/search?query=${encodeURIComponent(query)}`);
-      window.location.href = `/search?query=${encodeURIComponent(query)}`;
+      // window.location.href = `/search?query=${encodeURIComponent(query)}`;
+
+      const userSearchResults = await axios.get(`${apiURL}/search/users/`, {
+        params: {
+          searchText: query,
+        },
+      });
+
+      const contentSearchResults = await axios.get(
+        `${apiURL}/search/content/`,
+        {
+          params: {
+            searchText: query,
+          },
+        }
+      );
+
+      setUserSearchResults(userSearchResults.data.documents);
+      setContentSearchResults(contentSearchResults.data.documents);
+
+      console.log(userSearchResults);
+      console.log(contentSearchResults);
+
+      setShowSearchResults(true);
     } else {
-      alert("You didn't search for anything.")
+      alert("You didn't search for anything.");
     }
-  }
+  };
 
   const updateAuthenticated = () => {
     setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
@@ -128,9 +158,26 @@ function Navbar() {
         {/* Create New Content */}
         {authenticated ? (
           <>
-            <form onSubmit={handleSearch} className="searchBarContainer">
-              <input type="text" className="searchBar" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search for something!" required />
-              <button className="searchButton"><MagnifyingGlassIcon /></button>
+            <form onSubmit={handleSearch} className='searchBarContainer'>
+              <input
+                type='text'
+                className='searchBar'
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder='Search for something!'
+                required
+              />
+              <button className='searchButton'>
+                <MagnifyingGlassIcon />
+              </button>
+              {showSearchResults && (
+                <div className='nav-searchResults'>
+                  <SearchList
+                    userSearchResults={userSearchResults}
+                    contentSearchResults={contentSearchResults}
+                  />
+                </div>
+              )}
             </form>
 
             <button

@@ -1,57 +1,80 @@
+@mixin glassmorphic-background {
+  background-color: var(--tile-color);
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
 .userSearchResults,
 .contentSearchResults {
   display: flex;
   flex-direction: row;
   cursor: pointer;
+
+  &:hover {
+    background-color: var(--tile-color);
+    box-shadow: 0 0px 25px var(--shadow-color),
+      inset 0 0px 25px var(--shadow-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border-radius: 10px;
+  }
 }
 
-.userSearchResults>h1,
-.contentSearchResults>h1 {
-  display: inline;
-  width: fit-content;
-  cursor: pointer;
-  margin-left: 2rem;
-}
-
-
-.userSearchResults>img,
-.contentSearchResults>img {
-  width: 5rem;
-  min-height: 5rem;
-  margin-top: 0.5rem;
-  border-radius: 15px;
-  background-color: var(--comment-background-color);
-  border: 6px solid var(--input-border-color);
+.userSearchResults {
+  margin: 10px 0;
+  padding: 0px;
 }
 
 .searchItem {
   list-style-type: none;
 }
 
-.searchResults {
-  background-color: var(--tile-color);
-  padding-inline: 2rem;
-  padding-block: 1rem;
-  border-radius: 2rem;
-  display: flex;
-  flex-direction: column;
+.search-content-thumbnail {
+  width: 200px;
+  height: 100px;
+  margin: 10px 10px 10px 0;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: var(--input-border-color);
 }
 
-.searchResults>h1 {
-  border-bottom: 4px solid var(--icon-hover-color);
+.searchResults {
+  @include glassmorphic-background;
+  padding: 20px 40px;
+  border-radius: 25px;
+  margin-bottom: 30px;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .fetchMoreButton {
-  text-align: center;
-  align-self: center;
-  height: 3rem;
+  width: 100%;
+
+  margin: 1rem auto;
+  padding: 15px;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
   color: var(--text-color);
-  background-color: var(--tile-color);
-  border: 3px solid var(--input-border-color);
-  border-radius: 15px;
-  font-size: x-large;
+
+  cursor: pointer;
 }
 
-.fetchMoreButton:disabled {
-  display: none;
+.fetchMoreButton:hover {
+  background-color: var(--input-border-color);
+  color: var(--text-color);
+}
+
+.fetchMoreButton:active {
+  background-color: var(--input-border-color);
+  color: var(--text-color);
+  transform: scale(0.95);
 }

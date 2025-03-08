@@ -2,12 +2,10 @@
 
 import { User } from "@/models/User";
 import { useRouter } from "next/navigation";
-import "@/app/styles/navbar.scss"
-
+import "@/app/styles/navbar.scss";
 
 const UserResult = ({ user }: { user: User }) => {
   const router = useRouter();
-
 
   /**
    * handleClick() -> void
@@ -22,8 +20,7 @@ const UserResult = ({ user }: { user: User }) => {
   };
 
   return (
-    <div className="userSearchResults" onClick={handleClick}>
-
+    <div className='userSearchResults' onClick={handleClick}>
       <div className='profile-picture-container'>
         {user && user.profileImage ? (
           <img
@@ -42,7 +39,9 @@ const UserResult = ({ user }: { user: User }) => {
         )}
       </div>
 
-      <h1>{user.firstName} {user.lastName}</h1>
+      <h3>
+        {user.firstName} {user.lastName}
+      </h3>
     </div>
   );
 };
