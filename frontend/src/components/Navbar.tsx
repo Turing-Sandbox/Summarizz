@@ -1,14 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "@/app/styles/navbar.scss";
-import { useAuth } from "@/hooks/AuthProvider";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+
+// Local Files (Import)
+import { useAuth } from "../hooks/AuthProvider";
 import { apiURL } from "@/app/scripts/api";
 import { User } from "@/models/User";
+
+// Stylesheets
+import "@/app/styles/navbar.scss";
 
 function Navbar() {
   // ---------------------------------------
@@ -16,6 +21,8 @@ function Navbar() {
   // ---------------------------------------
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [userInfo, setUserInfo] = useState<User | null>(null);
+  const [query, setQuery] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>();
 
@@ -71,6 +78,25 @@ function Navbar() {
     localStorage.setItem("isDarkMode", isDarkMode ? "false" : "true");
   };
 
+
+  /**
+   * handleSearch() -> void
+   *
+   * @description
+   * Uses the Next.js router to push the user to the search results page,
+   * with the user's input as a url query parameter.
+   */
+  const handleSearch = (e: { preventDefault: () => void; }) => {
+    e.preventDefault();
+    if (query) {
+      // Redirect to the search results page, where the actual searching happens.
+      // router.push(`/search?query=${encodeURIComponent(query)}`);
+      window.location.href = `/search?query=${encodeURIComponent(query)}`;
+    } else {
+      alert("You didn't search for anything.")
+    }
+  }
+
   const updateAuthenticated = () => {
     setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
   };
@@ -102,6 +128,11 @@ function Navbar() {
         {/* Create New Content */}
         {authenticated ? (
           <>
+            <form onSubmit={handleSearch} className="searchBarContainer">
+              <input type="text" className="searchBar" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search for something!" required />
+              <button className="searchButton"><MagnifyingGlassIcon /></button>
+            </form>
+
             <button
               className='navbar-button'
               onClick={() => {

@@ -6,6 +6,7 @@ import cors from "cors";
 import contentRoutes from "../content-module/routes/contentRoutes";
 import userRoutes from "../user-module/routes/userRoutes";
 import commentRoutes from "../comment-module/routes/commentRoutes";
+import searchRoutes from "../search-module/routes/searchRoutes";
 import oauthRoutes from "../user-module/routes/oauthRoutes";
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use("/comment", commentRoutes);
 app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
+app.use("/search", searchRoutes);
 app.use("/oauth", oauthRoutes);
 
 // Middleware to log all requests
