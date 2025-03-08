@@ -25,11 +25,11 @@ export class SearchController {
 		const query: Record<string, any> = req.query;
 
 		const searchText = query.searchText;
-		const contentStartingPoint = query.contentStartingPoint;
+		// const contentStartingPoint = query.contentStartingPoint;
 
 		console.log("searching content")
 		try {
-			const response = await SearchService.searchContent(searchText, contentStartingPoint);
+			const response = await SearchService.searchContent(searchText);
 			res.status(200).json(response);
 		} catch (error) {
 			console.error(`Error searching: ${error}`);

@@ -1,137 +1,155 @@
+import algoliasearch from "algoliasearch";
 import { db } from "../../shared/firebaseConfig";
-import { collection, query, getDocs, where, orderBy, limit, startAfter } from "firebase/firestore";
+import {
+  collection,
+  query,
+  getDocs,
+  where,
+  orderBy,
+  limit,
+  startAfter,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 
 export class SearchService {
+  private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;
+  private static readonly ALGOLIA_INDEX_NAME = "contents";
 
-	/**
-	 * searchUsers(searchText: string, startingPoint:string)
-	 *
-	 * @description
-	 * Fetches 5 users at a time where their username matches or starts with the text provided to the search query.
-	 * If a starting point is provided, the search query starts from the provided starting point. 
-	 *
-	 */
-	static async searchUsers(searchText: string, startingPoint = null) {
-		console.log("Searching... (from service)")
-		console.log("Searching for specific users...")
-		const userRef = collection(db, 'users');
-		const limitNumber: number = 5;
+  private static getAlgoliaClient() {
+    if (!this.algoliaClient) {
+      const ALGOLIA_APP_ID = "8F81LZVEMB";
+      const ALGOLIA_ADMIN_KEY = "b6d95c4b470a24c70cfc547807a53f3c";
+      this.algoliaClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
+    }
+    return this.algoliaClient;
+  }
 
-		// Create the base user query (no previous query)
-		const userQuery = query(
-			userRef,
-			where('usernameLower', '>=', searchText.toLowerCase()),
-			where('usernameLower', '<', searchText.toLowerCase() + '\uf8ff'),
-			orderBy('usernameLower'),
-			limit(limitNumber)
-		);
+  /**
+   * searchUsers(searchText: string, startingPoint:string)
+   *
+   * @description
+   * Fetches 5 users at a time where their username matches or starts with the text provided to the search query.
+   * If a starting point is provided, the search query starts from the provided starting point.
+   *
+   */
+  static async searchUsers(searchText: string, startingPoint = null) {
+    console.log("Searching... (from service)");
+    console.log("Searching for specific users...");
+    const userRef = collection(db, "users");
+    const limitNumber: number = 5;
 
-		// If there's a starting point, create a new query starting at that point
-		// (fetch next 5 documents starting after the starting point)
-		if (startingPoint) {
-			console.log("starting point")
-			console.log(JSON.stringify(startingPoint, null, 3))
-			const nextUserQuery = query(
-				userRef,
-				where('usernameLower', '>=', searchText.toLowerCase()),
-				where('usernameLower', '<', searchText.toLowerCase() + '\uf8ff'),
-				orderBy('usernameLower'),
-				limit(limitNumber),
-				startAfter(startingPoint));
+    // Create the base user query (no previous query)
+    const userQuery = query(
+      userRef,
+      where("usernameLower", ">=", searchText.toLowerCase()),
+      where("usernameLower", "<=", searchText.toLowerCase() + "\uf8ff"),
+      orderBy("usernameLower"),
+      limit(limitNumber)
+    );
 
-			const results = await getDocs(nextUserQuery);
-			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			let nextStartingPoint = null;
+    // If there's a starting point, create a new query starting at that point
+    // (fetch next 5 documents starting after the starting point)
+    if (startingPoint) {
+      console.log("starting point");
+      console.log(JSON.stringify(startingPoint, null, 3));
+      const nextUserQuery = query(
+        userRef,
+        where("usernameLower", ">=", searchText.toLowerCase()),
+        where("usernameLower", "<=", searchText.toLowerCase() + "\uf8ff"),
+        orderBy("usernameLower"),
+        limit(limitNumber),
+        startAfter(startingPoint)
+      );
 
-			if (documents.length >= limitNumber) {
-				// const nextStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
-				nextStartingPoint = results.docs[results.docs.length - 1]?.data().usernameLower;
-			}
+      const results = await getDocs(nextUserQuery);
+      const documents = results.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      let nextStartingPoint = null;
 
-			console.log("setting starting point: ", nextStartingPoint)
-			return { documents, nextStartingPoint };
-		} else {
-			// If there's no starting point, execute the base query
-			console.log("no starting point")
-			const results = await getDocs(userQuery);
-			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			let newStartingPoint = null;
+      if (documents.length >= limitNumber) {
+        // const nextStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
+        nextStartingPoint =
+          results.docs[results.docs.length - 1]?.data().usernameLower;
+      }
 
-			if (documents.length >= limitNumber) {
-				// newStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
-				newStartingPoint = results.docs[results.docs.length - 1]?.data().usernameLower;
-			}
+      console.log("setting starting point: ", nextStartingPoint);
+      return { documents, nextStartingPoint };
+    } else {
+      // If there's no starting point, execute the base query
+      console.log("no starting point");
+      const results = await getDocs(userQuery);
+      const documents = results.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      let newStartingPoint = null;
 
-			console.log("setting starting point: ", newStartingPoint)
-			return { documents, newStartingPoint };
-		}
+      if (documents.length >= limitNumber) {
+        // newStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
+        newStartingPoint =
+          results.docs[results.docs.length - 1]?.data().usernameLower;
+      }
 
-	}
+      console.log("setting starting point: ", newStartingPoint);
+      return { documents, newStartingPoint };
+    }
+  }
 
-	/**
-	 * searchContent(searchText: string, startingPoint:string)
-	 *
-	 * @description
-	 * Fetches 5 items at a time where their titles match or start with the text provided to the search query.
-	 * If a starting point is provided, the search query starts from the provided starting point. 
-	 *
-	 */
-	static async searchContent(searchText: string, startingPoint = null) {
-		console.log("Searching... (from service)")
-		console.log("Searching for specific content...")
-		const contentRef = collection(db, 'contents');
-		const limitNumber: number = 5;
+  /**
+   * searchContent(searchText: string, startingPoint:string)
+   *
+   * @description
+   * Fetches 5 items at a time where their titles match or start with the text provided to the search query.
+   * If a starting point is provided, the search query starts from the provided starting point.
+   *
+   */
+  static async searchContent(searchText: string) {
+    try {
+      if (!searchText) {
+        console.log("No search text provided");
+        return { documents: [], nextStartingPoint: null };
+      }
 
-		// Create the base query
-		const contentQuery = query(
-			contentRef,
-			where('titleLower', '>=', searchText.toLowerCase()),
-			where('titleLower', '<', searchText.toLowerCase() + '\uf8ff'),
-			orderBy('titleLower'),
-			limit(limitNumber)
-		);
+      const client = this.getAlgoliaClient();
+      const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
+      const { hits } = await index.search(searchText);
 
-		// If there's a starting point, create a new query starting at that point
-		if (startingPoint) {
-			console.log("starting point")
-			console.log(startingPoint)
-			const nextContentQuery = query(
-				contentRef,
-				where('titleLower', '>=', searchText.toLowerCase()),
-				where('titleLower', '<', searchText.toLowerCase() + '\uf8ff'),
-				orderBy('titleLower'),
-				limit(limitNumber),
-				startAfter(startingPoint));
+      console.log("Algolia search results: ", hits);
 
-			const results = await getDocs(nextContentQuery);
-			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Fetch corresponding Firebase documents
+      const firebaseDocuments = await Promise.all(
+        hits.map(async (hit) => {
+          const docRef = doc(db, "contents", hit.objectID);
+          const docSnap = await getDoc(docRef);
 
-			let nextStartingPoint = null;
-			if (documents.length >= limitNumber) {
-				// const nextStartingPoint = results.docs[results.docs.length - 1]?.id;
-				nextStartingPoint = results.docs[results.docs.length - 1]?.data().titleLower;
-			}
+          if (docSnap.exists()) {
+            return {
+              id: docSnap.id,
+              ...docSnap.data(),
+              searchRanking: hit._rankingInfo?.nbTypos ?? 0,
+            };
+          }
+          return null;
+        })
+      );
 
-			console.log("setting starting point: ", nextStartingPoint)
-			return { documents, nextStartingPoint };
-		} else {
-			// If there's no starting point, execute the base query
-			console.log("no starting point")
-			const results = await getDocs(contentQuery);
-			const documents = results.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-			let newStartingPoint = null;
+      // Filter out any null values (in case some documents weren't found in Firebase)
+      const documents = firebaseDocuments.filter(
+        (doc): doc is NonNullable<typeof doc> => doc !== null
+      );
 
-			if (documents.length >= limitNumber) {
-				// const newStartingPoint = results.docs[results.docs.length - 1]?.id;
-				newStartingPoint = results.docs[results.docs.length - 1]?.data().titleLower;
-			}
-
-			console.log("setting starting point: ", newStartingPoint)
-			return { documents, newStartingPoint };
-		}
-	};
+      return {
+        documents,
+        nextStartingPoint: null,
+      };
+    } catch (err) {
+      console.error("Algolia search error: ", err);
+      throw new Error("Failed to search for content");
+    }
+  }
 }
-
-
 
 export default SearchService;

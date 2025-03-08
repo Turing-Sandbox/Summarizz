@@ -4,6 +4,7 @@ import AuthProvider from "@/hooks/AuthProvider";
 import Background from "@/components/Background";
 import Footer from "@/components/Footer";
 import SearchList from "@/components/search/searchList";
+import Navbar from "@/components/Navbar";
 
 /**
  * Page() -> JSX.Element
@@ -14,15 +15,18 @@ import SearchList from "@/components/search/searchList";
  * @returns JSX.Element
  */
 export default function Page() {
-	return (
-		<>
-			<Background />
-			<AuthProvider>
-				<SearchList />
-				<div className='footer'>
-					<Footer />
-				</div>
-			</AuthProvider>
-		</>
-	);
+  return (
+    <>
+      <Background />
+      <AuthProvider>
+        <Navbar />
+        <div className='main-content'>
+          <SearchList />
+        </div>
+        <div className='footer'>
+          <Footer />
+        </div>
+      </AuthProvider>
+    </>
+  );
 }
