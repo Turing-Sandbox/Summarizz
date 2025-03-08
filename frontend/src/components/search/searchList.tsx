@@ -34,14 +34,15 @@ const SearchList = ({
   const [usersReturned, setUsersReturned] = useState<User[]>([]);
   const [userDisabled, setUserDisabled] = useState(true);
   const [contentReturned, setContentReturned] = useState<Content[]>([]);
-  const [contentDisabled, setContentDisabled] = useState(true);
 
   const [userStartingPoint, setUserStartingPoint] = useState<string | null>(
     null
   );
-  const [contentStartingPoint, setContentStartingPoint] = useState<
-    string | null
-  >(null);
+  // const [contentStartingPoint, setContentStartingPoint] = useState<
+  //   string | null
+  // >(null);
+
+  const [numberOfContentsToDisplay, setNumberOfContentsToDisplay] = useState(5);
 
   const [fetching, setFetching] = useState(false);
 
@@ -149,7 +150,6 @@ const SearchList = ({
       const response = await axios.get(`${apiURL}/search/content/`, {
         params: {
           searchText: param,
-          contentStartingPoint: contentStartingPoint,
         },
       });
 
@@ -168,18 +168,9 @@ const SearchList = ({
         // Append the new data to the list of stored articles.
         setContentReturned((prev) => [...prev, ...uniqueDocuments]);
         // Update the starting point for the next fetch.
-        setContentStartingPoint(
-          uniqueDocuments[uniqueDocuments.length - 1].titleLower
-        );
-
-        if (contentReturned.length < 5) {
-          setContentDisabled(true);
-        } else {
-          setContentDisabled(false);
-        }
-      } else {
-        // If no unique documents, disable the button.
-        setContentDisabled(true);
+        // setContentStartingPoint(
+        //   uniqueDocuments[uniqueDocuments.length - 1].titleLower
+        // );
       }
     } catch (error: any) {
       alert(`CONTENT ERROR ${error}`);
@@ -216,18 +207,27 @@ const SearchList = ({
         {contentReturned?.length === 0 ? (
           <p>Nothing found...</p>
         ) : (
-          contentReturned.map((content: Content, index) => (
-            <div key={index} className='searchItem'>
-              <ContentResult content={content} />
-            </div>
-          ))
+          contentReturned.map(
+            (content: Content, index) =>
+              index < numberOfContentsToDisplay && (
+                <div key={index} className='searchItem'>
+                  <ContentResult content={content} />
+                </div>
+              )
+          )
         )}
 
-        {!contentDisabled && (
-          <button className='fetchMoreButton' onClick={fetchContentData}>
-            Fetch more Content
-          </button>
-        )}
+        {contentSearchResults &&
+          contentSearchResults.length > numberOfContentsToDisplay && (
+            <button
+              className='fetchMoreButton'
+              onClick={() =>
+                setNumberOfContentsToDisplay(numberOfContentsToDisplay + 5)
+              }
+            >
+              Fetch more Content
+            </button>
+          )}
       </div>
       {/* </div> */}
     </>
