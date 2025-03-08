@@ -22,15 +22,12 @@ def make_custom_response(**kwargs) -> Response:
 
     return response
 
-
 app.register_blueprint(general_bp)
 app.register_blueprint(summary_bp)
-
 
 @app.before_request
 def before_request():
     log.info(f"REQUEST: {request.method} {request.path}")
-
 
 if __name__ == "__main__":
     time_in = datetime.datetime.now()

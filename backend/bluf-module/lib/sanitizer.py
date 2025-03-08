@@ -16,24 +16,30 @@ HTML_ENTITIES_REGEX = [
 WHITESPACE_REGEX = re.compile("\\s+")
 
 
-def sanitize_text(text: str) -> str:
-    if not isinstance(text, str):
-        log.error("Input (text) provided is not a string.")
+def sanitize_text(content: str) -> str:
+    if not isinstance(content, str):
+        log.error("")
         return ""
 
-    if not text:
-        log.error("Input (text) provided is empty.")
+    if content is None:
+        log.warning("Input text was None, please ensure there is text to sanitize.")
+        return ""
 
-    text_sanitized = unquote(text)
-    text_sanitized = HTML_REGEX.sub(" ", text_sanitized)
-    text_sanitized = SPECIAL_CHARS_REGEX.sub(" ", text_sanitized)
+    try:
+        text_sanitized = unquote(content)
+        text_sanitized = HTML_REGEX.sub(" ", text_sanitized)
+        text_sanitized = SPECIAL_CHARS_REGEX.sub(" ", text_sanitized)
 
-    for regex in HTML_ENTITIES_REGEX:
-        text_sanitized = regex.sub(" ", text_sanitized)
+        for regex in HTML_ENTITIES_REGEX:
+            text_sanitized = regex.sub(" ", text_sanitized)
 
-    text_sanitized = unicodedata.normalize("NFKD", text_sanitized)
-    text_sanitized = WHITESPACE_REGEX.sub(" ", text_sanitized)
-    text_sanitized = text_sanitized.strip()
+        text_sanitized = unicodedata.normalize("NFKD", text_sanitized)
+        text_sanitized = WHITESPACE_REGEX.sub(" ", text_sanitized)
+        text_sanitized = text_sanitized.strip()
 
-    log.info(f"Sanitized (text) from request: {text_sanitized}")
-    return text_sanitized
+        log.info(f"Sanitized (text) from request: {text_sanitized[:200] + "..." if len(text_sanitized) > 200 else text_sanitized}")
+        return text_sanitized
+
+    except Exception as e:
+        log.error(f"Error during text sanitization: {e}")
+        return ""

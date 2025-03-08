@@ -16,3 +16,4 @@ langchain-together
 langchain-groq
 langchain-together
 langchain_mistralai
+mangum
