@@ -251,10 +251,11 @@
 }
 
 .nav-searchResults {
+  @include glassmorphic-background;
   position: fixed;
   top: 90px;
   left: 50%;
   transform: translateX(-50%);
   width: 50%;
-  z-index: 1200;
+  z-index: 1;
 }

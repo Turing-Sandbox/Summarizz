@@ -13,11 +13,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: var(--tile-color);
-    box-shadow: 0 0px 25px var(--shadow-color),
-      inset 0 0px 25px var(--shadow-color);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    @include glassmorphic-background;
     transition: all 0.3s ease;
     border-radius: 10px;
   }
