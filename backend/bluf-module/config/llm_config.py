@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from enum import Enum
 from dataclasses import dataclass
 from typing import Type, Dict, Any
@@ -26,7 +31,7 @@ class ProviderConfig:
 
 class Models(str, Enum):
     # NOTE: These models are specific to OpenRouter (free models).
-    LLAMA_3B_PREVIEW = "meta-llama/llama-3.2-3b-instruct:free"
+    LLAMA_3B_PREVIEW = "meta-llama/llama-3.3-70b-instruct:free"
     GEMINI_FLASH_8B = "google/gemini-flash-1.5-8b-exp"
     DEEPSEEK_R1 = "deepseek/deepseek-r1:free"
     MISTRAL_SMALL_3 = "mistralai/mistral-small-24b-instruct-2501"
@@ -57,21 +62,21 @@ PROVIDER_CONFIG: Dict[Providers, ProviderConfig] = {
     Providers.PROVIDER_GROQ: ProviderConfig(
         prompt_template=DEFAULT_PROMPT_TEMPLATE,
         model_class=ChatGroq,
-        default_model="",
+        default_model="deepseek-r1-distill-qwen-32b",
         api_key=GROQ_API_KEY
     ),
 
     Providers.PROVIDER_MISTRAL: ProviderConfig(
         prompt_template=DEFAULT_PROMPT_TEMPLATE,
         model_class=ChatMistralAI,
-        default_model="",
+        default_model="mistral-large-latest",
         api_key=MISTRAL_API_KEY
     ),
 
     Providers.PROVIDER_TOGETHER: ProviderConfig(
         prompt_template=DEFAULT_PROMPT_TEMPLATE,
         model_class=ChatTogether,
-        default_model="",
+        default_model="Qwen/Qwen2.5-72B-Instruct-Turbo",
         api_key=TOGETHER_API_KEY
     )
 }

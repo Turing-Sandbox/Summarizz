@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-flask run --reload
+flask --app app:app run --reload

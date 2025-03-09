@@ -1,4 +1,9 @@
+import os
 import re
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import unicodedata
 from urllib.parse import unquote
 
@@ -16,7 +21,7 @@ HTML_ENTITIES_REGEX = [
 WHITESPACE_REGEX = re.compile("\\s+")
 
 
-def sanitize_text(content: str) -> str:
+def sanitize_content(content: str) -> str:
     if not isinstance(content, str):
         log.error("")
         return ""

@@ -1,6 +1,10 @@
+import os
+import sys
 import datetime
-from config.rich_logging import logger as log
 
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from config.rich_logging import logger as log
 from flask import jsonify, Response
 from flask_smorest import Blueprint
 

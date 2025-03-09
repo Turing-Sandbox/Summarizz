@@ -2,7 +2,7 @@ import os
 import sys
 import datetime
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.rich_logging import logger as log
 
@@ -29,7 +29,7 @@ def error_response(error_message: str, status_code: int = 400) -> Tuple[Response
        return None
 
 
-def success_response(data: Optional[Dict[str, Any]] = None, **kwargs) -> Tuple[Response, int] | None:
+def success_response(data: Any = None, **kwargs) -> Tuple[Response, int] | None:
     try:
         if not data:
             raise ValueError(f"Expected data but got: {data} instead.")
