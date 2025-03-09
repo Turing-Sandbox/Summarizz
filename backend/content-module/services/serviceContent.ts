@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc, runTransaction, Timestamp } from "firebase/firestore";
+import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc, runTransaction, Timestamp, getDocs } from "firebase/firestore";
 import {
   addContentToUser,
   removeContentFromUser,
@@ -434,6 +434,62 @@ static async shareContent(contentID: string, userId: string) {
     } catch (error) {
       console.error("Error unsharing content:", error);
       throw new Error(error.message || "Failed to unshare content");
+    }
+  }
+
+  // Get all content from the database from every user
+  static async getAllContent() {
+    console.log("Getting all content...");
+    try {
+      const contentCollection = collection(db, "contents");
+      const contentSnapshot = await getDocs(contentCollection);
+      
+      // Convert snapshot to array of content with IDs and proper structure
+      const contentList = contentSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.title || '',
+          content: data.content || '',
+          creatorUID: data.creatorUID || '',
+          dateCreated: data.dateCreated || new Date(),
+          dateUpdated: data.dateUpdated || new Date(),
+          thumbnail: data.thumbnail || null,
+          readtime: data.readtime || 0,
+          likes: data.likes || 0,
+          peopleWhoLiked: data.peopleWhoLiked || [],
+          bookmarkedBy: data.bookmarkedBy || [],
+          titleLower: data.titleLower || '',
+          sharedBy: data.sharedBy || [],
+          views: data.views || 0,
+          shares: data.shares || 0,
+          timestamp: data.dateCreated?.toMillis() || Date.now() // For trending calculation
+        };
+      });
+      
+      return contentList;
+    } catch (error) {
+      console.error("Error fetching all content: ", error);
+      throw new Error(error.message || "Failed to fetch all content");
+    }
+  }
+
+  // Get all content from the database, filter by most likes
+  static async getTrendingContent(limit = 5) {
+    console.log("Getting trending content...");
+    try {
+      // Get all content first
+      const allContent = await this.getAllContent();
+      
+      // Sort by likes in descending order
+      const trendingContent = [...allContent]
+        .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+        .slice(0, limit);
+      
+      return trendingContent;
+    } catch (error) {
+      console.error("Error fetching trending content: ", error);
+      throw new Error(error.message || "Failed to fetch trending content");
     }
   }
 

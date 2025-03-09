@@ -45,6 +45,21 @@ export default function Page() {
   // useAuth Hook for Authentication
   const { userUID } = useAuth();
 
+  // Check if page needs refresh on initial load
+  useEffect(() => {
+    const needsRefresh = localStorage.getItem('needsRefresh');
+    const lastVisitedContent = localStorage.getItem('lastVisitedContent');
+    
+    if (needsRefresh === 'true' && lastVisitedContent === id) {
+      // Clear the flags
+      localStorage.removeItem('needsRefresh');
+      localStorage.removeItem('lastVisitedContent');
+      
+      // Refresh the page once to ensure proper styling
+      window.location.reload();
+    }
+  }, [id]);
+
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------

@@ -2,11 +2,10 @@ import { Request, Response } from "express";
 import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
-
-import { arrayUnion, doc, updateDoc, getDoc } from "firebase/firestore";
-import { db } from "../../shared/firebaseConfig";
-import { addSharedContentToUser } from "../../user-module/services/userService";
-import axios from "axios";
+// import { arrayUnion, doc, updateDoc, getDoc } from "firebase/firestore";
+// import { db } from "../../shared/firebaseConfig";
+// import { addSharedContentToUser } from "../../user-module/services/userService";
+// import axios from "axios";
 
 export class ContentController {
   static async createContent(req: Request, res: Response) {
@@ -282,22 +281,22 @@ export class ContentController {
   }
 
   // Share content
-static async shareContent(req: Request, res: Response) {
-  const { userId, contentId } = req.params;
+  static async shareContent(req: Request, res: Response) {
+    const { userId, contentId } = req.params;
 
-  try {
+    try {
       // Call the service layer to handle *both* sharing and incrementing
       const updatedContent = await ContentService.shareContent(contentId, userId);
 
       // Return success response
       res.status(200).json({ content: updatedContent }); // Return the updated content
-  } catch (error) {
+    } catch (error) {
       console.error("Error sharing content:", error);
       res.status(500).json({
-          error: error instanceof Error ? error.message : "Failed to share content",
+        error: error instanceof Error ? error.message : "Failed to share content",
       });
+    }
   }
-}
 
   // Unshare content
   static async unshareContent(req: Request, res: Response) {
@@ -343,6 +342,46 @@ static async shareContent(req: Request, res: Response) {
           error instanceof Error
             ? error.message
             : "Failed to increment view count",
+      });
+    }
+  }
+
+  static async getTrendingContent(req: Request, res: Response) {
+    console.log("Fetching Trending Content...");
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+
+    try {
+      const trendingContent = await ContentService.getTrendingContent(limit);
+      
+      res.status(200).json({
+        success: true,
+        trendingContent,
+        message: "Trending content fetched successfully"
+      });
+    } catch (error) {
+      console.error("Error fetching trending content:", error);
+      res.status(500).json({ 
+        success: false,
+        error: error.message || "Failed to fetch trending content" 
+      });
+    }
+  }
+
+  static async getAllContent(req: Request, res: Response) {
+    console.log("Fetching All Content...");
+    try {
+      const allContent = await ContentService.getAllContent();
+      
+      res.status(200).json({
+        success: true,
+        content: allContent,
+        message: "All content fetched successfully"
+      });
+    } catch (error) {
+      console.error("Error fetching all content:", error);
+      res.status(500).json({ 
+        success: false,
+        error: error.message || "Failed to fetch all content" 
       });
     }
   }
