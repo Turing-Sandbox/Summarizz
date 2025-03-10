@@ -37,7 +37,7 @@
   background-color: var(--tile-color);
   border-radius: 10px;
   box-shadow: 0 4px 15px var(--shadow-color);
-  padding: 18px;
+  padding: 18px; 
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   width: 320px; 
@@ -80,13 +80,18 @@ html, body {
 
 /* Content Sections */
 .trending-content,
-.content {
+.content,
+.personalized-content {
   margin-bottom: 60px;
   
   .trending-header,
-  .content-header {
+  .content-header,
+  .personalized-header {
     margin-bottom: 25px;
     padding-left: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     
     h2 {
       font-size: 1.8rem;
@@ -102,7 +107,7 @@ html, body {
     display: flex;
     overflow-x: auto;
     padding: 5px;
-    gap: 15px;
+    gap: 15px; 
     @include custom-scrollbar;
     
     .content-card {
@@ -116,10 +121,37 @@ html, body {
 .content {
   .content-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px; 
     padding: 5px;
-    justify-items: center;
+    justify-items: center; 
+    
+    @media (max-width: 1400px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    
+    @media (max-width: 1100px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+    
+    .content-card {
+      @include content-card;
+    }
+  }
+}
+
+/* Personalized Content Section */
+.personalized-content {
+  .content-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px; 
+    padding: 5px;
+    justify-items: center; 
     
     @media (max-width: 1400px) {
       grid-template-columns: repeat(3, 1fr);
@@ -203,24 +235,41 @@ html, body {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
     }
-  }
-  
-  &:hover .content-thumbnail {
-    transform: scale(1.08);
   }
 }
 
 /* Loading and Error States */
 .loading-container,
 .error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
   text-align: center;
-  padding: 40px;
-  margin-top: 40px;
-  font-size: 1.2rem;
+  
+  p {
+    font-size: 1.2rem;
+    color: var(--text-secondary-color);
+  }
 }
 
-.error-container {
-  color: var(--error-color, #e53935);
+/* Refresh Button Styling */
+.refresh-button {
+  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: var(--input-border-color);
+    color: var(--background-color);
+  }
 }

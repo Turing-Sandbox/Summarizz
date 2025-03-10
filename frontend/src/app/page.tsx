@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Background from "@/components/Background";
-import AuthProvider from "../hooks/AuthProvider";
+import AuthProvider, { useAuth } from "../hooks/AuthProvider";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import axios from 'axios';
@@ -29,13 +29,16 @@ interface Content {
   sharedBy?: string[];
   titleLower?: string;
   timestamp?: number;
+  score?: number; // For personalized content
 }
 
 export default function Home() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
   const [regularContent, setRegularContent] = useState<Content[]>([]);
+  const [personalizedContent, setPersonalizedContent] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { userUID } = useAuth();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -72,6 +75,57 @@ export default function Home() {
           console.log('Regular content data received successfully');
           setRegularContent(contentResponse.data.content);
           regularFetched = true;
+          
+          // Generate personalized content client-side if user is logged in
+          if (userUID && contentResponse.data.content && contentResponse.data.content.length > 0) {
+            console.log('Generating personalized content client-side');
+            
+            // Get user data from local storage if available
+            const likedContentIds = JSON.parse(localStorage.getItem('likedContent') || '[]');
+            const followedCreators = JSON.parse(localStorage.getItem('followedCreators') || '[]');
+            
+            // Score content based on user preferences
+            const scoredContent = contentResponse.data.content.map((content: Content) => {
+              let score = 0;
+              
+              // Boost score if content is from someone the user follows
+              if (followedCreators.includes(content.creatorUID)) {
+                score += 10; // High priority for followed creators
+              }
+              
+              // Add popularity factors
+              score += (content.likes || 0) * 0.2;
+              score += (content.views || 0) * 0.1;
+              
+              // Add recency factor
+              if (content.dateCreated) {
+                const now = new Date();
+                const contentDate = content.dateCreated instanceof Date 
+                  ? content.dateCreated 
+                  : new Date(content.dateCreated);
+                
+                // Calculate days difference
+                const daysDiff = Math.floor((now.getTime() - contentDate.getTime()) / (1000 * 3600 * 24));
+                
+                // Boost newer content (within last 7 days)
+                if (daysDiff < 7) {
+                  score += (7 - daysDiff) * 0.5;
+                }
+              }
+              
+              return {
+                ...content,
+                score: score // Explicitly assign score to avoid TypeScript errors
+              };
+            });
+            
+            // Sort by score and get top results
+            const personalizedContent = scoredContent
+              .sort((a: Content, b: Content) => (b.score || 0) - (a.score || 0))
+              .slice(0, 8);
+            
+            setPersonalizedContent(personalizedContent);
+          }
         } else {
           console.log('No regular content available in response');
           setRegularContent([]);
@@ -90,7 +144,7 @@ export default function Home() {
     };
     
     fetchContent();
-  }, []);
+  }, [userUID]);
 
   const handleContentClick = (contentId: string) => {
     window.location.href = `/content/${contentId}`;
@@ -223,10 +277,42 @@ export default function Home() {
               </div>
             </section>
             
+            {/* Personalized Content Section - Only show if user is logged in */}
+            {userUID && (
+              <section className="personalized-content">
+                <div className="personalized-header">
+                  <h2>For You</h2>
+                  <button 
+                    className="refresh-button"
+                    onClick={() => window.location.reload()}
+                  >
+                    Refresh
+                  </button>
+                </div>
+                <div className="content-grid">
+                  {personalizedContent.length > 0 ? (
+                    personalizedContent.map(content => (
+                      <div key={content.id} className="content-card">
+                        {renderContentItem(content)}
+                      </div>
+                    ))
+                  ) : (
+                    <p>Loading your personalized recommendations...</p>
+                  )}
+                </div>
+              </section>
+            )}
+            
             {/* Regular Content Section */}
             <section className="content">
               <div className="content-header">
                 <h2>Your Content Feed</h2>
+                <button 
+                  className="refresh-button"
+                  onClick={() => window.location.reload()}
+                >
+                  Refresh
+                </button>
               </div>
               <div className="content-grid">
                 {regularContent.length > 0 ? (

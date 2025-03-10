@@ -493,6 +493,122 @@ static async shareContent(contentID: string, userId: string) {
     }
   }
 
+  // Get personalized content for a specific user based on their likes and follows
+  static async getPersonalizedContent(userId: string, limit = 20) {
+    console.log("Getting personalized content for user:", userId);
+    try {
+      // Get user data to check liked content and follows
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error("User not found");
+      }
+      
+      const userData = userDoc.data();
+      const likedContent = userData.likedContent || [];
+      const following = userData.following || [];
+      
+      // Get all content
+      const allContent = await this.getAllContent();
+      
+      // Create a scoring system for content
+      const scoredContent = allContent.map(content => {
+        let score = 0;
+        
+        // Boost score if content is from someone the user follows
+        if (following.includes(content.creatorUID)) {
+          score += 10; // High priority for followed creators
+        }
+        
+        // Analyze content the user has liked to find similar content
+        if (likedContent.includes(content.id)) {
+          // Include some liked content in recommendations to ensure we have content to show
+          // This helps when a user has few interactions
+          if (Math.random() < 0.3) { // 30% chance to include liked content
+            score += 5; // Give it a moderate score
+          } else {
+            score = -1; // Still exclude most liked content
+          }
+        } else {
+          // Check if any liked content has similar title (simple text similarity)
+          for (const likedId of likedContent) {
+            const likedItem = allContent.find(item => item.id === likedId);
+            if (likedItem && likedItem.titleLower && content.titleLower) {
+              // Simple word matching for similarity (can be improved with more sophisticated algorithms)
+              const likedWords = likedItem.titleLower.split(' ');
+              const contentWords = content.titleLower.split(' ');
+              
+              // Count matching words
+              const matchingWords = likedWords.filter(word => 
+                word.length > 3 && contentWords.includes(word)
+              ).length;
+              
+              if (matchingWords > 0) {
+                score += matchingWords * 2; // Boost score based on matching words
+              }
+            }
+          }
+        }
+        
+        // Boost score for popular content (likes, views)
+        score += (content.likes || 0) * 0.2;
+        score += (content.views || 0) * 0.1;
+        
+        // Add recency factor - newer content gets higher score
+        if (content.dateCreated) {
+          const now = new Date();
+          const contentDate = content.dateCreated instanceof Date 
+            ? content.dateCreated 
+            : new Date(content.dateCreated);
+          
+          // Calculate days difference
+          const daysDiff = Math.floor((now.getTime() - contentDate.getTime()) / (1000 * 3600 * 24));
+          
+          // Boost newer content (within last 7 days)
+          if (daysDiff < 7) {
+            score += (7 - daysDiff) * 0.5;
+          }
+        }
+        
+        return {
+          ...content,
+          score
+        };
+      });
+      
+      // Filter out already liked content and sort by score
+      let personalizedContent = scoredContent
+        .filter(content => content.score >= 0) // Remove already liked content
+        .sort((a, b) => b.score - a.score) // Sort by score descending
+        .slice(0, limit); // Limit results
+      
+      // If we don't have enough personalized content, include some trending content
+      if (personalizedContent.length < 5) {
+        console.log("Not enough personalized content, adding trending content");
+        const trendingContent = await this.getTrendingContent(10);
+        
+        // Add trending content that isn't already in personalized content
+        const existingIds = personalizedContent.map(c => c.id);
+        const additionalContent = trendingContent.filter(c => !existingIds.includes(c.id))
+          .map(content => ({
+            ...content,
+            score: 3 // Assign a default score to trending content
+          }));
+        
+        personalizedContent = [
+          ...personalizedContent,
+          ...additionalContent
+        ].slice(0, limit);
+      }
+      
+      return personalizedContent;
+    } catch (error) {
+      console.error("Error fetching personalized content: ", error);
+      throw new Error(error.message || "Failed to fetch personalized content");
+    }
+  }
+
   //Increment the number of views on an article
   static async incrementViewCount(contentID: string) {
     try {

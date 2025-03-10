@@ -385,4 +385,29 @@ export class ContentController {
       });
     }
   }
+
+  static async getPersonalizedContent(req: Request, res: Response) {
+    console.log("Fetching Personalized Content...");
+    const { userId } = req.params;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 20;
+
+    try {
+      console.log(`Getting personalized content for user: ${userId}`);
+      const personalizedContent = await ContentService.getPersonalizedContent(userId, limit);
+      
+      res.status(200).json({
+        success: true,
+        personalizedContent,
+        message: "Personalized content fetched successfully"
+      });
+    } catch (error) {
+      console.error("Error fetching personalized content:", error);
+
+      res.status(200).json({ 
+        success: true,
+        personalizedContent: [],
+        message: "No personalized content available"
+      });
+    }
+  }
 }
