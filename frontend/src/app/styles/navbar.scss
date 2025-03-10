@@ -33,7 +33,7 @@
     top: 0;
     left: 0;
     margin: var(--navbar-margin);
-    z-index: 1;
+    z-index: 2;
     display: flex;
   }
 
@@ -134,7 +134,7 @@
   right: 0;
   padding: 10px 30px;
   margin: var(--navbar-margin);
-  z-index: 1;
+  z-index: 2;
 
   &-item {
     display: block;
@@ -256,5 +256,17 @@
   left: 50%;
   transform: translateX(-50%);
   width: 50%;
-  z-index: 1200;
+  z-index: 2;
+}
+
+.navbar-page-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1;
 }

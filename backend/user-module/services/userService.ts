@@ -100,7 +100,7 @@ export async function updateUser(
   data: Partial<{ email: string; username: string; isPrivate: boolean; usernameLower: string }>
 ) {
   data.usernameLower = data.username.toLowerCase();
-  console.log(`updating user ${data.username}: ${JSON.stringify(data)}`)
+  console.log(`updating user ${data.username}: ${JSON.stringify(data)}`);
   await updateDoc(doc(db, "users", uid), data);
 }
 
@@ -249,9 +249,11 @@ export async function deleteUser(uid: string, password: string, email: string) {
   }
 
   // 1 - Delete all content created by the user
-  for (const contentId of user.content) {
-    // Delete content
-    await ContentService.deleteContent(contentId);
+  if (user.content) {
+    for (const contentId of user.content) {
+      // Delete content
+      await ContentService.deleteContent(contentId);
+    }
   }
 
   // 2 - Delete the user profile image

@@ -122,6 +122,7 @@ function Navbar() {
       console.log(contentSearchResults);
 
       setShowSearchResults(true);
+      setShowMenu(false);
     } else {
       alert("You didn't search for anything.");
     }
@@ -145,6 +146,15 @@ function Navbar() {
   // --------------------------------------
   return (
     <>
+      {(showSearchResults || showMenu) && (
+        <div
+          className='navbar-page-overlay'
+          onClick={() => {
+            setShowSearchResults(false);
+            setShowMenu(false);
+          }}
+        ></div>
+      )}
       <div className='navbar-background'>
         {/* App Name */}
         <a
@@ -165,7 +175,6 @@ function Navbar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder='Search for something!'
-                required
               />
               <button className='searchButton'>
                 <MagnifyingGlassIcon />
@@ -197,6 +206,7 @@ function Navbar() {
               onClick={() => {
                 updateAuthenticated();
                 setShowMenu(!showMenu);
+                setShowSearchResults(false);
               }}
             >
               {user && user.profileImage ? (
