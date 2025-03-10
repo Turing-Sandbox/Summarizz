@@ -145,6 +145,15 @@ function Navbar() {
   // --------------------------------------
   return (
     <>
+      {(showSearchResults || showMenu) && (
+        <div
+          className='navbar-page-overlay'
+          onClick={() => {
+            setShowSearchResults(false);
+            setShowMenu(false);
+          }}
+        ></div>
+      )}
       <div className='navbar-background'>
         {/* App Name */}
         <a
