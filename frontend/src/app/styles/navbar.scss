@@ -1,14 +1,5 @@
 @use "colors.scss";
-
-// Mixins for reusable styles
-@mixin glassmorphic-background {
-  background-color: var(--tile-color);
-  border-radius: 25px;
-  box-shadow: 0 0px 25px var(--shadow-color),
-    inset 0 0px 25px var(--shadow-color);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
+@use "global.scss";
 
 @mixin absolute-positioned {
   position: absolute;
@@ -26,7 +17,8 @@
   display: flex;
 
   &-background {
-    @include glassmorphic-background;
+    @include global.glassmorphic-background;
+    border-radius: 25px;
     height: var(--navbar-height);
     width: 90vw;
     position: fixed;
@@ -128,7 +120,8 @@
 }
 
 .menu {
-  @include glassmorphic-background;
+  @include global.glassmorphic-background;
+  border-radius: 25px;
   position: fixed;
   top: 90px;
   right: 0;
@@ -265,7 +258,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); 
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   z-index: 1;

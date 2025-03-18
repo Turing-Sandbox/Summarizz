@@ -25,7 +25,7 @@
 .auth-box {
   background-color: var(--tile-color);
   box-shadow: 0 0px 25px var(--shadow-color),
-  inset 0 0px 25px var(--shadow-color);
+    inset 0 0px 25px var(--shadow-color);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
@@ -160,7 +160,7 @@
   font-size: 1.1rem;
 }
 
-.auth-oauth-button svg, img {
+.auth-oauth-button .logo {
   height: 20px;
   width: 20px;
   margin-right: 10px;
