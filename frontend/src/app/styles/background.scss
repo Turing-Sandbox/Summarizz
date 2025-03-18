@@ -1,15 +1,6 @@
 // Import colors.scss to use the variables
 @use "./colors.scss";
 
-html {
-  background-color: var(--background-color);
-}
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
 .left-bottom-rectangle {
   background-color: var(--left-bottom-rectangle);
   opacity: 0.8;

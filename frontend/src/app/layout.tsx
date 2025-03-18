@@ -1,9 +1,12 @@
 // React & NextJs (Import)
 import type { Metadata } from "next";
-import AuthProvider from "@/hooks/AuthProvider";
 
 // Stylesheets
 import "@/app/styles/global.scss";
+import Background from "@/components/Background";
+import Footer from "@/components/Footer";
+import AuthProvider from "@/hooks/AuthProvider";
+import NavbarWrapper from "@/components/NavbarWrapper";
 
 export const metadata: Metadata = {
   title: "Summarizz",
@@ -18,7 +21,12 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <Background />
+          <NavbarWrapper />
+          {children}
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );

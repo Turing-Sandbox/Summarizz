@@ -1,5 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=Inter:wght@400&family=Work+Sans:wght@400&display=swap");
 
+// Mixins for reusable styles
+@mixin glassmorphic-background {
+  background-color: var(--tile-color);
+  box-shadow: 0 0px 25px var(--shadow-color),
+    inset 0 0px 25px var(--shadow-color);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
 @font-face {
   font-family: "Blanka";
   src: url(../fonts/Blanka-Regular.otf) format("opentype"),
@@ -11,6 +20,10 @@
   --font-headings: "IBM Plex Mono", monospace;
   --font-body: "Work Sans", sans-serif;
   --font-interactive: "Inter", sans-serif;
+}
+
+html {
+  background-color: var(--background-color);
 }
 
 body {

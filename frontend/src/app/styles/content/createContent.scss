@@ -1,6 +1,6 @@
 @use "@/app/styles/colors.scss";
 
-form {
+.create-content-form {
   display: flex;
   flex-direction: column;
 }
@@ -63,7 +63,7 @@ form {
   margin: 5px 5px 20px auto;
 }
 
-input[type="file"] {
+.create-content-form input[type="file"] {
   display: none;
 }
 
@@ -100,7 +100,6 @@ input[type="file"] {
   border-radius: 10px;
   margin-bottom: -1rem;
 }
-
 
 .summary-container {
   border: 1px solid #ddd;

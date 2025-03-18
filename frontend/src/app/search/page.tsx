@@ -1,10 +1,6 @@
 "use client";
 
-import AuthProvider from "@/hooks/AuthProvider";
-import Background from "@/components/Background";
-import Footer from "@/components/Footer";
 import SearchList from "@/components/search/searchList";
-import Navbar from "@/components/Navbar";
 
 /**
  * Page() -> JSX.Element
@@ -17,16 +13,9 @@ import Navbar from "@/components/Navbar";
 export default function Page() {
   return (
     <>
-      <Background />
-      <AuthProvider>
-        <Navbar />
-        <div className='main-content'>
-          <SearchList />
-        </div>
-        <div className='footer'>
-          <Footer />
-        </div>
-      </AuthProvider>
+      <div className='main-content'>
+        <SearchList />
+      </div>
     </>
   );
 }
