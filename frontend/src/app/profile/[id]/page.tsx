@@ -33,7 +33,6 @@ export default function Page() {
   // ---------------------------------------
   const [user, setUser] = useState<User | null>(null);
   const [contents, setContents] = useState<Content[]>([]);
-  const [bookmarkedContents, setBookmarkedContents] = useState<Content[]>([]);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followRequested, setFollowRequested] = useState(false);
   const [sharedContent, setSharedContent] = useState<Content[]>([]);
@@ -182,6 +181,12 @@ export default function Page() {
         alert("You can't follow yourself.");
         return;
     }
+
+    if (!user) { // Defensive check
+      console.error("User data not available.");
+      return;
+    }
+
     try {
       let url = "";
       if (isFollowing) {
@@ -189,15 +194,14 @@ export default function Page() {
         url = `${apiURL}/user/${userUID}/unfollow/user/${id}`;
         await axios.post(url);
         setIsFollowing(false);
-
       } else if (user?.isPrivate) {
-        // Private profile
+        // Private profile: Send request, or cancel if already requested (optional)
         if(followRequested){
-          // cancel request
-          // OPTIONAL: Handle Cancel Request (requires backend endpoint)
-          url = `${apiURL}/user/${userUID}/cancel-request/${id}`;
+          // cancel request (OPTIONAL: Handle Cancel Request (requires backend endpoint))
+          // url = `${apiURL}/user/${userUID}/cancel-request/${id}`;
           // await axios.post(url); // UNCOMMENT WHEN ENDPOINT IS READY
-          setFollowRequested(false);
+          // setFollowRequested(false); // OPTIONAL: Update local state
+          return; // for now
         } else {
           // Send Follow Request
           url = `${apiURL}/user/${userUID}/request/${id}`; 
@@ -216,7 +220,7 @@ export default function Page() {
       setUser(userResponse.data);
 
     } catch (error) {
-       console.error("Error handling follow:", error);
+       console.error("Error handling follow/request:", error);
        alert("An error occurred. Please try again.")
     }
   };
@@ -253,7 +257,7 @@ export default function Page() {
         if (!prevUser) return null;
 
         const updatedFollowRequests = prevUser.followRequests?.filter(id => id !== requesterId);
-        const updatedFollowedBy = prevUser.followedBy ? [...prevUser.followedBy, requesterId] : [requesterId];
+        const updatedFollowedBy = prevUser.followers ? [...prevUser.followers, requesterId] : [requesterId];
 
           return {
             ...prevUser,
@@ -351,35 +355,35 @@ export default function Page() {
     return <div>User not found.</div>;
   }
 
-  // ANCHOR - What do we do with this?
-  // const handleRequestFollow = async () => {
-  //   try {
-  //     if (!userUID || !user?.uid) {
-  //       console.error("User ID or Target ID not available");
-  //       return;
-  //     }
-
-  //     const url = `${apiURL}/user/${userUID}/request/${user.uid}`;
-
-  //     await axios.post(url);
-  //     setFollowRequested(true); // Set request state
-
-  //     console.log("Follow request sent successfully.");
-  //   } catch (error) {
-  //     console.error("Error sending follow request:", error);
-  //   }
-  // };
-
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
 
-  const followersCount = user?.followedBy ? user.followedBy.length : 0;
-  const followingCount = user?.followedCreators ? user.followedCreators.length : 0;
+  const followersCount = user?.followers ? user.followers.length : 0;
+  const followingCount = user?.following ? user.following.length : 0;
   const createdCount = user?.content ? user.content.length : 0;
   const sharedCount = user?.sharedContent ? user.sharedContent.length : 0;
-  const canViewFullProfile = !user?.isPrivate || userUID === id;
+  const canViewFullProfile = !user?.isPrivate || userUID === id || (userUID && user?.followers?.includes(userUID));
 
+    // Helper function to get username by ID (Simplified)
+    async function getUsername(userId: string): Promise<string> {
+      try {
+        const userResponse = await axios.get(`${apiURL}/user/${userId}`);
+        return userResponse.data.username || "Unknown User"; // Provide a fallback
+      } catch (error) {
+        console.error("Error fetching username:", error);
+        return "Unknown User"; // Fallback in case of error
+      }
+    }
+  
+  
+    if (isLoading) {
+      return <div>Loading profile...</div>;
+    }
+  
+    if (!user) {
+      return <div>User not found.</div>;
+    }
   return (
     <>
       <div className='main-content'>
@@ -403,30 +407,31 @@ export default function Page() {
           <div className='profile-banner-info'>
             <div className='username-follow'>
               <h1 className='username'>{user?.username}</h1>
-              <button
-                className={`icon-button follow ${
-                  isFollowing ? "following" : ""
-                }`}
-                onClick={handleFollow}
-                title={
-                  isFollowing
-                    ? "Unfollow User"
-                    : followRequested
-                    ? "Request Sent"
-                    : user?.isPrivate
-                    ? "Request User"
-                    : "Follow User"
-                } // Tooltip text
-              >
-                <UserPlusIcon
-                  className={`icon follow ${isFollowing ? "following" : ""}`}
-                  style={{
-                    color: isFollowing ? "black" : "#7D7F7C", // Black when following
-                    width: "16px",
-                    height: "16px",
-                  }}
-                />
-              </button>
+              {/* Follow/Request Button (Conditional Rendering) */}
+              {userUID !== id && ( // Don't show button if viewing own profile
+                <button
+                  className={`icon-button follow ${isFollowing ? "following" : ""}`}
+                  onClick={handleFollow}
+                  title={
+                    isFollowing
+                      ? "Unfollow User"
+                      : followRequested
+                      ? "Request Sent"
+                      : user?.isPrivate
+                      ? "Request to Follow"
+                      : "Follow User"
+                  }
+                >
+                  <UserPlusIcon
+                    className={`icon follow ${isFollowing || followRequested ? "following" : ""}`}
+                    style={{
+                      color: isFollowing || followRequested ? "black" : "#7D7F7C",
+                      width: "16px",
+                      height: "16px",
+                    }}
+                  />
+                </button>
+              )}
             </div>
 
             {canViewFullProfile ? (
@@ -461,6 +466,40 @@ export default function Page() {
             <p>{user?.bio}</p>
           </div>
         </div>
+
+        {/* Follow Requests Section (Conditional Rendering) */}
+        {userUID === id && user?.followRequests && user.followRequests.length > 0 && (
+          <div className="follow-requests-section">
+            <h3>Follow Requests</h3>
+            <ul>
+              {user.followRequests.map((requesterId) => (
+                <li key={requesterId}>
+                  {/* Display Requester Username (Simplified) */}
+                  <span>
+                      {/* Ideally use a batch fetch, but this works for now */}
+                      {getUsername(requesterId).then(username => <span>{username}</span>)}
+                    </span>
+                  <div className="request-buttons">
+                    <button
+                      className="icon-button approve"
+                      onClick={() => handleApproveRequest(requesterId)}
+                      title="Approve Request"
+                    >
+                      <CheckIcon className="icon check" />
+                    </button>
+                    <button
+                      className="icon-button reject"
+                      onClick={() => handleRejectRequest(requesterId)}
+                      title="Reject Request"
+                    >
+                      <XMarkIcon className="icon xmark" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Tabs for Created/Shared Content */}
         <div className='tabs'>

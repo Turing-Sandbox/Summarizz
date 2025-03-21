@@ -475,14 +475,14 @@ export async function followUser(userId: string, targetId: string) {
 
   // Target user is public: follow directly.
   const userData = userDoc.data();
-  const following = userData.followedCreators || []; // Use followedCreators
+  const following = userData.following || []; 
   if (!following.includes(targetId)) {
-      await updateDoc(userRef, { followedCreators: arrayUnion(targetId) }); // Use arrayUnion and correct field
+      await updateDoc(userRef, { following: arrayUnion(targetId) }); 
   }
 
-  const followers = targetData.followedBy || []; // Use followedBy
+  const followers = targetData.followers || []; 
   if (!followers.includes(userId)) {
-      await updateDoc(targetRef, { followedBy: arrayUnion(userId) });  // Use arrayUnion and correct field
+      await updateDoc(targetRef, { followers: arrayUnion(userId) });  
   }
 }
 
@@ -498,14 +498,14 @@ export async function unfollowUser(userId: string, targetId: string) {
     const targetData = targetDoc.data();
 
     // Update the user's following list
-    const following = userData.followedCreators || []; // Use followedCreators
+    const following = userData.following || [];
     const updatedFollowing = following.filter((id: string) => id !== targetId);
-    await updateDoc(userRef, { followedCreators: updatedFollowing }); // Use correct field
+    await updateDoc(userRef, { following: updatedFollowing });
 
     // Update the target's followers list
-    const followers = targetData.followedBy || []; // Use followedBy
+    const followers = targetData.followers || []; 
     const updatedFollowers = followers.filter((id: string) => id !== userId);
-    await updateDoc(targetRef, { followedBy: updatedFollowers }); // Use correct field
+    await updateDoc(targetRef, { followers: updatedFollowers });
   } else {
     throw new Error("User or target not found");
   }
@@ -549,25 +549,25 @@ export async function approveFollowRequest(userId: string, requesterId: string) 
   );
 
   // 2. Add requesterId to followedBy
-  const followedBy = userData.followedBy || [];
-  if (!followedBy.includes(requesterId)) {
-    followedBy.push(requesterId);
+  const followers = userData.followers || [];
+  if (!followers.includes(requesterId)) {
+    followers.push(requesterId);
   }
 
   // 3. Add userId to requester's followedCreators
-  const followedCreators = requesterData.followedCreators || [];
-  if (!followedCreators.includes(userId)) {
-    followedCreators.push(userId);
+  const following = requesterData.following || [];
+  if (!following.includes(userId)) {
+    following.push(userId);
   }
 
   // Update both documents atomically
     await Promise.all([
         updateDoc(userRef, {
             followRequests: followRequests,
-            followedBy: followedBy,
+            followers: followers,
         }),
         updateDoc(requesterRef, {
-            followedCreators: followedCreators,
+            following: following,
         }),
     ]);
 }
