@@ -9,6 +9,8 @@ import {
   where,
   getDocs,
   query,
+  arrayUnion,
+  arrayRemove
 } from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
@@ -441,31 +443,46 @@ export async function removeSharedContentFromUser(
 
 export async function followUser(userId: string, targetId: string) {
   if (userId === targetId) {
-    console.warn("Users cannot follow themselves");
-    return;
+      throw new Error("Users cannot follow themselves");
   }
 
   const userRef = doc(db, "users", userId);
   const targetRef = doc(db, "users", targetId);
 
-  const userDoc = await getDoc(userRef);
-  const targetDoc = await getDoc(targetRef);
+  const [userDoc, targetDoc] = await Promise.all([
+      getDoc(userRef),
+      getDoc(targetRef),
+  ]);
 
-  if (userDoc.exists() && targetDoc.exists()) {
-    const userData = userDoc.data();
-    const targetData = targetDoc.data();
+  if (!userDoc.exists() || !targetDoc.exists()) {
+      throw new Error("User or target not found");
+  }
 
-    // Update the user's following list
-    const following = userData.following || [];
-    if (!following.includes(targetId)) following.push(targetId);
-    await updateDoc(userRef, { following });
+  const targetData = targetDoc.data() as User; // Use the User interface
 
-    // Update the target's followers list
-    const followers = targetData.followers || [];
-    if (!followers.includes(userId)) followers.push(userId);
-    await updateDoc(targetRef, { followers });
-  } else {
-    throw new Error("User or target not found");
+  if (targetData.isPrivate) {
+      // Target user is private: create a follow request.
+      const requests = targetData.followRequests || [];
+      if (!requests.includes(userId)) {
+          await updateDoc(targetRef, {
+              followRequests: arrayUnion(userId), // Use arrayUnion
+          });
+      }
+      //Don't do the below if it's private
+      //We do not want to add the user as a follower or to the following list untill approved.
+      return; // Exit the function – request only
+  }
+
+  // Target user is public: follow directly.
+  const userData = userDoc.data();
+  const following = userData.followedCreators || []; // Use followedCreators
+  if (!following.includes(targetId)) {
+      await updateDoc(userRef, { followedCreators: arrayUnion(targetId) }); // Use arrayUnion and correct field
+  }
+
+  const followers = targetData.followedBy || []; // Use followedBy
+  if (!followers.includes(userId)) {
+      await updateDoc(targetRef, { followedBy: arrayUnion(userId) });  // Use arrayUnion and correct field
   }
 }
 
@@ -481,14 +498,14 @@ export async function unfollowUser(userId: string, targetId: string) {
     const targetData = targetDoc.data();
 
     // Update the user's following list
-    const following = userData.following || [];
+    const following = userData.followedCreators || []; // Use followedCreators
     const updatedFollowing = following.filter((id: string) => id !== targetId);
-    await updateDoc(userRef, { following: updatedFollowing });
+    await updateDoc(userRef, { followedCreators: updatedFollowing }); // Use correct field
 
     // Update the target's followers list
-    const followers = targetData.followers || [];
+    const followers = targetData.followedBy || []; // Use followedBy
     const updatedFollowers = followers.filter((id: string) => id !== userId);
-    await updateDoc(targetRef, { followers: updatedFollowers });
+    await updateDoc(targetRef, { followedBy: updatedFollowers }); // Use correct field
   } else {
     throw new Error("User or target not found");
   }
@@ -508,4 +525,67 @@ export async function requestFollow(userId: string, targetId: string) {
   } else {
     throw new Error("Target user not found");
   }
+}
+
+export async function approveFollowRequest(userId: string, requesterId: string) {
+  const userRef = doc(db, "users", userId);
+  const requesterRef = doc(db, "users", requesterId);
+
+  const [userDoc, requesterDoc] = await Promise.all([
+    getDoc(userRef),
+    getDoc(requesterRef),
+  ]);
+
+  if (!userDoc.exists() || !requesterDoc.exists()) {
+    throw new Error("User or requester not found");
+  }
+
+  const userData = userDoc.data() as User;
+  const requesterData = requesterDoc.data() as User;
+
+  // 1. Remove requesterId from followRequests
+  const followRequests = (userData.followRequests || []).filter(
+    (id) => id !== requesterId
+  );
+
+  // 2. Add requesterId to followedBy
+  const followedBy = userData.followedBy || [];
+  if (!followedBy.includes(requesterId)) {
+    followedBy.push(requesterId);
+  }
+
+  // 3. Add userId to requester's followedCreators
+  const followedCreators = requesterData.followedCreators || [];
+  if (!followedCreators.includes(userId)) {
+    followedCreators.push(userId);
+  }
+
+  // Update both documents atomically
+    await Promise.all([
+        updateDoc(userRef, {
+            followRequests: followRequests,
+            followedBy: followedBy,
+        }),
+        updateDoc(requesterRef, {
+            followedCreators: followedCreators,
+        }),
+    ]);
+}
+
+export async function rejectFollowRequest(userId: string, requesterId: string) {
+  const userRef = doc(db, "users", userId);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+      throw new Error("User not found");
+  }
+  const userData = userDoc.data() as User; // Use the User interface
+
+  // Remove requesterId from followRequests
+  const followRequests = (userData.followRequests || []).filter(
+      (id) => id !== requesterId
+  );
+  await updateDoc(userRef, {
+      followRequests: followRequests,
+  });
 }

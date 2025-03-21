@@ -7,7 +7,7 @@ import Image from "next/image";
 
 // Third-Party Libraries (Import)
 import axios from "axios";
-import { UserPlusIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { UserPlusIcon, TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
 
 // Local Files (Import)
 import { useAuth } from "@/hooks/AuthProvider";
@@ -174,42 +174,50 @@ export default function Page() {
    * @returns void
    */
   const handleFollow = async () => {
-    try {
-      if (!userUID || !user?.uid) {
-        console.error("User ID or Target User ID not available");
+      if (!userUID) {
+        alert("Please log in to follow users.");
         return;
-      }
-
-      if (userUID === user.uid) {
-        console.warn("You cannot follow yourself.");
+    }
+    if (userUID === id) {
         alert("You can't follow yourself.");
         return;
-      }
-
-      // Construct the appropriate URL based on the action
+    }
+    try {
       let url = "";
       if (isFollowing) {
-        url = `${apiURL}/user/${userUID}/unfollow/user/${user.uid}`; // Unfollow
-      } else if (user?.isPrivate && !isFollowing) {
-        url = `${apiURL}/user/${userUID}/request/${user.uid}`; // Follow Request for private accounts
-      } else {
-        url = `${apiURL}/user/${userUID}/follow/user/${user.uid}`; // Follow for public accounts
-      }
+        // Unfollow
+        url = `${apiURL}/user/${userUID}/unfollow/user/${id}`;
+        await axios.post(url);
+        setIsFollowing(false);
 
-      await axios.post(url);
-
-      // Update state based on the action
-      if (isFollowing) {
-        setIsFollowing(false); // Unfollowed
       } else if (user?.isPrivate) {
-        setFollowRequested(true); // Follow request sent
+        // Private profile
+        if(followRequested){
+          // cancel request
+          // OPTIONAL: Handle Cancel Request (requires backend endpoint)
+          url = `${apiURL}/user/${userUID}/cancel-request/${id}`;
+          // await axios.post(url); // UNCOMMENT WHEN ENDPOINT IS READY
+          setFollowRequested(false);
+        } else {
+          // Send Follow Request
+          url = `${apiURL}/user/${userUID}/request/${id}`; 
+          await axios.post(url);
+          setFollowRequested(true);
+        } 
       } else {
-        setIsFollowing(true); // Followed
+          // Public profile: Follow directly
+          url = `${apiURL}/user/${userUID}/follow/${id}`;
+          await axios.post(url);
+          setIsFollowing(true); 
       }
 
-      console.log(`Action performed successfully.`);
+      // Refetch user data to ensure consistency
+      const userResponse = await axios.get(`${apiURL}/user/${id}`);
+      setUser(userResponse.data);
+
     } catch (error) {
-      console.error("Error following/unfollowing user:", error);
+       console.error("Error handling follow:", error);
+       alert("An error occurred. Please try again.")
     }
   };
 
@@ -232,6 +240,61 @@ export default function Page() {
       setUser(userResponse.data);
     } catch (error) {
       console.error("Error unsharing content:", error);
+    }
+  };
+
+  // Approve Follow Request
+  const handleApproveRequest = async (requesterId: string) => {
+    try {
+      await axios.post(`${apiURL}/user/${id}/approve/${requesterId}`);
+
+      //Update local state
+      setUser(prevUser => {
+        if (!prevUser) return null;
+
+        const updatedFollowRequests = prevUser.followRequests?.filter(id => id !== requesterId);
+        const updatedFollowedBy = prevUser.followedBy ? [...prevUser.followedBy, requesterId] : [requesterId];
+
+          return {
+            ...prevUser,
+            followRequests: updatedFollowRequests,
+            followedBy: updatedFollowedBy,
+          }
+      });
+       // Refetch user data to be 100% sure
+       const userResponse = await axios.get(`${apiURL}/user/${id}`);
+       setUser(userResponse.data);
+
+       console.log("Follow request approved successfully.");
+    } catch (error) {
+      console.error("Error approving follow request:", error);
+      alert("Failed to approve follow request. Please try again.");
+    }
+  };
+
+  // Reject Follow Request
+  const handleRejectRequest = async (requesterId: string) => {
+    try {
+      await axios.post(`${apiURL}/user/${id}/reject/${requesterId}`);
+
+      // Update local state
+      setUser(prevUser => {
+        if (!prevUser) return null;
+        const updatedFollowRequests = prevUser.followRequests?.filter(id => id !== requesterId);
+
+        return {
+          ...prevUser,
+          followRequests: updatedFollowRequests
+        };
+      });
+      // Refetch user data to be 100% sure
+      const userResponse = await axios.get(`${apiURL}/user/${id}`);
+      setUser(userResponse.data);
+
+      console.log("Follow request rejected successfully.");
+    } catch (error) {
+      console.error("Error rejecting follow request:", error);
+      alert("Failed to reject follow request. Please try again.");
     }
   };
 
@@ -311,8 +374,8 @@ export default function Page() {
   // -------------- Render ----------------
   // --------------------------------------
 
-  const followersCount = user?.followers ? user.followers.length : 0;
-  const followingCount = user?.following ? user.following.length : 0;
+  const followersCount = user?.followedBy ? user.followedBy.length : 0;
+  const followingCount = user?.followedCreators ? user.followedCreators.length : 0;
   const createdCount = user?.content ? user.content.length : 0;
   const sharedCount = user?.sharedContent ? user.sharedContent.length : 0;
   const canViewFullProfile = !user?.isPrivate || userUID === id;

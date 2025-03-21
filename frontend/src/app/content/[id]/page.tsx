@@ -215,7 +215,7 @@ export default function Page() {
     }
 
     if (content?.creatorUID) {
-      setIsFollowing(user?.following?.includes(content.creatorUID) || false);
+      setIsFollowing(user?.followedCreators?.includes(content.creatorUID) || false);
     }
   }, [content, user]);
 
