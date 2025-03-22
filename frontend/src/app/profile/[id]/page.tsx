@@ -50,27 +50,24 @@ export default function Page() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch User Data
+        // 1. Fetch User Data
         const userResponse = await axios.get(`${apiURL}/user/${id}`);
         const userData = userResponse.data;
         setUser(userData);
 
-        // Fetch User's Created Content
+        // 2. Fetch User's Created Content
         if (userData?.content) {
-          const contentPromises = userData.content.map((contentId: string) =>
-            getContent(contentId)
-          );
+          const contentPromises = userData.content.map((contentId: string) => getContent(contentId));
           await Promise.all(contentPromises);
         }
-        // Fetch Shared Content (only if sharedContent exists)
+        
+        // 3. Fetch Shared Content (only if sharedContent exists)
         if (userData?.sharedContent) {
-          const validSharedContent = await getAndFilterSharedContent(
-            userData.sharedContent
-          );
+          const validSharedContent = await getAndFilterSharedContent(userData.sharedContent);
           setSharedContent(validSharedContent);
         }
 
-        // Check follow status (only if viewing another user's profile)
+        // 4. Check follow status (only if viewing another user's profile)
         if (userUID && userUID !== id) {
           setIsFollowing(userData.followedBy?.includes(userUID));
           setFollowRequested(userData.followRequests?.includes(userUID));
@@ -177,6 +174,7 @@ export default function Page() {
         alert("Please log in to follow users.");
         return;
     }
+
     if (userUID === id) {
         alert("You can't follow yourself.");
         return;
@@ -189,13 +187,11 @@ export default function Page() {
 
     try {
       let url = "";
-      if (isFollowing) {
-        // Unfollow
-        url = `${apiURL}/user/${userUID}/unfollow/user/${id}`;
-        await axios.post(url);
-        setIsFollowing(false);
-      } else if (user?.isPrivate) {
-        // Private profile: Send request, or cancel if already requested (optional)
+      let method = "post";
+
+      if (isFollowing) { // Unfollow
+        url = `${apiURL}/user/${userUID}/unfollow/${id}`;
+      } else if (user.isPrivate) { // Private profile: Send request, or cancel if already requested (optional)
         if(followRequested){
           // cancel request (OPTIONAL: Handle Cancel Request (requires backend endpoint))
           // url = `${apiURL}/user/${userUID}/cancel-request/${id}`;
@@ -203,21 +199,29 @@ export default function Page() {
           // setFollowRequested(false); // OPTIONAL: Update local state
           return; // for now
         } else {
-          // Send Follow Request
+          // Send Request
           url = `${apiURL}/user/${userUID}/request/${id}`; 
-          await axios.post(url);
-          setFollowRequested(true);
         } 
-      } else {
-          // Public profile: Follow directly
+      } else { // Public profile: Follow directly
           url = `${apiURL}/user/${userUID}/follow/${id}`;
-          await axios.post(url);
-          setIsFollowing(true); 
       }
 
-      // Refetch user data to ensure consistency
-      const userResponse = await axios.get(`${apiURL}/user/${id}`);
-      setUser(userResponse.data);
+      // Only make the API call if a URL is set
+      if (url) {
+        await axios.post(url);
+
+        // Optimistically update the UI *immediately*
+        if (isFollowing) {
+            setIsFollowing(false); // Just unfollowed
+        } else if (user.isPrivate && !followRequested) {
+            setFollowRequested(true); // Just sent a request
+        } else if (!user.isPrivate) {
+            setIsFollowing(true);  // Just followed directly
+        }
+        // Refetch data
+        const userResponse = await axios.get(`${apiURL}/user/${id}`);
+        setUser(userResponse.data);
+      }
 
     } catch (error) {
        console.error("Error handling follow/request:", error);
