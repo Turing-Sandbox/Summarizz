@@ -7,8 +7,6 @@ import {
   removeLikedContentFromUser,
   addBookmarkedContentToUser,
   removeBookmarkedContentFromUser,
-  addSharedContentToUser,
-  removeSharedContentFromUser,
 } from "../../user-module/services/userService";
 import { StorageService } from "../../storage-module/services/serviceStorage";
 import { Content } from "../models/contentModel";

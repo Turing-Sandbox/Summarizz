@@ -548,13 +548,13 @@ export async function approveFollowRequest(userId: string, requesterId: string) 
     (id) => id !== requesterId
   );
 
-  // 2. Add requesterId to followedBy
+  // 2. Add requesterId to followers list
   const followers = userData.followers || [];
   if (!followers.includes(requesterId)) {
     followers.push(requesterId);
   }
 
-  // 3. Add userId to requester's followedCreators
+  // 3. Add userId to requester's following list
   const following = requesterData.following || [];
   if (!following.includes(userId)) {
     following.push(userId);

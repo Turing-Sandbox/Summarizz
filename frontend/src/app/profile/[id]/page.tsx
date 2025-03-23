@@ -38,6 +38,7 @@ export default function Page() {
   const [sharedContent, setSharedContent] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<"created" | "shared">("created");
+  const [followUsernames, setFollowUsernames] = useState<{ [userId: string]: string }>({}); // Cache for usernames
 
   const { userUID } = useAuth(); // Get logged in user's UID
   const router = useRouter();
@@ -69,7 +70,7 @@ export default function Page() {
 
         // 4. Check follow status (only if viewing another user's profile)
         if (userUID && userUID !== id) {
-          setIsFollowing(userData.followedBy?.includes(userUID));
+          setIsFollowing(userData.followers?.includes(userUID));
           setFollowRequested(userData.followRequests?.includes(userUID));
         }
       } catch (error) {
@@ -81,6 +82,28 @@ export default function Page() {
 
     fetchData();
   }, [id, userUID]);
+
+  // Fetch usernames for follow requests
+  useEffect(() => {
+    if (!user || !user.followRequests) return;
+  
+    const followRequests = user.followRequests;
+  
+    async function fetchUsernames() {
+      const usernamesMap: { [key: string]: string } = {};
+      for (const requesterId of followRequests) {
+        try {
+          const username = await getUsername(requesterId);
+          usernamesMap[requesterId] = username;
+        } catch (error) {
+          usernamesMap[requesterId] = "Unknown User";
+        }
+      }
+      setFollowUsernames(usernamesMap);
+    }
+  
+    fetchUsernames();
+  }, [user]);  
 
   // Helper function to fetch and filter shared content
   async function getAndFilterSharedContent(
@@ -237,7 +260,7 @@ export default function Page() {
 
     try {
       // Make API call to unshare
-      await axios.post(`${apiURL}/content/${userUID}/unshare/${contentId}`);
+      await axios.post(`${apiURL}/content/${contentId}/user/${userUID}/unshare`);
 
       // Update the UI: Filter out the unshared content
       setSharedContent((prevSharedContent) =>
@@ -261,12 +284,12 @@ export default function Page() {
         if (!prevUser) return null;
 
         const updatedFollowRequests = prevUser.followRequests?.filter(id => id !== requesterId);
-        const updatedFollowedBy = prevUser.followers ? [...prevUser.followers, requesterId] : [requesterId];
+        const updatedFollowers = prevUser.followers ? [...prevUser.followers, requesterId] : [requesterId];
 
           return {
             ...prevUser,
             followRequests: updatedFollowRequests,
-            followedBy: updatedFollowedBy,
+            followers: updatedFollowers,
           }
       });
        // Refetch user data to be 100% sure
@@ -476,31 +499,27 @@ export default function Page() {
           <div className="follow-requests-section">
             <h3>Follow Requests</h3>
             <ul>
-              {user.followRequests.map((requesterId) => (
-                <li key={requesterId}>
-                  {/* Display Requester Username (Simplified) */}
-                  <span>
-                      {/* Ideally use a batch fetch, but this works for now */}
-                      {getUsername(requesterId).then(username => <span>{username}</span>)}
-                    </span>
-                  <div className="request-buttons">
-                    <button
-                      className="icon-button approve"
-                      onClick={() => handleApproveRequest(requesterId)}
-                      title="Approve Request"
-                    >
-                      <CheckIcon className="icon check" />
-                    </button>
-                    <button
-                      className="icon-button reject"
-                      onClick={() => handleRejectRequest(requesterId)}
-                      title="Reject Request"
-                    >
-                      <XMarkIcon className="icon xmark" />
-                    </button>
-                  </div>
-                </li>
-              ))}
+            {user.followRequests.map((requesterId) => (
+              <li key={requesterId}>
+                <span>{followUsernames[requesterId] || "Loading..."}</span>
+                <div className="request-buttons">
+                  <button
+                    className="icon-button approve"
+                    onClick={() => handleApproveRequest(requesterId)}
+                    title="Approve Request"
+                  >
+                    <CheckIcon className="icon check" />
+                  </button>
+                  <button
+                    className="icon-button reject"
+                    onClick={() => handleRejectRequest(requesterId)}
+                    title="Reject Request"
+                  >
+                    <XMarkIcon className="icon xmark" />
+                  </button>
+                </div>
+              </li>
+            ))}
             </ul>
           </div>
         )}
