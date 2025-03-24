@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
