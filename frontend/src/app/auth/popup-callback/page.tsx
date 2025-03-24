@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 /**
@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
  * It receives OAuth tokens from the authentication provider and sends
  * them to the parent window that opened this popup.
  */
-export default function PopupCallbackPage() {
+function PopupCallbackContent() {
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
@@ -61,5 +61,13 @@ export default function PopupCallbackPage() {
         <p>Authentication successful! You can close this window.</p>
       )}
     </div>
+  );
+}
+
+export default function PopupCallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PopupCallbackContent />
+    </Suspense>
   );
 }
