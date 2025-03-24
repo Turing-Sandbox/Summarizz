@@ -269,7 +269,7 @@ export default function Page() {
       <div className='main-content'>
         <h1>Create Content</h1>
 
-        <form className="create-content-form">
+        <form className='create-content-form'>
           <input
             className='content-input'
             type='text'
