@@ -75,6 +75,9 @@ export default function Page() {
   // ----------- Event Handlers ------------
   // ---------------------------------------
   useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     const savedTitle = localStorage.getItem("title");
     const savedContent = Cookies.get("content");
 
@@ -277,6 +280,8 @@ export default function Page() {
             name='title'
             value={title}
             onChange={(e) => {
+              // Only proceed if we're in the browser environment
+              if (typeof window === "undefined") return;
               setTitle(e.target.value);
               localStorage.setItem("title", e.target.value);
             }}
@@ -284,6 +289,8 @@ export default function Page() {
           />
           <a
             onClick={() => {
+              // Only proceed if we're in the browser environment
+              if (typeof window === "undefined") return;
               setTitle("");
               localStorage.removeItem("title");
             }}
@@ -336,6 +343,9 @@ export default function Page() {
           <button
             className='content-button left-button'
             onClick={() => {
+              // Only proceed if we're in the browser environment
+              if (typeof window === "undefined") return;
+
               localStorage.removeItem("title");
               Cookies.remove("content");
               setTitle("");

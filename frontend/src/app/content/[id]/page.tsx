@@ -233,6 +233,9 @@ export default function Page() {
    * @returns void
    */
   const handleDelete = async () => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     if (localStorage.getItem("userUID") === content?.creatorUID) {
       try {
         // Delete comments
@@ -417,6 +420,13 @@ export default function Page() {
     }
   };
 
+  const isCreator = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userUID") === content?.creatorUID;
+    }
+    return false;
+  };
+
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
@@ -495,7 +505,7 @@ export default function Page() {
               </div>
 
               {/* EDIT & DELETE (Only for Creator) */}
-              {userUID === content?.creatorUID && (
+              {isCreator() && (
                 <div className='content-interactions'>
                   <div className='icon-container'>
                     <button

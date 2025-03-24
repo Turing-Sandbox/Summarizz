@@ -46,6 +46,9 @@ export default function Toolbar({ editor }: ToolbarProps) {
 
   // EFFECT: Handle Dark Mode Preference for Formatting Options
   useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     const preferenceMode = localStorage.getItem("isDarkMode");
 
     if (preferenceMode === "true") {

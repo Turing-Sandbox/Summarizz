@@ -18,6 +18,9 @@ export default function PopupCallbackPage() {
       const uid = searchParams.get("uid");
       const errorMsg = searchParams.get("error");
 
+      // Only proceed if we're in the browser environment
+      if (typeof window === "undefined") return;
+
       // Verify window.opener exists
       if (!window.opener) {
         setError("Authentication window was not opened correctly");

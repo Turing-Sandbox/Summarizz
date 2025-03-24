@@ -44,6 +44,9 @@ export default function CallbackPage() {
 
   // If this is a popup callback, we need to send the data back to the opener window
   useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     if (window.opener) {
       const token = searchParams.get("token");
       const uid = searchParams.get("uid");
