@@ -13,9 +13,13 @@ const app = express();
 const port = 3000;
 
 app.use(
-    cors({
-      origin: [process.env.FRONTEND_URL, process.env.BACKEND_URL],
-    })
+  cors({
+    origin: [
+      process.env.FRONTEND_URL,
+      process.env.BACKEND_URL,
+      process.env.NETLIFY_URL,
+    ],
+  })
 );
 
 app.use(express.json());
