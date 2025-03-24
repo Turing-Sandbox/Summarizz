@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthService } from "@/services/authService";
 import { useAuth } from "@/hooks/AuthProvider";
 
-export default function CallbackPage() {
+function CallbackContent() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -44,6 +44,9 @@ export default function CallbackPage() {
 
   // If this is a popup callback, we need to send the data back to the opener window
   useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     if (window.opener) {
       const token = searchParams.get("token");
       const uid = searchParams.get("uid");
@@ -84,5 +87,13 @@ export default function CallbackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CallbackContent />
+    </Suspense>
   );
 }

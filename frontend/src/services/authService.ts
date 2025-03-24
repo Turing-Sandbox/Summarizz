@@ -55,6 +55,9 @@ export const AuthService = {
 
   async signInWithProvider(provider: string, useRedirect = false) {
     try {
+      // Only proceed if we're in the browser environment
+      if (typeof window === "undefined") return null;
+
       if (useRedirect) {
         // Get the OAuth URL from the backend
         const response = await axios.post(`${apiURL}/oauth/url`, {

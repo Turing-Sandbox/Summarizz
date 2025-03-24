@@ -43,6 +43,9 @@ function Navbar() {
 
   // Dark Mode handling
   useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     const preferenceMode = localStorage.getItem("isDarkMode");
 
     // Check if user has a saved preference in cookies
@@ -80,6 +83,9 @@ function Navbar() {
   // -------------- Functions --------------
   // ---------------------------------------
   const toggleTheme = () => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     const newTheme = isDarkMode ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
     setIsDarkMode(!isDarkMode);
@@ -140,6 +146,13 @@ function Navbar() {
       setUser(res.data);
     });
   }
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("title");
+    }
+    auth.logout();
+  };
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -314,7 +327,7 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  auth.logout();
+                  handleLogout();
                 }}
               >
                 Logout
