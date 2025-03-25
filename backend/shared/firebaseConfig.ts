@@ -1,4 +1,3 @@
-// shared/firebaseConfig.ts
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import { getAnalytics, isSupported } from "firebase/analytics";
@@ -6,6 +5,7 @@ import { getFirestore } from "firebase/firestore";
 import dotenv from "dotenv";
 import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
+import { logger } from "./loggingHandler";
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ const firebaseConfig = {
   measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
+// Initialize firebase, db, realtime_db, auth, storage
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 const realtime_db = getDatabase(firebaseApp);
@@ -31,14 +31,16 @@ const storage = getStorage(
   "gs://summarizz-d3713.firebasestorage.app"
 );
 
-// Conditionally initialize Analytics if supported
+// Conditionally initialize analytics if supported
 let analytics;
 isSupported().then((supported) => {
   if (supported) {
     analytics = getAnalytics(firebaseApp);
-    console.log("Firebase Analytics initialized.");
+    logger.info("Firebase Analytics initialized.");
+
   } else {
-    console.log("Firebase Analytics is not supported in this environment.");
+    logger.info("Firebase Analytics is not supported in this environment.");
+
   }
 });
 

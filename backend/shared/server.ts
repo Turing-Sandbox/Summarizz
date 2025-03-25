@@ -1,5 +1,3 @@
-// server.ts
-
 import express from "express";
 import "./firebaseConfig";
 import cors from "cors";
@@ -8,6 +6,7 @@ import userRoutes from "../user-module/routes/userRoutes";
 import commentRoutes from "../comment-module/routes/commentRoutes";
 import searchRoutes from "../search-module/routes/searchRoutes";
 import oauthRoutes from "../user-module/routes/oauthRoutes";
+import { logger } from "./loggingHandler";
 
 const app = express();
 const port = 3000;
@@ -27,15 +26,15 @@ app.use("/search", searchRoutes);
 app.use("/oauth", oauthRoutes);
 
 // Middleware to log all requests
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+app.use((req, _, next) => {
+  logger.http(`${req.method} ${req.url}`);
   next();
 });
 
-app.get("/", (req, res) => {
+app.get("/", (_, res) => {
   res.send("Server is Listening!");
 });
 
 app.listen(port, () => {
-  console.log(`Express is listening at http://localhost:${port}`);
+  logger.http(`Express is listening at http://localhost:${port}`);
 });
