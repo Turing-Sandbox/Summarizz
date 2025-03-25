@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/AuthProvider";
 interface ContentTileProps {
   content: Content;
   index: number;
+  hideStats?: boolean;
   deleteShareOption?: boolean;
   handleUnshare?: (contentId: string) => void;
 }
@@ -29,6 +30,7 @@ interface ContentTileProps {
 export default function ContentTile({
   content,
   index,
+  hideStats = false,
   deleteShareOption = false,
   handleUnshare = () => {},
 }: ContentTileProps) {
@@ -79,36 +81,38 @@ export default function ContentTile({
         </div>
       )}
 
-      <div className='content-stats'>
-        <span className='stat-item'>
-          {userUID && content.peopleWhoLiked?.includes(userUID) ? (
-            <HeartIconFilled className='stat-icon' />
-          ) : (
-            <HeartIconOutline className='stat-icon' />
-          )}
-          <p className='stat-number'>{content.likes || 0}</p>
-        </span>
-        <span className='stat-item'>
-          <EyeIconOutline className='stat-icon' />
-          <p className='stat-number'>{content.views || 0}</p>
-        </span>
-        <span className='stat-item'>
-          {userUID && content.sharedBy?.includes(userUID) ? (
-            <ShareIconFilled className='stat-icon' />
-          ) : (
-            <ShareIconOutline className='stat-icon' />
-          )}
-          <p className='stat-number'>{content.shares || 0}</p>
-        </span>
-        <span className='stat-item'>
-          {userUID && content.bookmarkedBy?.includes(userUID) ? (
-            <BookmarkIconFilled className='stat-icon' />
-          ) : (
-            <BookmarkIconOutline className='stat-icon' />
-          )}
-          <p className='stat-number'>{content.bookmarkedBy?.length || 0}</p>
-        </span>
-      </div>
+      {!hideStats && (
+        <div className='content-stats'>
+          <span className='stat-item'>
+            {userUID && content.peopleWhoLiked?.includes(userUID) ? (
+              <HeartIconFilled className='stat-icon' />
+            ) : (
+              <HeartIconOutline className='stat-icon' />
+            )}
+            <p className='stat-number'>{content.likes || 0}</p>
+          </span>
+          <span className='stat-item'>
+            <EyeIconOutline className='stat-icon' />
+            <p className='stat-number'>{content.views || 0}</p>
+          </span>
+          <span className='stat-item'>
+            {userUID && content.sharedBy?.includes(userUID) ? (
+              <ShareIconFilled className='stat-icon' />
+            ) : (
+              <ShareIconOutline className='stat-icon' />
+            )}
+            <p className='stat-number'>{content.shares || 0}</p>
+          </span>
+          <span className='stat-item'>
+            {userUID && content.bookmarkedBy?.includes(userUID) ? (
+              <BookmarkIconFilled className='stat-icon' />
+            ) : (
+              <BookmarkIconOutline className='stat-icon' />
+            )}
+            <p className='stat-number'>{content.bookmarkedBy?.length || 0}</p>
+          </span>
+        </div>
+      )}
     </div>
   );
 }
