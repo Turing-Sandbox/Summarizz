@@ -122,7 +122,7 @@ export default function Page() {
   async function fetchPersonalizedContent(): Promise<boolean> {
     try {
       const personalizedResponse = await axios.get(
-        `${apiURL}/content/feed/personalized`,
+        `${apiURL}/content/feed/${userUID}`,
         { timeout: 5000 }
       );
 
