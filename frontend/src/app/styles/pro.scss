@@ -1,0 +1,258 @@
+// Pro feature page styles
+// Using project CSS variables
+
+.pro-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  color: var(--text-color);
+}
+
+.pro-hero {
+  text-align: center;
+  padding: 3rem 1rem;
+  margin-top: 5rem;
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, var(--left-bottom-rectangle) 0%, var(--middle-bottom-circle) 100%);
+  border-radius: 10px;
+  color: white;
+
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .pro-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+}
+
+.pro-cta-button {
+  background-color: white;
+  color: var(--left-bottom-rectangle);
+  font-weight: 600;
+  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.pro-features {
+  margin-bottom: 4rem;
+
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background-color: var(--tile-color);
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  .feature-icon {
+    width: 50px;
+    height: 50px;
+    background-color: var(--left-bottom-rectangle);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.8rem;
+  }
+
+  p {
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+}
+
+.pro-pricing {
+  margin-bottom: 4rem;
+  text-align: center;
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.pricing-card {
+  max-width: 400px;
+  margin: 0 auto;
+  background-color: var(--tile-color);
+  border-radius: 10px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--left-bottom-rectangle);
+
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .price {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--left-bottom-rectangle);
+    margin-bottom: 1.5rem;
+
+    span {
+      font-size: 1.2rem;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+  }
+}
+
+.pricing-features {
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: 2rem;
+
+  li {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--input-border-color);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.pricing-button {
+  background-color: var(--left-bottom-rectangle);
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+
+  &:hover {
+    background-color: var(--left-top-rectangle);
+  }
+}
+
+.pro-testimonials {
+  margin-bottom: 4rem;
+
+  h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
+.testimonials-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.testimonial-card {
+  background-color: var(--tile-color);
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+
+  &::before {
+    content: '"';
+    position: absolute;
+    top: 10px;
+    left: 15px;
+    font-size: 4rem;
+    color: var(--left-bottom-rectangle);
+    opacity: 0.7;
+    font-family: serif;
+  }
+
+  p {
+    font-style: italic;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .testimonial-author {
+    font-weight: 600;
+    color: var(--left-bottom-rectangle);
+  }
+}
+
+.pro-cta {
+  text-align: center;
+  padding: 3rem;
+  background-color: var(--tile-color);
+  border-radius: 10px;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .pro-hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .pro-hero .pro-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .features-grid,
+  .testimonials-container {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-card {
+    max-width: 100%;
+  }
+}
