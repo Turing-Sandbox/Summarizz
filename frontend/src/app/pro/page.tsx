@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useAuth } from "@/hooks/AuthProvider";
 import "@/app/styles/pro.scss";
 

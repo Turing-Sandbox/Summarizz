@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+// import axios from "axios";
 import { useAuth } from "@/hooks/AuthProvider";
-import { apiURL } from "@/app/scripts/api";
+// import { apiURL } from "@/app/scripts/api";
 import "@/app/styles/subscribe.scss";
 
 export default function SubscribePage() {
@@ -48,7 +48,7 @@ export default function SubscribePage() {
       // Redirect to Stripe Checkout
       window.location.href = response.data.url;
       */
-     
+
       // Redirect to Stripe test checkout link
       window.open("https://buy.stripe.com/test_bIY5nxgiD2TyghO8ww", "_blank");
     } catch (err: any) {
