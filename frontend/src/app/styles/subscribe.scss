@@ -1,0 +1,150 @@
+// Subscribe page styles
+// Using project CSS variables
+
+.subscribe-page-container {
+  max-width: 800px;
+  margin: 5rem auto 0;
+  padding: 3rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+}
+
+.subscribe-card {
+  background-color: var(--tile-color);
+  border-radius: 10px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+  }
+
+  .subscribe-description {
+    color: var(--text-color);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+}
+
+.subscription-details {
+  margin-bottom: 2rem;
+}
+
+.subscription-plan {
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 2px solid var(--left-bottom-rectangle);
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+  }
+
+  .subscription-price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--left-bottom-rectangle);
+    margin-bottom: 1.5rem;
+
+    span {
+      font-size: 1rem;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+  }
+}
+
+.subscription-features {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  list-style-type: none;
+  padding: 0;
+  margin-bottom: 1rem;
+  text-align: left;
+
+  li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+    color: var(--text-color);
+
+    &:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--left-bottom-rectangle);
+      font-weight: bold;
+    }
+  }
+}
+
+.subscribe-button {
+  background-color: var(--left-bottom-rectangle);
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-bottom: 1.5rem;
+
+  &:hover {
+    background-color: var(--left-top-rectangle);
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+}
+
+.payment-info {
+  font-size: 0.9rem;
+  color: var(--text-color);
+
+  p {
+    margin-bottom: 0.5rem;
+  }
+
+  .payment-disclaimer {
+    font-size: 0.8rem;
+    opacity: 0.8;
+  }
+}
+
+.error-message {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #d32f2f;
+  padding: 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .subscribe-card {
+    padding: 1.5rem;
+  }
+
+  .subscribe-card h1 {
+    font-size: 1.8rem;
+  }
+
+  .subscription-plan .subscription-price {
+    font-size: 2rem;
+  }
+}
