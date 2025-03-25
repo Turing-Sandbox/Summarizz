@@ -327,6 +327,16 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
+                  router.push("/pro");
+                }}
+              >
+                Summarizz Pro
+              </a>
+
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
                   handleLogout();
                 }}
               >
