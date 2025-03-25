@@ -1,5 +1,8 @@
+"use client";
+
 import "@/app/styles/footer.scss";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 /**
  * Footer() -> JSX.Element
@@ -11,47 +14,50 @@ import Image from "next/image";
  */
 export default function Footer() {
   const year = new Date().getFullYear();
+  const pathname = usePathname();
+  const showFooterLinks = !pathname.startsWith("/auth");
 
   return (
     <footer className='footer'>
-      <div className='website-links'>
-        <div className='website-links-list'>
-          <h4>Legal</h4>
+      {showFooterLinks && (
+        <div className='website-links'>
+          <div className='website-links-list'>
+            <h4>Legal</h4>
 
-          <div className='link'>
-            <a href='/legal/terms-of-service'>Terms of Service</a>
+            <div className='link'>
+              <a href='/legal/terms-of-service'>Terms of Service</a>
+            </div>
+
+            <div className='link'>
+              <a href='/legal/privacy-policy'>Privacy Policy</a>
+            </div>
+
+            <div className='link'>
+              <a href='/legal/cookie-policy'>Cookie Policy</a>
+            </div>
+
+            <div className='link'>
+              <a href='/legal/ai-disclaimer'>AI Disclaimer</a>
+            </div>
+
+            <div className='link'>
+              <a href='/legal/accessibility'>Accessibility</a>
+            </div>
           </div>
 
-          <div className='link'>
-            <a href='/legal/privacy-policy'>Privacy Policy</a>
-          </div>
+          <div className='website-links-list'>
+            <h4>Social</h4>
 
-          <div className='link'>
-            <a href='/legal/cookie-policy'>Cookie Policy</a>
-          </div>
+            <div className='link'>
+              <a href='/about'>About</a>
+            </div>
 
-          <div className='link'>
-            <a href='/legal/ai-disclaimer'>AI Disclaimer</a>
-          </div>
-
-          <div className='link'>
-            <a href='/legal/accessibility'>Accessibility</a>
+            <div className='link'>
+              <a href='/contact'>Contact</a>
+            </div>
           </div>
         </div>
-
-        <div className='website-links-list'>
-          <h4>Social</h4>
-
-          <div className='link'>
-            <a href='/about'>About</a>
-          </div>
-
-          <div className='link'>
-            <a href='/contact'>Contact</a>
-          </div>
-        </div>
-      </div>
-
+      )}
       <Image
         src='/images/summarizz-logo.png'
         alt='Summarizz Logo'
