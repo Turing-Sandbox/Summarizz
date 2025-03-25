@@ -35,19 +35,27 @@ body {
   box-sizing: border-box;
 }
 
-%base-font {
-  font-weight: 400;
-  font-style: normal;
+h1 {
+  font-family: var(--font-headings);
+  font-weight: 900;
+  font-size: 2.5rem;
 }
 
-h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
   font-family: var(--font-headings);
-  @extend %base-font;
+  margin: 40px 0 0px;
+  padding: 0;
+  font-weight: 700;
+  font-style: normal;
+}
+
+%base-font {
+  font-weight: 200;
+  font-style: normal;
 }
 
 p,
@@ -55,7 +63,8 @@ label,
 input,
 textarea,
 ul,
-ol {
+ol,
+a {
   font-family: var(--font-body);
   font-size: small;
   @extend %base-font;
@@ -67,6 +76,15 @@ label {
   font-family: var(--font-interactive);
   text-decoration: none;
   @extend %base-font;
+}
+
+a {
+  color: var(--text-color);
+}
+
+a:hover {
+  color: var(--icon-hover-color);
+  font-weight: 500;
 }
 
 %block-style {

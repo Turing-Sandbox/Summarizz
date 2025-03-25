@@ -14,6 +14,44 @@ export default function Footer() {
 
   return (
     <footer className='footer'>
+      <div className='website-links'>
+        <div className='website-links-list'>
+          <h4>Legal</h4>
+
+          <div className='link'>
+            <a href='/legal/terms-of-service'>Terms of Service</a>
+          </div>
+
+          <div className='link'>
+            <a href='/legal/privacy-policy'>Privacy Policy</a>
+          </div>
+
+          <div className='link'>
+            <a href='/legal/cookie-policy'>Cookie Policy</a>
+          </div>
+
+          <div className='link'>
+            <a href='/legal/ai-disclaimer'>AI Disclaimer</a>
+          </div>
+
+          <div className='link'>
+            <a href='/legal/accessibility'>Accessibility</a>
+          </div>
+        </div>
+
+        <div className='website-links-list'>
+          <h4>Social</h4>
+
+          <div className='link'>
+            <a href='/about'>About</a>
+          </div>
+
+          <div className='link'>
+            <a href='/contact'>Contact</a>
+          </div>
+        </div>
+      </div>
+
       <Image
         src='/images/summarizz-logo.png'
         alt='Summarizz Logo'

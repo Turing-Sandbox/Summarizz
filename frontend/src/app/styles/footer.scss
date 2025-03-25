@@ -7,8 +7,33 @@
   margin: 20px 0px;
 }
 
+.website-links {
+  width: 90vw;
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  margin: 20px 0;
+  gap: 20px;
+}
+
+.website-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.website-links-list h4 {
+  display: inline-block;
+  margin: 10px 0;
+}
+
 .footer-logo {
   width: 50px;
   height: 50px;
   margin: 20 0 5 0;
+}
+
+@media screen and (max-width: 768px) {
+  .website-links {
+    grid-template-columns: 1fr;
+  }
 }
