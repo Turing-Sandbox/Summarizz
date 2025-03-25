@@ -73,7 +73,6 @@
 }
 
 .content-thumbnail:hover {
-  // Zoom image on hover
   transform: scale(1.1);
 }
 
@@ -88,9 +87,9 @@
 }
 
 .icon {
-  width: 20px; /* Or whatever size you want */
+  width: 20px;
   height: 20px;
-  color: var(--icon-color); /* Use CSS variables if you have them */
+  color: var(--icon-color);
   transition: all ease-out 0.3s;
 }
 
@@ -99,9 +98,6 @@
   cursor: pointer;
 }
 
-/* Specific style for the delete icon's hover state */
 .icon.delete:hover {
-  color: var(
-    --delete-hover-color
-  ); /* Use a specific variable for delete hover */
+  color: var(--delete-hover-color);
 }
