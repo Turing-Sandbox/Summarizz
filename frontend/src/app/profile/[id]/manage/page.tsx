@@ -446,7 +446,7 @@ export default function Page() {
    *
    * @description
    * Fetches user data from the backend using the id provided in the route, this
-   * will fetch { firstName, lastName, bio, profileImage, followedBy, followRequests }
+   * will fetch { firstName, lastName, bio, profileImage, followers, followRequests }
    * from the backend and set the user accordingly.
    *
    * @param userId - The id of the user to fetch
