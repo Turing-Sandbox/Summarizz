@@ -48,8 +48,8 @@ export class SearchController {
 			const response = await SearchService.searchContent(searchText);
 			res.status(200).json(response);
 		} catch (error) {
-			logger.error(`Error searching: ${error}`);
-			throw Error(error)
+			logger.error(`Error searching content: ${error.message || error}`);
+			res.status(500).json({ error: 'Failed to search content' });
 		}
 	}
 }
