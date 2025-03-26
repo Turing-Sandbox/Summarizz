@@ -62,6 +62,10 @@ export default function Page() {
   }, [userUID]);
 
   async function fetchUser(): Promise<boolean> {
+    if (!userUID) {
+      setUser(null);
+      return false;
+    }
     try {
       const userResponse = await axios.get(`${apiURL}/user/${userUID}`, {
         timeout: 5000,
