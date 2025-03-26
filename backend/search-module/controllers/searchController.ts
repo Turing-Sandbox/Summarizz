@@ -25,8 +25,8 @@ export class SearchController {
 			const response = await SearchService.searchUsers(searchText, userStartingPoint);
 			res.status(200).json(response);
 		} catch (error) {
-			logger.error(`Error searching: ${error}`);
-			throw Error(error)
+			logger.error(`Error searching users: ${error.message || error}`);
+			res.status(500).json({ error: 'Failed to search users' });
 		}
 	}
 
