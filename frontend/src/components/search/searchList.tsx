@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
 
@@ -18,13 +18,13 @@ import Navbar from "@/components/Navbar";
 import "@/app/styles/search/search.scss";
 import Error from "next/error";
 
-const SearchList = ({
+function SearchListContent({
   userSearchResults,
   contentSearchResults,
 }: {
   userSearchResults?: User[];
   contentSearchResults?: Content[];
-} = {}) => {
+} = {}) {
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------
@@ -231,6 +231,17 @@ const SearchList = ({
       </div>
       {/* </div> */}
     </>
+  );
+}
+
+const SearchList = (props: {
+  userSearchResults?: User[];
+  contentSearchResults?: Content[];
+}) => {
+  return (
+    <Suspense fallback={<div>Loading search results...</div>}>
+      <SearchListContent {...props} />
+    </Suspense>
   );
 };
 

@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-
 interface AuthContextType {
   userUID: string | null;
   setUserUID: (arg0: string) => void;
@@ -18,7 +17,6 @@ interface AuthContextType {
   login: (token: string, userUID: string) => void;
   logout: () => void;
 }
-
 
 const AuthContext = createContext<AuthContextType>({
   userUID: null,
@@ -33,23 +31,34 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
 });
 
-
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
 
   function setUserUID(userUID: string) {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     localStorage.setItem("userUID", userUID);
   }
 
   function getUserUID() {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return null;
+
     return localStorage.getItem("userUID");
   }
 
   function setToken(token: string) {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     localStorage.setItem("token", token);
   }
 
   function getToken() {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return null;
+
     return localStorage.getItem("token");
   }
 
@@ -59,6 +68,9 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   function logout() {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     localStorage.removeItem("token");
     localStorage.removeItem("userUID");
     router.push("/authentication/login");
@@ -82,14 +94,11 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-
 export default AuthProvider;
-
 
 export const useAuth = () => {
   return useContext(AuthContext);

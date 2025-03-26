@@ -16,6 +16,7 @@ export default function Background() {
       <div className='left-top-rectangle' />
       <div className='middle-bottom-circle' />
       <div className='right-top-circle' />
+      <div className='smooth-filter' />
     </div>
   );
 }

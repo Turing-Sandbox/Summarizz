@@ -9,6 +9,8 @@ import {
   followUserController,
   unfollowUserController,
   requestFollowController,
+  approveFollowRequestController,
+  rejectFollowRequestController, 
   changePasswordController,
   changeEmailController,
   changeUsernameController,
@@ -34,6 +36,9 @@ router.post("/:userId/unfollow/:targetId", unfollowUserController); // Unfollow 
 
 // Profile View - Request Follow for Private Account
 router.post("/:userId/request/:targetId", requestFollowController); // Request Follow
+// Approve and Reject Follow Requests
+router.post("/:userId/approve/:requesterId", approveFollowRequestController); // Approve Follow Request
+router.post("/:userId/reject/:requesterId", rejectFollowRequestController); // Reject Follow Request
 
 // Profile Management - Change Password
 router.post("/:userId/change-password", changePasswordController); // Change Password

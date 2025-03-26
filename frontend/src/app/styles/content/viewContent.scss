@@ -1,11 +1,4 @@
-// Mixins for reusable styles
-@mixin glassmorphic-background {
-  background-color: var(--tile-color);
-  box-shadow: 0 0px 25px var(--shadow-color),
-    inset 0 0px 25px var(--shadow-color);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
+@use "@/app/styles/global.scss";
 
 .content-title-bar {
   display: flex;
@@ -168,7 +161,7 @@
 }
 
 .comment-textarea {
-  @include glassmorphic-background;
+  @include global.glassmorphic-background;
   border-radius: 10px;
   resize: none;
   overflow: hidden;
@@ -206,7 +199,7 @@
 }
 
 .edit-comment {
-  @include glassmorphic-background;
+  @include global.glassmorphic-background;
   display: flex;
   flex-direction: column;
   padding: 10px;
@@ -242,7 +235,7 @@
 }
 
 .comment {
-  @include glassmorphic-background;
+  @include global.glassmorphic-background;
   border-radius: 10px;
   padding: 10px;
   margin-bottom: 10px;

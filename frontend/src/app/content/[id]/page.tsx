@@ -248,6 +248,9 @@ export default function Page() {
    * @returns void
    */
   const handleDelete = async () => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     if (localStorage.getItem("userUID") === content?.creatorUID) {
       try {
         // Delete comments
@@ -432,169 +435,171 @@ export default function Page() {
     }
   };
 
+  const isCreator = () => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("userUID") === content?.creatorUID;
+    }
+    return false;
+  };
+
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
   return (
     <>
-        <div className='main-content'>
-          <div className='row'>
-            {/* Left Column: Thumbnail and Comments */}
-            <div className='col-1'>
-              {content?.thumbnail && (
-                <Image
-                  src={content.thumbnail}
-                  alt='Thumbnail'
-                  width={200}
-                  height={200}
-                  className='thumbnail'
-                />
-              )}
-              <CommentList />
-            </div>
+      <div className='main-content'>
+        <div className='row'>
+          {/* Left Column: Thumbnail and Comments */}
+          <div className='col-1'>
+            {content?.thumbnail && (
+              <Image
+                src={content.thumbnail}
+                alt='Thumbnail'
+                width={200}
+                height={200}
+                className='thumbnail'
+              />
+            )}
+            <CommentList />
+          </div>
 
-            {/* Right Column: Content Details */}
-            <div className='col-2'>
-              {/* Title and Interaction Buttons */}
-              <div className='content-title-bar'>
-                <h1 className='content-title'>{content?.title}</h1>
+          {/* Right Column: Content Details */}
+          <div className='col-2'>
+            {/* Title and Interaction Buttons */}
+            <div className='content-title-bar'>
+              <h1 className='content-title'>{content?.title}</h1>
 
+              <div className='content-interactions'>
+                {/* LIKE BUTTON */}
+                <button
+                  className='icon-button'
+                  onClick={handleLike}
+                  title={isLiked ? "Unlike Content" : "Like Content"}
+                >
+                  {isLiked ? (
+                    <HeartIconSolid className='icon' />
+                  ) : (
+                    <HeartIconOutline className='icon ' />
+                  )}
+                  {likes > 0 && <span className='icon counter'>{likes}</span>}
+                </button>
+
+                {/* BOOKMARK BUTTON */}
+                <button
+                  className='icon-button'
+                  onClick={handleBookmark}
+                  title={
+                    isBookmarked ? "Unbookmark Content" : "Bookmark Content"
+                  }
+                >
+                  {isBookmarked ? (
+                    <BookmarkIconSolid className='icon' />
+                  ) : (
+                    <BookmarkIconOutline className='icon' />
+                  )}
+                  {bookmarks > 0 && (
+                    <span className='icon counter'>{bookmarks}</span>
+                  )}
+                </button>
+
+                {/* SHARE BUTTON */}
+                <button
+                  className='icon-button'
+                  onClick={handleShare}
+                  title={isShared ? "Unshare Content" : "Share Content"}
+                >
+                  {isShared ? (
+                    <ShareIconSolid className='icon' />
+                  ) : (
+                    <ShareIconOutline className='icon' />
+                  )}
+                  {shareCount > 0 && (
+                    <span className='icon counter'>{shareCount}</span>
+                  )}
+                </button>
+              </div>
+
+              {/* EDIT & DELETE (Only for Creator) */}
+              {isCreator() && (
                 <div className='content-interactions'>
-                  {/* LIKE BUTTON */}
-                  <button
-                    className='icon-button'
-                    onClick={handleLike}
-                    title={isLiked ? "Unlike Content" : "Like Content"}
-                  >
-                    {isLiked ? (
-                      <HeartIconSolid className='icon' />
-                    ) : (
-                      <HeartIconOutline className='icon ' />
-                    )}
-                    {likes > 0 && <span className='icon counter'>{likes}</span>}
-                  </button>
-
-                  {/* BOOKMARK BUTTON */}
-                  <button
-                    className='icon-button'
-                    onClick={handleBookmark}
-                    title={
-                      isBookmarked ? "Unbookmark Content" : "Bookmark Content"
-                    }
-                  >
-                    {isBookmarked ? (
-                      <BookmarkIconSolid className='icon' />
-                    ) : (
-                      <BookmarkIconOutline className='icon' />
-                    )}
-                    {bookmarks > 0 && (
-                      <span className='icon counter'>{bookmarks}</span>
-                    )}
-                  </button>
-
-                  {/* SHARE BUTTON */}
-                  <button
-                    className='icon-button'
-                    onClick={handleShare}
-                    title={isShared ? "Unshare Content" : "Share Content"}
-                  >
-                    {isShared ? (
-                      <ShareIconSolid className='icon' />
-                    ) : (
-                      <ShareIconOutline className='icon' />
-                    )}
-                    {shareCount > 0 && (
-                      <span className='icon counter'>{shareCount}</span>
-                    )}
-                  </button>
-                </div>
-
-                {/* EDIT & DELETE (Only for Creator) */}
-                {userUID === content?.creatorUID && (
-                  <div className='content-interactions'>
-                    <div className='icon-container'>
-                      <button
-                        className='icon-button'
-                        onClick={editContent}
-                        title='Edit Content'
-                      >
-                        <PencilIconSolid className='icon edit' />
-                      </button>
-                      <button
-                        className='icon-button'
-                        onClick={handleDelete}
-                        title='Delete Content'
-                      >
-                        <TrashIconSolid className='icon delete' />
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Content Header: Info and Creator */}
-              <div className='content-header'>
-                <div className='content-info'>
-                  {/* LEFT SIDE (VIEW, DATE, READ TIME AND CREATOR) */}
-                  <p className='username'>By: {creator?.username}</p>
-                  <p>
-                    {content?.dateCreated?.toLocaleDateString()}
-                    {content?.readtime ? ` - ${content.readtime} min` : ""}
-                  </p>
-                  <p>{views ? ` ${views} views` : ""}</p>
-
-                  <div className='creator-follow-section'>
-                    {/* CLICK CREATOR IMAGE TO NAVIGATE TO THEIR PROFILE */}
-                    <div
-                      onClick={() => router.push(`/profile/${creator?.uid}`)}
+                  <div className='icon-container'>
+                    <button
+                      className='icon-button'
+                      onClick={editContent}
+                      title='Edit Content'
                     >
-                      {creator?.profileImage ? (
-                        <Image
-                          className='profile-image-creator'
-                          src={creator.profileImage}
-                          width={70}
-                          height={70}
-                          alt='Profile Picture'
-                        />
-                      ) : (
-                        <div className='profile-image-creator'>
-                          <h1 className='profile-initial'>
-                            {creator?.username[0].toUpperCase()}
-                          </h1>
-                        </div>
-                      )}
-                    </div>
-
-                    {userUID && userUID !== creator?.uid && (
-                      <button
-                        className='follow-button'
-                        onClick={handleFollow}
-                        title={
-                          isFollowing ? "Unfollow Author" : "Follow Author"
-                        }
-                      >
-                        {isFollowing ? "Following" : "Follow"}
-                      </button>
-                    )}
+                      <PencilIconSolid className='icon edit' />
+                    </button>
+                    <button
+                      className='icon-button'
+                      onClick={handleDelete}
+                      title='Delete Content'
+                    >
+                      <TrashIconSolid className='icon delete' />
+                    </button>
                   </div>
                 </div>
+              )}
+            </div>
 
-                <div className='spliter'></div>
+            {/* Content Header: Info and Creator */}
+            <div className='content-header'>
+              <div className='content-info'>
+                {/* LEFT SIDE (VIEW, DATE, READ TIME AND CREATOR) */}
+                <p className='username'>By: {creator?.username}</p>
+                <p>
+                  {content?.dateCreated?.toLocaleDateString()}
+                  {content?.readtime ? ` - ${content.readtime} min` : ""}
+                </p>
+                <p>{views ? ` ${views} views` : ""}</p>
 
-                {/* RIGHT SIDE - SUMMARY */}
-                <div className='content-summary'>
-                  <p>Article Summary</p>
+                <div className='creator-follow-section'>
+                  {/* CLICK CREATOR IMAGE TO NAVIGATE TO THEIR PROFILE */}
+                  <div onClick={() => router.push(`/profile/${creator?.uid}`)}>
+                    {creator?.profileImage ? (
+                      <Image
+                        className='profile-image-creator'
+                        src={creator.profileImage}
+                        width={70}
+                        height={70}
+                        alt='Profile Picture'
+                      />
+                    ) : (
+                      <div className='profile-image-creator'>
+                        <h1 className='profile-initial'>
+                          {creator?.username[0].toUpperCase()}
+                        </h1>
+                      </div>
+                    )}
+                  </div>
+
+                  {userUID && userUID !== creator?.uid && (
+                    <button
+                      className='follow-button'
+                      onClick={handleFollow}
+                      title={isFollowing ? "Unfollow Author" : "Follow Author"}
+                    >
+                      {isFollowing ? "Following" : "Follow"}
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* Render the Main Content */}
-              {formatedContent && (
-                <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
-              )}
+              <div className='spliter'></div>
 
+              {/* RIGHT SIDE - SUMMARY */}
+              <div className='content-summary'>
+                <p>Article Summary</p>
+              </div>
             </div>
+
+            {/* Render the Main Content */}
+            {formatedContent && (
+              <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
+            )}
           </div>
         </div>
+      </div>
     </>
   );
 }
