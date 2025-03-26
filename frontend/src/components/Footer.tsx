@@ -2,7 +2,7 @@
 
 import "@/app/styles/footer.scss";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 /**
  * Footer() -> JSX.Element
@@ -17,6 +17,8 @@ export default function Footer() {
   const pathname = usePathname();
   const showFooterLinks = !pathname.startsWith("/auth");
 
+  const router = useRouter();
+
   return (
     <footer className='footer'>
       {showFooterLinks && (
@@ -25,23 +27,33 @@ export default function Footer() {
             <h4>Legal</h4>
 
             <div className='link'>
-              <a href='/legal/terms-of-service'>Terms of Service</a>
+              <a onClick={() => router.push("/legal/terms-of-service")}>
+                Terms of Service
+              </a>
             </div>
 
             <div className='link'>
-              <a href='/legal/privacy-policy'>Privacy Policy</a>
+              <a onClick={() => router.push("/legal/privacy-policy")}>
+                Privacy Policy
+              </a>
             </div>
 
             <div className='link'>
-              <a href='/legal/cookie-policy'>Cookie Policy</a>
+              <a onClick={() => router.push("/legal/cookie-policy")}>
+                Cookie Policy
+              </a>
             </div>
 
             <div className='link'>
-              <a href='/legal/ai-disclaimer'>AI Disclaimer</a>
+              <a onClick={() => router.push("/legal/ai-disclaimer")}>
+                AI Disclaimer
+              </a>
             </div>
 
             <div className='link'>
-              <a href='/legal/accessibility'>Accessibility</a>
+              <a onClick={() => router.push("/legal/accessibility")}>
+                Accessibility
+              </a>
             </div>
           </div>
 
@@ -49,11 +61,11 @@ export default function Footer() {
             <h4>Social</h4>
 
             <div className='link'>
-              <a href='/about'>About</a>
+              <a onClick={() => router.push("/about")}>About</a>
             </div>
 
             <div className='link'>
-              <a href='/contact'>Contact</a>
+              <a onClick={() => router.push("/contact")}>Contact</a>
             </div>
           </div>
         </div>

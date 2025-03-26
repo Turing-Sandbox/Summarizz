@@ -84,6 +84,7 @@ button {
 
 a {
   color: var(--text-color);
+  cursor: pointer;
 }
 
 a:hover {
@@ -114,6 +115,63 @@ blockquote {
   background-color: var(--tile-color);
   border-left: 5px solid var(--input-border-color);
   border-radius: 5px;
+}
+
+.input-group {
+  text-align: left;
+  margin: 10px 0;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin: 0 0.5rem 0 1rem;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  width: 100%;
+
+  margin: 0.5rem auto;
+  padding: 0.8rem;
+  box-sizing: border-box;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
+  color: var(--text-color);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 50px;
+  max-height: 200px;
+}
+
+.save-button {
+  width: 100%;
+
+  margin: 1rem auto;
+  padding: 15px;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.save-button:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
 }
 
 .summarizz-logo {
