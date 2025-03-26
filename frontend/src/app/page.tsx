@@ -124,12 +124,17 @@ export default function Page() {
   }
 
   async function fetchPersonalizedContent(): Promise<boolean> {
+    if (!userUID) {
+      setPersonalizedContent([]);
+      return false;
+    }
+  
     try {
       const personalizedResponse = await axios.get(
         `${apiURL}/content/feed/${userUID}`,
         { timeout: 5000 }
       );
-
+  
       if (personalizedResponse.data && personalizedResponse.data.success) {
         setPersonalizedContent(personalizedResponse.data.personalizedContent);
         return true;
