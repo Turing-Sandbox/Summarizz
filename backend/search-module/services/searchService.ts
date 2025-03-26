@@ -11,6 +11,9 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
+import { getLoggerWithContext } from "../../shared/loggingHandler";
+
+const logger = getLoggerWithContext("SearchService");
 
 export class SearchService {
   private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;
@@ -35,10 +38,12 @@ export class SearchService {
    * Fetches 5 users at a time where their username matches or starts with the text provided to the search query.
    * If a starting point is provided, the search query starts from the provided starting point.
    *
+   * @param searchText - The text to search for in the username.
+   * @param startingPoint - The starting point for the search query.
+   * @returns An array of users matching the search query.
    */
   static async searchUsers(searchText: string, startingPoint = null) {
-    console.log("Searching... (from service)");
-    console.log("Searching for specific users...");
+    logger.info(`Searching for users that match the following: ${searchText}`);
     const userRef = collection(db, "users");
     const limitNumber: number = 5;
 
@@ -51,11 +56,14 @@ export class SearchService {
       limit(limitNumber)
     );
 
-    // If there's a starting point, create a new query starting at that point
-    // (fetch next 5 documents starting after the starting point)
+    /**
+     * If a starting point is provided, create a new query starting at that point
+     * (fetch next 5 documents starting after the starting point)
+     */
     if (startingPoint) {
-      console.log("starting point");
-      console.log(JSON.stringify(startingPoint, null, 3));
+      logger.info(`Starting point: ${startingPoint}.`);
+      logger.info("Starting point (JSON):", JSON.stringify(startingPoint, null, 3));
+
       const nextUserQuery = query(
         userRef,
         where("usernameLower", ">=", searchText.toLowerCase()),
@@ -73,16 +81,16 @@ export class SearchService {
       let nextStartingPoint = null;
 
       if (documents.length >= limitNumber) {
-        // const nextStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
         nextStartingPoint =
           results.docs[results.docs.length - 1]?.data().usernameLower;
       }
 
-      console.log("setting starting point: ", nextStartingPoint);
+      logger.info(`Setting starting point: ${nextStartingPoint}.`);
       return { documents, nextStartingPoint };
     } else {
-      // If there's no starting point, execute the base query
-      console.log("no starting point");
+      // If there's no starting point, execute base query
+      logger.info("No starting point provided, starting from the beginning.");
+
       const results = await getDocs(userQuery);
       const documents = results.docs.map((doc) => ({
         id: doc.id,
@@ -91,12 +99,11 @@ export class SearchService {
       let newStartingPoint = null;
 
       if (documents.length >= limitNumber) {
-        // newStartingPoint = results.docs[results.docs.length - 1]?.data().uid;
         newStartingPoint =
           results.docs[results.docs.length - 1]?.data().usernameLower;
       }
 
-      console.log("setting starting point: ", newStartingPoint);
+      logger.info(`Setting starting point: ${newStartingPoint}.`);
       return { documents, newStartingPoint };
     }
   }
@@ -108,11 +115,13 @@ export class SearchService {
    * Fetches 5 items at a time where their titles match or start with the text provided to the search query.
    * If a starting point is provided, the search query starts from the provided starting point.
    *
+   * @param searchText - Text to search for
+   * @returns - Object containing the documents and next starting point
+   * @throws - Error if search fails, i.e if the search query fails
    */
   static async searchContent(searchText: string) {
     try {
       if (!searchText) {
-        console.log("No search text provided");
         return { documents: [], nextStartingPoint: null };
       }
 
@@ -120,7 +129,7 @@ export class SearchService {
       const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
       const { hits } = await index.search(searchText);
 
-      console.log("Algolia search results: ", hits);
+      logger.info(`Algolia search results length: ${hits.length}, hits: ${hits}`);
 
       // Fetch corresponding Firebase documents
       const firebaseDocuments = await Promise.all(
@@ -149,8 +158,9 @@ export class SearchService {
         nextStartingPoint: null,
       };
     } catch (err) {
-      console.error("Algolia search error: ", err);
-      throw new Error("Failed to search for content");
+      logger.error(`Something went wrong, error: ${err}`);
+      throw new Error(`Failed to search for content, error: ${err}`);
+
     }
   }
 }

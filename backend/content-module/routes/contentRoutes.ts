@@ -6,6 +6,10 @@ const contentRoutes = Router();
 contentRoutes.post("/", ContentController.createContent); // Create new content
 contentRoutes.post("/uploadThumbnail", ContentController.uploadThumbnail); // Upload thumbnail
 
+contentRoutes.get("/feed/trending", ContentController.getTrendingContent); // Get trending content
+contentRoutes.get("/feed/personalized/:userId", ContentController.getPersonalizedContent); // Get personalized content
+
+contentRoutes.get("/", ContentController.getAllContent); // Get all content
 contentRoutes.get("/:contentId", ContentController.getContent); // Get content by ID
 
 contentRoutes.put("/views/:contentId", ContentController.incrementViewCount); // Increment the view count

@@ -5,6 +5,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { storage } from "../../shared/firebaseConfig";
+import { logger } from "../../shared/loggingHandler";
 import fs from "fs/promises";
 
 export class StorageService {
@@ -35,27 +36,29 @@ export class StorageService {
       const fileBuffer = await fs.readFile(file.filepath);
 
       const snapshot = await uploadBytes(storageRef, fileBuffer, metadata);
-      console.log("====================================");
-      console.log("   file: ", file);
-      console.log("   fileBuffer: ", fileBuffer);
-      console.log("   path: ", filePath);
-      console.log("   fileName", fileName);
-      console.log("   storageRef: ", storageRef);
-      console.log("   Uploaded file successfully!");
-      console.log("====================================");
+      logger.info(`
+        File: ${file}
+        FileBuffer: ${fileBuffer}
+        Path: ${filePath}
+        FileName: ${fileName}
+        StorageRef: ${storageRef}
+      `);
+      logger.info("File uploaded successfully.");
 
       // Get the download URL
       const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log("Download URL:", downloadURL);
+      logger.info("Download URL:", downloadURL);
 
       return { url: downloadURL };
     } catch (error) {
       let errorMessage = error.message;
+
       // Remove "Firebase: " prefix from the error message
       if (errorMessage.startsWith("Firebase: ")) {
         errorMessage = errorMessage.replace("Firebase: ", "");
       }
       throw new Error(errorMessage);
+
     }
   }
 
@@ -80,9 +83,11 @@ export class StorageService {
 
     try {
       await deleteObject(fileRef);
-      console.log(`File ${filePath} deleted.`);
+      logger.info(`File ${filePath} deleted.`);
+
     } catch (error) {
-      console.error(`Error deleting file ${filePath}: `, error);
+      logger.error(`Error deleting file ${filePath}: `, error);
+
     }
   }
 
@@ -99,5 +104,6 @@ export class StorageService {
       return match[1];
     }
     throw new Error("Invalid Firebase Storage URL");
+
   }
 }

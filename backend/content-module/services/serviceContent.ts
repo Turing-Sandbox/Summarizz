@@ -1,5 +1,5 @@
 import { db } from "../../shared/firebaseConfig";
-import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc, runTransaction, Timestamp } from "firebase/firestore";
+import { collection, increment, addDoc, getDoc, updateDoc, arrayRemove, arrayUnion, doc, deleteDoc, runTransaction, Timestamp, getDocs } from "firebase/firestore";
 import {
   addContentToUser,
   removeContentFromUser,
@@ -59,19 +59,14 @@ export class ContentService {
 
   static async getContent(uid: string) {
     console.log("Getting content...");
-    // Get content from Firestore
     console.log(uid);
     const contentDoc = await getDoc(doc(db, "contents", uid));
-    return contentDoc.exists() ? contentDoc.data() : null;
-
-    // const contentRef = await getDoc(doc(db, "contents", contentID));
-
-    // if (contentRef.exists()) {
-    //   const content = contentRef.data();
-    //   return content;
-    // } else {
-    //   return null;
-    // }
+    
+    if (!contentDoc.exists()) {
+      return null;
+    }
+    
+    return contentDoc.data() as Content;
   }
 
   static async deleteContent(content_id: string) {
@@ -433,6 +428,155 @@ static async shareContent(contentID: string, userId: string) {
       console.error("Error unsharing content:", error);
       throw new Error(error.message || "Failed to unshare content");
     }
+  }
+
+  // Get all content from the database from every user
+  static async getAllContent() {
+    console.log("Getting all content...");
+    try {
+      const contentCollection = collection(db, "contents");
+      const contentSnapshot = await getDocs(contentCollection);
+      const contentList = contentSnapshot.docs.map(doc => doc.data());
+      
+      return contentList;
+    } catch (error) {
+      console.error("Error fetching all content: ", error);
+      throw new Error(error.message || "Failed to fetch all content");
+    }
+  }
+
+  // Get all trending content
+  static async getTrendingContent(limit = 5) {
+    console.log("Getting trending content...");
+    try {
+      const allContent = await ContentService.getAllContent();
+
+      // Sorts by likes in descending order (trending content is highest liked)
+      const trendingContent = [...allContent]
+        .sort((a, b) => (b.likes || 0) - (a.likes || 0))
+        .slice(0, limit);
+      return trendingContent;
+
+    } catch (error) {
+      console.error("Error fetching trending content: ", error);
+      throw new Error(error.message || "Failed to fetch trending content");
+    }
+  }
+
+  // Get personalized content (for users)
+  static async getPersonalizedContent(userId: string, limit = 20) {
+    console.log("Getting personalized content for user:", userId);
+    try {
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        throw new Error("User not found");
+      }
+      
+      const userData = userDoc.data();
+      const likedContent = userData.likedContent || [];
+      const following = userData.following || [];
+
+      const allContent = await ContentService.getAllContent();
+      
+      // Extract scoring logic to separate methods for better maintainability
+      const scoredContent = allContent.map(content => {
+        // Calculate different types of scores
+        const creatorScore = this.calculateCreatorScore(content, following);
+        const similarityScore = this.calculateSimilarityScore(content, likedContent, allContent);
+        const popularityScore = this.calculatePopularityScore(content);
+        const recencyScore = this.calculateRecencyScore(content);
+        
+        // Combine all scores
+        const score = creatorScore + similarityScore + popularityScore + recencyScore;
+        
+        return { ...content, score };
+      });
+      
+      let personalizedContent = scoredContent
+        .filter(content => content.score >= 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+      
+      if (personalizedContent.length < 5) {
+        console.log("Not enough personalized content, adding trending content");
+        const trendingContent = await this.getTrendingContent(10);
+        
+        const existingUids = personalizedContent.map(c => (c as Content & { score: number }).uid);
+        const additionalContent = trendingContent
+          .filter(c => !existingUids.includes(c.uid))
+          .map(content => ({
+            ...content,
+            score: 3
+          }));
+        
+        personalizedContent = [
+          ...personalizedContent,
+          ...additionalContent
+        ].slice(0, limit);
+      }
+      
+      return personalizedContent;
+    } catch (error) {
+      console.error("Error fetching personalized content: ", error);
+      throw new Error(error.message || "Failed to fetch personalized content");
+    }
+  }
+  
+  // Helper methods for calculating different score components
+  private static calculateCreatorScore(content: any, following: string[]): number {
+    // Score++ if creator is followed by user
+    return following.includes(content.creatorUID) ? 10 : 0;
+  }
+  
+  private static calculateSimilarityScore(
+    content: any, 
+    likedContent: string[], 
+    allContent: any[]
+  ): number {
+    // If user has liked this content, we'll consider it but with consistent scoring
+    if (likedContent.includes(content.id)) {
+      return 5; // Always give a positive score for content similar to what user liked
+    }
+    
+    // Otherwise, check for similarity with other liked content
+    let similarityScore = 0;
+    for (const likedId of likedContent) {
+      const likedItem = allContent.find(item => item.id === likedId);
+      if (likedItem?.titleLower && content.titleLower) {
+        const likedWords = likedItem.titleLower.split(' ');
+        const contentWords = content.titleLower.split(' ');
+        
+        const matchingWords = likedWords.filter((word: string) => 
+          word.length > 3 && contentWords.includes(word)
+        ).length;
+        
+        if (matchingWords > 0) {
+          similarityScore += matchingWords * 2;
+        }
+      }
+    }
+    return similarityScore;
+  }
+  
+  private static calculatePopularityScore(content: any): number {
+    // Score++ for likes and views
+    return (content.likes || 0) * 0.2 + (content.views || 0) * 0.1;
+  }
+  
+  private static calculateRecencyScore(content: any): number {
+    if (!content.dateCreated) return 0;
+    
+    const now = new Date();
+    const contentDate = content.dateCreated instanceof Date 
+      ? content.dateCreated 
+      : new Date(content.dateCreated);
+    
+    const daysDiff = Math.floor((now.getTime() - contentDate.getTime()) / (1000 * 3600 * 24));
+    
+    // Give higher scores to newer content (less than 7 days old)
+    return daysDiff < 7 ? (7 - daysDiff) * 0.5 : 0;
   }
 
   //Increment the number of views on an article
