@@ -519,64 +519,18 @@ static async shareContent(contentID: string, userId: string) {
 
       const allContent = await ContentService.getAllContent();
       
-      // Scoring system for personalized content
+      // Extract scoring logic to separate methods for better maintainability
       const scoredContent = allContent.map(content => {
-        let score = 0;
+        // Calculate different types of scores
+        const creatorScore = this.calculateCreatorScore(content, following);
+        const similarityScore = this.calculateSimilarityScore(content, likedContent, allContent);
+        const popularityScore = this.calculatePopularityScore(content);
+        const recencyScore = this.calculateRecencyScore(content);
         
-        // Score++ if creator is followed by user
-        if (following.includes(content.creatorUID)) {
-          score += 10; // Priority 1 for creators the user follows
-        }
+        // Combine all scores
+        const score = creatorScore + similarityScore + popularityScore + recencyScore;
         
-        if (likedContent.includes(content.id)) {
-          // This is a 30% chance to include liked content, best when user has few interactions
-          if (Math.random() < 0.3) {
-            score += 5;
-          } else {
-            score = -1;
-          }
-        } else {
-          for (const likedId of likedContent) {
-            const likedItem = allContent.find(item => item.id === likedId);
-            if (likedItem?.titleLower && content.titleLower) {
-              const likedWords = likedItem.titleLower.split(' ');
-              const contentWords = content.titleLower.split(' ');
-              
-              const matchingWords = likedWords.filter((word: string) => 
-                word.length > 3 && contentWords.includes(word)
-              ).length;
-              
-              if (matchingWords > 0) {
-                score += matchingWords * 2;
-              }
-            }
-          }
-        }
-        
-        // Score++ for likes and views (0.2 and 0.1 respectively)
-        score += (content.likes || 0) * 0.2;
-        score += (content.views || 0) * 0.1;
-        
-        // Score++ for recency (newer content gets higher score)
-        if (content.dateCreated) {
-          const now = new Date();
-          const contentDate = content.dateCreated instanceof Date 
-            ? content.dateCreated 
-            : new Date(content.dateCreated);
-          
-          // Score++ for recency (newer content gets higher score)
-          const daysDiff = Math.floor((now.getTime() - contentDate.getTime()) / (1000 * 3600 * 24));
-          
-          // Score++ for recency (newer content gets higher score)
-          if (daysDiff < 7) {
-            score += (7 - daysDiff) * 0.5;
-          }
-        }
-        
-        return {
-          ...content,
-          score
-        };
+        return { ...content, score };
       });
       
       let personalizedContent = scoredContent
@@ -606,6 +560,61 @@ static async shareContent(contentID: string, userId: string) {
       console.error("Error fetching personalized content: ", error);
       throw new Error(error.message || "Failed to fetch personalized content");
     }
+  }
+  
+  // Helper methods for calculating different score components
+  private static calculateCreatorScore(content: any, following: string[]): number {
+    // Score++ if creator is followed by user
+    return following.includes(content.creatorUID) ? 10 : 0;
+  }
+  
+  private static calculateSimilarityScore(
+    content: any, 
+    likedContent: string[], 
+    allContent: any[]
+  ): number {
+    // If user has liked this content, we'll consider it but with consistent scoring
+    if (likedContent.includes(content.id)) {
+      return 5; // Always give a positive score for content similar to what user liked
+    }
+    
+    // Otherwise, check for similarity with other liked content
+    let similarityScore = 0;
+    for (const likedId of likedContent) {
+      const likedItem = allContent.find(item => item.id === likedId);
+      if (likedItem?.titleLower && content.titleLower) {
+        const likedWords = likedItem.titleLower.split(' ');
+        const contentWords = content.titleLower.split(' ');
+        
+        const matchingWords = likedWords.filter((word: string) => 
+          word.length > 3 && contentWords.includes(word)
+        ).length;
+        
+        if (matchingWords > 0) {
+          similarityScore += matchingWords * 2;
+        }
+      }
+    }
+    return similarityScore;
+  }
+  
+  private static calculatePopularityScore(content: any): number {
+    // Score++ for likes and views
+    return (content.likes || 0) * 0.2 + (content.views || 0) * 0.1;
+  }
+  
+  private static calculateRecencyScore(content: any): number {
+    if (!content.dateCreated) return 0;
+    
+    const now = new Date();
+    const contentDate = content.dateCreated instanceof Date 
+      ? content.dateCreated 
+      : new Date(content.dateCreated);
+    
+    const daysDiff = Math.floor((now.getTime() - contentDate.getTime()) / (1000 * 3600 * 24));
+    
+    // Give higher scores to newer content (less than 7 days old)
+    return daysDiff < 7 ? (7 - daysDiff) * 0.5 : 0;
   }
 
   //Increment the number of views on an article
