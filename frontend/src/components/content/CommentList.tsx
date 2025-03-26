@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
@@ -11,7 +13,6 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
-import { Comment } from "@/models/Comment";
 
 const CommentList = () => {
   const [comments, setComments] = useState<Comment[]>([]);

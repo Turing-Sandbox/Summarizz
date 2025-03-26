@@ -1,10 +1,4 @@
-@mixin glassmorphic-background {
-  background-color: var(--tile-color);
-  box-shadow: 0 0px 25px var(--shadow-color),
-    inset 0 0px 25px var(--shadow-color);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
+@use "@/app/styles/global.scss";
 
 .userSearchResults,
 .contentSearchResults {
@@ -13,11 +7,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: var(--tile-color);
-    box-shadow: 0 0px 25px var(--shadow-color),
-      inset 0 0px 25px var(--shadow-color);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    @include global.glassmorphic-background;
     transition: all 0.3s ease;
     border-radius: 10px;
   }
@@ -42,7 +32,7 @@
 }
 
 .searchResults {
-  @include glassmorphic-background;
+  @include global.glassmorphic-background;
   padding: 20px 40px;
   border-radius: 25px;
   margin-bottom: 30px;

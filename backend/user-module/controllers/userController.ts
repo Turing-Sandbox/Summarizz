@@ -13,6 +13,8 @@ import {
   changePassword,
   changeEmail,
   changeUsername,
+  approveFollowRequest,
+  rejectFollowRequest
 } from "../services/userService";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
@@ -247,5 +249,29 @@ export async function requestFollowController(req: Request, res: Response) {
     res
       .status(500)
       .json({ error: error.message || "Failed to send follow request" });
+  }
+}
+
+// Approve Follow Request
+export async function approveFollowRequestController(req: Request, res: Response) {
+  const { userId, requesterId } = req.params; // Get both IDs from params
+  try {
+      await approveFollowRequest(userId, requesterId);
+      res.status(200).json({ message: "Follow request approved" });
+  } catch (error) {
+      console.error("Error approving follow request:", error);
+      res.status(500).json({ error: error.message || "Failed to approve follow request" });
+  }
+}
+
+// Reject Follow Request
+export async function rejectFollowRequestController(req: Request, res: Response) {
+  const { userId, requesterId } = req.params;
+  try {
+      await rejectFollowRequest(userId, requesterId);
+      res.status(200).json({ message: "Follow request rejected" });
+  } catch (error) {
+      console.error("Error rejecting follow request:", error);
+      res.status(500).json({ error: error.message || "Failed to reject follow request" });
   }
 }

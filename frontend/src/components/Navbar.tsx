@@ -43,6 +43,9 @@ function Navbar() {
 
   // Dark Mode handling
   useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     const preferenceMode = localStorage.getItem("isDarkMode");
 
     // Check if user has a saved preference in cookies
@@ -80,6 +83,9 @@ function Navbar() {
   // -------------- Functions --------------
   // ---------------------------------------
   const toggleTheme = () => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
     const newTheme = isDarkMode ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
     setIsDarkMode(!isDarkMode);
@@ -122,6 +128,7 @@ function Navbar() {
       console.log(contentSearchResults);
 
       setShowSearchResults(true);
+      setShowMenu(false);
     } else {
       alert("You didn't search for anything.");
     }
@@ -140,11 +147,27 @@ function Navbar() {
     });
   }
 
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("title");
+    }
+    auth.logout();
+  };
+
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
   return (
     <>
+      {(showSearchResults || showMenu) && (
+        <div
+          className='navbar-page-overlay'
+          onClick={() => {
+            setShowSearchResults(false);
+            setShowMenu(false);
+          }}
+        ></div>
+      )}
       <div className='navbar-background'>
         {/* App Name */}
         <a
@@ -165,7 +188,6 @@ function Navbar() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder='Search for something!'
-                required
               />
               <button className='searchButton'>
                 <MagnifyingGlassIcon />
@@ -197,6 +219,7 @@ function Navbar() {
               onClick={() => {
                 updateAuthenticated();
                 setShowMenu(!showMenu);
+                setShowSearchResults(false);
               }}
             >
               {user && user.profileImage ? (
@@ -304,7 +327,17 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  auth.logout();
+                  router.push("/pro");
+                }}
+              >
+                Summarizz Pro
+              </a>
+
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
+                  handleLogout();
                 }}
               >
                 Logout
