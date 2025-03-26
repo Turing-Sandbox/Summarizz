@@ -2,10 +2,6 @@ import { Request, Response } from "express";
 import { ContentService } from "../services/serviceContent";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
-// import { arrayUnion, doc, updateDoc, getDoc } from "firebase/firestore";
-// import { db } from "../../shared/firebaseConfig";
-// import { addSharedContentToUser } from "../../user-module/services/userService";
-// import axios from "axios";
 
 export class ContentController {
   static async createContent(req: Request, res: Response) {
@@ -330,7 +326,7 @@ export class ContentController {
     }
   }
 
-  // Update the number of times the content was viewed
+  //  Update the number of times the content was viewed
   static async incrementViewCount(req: Request, res: Response) {
     const { contentId } = req.params;
     try {
@@ -403,10 +399,10 @@ export class ContentController {
     } catch (error) {
       console.error("Error fetching personalized content:", error);
 
-      res.status(200).json({ 
-        success: true,
+      res.status(500).json({ 
+        success: false,
         personalizedContent: [],
-        message: "No personalized content available"
+        message: `Failed to fetch personalized content for user ${userId}, error: ${error.message}`
       });
     }
   }

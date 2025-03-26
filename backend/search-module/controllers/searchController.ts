@@ -5,7 +5,15 @@ import { getLoggerWithContext } from "../../shared/loggingHandler";
 const logger = getLoggerWithContext("SearchController");
 
 export class SearchController {
-
+	/**
+	 * @description
+	 * Fetches 5 users at a time where their username matches or starts with the text 
+	 * provided to the search query. If a starting point is provided, the search query 
+	 * starts from the provided starting point.
+	 * 
+	 * @param req - Express request object.
+	 * @param res - Express response object.
+	 */
 	static async searchUsers(req: Request, res: Response) {
 		const query: Record<string, any> = req.query;
 
@@ -22,7 +30,14 @@ export class SearchController {
 		}
 	}
 
-
+	/**
+	 * @description
+	 * Fetches 5 content items at a time where their title matches or starts with the
+	 * text provided to the search query.
+	 * 
+	 * @param req - Express request object.
+	 * @param res - Express response object.
+	 */
 	static async searchContent(req: Request, res: Response) {
 		const query: Record<string, any> = req.query;
 

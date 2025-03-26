@@ -61,19 +61,31 @@ export class ContentService {
 
   static async getContent(uid: string) {
     console.log("Getting content...");
-    // Get content from Firestore
     console.log(uid);
     const contentDoc = await getDoc(doc(db, "contents", uid));
-    return contentDoc.exists() ? contentDoc.data() : null;
-
-    // const contentRef = await getDoc(doc(db, "contents", contentID));
-
-    // if (contentRef.exists()) {
-    //   const content = contentRef.data();
-    //   return content;
-    // } else {
-    //   return null;
-    // }
+    
+    if (!contentDoc.exists()) {
+      return null;
+    }
+    
+    const data = contentDoc.data();
+    return {
+      id: uid,
+      title: data.title || '',
+      content: data.content || '',
+      creatorUID: data.creatorUID || '',
+      dateCreated: data.dateCreated || new Date(),
+      dateUpdated: data.dateUpdated || new Date(),
+      thumbnail: data.thumbnail || null,
+      readtime: data.readtime || 0,
+      likes: data.likes || 0,
+      peopleWhoLiked: data.peopleWhoLiked || [],
+      bookmarkedBy: data.bookmarkedBy || [],
+      titleLower: data.titleLower || '',
+      sharedBy: data.sharedBy || [],
+      views: data.views || 0,
+      shares: data.shares || 0
+    };
   }
 
   static async deleteContent(content_id: string) {
@@ -474,30 +486,28 @@ static async shareContent(contentID: string, userId: string) {
     }
   }
 
-  // Get all content from the database, filter by most likes
+  // Get all trending content
   static async getTrendingContent(limit = 5) {
     console.log("Getting trending content...");
     try {
-      // Get all content first
-      const allContent = await this.getAllContent();
-      
-      // Sort by likes in descending order
+      const allContent = await ContentService.getAllContent();
+
+      // Sorts by likes in descending order (trending content is highest liked)
       const trendingContent = [...allContent]
         .sort((a, b) => (b.likes || 0) - (a.likes || 0))
         .slice(0, limit);
-      
       return trendingContent;
+
     } catch (error) {
       console.error("Error fetching trending content: ", error);
       throw new Error(error.message || "Failed to fetch trending content");
     }
   }
 
-  // Get personalized content for a specific user based on their likes and follows
+  // Get personalized content (for users)
   static async getPersonalizedContent(userId: string, limit = 20) {
     console.log("Getting personalized content for user:", userId);
     try {
-      // Get user data to check liked content and follows
       const userRef = doc(db, "users", userId);
       const userDoc = await getDoc(userRef);
       
@@ -508,64 +518,58 @@ static async shareContent(contentID: string, userId: string) {
       const userData = userDoc.data();
       const likedContent = userData.likedContent || [];
       const following = userData.following || [];
+
+      const allContent = await ContentService.getAllContent();
       
-      // Get all content
-      const allContent = await this.getAllContent();
-      
-      // Create a scoring system for content
+      // Scoring system for personalized content
       const scoredContent = allContent.map(content => {
         let score = 0;
         
-        // Boost score if content is from someone the user follows
+        // Score++ if creator is followed by user
         if (following.includes(content.creatorUID)) {
-          score += 10; // High priority for followed creators
+          score += 10; // Priority 1 for creators the user follows
         }
         
-        // Analyze content the user has liked to find similar content
         if (likedContent.includes(content.id)) {
-          // Include some liked content in recommendations to ensure we have content to show
-          // This helps when a user has few interactions
-          if (Math.random() < 0.3) { // 30% chance to include liked content
-            score += 5; // Give it a moderate score
+          // This is a 30% chance to include liked content, best when user has few interactions
+          if (Math.random() < 0.3) {
+            score += 5;
           } else {
-            score = -1; // Still exclude most liked content
+            score = -1;
           }
         } else {
-          // Check if any liked content has similar title (simple text similarity)
           for (const likedId of likedContent) {
             const likedItem = allContent.find(item => item.id === likedId);
-            if (likedItem && likedItem.titleLower && content.titleLower) {
-              // Simple word matching for similarity (can be improved with more sophisticated algorithms)
+            if (likedItem?.titleLower && content.titleLower) {
               const likedWords = likedItem.titleLower.split(' ');
               const contentWords = content.titleLower.split(' ');
               
-              // Count matching words
-              const matchingWords = likedWords.filter(word => 
+              const matchingWords = likedWords.filter((word: string) => 
                 word.length > 3 && contentWords.includes(word)
               ).length;
               
               if (matchingWords > 0) {
-                score += matchingWords * 2; // Boost score based on matching words
+                score += matchingWords * 2;
               }
             }
           }
         }
         
-        // Boost score for popular content (likes, views)
+        // Score++ for likes and views (0.2 and 0.1 respectively)
         score += (content.likes || 0) * 0.2;
         score += (content.views || 0) * 0.1;
         
-        // Add recency factor - newer content gets higher score
+        // Score++ for recency (newer content gets higher score)
         if (content.dateCreated) {
           const now = new Date();
           const contentDate = content.dateCreated instanceof Date 
             ? content.dateCreated 
             : new Date(content.dateCreated);
           
-          // Calculate days difference
+          // Score++ for recency (newer content gets higher score)
           const daysDiff = Math.floor((now.getTime() - contentDate.getTime()) / (1000 * 3600 * 24));
           
-          // Boost newer content (within last 7 days)
+          // Score++ for recency (newer content gets higher score)
           if (daysDiff < 7) {
             score += (7 - daysDiff) * 0.5;
           }
@@ -577,23 +581,20 @@ static async shareContent(contentID: string, userId: string) {
         };
       });
       
-      // Filter out already liked content and sort by score
       let personalizedContent = scoredContent
-        .filter(content => content.score >= 0) // Remove already liked content
-        .sort((a, b) => b.score - a.score) // Sort by score descending
-        .slice(0, limit); // Limit results
+        .filter(content => content.score >= 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
       
-      // If we don't have enough personalized content, include some trending content
       if (personalizedContent.length < 5) {
         console.log("Not enough personalized content, adding trending content");
         const trendingContent = await this.getTrendingContent(10);
         
-        // Add trending content that isn't already in personalized content
         const existingIds = personalizedContent.map(c => c.id);
         const additionalContent = trendingContent.filter(c => !existingIds.includes(c.id))
           .map(content => ({
             ...content,
-            score: 3 // Assign a default score to trending content
+            score: 3
           }));
         
         personalizedContent = [
