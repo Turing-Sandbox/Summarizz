@@ -68,24 +68,7 @@ export class ContentService {
       return null;
     }
     
-    const data = contentDoc.data();
-    return {
-      id: uid,
-      title: data.title || '',
-      content: data.content || '',
-      creatorUID: data.creatorUID || '',
-      dateCreated: data.dateCreated || new Date(),
-      dateUpdated: data.dateUpdated || new Date(),
-      thumbnail: data.thumbnail || null,
-      readtime: data.readtime || 0,
-      likes: data.likes || 0,
-      peopleWhoLiked: data.peopleWhoLiked || [],
-      bookmarkedBy: data.bookmarkedBy || [],
-      titleLower: data.titleLower || '',
-      sharedBy: data.sharedBy || [],
-      views: data.views || 0,
-      shares: data.shares || 0
-    };
+    return contentDoc.data() as Content;
   }
 
   static async deleteContent(content_id: string) {
@@ -455,29 +438,7 @@ static async shareContent(contentID: string, userId: string) {
     try {
       const contentCollection = collection(db, "contents");
       const contentSnapshot = await getDocs(contentCollection);
-      
-      // Convert snapshot to array of content with IDs and proper structure
-      const contentList = contentSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          title: data.title || '',
-          content: data.content || '',
-          creatorUID: data.creatorUID || '',
-          dateCreated: data.dateCreated || new Date(),
-          dateUpdated: data.dateUpdated || new Date(),
-          thumbnail: data.thumbnail || null,
-          readtime: data.readtime || 0,
-          likes: data.likes || 0,
-          peopleWhoLiked: data.peopleWhoLiked || [],
-          bookmarkedBy: data.bookmarkedBy || [],
-          titleLower: data.titleLower || '',
-          sharedBy: data.sharedBy || [],
-          views: data.views || 0,
-          shares: data.shares || 0,
-          timestamp: data.dateCreated?.toMillis() || Date.now() // For trending calculation
-        };
-      });
+      const contentList = contentSnapshot.docs.map(doc => doc.data());
       
       return contentList;
     } catch (error) {
@@ -590,8 +551,9 @@ static async shareContent(contentID: string, userId: string) {
         console.log("Not enough personalized content, adding trending content");
         const trendingContent = await this.getTrendingContent(10);
         
-        const existingIds = personalizedContent.map(c => c.id);
-        const additionalContent = trendingContent.filter(c => !existingIds.includes(c.id))
+        const existingUids = personalizedContent.map(c => (c as Content & { score: number }).uid);
+        const additionalContent = trendingContent
+          .filter(c => !existingUids.includes(c.uid))
           .map(content => ({
             ...content,
             score: 3
