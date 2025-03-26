@@ -7,7 +7,12 @@ import Image from "next/image";
 
 // Third-Party Libraries (Import)
 import axios from "axios";
-import { UserPlusIcon, TrashIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import {
+  UserPlusIcon,
+  TrashIcon,
+  CheckIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/solid";
 
 // Local Files (Import)
 import { useAuth } from "@/hooks/AuthProvider";
@@ -17,6 +22,7 @@ import { apiURL } from "@/app/scripts/api";
 
 // Stylesheets
 import "@/app/styles/profile/profile.scss";
+import ContentTile from "@/components/content/ContentTile";
 
 /**
  * Page() -> JSX.Element
@@ -38,7 +44,9 @@ export default function Page() {
   const [sharedContent, setSharedContent] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<"created" | "shared">("created");
-  const [followUsernames, setFollowUsernames] = useState<{ [userId: string]: string }>({}); // Cache for usernames
+  const [followUsernames, setFollowUsernames] = useState<{
+    [userId: string]: string;
+  }>({}); // Cache for usernames
 
   const { userUID } = useAuth(); // Get logged in user's UID
   const router = useRouter();
@@ -58,13 +66,17 @@ export default function Page() {
 
         // 2. Fetch User's Created Content
         if (userData?.content) {
-          const contentPromises = userData.content.map((contentId: string) => getContent(contentId));
+          const contentPromises = userData.content.map((contentId: string) =>
+            getContent(contentId)
+          );
           await Promise.all(contentPromises);
         }
-        
+
         // 3. Fetch Shared Content (only if sharedContent exists)
         if (userData?.sharedContent) {
-          const validSharedContent = await getAndFilterSharedContent(userData.sharedContent);
+          const validSharedContent = await getAndFilterSharedContent(
+            userData.sharedContent
+          );
           setSharedContent(validSharedContent);
         }
 
@@ -86,9 +98,9 @@ export default function Page() {
   // Fetch usernames for follow requests
   useEffect(() => {
     if (!user || !user.followRequests) return;
-  
+
     const followRequests = user.followRequests;
-  
+
     async function fetchUsernames() {
       const usernamesMap: { [key: string]: string } = {};
       for (const requesterId of followRequests) {
@@ -101,9 +113,9 @@ export default function Page() {
       }
       setFollowUsernames(usernamesMap);
     }
-  
+
     fetchUsernames();
-  }, [user]);  
+  }, [user]);
 
   // Helper function to fetch and filter shared content
   async function getAndFilterSharedContent(
@@ -193,17 +205,18 @@ export default function Page() {
    * @returns void
    */
   const handleFollow = async () => {
-      if (!userUID) {
-        alert("Please log in to follow users.");
-        return;
+    if (!userUID) {
+      alert("Please log in to follow users.");
+      return;
     }
 
     if (userUID === id) {
-        alert("You can't follow yourself.");
-        return;
+      alert("You can't follow yourself.");
+      return;
     }
 
-    if (!user) { // Defensive check
+    if (!user) {
+      // Defensive check
       console.error("User data not available.");
       return;
     }
@@ -212,10 +225,12 @@ export default function Page() {
       let url = "";
       let method = "post";
 
-      if (isFollowing) { // Unfollow
+      if (isFollowing) {
+        // Unfollow
         url = `${apiURL}/user/${userUID}/unfollow/${id}`;
-      } else if (user.isPrivate) { // Private profile: Send request, or cancel if already requested (optional)
-        if(followRequested){
+      } else if (user.isPrivate) {
+        // Private profile: Send request, or cancel if already requested (optional)
+        if (followRequested) {
           // cancel request (OPTIONAL: Handle Cancel Request (requires backend endpoint))
           // url = `${apiURL}/user/${userUID}/cancel-request/${id}`;
           // await axios.post(url); // UNCOMMENT WHEN ENDPOINT IS READY
@@ -223,10 +238,11 @@ export default function Page() {
           return; // for now
         } else {
           // Send Request
-          url = `${apiURL}/user/${userUID}/request/${id}`; 
-        } 
-      } else { // Public profile: Follow directly
-          url = `${apiURL}/user/${userUID}/follow/${id}`;
+          url = `${apiURL}/user/${userUID}/request/${id}`;
+        }
+      } else {
+        // Public profile: Follow directly
+        url = `${apiURL}/user/${userUID}/follow/${id}`;
       }
 
       // Only make the API call if a URL is set
@@ -235,20 +251,19 @@ export default function Page() {
 
         // Optimistically update the UI *immediately*
         if (isFollowing) {
-            setIsFollowing(false); // Just unfollowed
+          setIsFollowing(false); // Just unfollowed
         } else if (user.isPrivate && !followRequested) {
-            setFollowRequested(true); // Just sent a request
+          setFollowRequested(true); // Just sent a request
         } else if (!user.isPrivate) {
-            setIsFollowing(true);  // Just followed directly
+          setIsFollowing(true); // Just followed directly
         }
         // Refetch data
         const userResponse = await axios.get(`${apiURL}/user/${id}`);
         setUser(userResponse.data);
       }
-
     } catch (error) {
-       console.error("Error handling follow/request:", error);
-       alert("An error occurred. Please try again.")
+      console.error("Error handling follow/request:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -260,7 +275,9 @@ export default function Page() {
 
     try {
       // Make API call to unshare
-      await axios.post(`${apiURL}/content/${contentId}/user/${userUID}/unshare`);
+      await axios.post(
+        `${apiURL}/content/${contentId}/user/${userUID}/unshare`
+      );
 
       // Update the UI: Filter out the unshared content
       setSharedContent((prevSharedContent) =>
@@ -280,23 +297,27 @@ export default function Page() {
       await axios.post(`${apiURL}/user/${id}/approve/${requesterId}`);
 
       //Update local state
-      setUser(prevUser => {
+      setUser((prevUser) => {
         if (!prevUser) return null;
 
-        const updatedFollowRequests = prevUser.followRequests?.filter(id => id !== requesterId);
-        const updatedFollowers = prevUser.followers ? [...prevUser.followers, requesterId] : [requesterId];
+        const updatedFollowRequests = prevUser.followRequests?.filter(
+          (id) => id !== requesterId
+        );
+        const updatedFollowers = prevUser.followers
+          ? [...prevUser.followers, requesterId]
+          : [requesterId];
 
-          return {
-            ...prevUser,
-            followRequests: updatedFollowRequests,
-            followers: updatedFollowers,
-          }
+        return {
+          ...prevUser,
+          followRequests: updatedFollowRequests,
+          followers: updatedFollowers,
+        };
       });
-       // Refetch user data to be 100% sure
-       const userResponse = await axios.get(`${apiURL}/user/${id}`);
-       setUser(userResponse.data);
+      // Refetch user data to be 100% sure
+      const userResponse = await axios.get(`${apiURL}/user/${id}`);
+      setUser(userResponse.data);
 
-       console.log("Follow request approved successfully.");
+      console.log("Follow request approved successfully.");
     } catch (error) {
       console.error("Error approving follow request:", error);
       alert("Failed to approve follow request. Please try again.");
@@ -309,13 +330,15 @@ export default function Page() {
       await axios.post(`${apiURL}/user/${id}/reject/${requesterId}`);
 
       // Update local state
-      setUser(prevUser => {
+      setUser((prevUser) => {
         if (!prevUser) return null;
-        const updatedFollowRequests = prevUser.followRequests?.filter(id => id !== requesterId);
+        const updatedFollowRequests = prevUser.followRequests?.filter(
+          (id) => id !== requesterId
+        );
 
         return {
           ...prevUser,
-          followRequests: updatedFollowRequests
+          followRequests: updatedFollowRequests,
         };
       });
       // Refetch user data to be 100% sure
@@ -329,50 +352,50 @@ export default function Page() {
     }
   };
 
-  function renderContentItem(content: Content, index: number) {
-    return (
-      <div
-        key={content.id || index}
-        className='content-list-item'
-        onClick={() => router.push(`/content/${content.id}`)}
-      >
-        <h3 className='content-item-title'>{content.title}</h3>
-        <p>
-          {content.dateCreated
-            ? `${content.dateCreated.toLocaleString("en-US", {
-                month: "short",
-              })} ${content.dateCreated.getDate()}${
-                content.readtime ? ` - ${content.readtime} min read` : ""
-              }`
-            : ""}
-        </p>
-        {content.thumbnail && (
-          <div className='content-thumbnail-container'>
-            <Image
-              src={content.thumbnail}
-              alt='Thumbnail'
-              width={200}
-              height={200}
-              className='content-thumbnail'
-            />
-          </div>
-        )}
-        {/* Unshare Button */}
-        {sharedContent.some((sharedItem) => sharedItem.id === content.id) && (
-          <button
-            className='icon-button'
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent content item click
-              handleUnshare(content.id);
-            }}
-            title='Unshare Content'
-          >
-            <TrashIcon className='icon delete' />
-          </button>
-        )}
-      </div>
-    );
-  }
+  // function renderContentItem(content: Content, index: number) {
+  //   return (
+  //     <div
+  //       key={content.id || index}
+  //       className='content-list-item'
+  //       onClick={() => router.push(`/content/${content.id}`)}
+  //     >
+  //       <h3 className='content-item-title'>{content.title}</h3>
+  //       <p>
+  //         {content.dateCreated
+  //           ? `${content.dateCreated.toLocaleString("en-US", {
+  //               month: "short",
+  //             })} ${content.dateCreated.getDate()}${
+  //               content.readtime ? ` - ${content.readtime} min read` : ""
+  //             }`
+  //           : ""}
+  //       </p>
+  //       {content.thumbnail && (
+  //         <div className='content-thumbnail-container'>
+  //           <Image
+  //             src={content.thumbnail}
+  //             alt='Thumbnail'
+  //             width={200}
+  //             height={200}
+  //             className='content-thumbnail'
+  //           />
+  //         </div>
+  //       )}
+  //       {/* Unshare Button */}
+  //       {sharedContent.some((sharedItem) => sharedItem.id === content.id) && (
+  //         <button
+  //           className='icon-button'
+  //           onClick={(e) => {
+  //             e.stopPropagation(); // Prevent content item click
+  //             handleUnshare(content.id);
+  //           }}
+  //           title='Unshare Content'
+  //         >
+  //           <TrashIcon className='icon delete' />
+  //         </button>
+  //       )}
+  //     </div>
+  //   );
+  // }
 
   if (isLoading) {
     return <div>Loading profile...</div>;
@@ -390,27 +413,29 @@ export default function Page() {
   const followingCount = user?.following ? user.following.length : 0;
   const createdCount = user?.content ? user.content.length : 0;
   const sharedCount = user?.sharedContent ? user.sharedContent.length : 0;
-  const canViewFullProfile = !user?.isPrivate || userUID === id || (userUID && user?.followers?.includes(userUID));
+  const canViewFullProfile =
+    !user?.isPrivate ||
+    userUID === id ||
+    (userUID && user?.followers?.includes(userUID));
 
-    // Helper function to get username by ID (Simplified)
-    async function getUsername(userId: string): Promise<string> {
-      try {
-        const userResponse = await axios.get(`${apiURL}/user/${userId}`);
-        return userResponse.data.username || "Unknown User"; // Provide a fallback
-      } catch (error) {
-        console.error("Error fetching username:", error);
-        return "Unknown User"; // Fallback in case of error
-      }
+  // Helper function to get username by ID (Simplified)
+  async function getUsername(userId: string): Promise<string> {
+    try {
+      const userResponse = await axios.get(`${apiURL}/user/${userId}`);
+      return userResponse.data.username || "Unknown User"; // Provide a fallback
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return "Unknown User"; // Fallback in case of error
     }
-  
-  
-    if (isLoading) {
-      return <div>Loading profile...</div>;
-    }
-  
-    if (!user) {
-      return <div>User not found.</div>;
-    }
+  }
+
+  if (isLoading) {
+    return <div>Loading profile...</div>;
+  }
+
+  if (!user) {
+    return <div>User not found.</div>;
+  }
   return (
     <>
       <div className='main-content'>
@@ -437,7 +462,9 @@ export default function Page() {
               {/* Follow/Request Button (Conditional Rendering) */}
               {userUID !== id && ( // Don't show button if viewing own profile
                 <button
-                  className={`icon-button follow ${isFollowing ? "following" : ""}`}
+                  className={`icon-button follow ${
+                    isFollowing ? "following" : ""
+                  }`}
                   onClick={handleFollow}
                   title={
                     isFollowing
@@ -450,12 +477,9 @@ export default function Page() {
                   }
                 >
                   <UserPlusIcon
-                    className={`icon follow ${isFollowing || followRequested ? "following" : ""}`}
-                    style={{
-                      color: isFollowing || followRequested ? "black" : "#7D7F7C",
-                      width: "16px",
-                      height: "16px",
-                    }}
+                    className={`icon follow ${
+                      isFollowing || followRequested ? "following" : ""
+                    }`}
                   />
                 </button>
               )}
@@ -495,34 +519,36 @@ export default function Page() {
         </div>
 
         {/* Follow Requests Section (Conditional Rendering) */}
-        {userUID === id && user?.followRequests && user.followRequests.length > 0 && (
-          <div className="follow-requests-section">
-            <h3>Follow Requests</h3>
-            <ul>
-            {user.followRequests.map((requesterId) => (
-              <li key={requesterId}>
-                <span>{followUsernames[requesterId] || "Loading..."}</span>
-                <div className="request-buttons">
-                  <button
-                    className="icon-button approve"
-                    onClick={() => handleApproveRequest(requesterId)}
-                    title="Approve Request"
-                  >
-                    <CheckIcon className="icon check" />
-                  </button>
-                  <button
-                    className="icon-button reject"
-                    onClick={() => handleRejectRequest(requesterId)}
-                    title="Reject Request"
-                  >
-                    <XMarkIcon className="icon xmark" />
-                  </button>
-                </div>
-              </li>
-            ))}
-            </ul>
-          </div>
-        )}
+        {userUID === id &&
+          user?.followRequests &&
+          user.followRequests.length > 0 && (
+            <div className='follow-requests-section'>
+              <h3>Follow Requests</h3>
+              <ul>
+                {user.followRequests.map((requesterId) => (
+                  <li key={requesterId}>
+                    <span>{followUsernames[requesterId] || "Loading..."}</span>
+                    <div className='request-buttons'>
+                      <button
+                        className='icon-button approve'
+                        onClick={() => handleApproveRequest(requesterId)}
+                        title='Approve Request'
+                      >
+                        <CheckIcon className='icon check' />
+                      </button>
+                      <button
+                        className='icon-button reject'
+                        onClick={() => handleRejectRequest(requesterId)}
+                        title='Reject Request'
+                      >
+                        <XMarkIcon className='icon xmark' />
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
         {/* Tabs for Created/Shared Content */}
         <div className='tabs'>
@@ -550,9 +576,13 @@ export default function Page() {
               <h3>No content found</h3>
             ) : (
               <div className='content-list'>
-                {contents.map((content, index) =>
-                  renderContentItem(content, index)
-                )}
+                {contents.map((content, index) => (
+                  <ContentTile
+                    key={content.id || index}
+                    content={content}
+                    index={index}
+                  />
+                ))}
               </div>
             )}
           </>
@@ -566,9 +596,19 @@ export default function Page() {
                 <h4>No shared content found</h4>
               ) : (
                 <div className='content-list'>
-                  {sharedContent.map((content, index) =>
-                    renderContentItem(content, index)
-                  )}
+                  {sharedContent.map((content, index) => (
+                    <ContentTile
+                      key={content.id || index}
+                      content={content}
+                      index={index}
+                      deleteShareOption={
+                        sharedContent.some(
+                          (sharedItem) => sharedItem.id === content.id
+                        ) && userUID === id
+                      }
+                      handleUnshare={handleUnshare}
+                    />
+                  ))}
                 </div>
               )
             ) : (

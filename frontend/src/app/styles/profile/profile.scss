@@ -24,7 +24,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
- 
+
   p {
     margin: 0;
     margin-bottom: 0.5rem; /* small gap between paragraphs */
@@ -50,38 +50,38 @@
 
 /* Follow icon styles */
 .icon.follow {
-  width: 16px; /* Match other icons */
-  height: 16px; /* Match other icons */
-  color: #7d7f7c; /* Default gray */
+  width: 16px; 
+  height: 16px; 
+  color: var(--icon-color); 
 }
 
 .icon.follow.following {
-  color: black; /* Black when following */
+  color: var(--icon-selected-color); 
 }
 
 .profile-stats {
   display: flex;
   align-items: center;
-  gap: 0.7rem;           /* Space between each stat item */
-  margin-bottom: 1.25rem;    /* Spacing below stats */
-  font-family: var(--font-body); 
+  gap: 0.7rem; 
+  margin-bottom: 1.25rem; 
+  font-family: var(--font-body);
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
-  align-items: center;  /* Center number and label horizontally */
-  font-size: 0.7rem;    /* Smaller font size for stats */
+  align-items: center; /* Center number and label horizontally */
+  font-size: 0.7rem; /* Smaller font size for stats */
 }
 
 .stat-number {
-  font-size: 0.9rem; 
+  font-size: 0.9rem;
   font-weight: bold;
 }
 
 .stat-label {
   font-size: 0.7rem;
-  color: #7d7f7c;
+  color: var(--text-color-light); 
 }
 
 .section-title {
@@ -96,77 +96,6 @@
   gap: 1rem; /* Adjust the gap between items */
 }
 
-.content-list-item {
-  padding: 20px;
-
-  border-radius: 20px;
-  border-style: solid;
-  border-color: var(--input-border-color);
-  border-width: 1px;
-  box-sizing: border-box;
-
-  background-color: var(--tile-color);
-  color: var(--text-color);
-
-  font-size: 1.1rem;
-}
-
-.content-item-title {
-  font-size: 1.5rem;
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-
-.content-list-item:hover {
-  background-color: var(--background-color);
-  cursor: pointer;
-}
-
-.content-thumbnail-container {
-  overflow: hidden;
-  border-radius: 10px;
-}
-
-.content-thumbnail {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 10px;
-  transition: transform 0.5s;
-}
-
-.content-thumbnail:hover {
-  // Zoom image on hover
-  transform: scale(1.1);
-}
-
-.icon-button {
-  padding: 0;
-  border: none;
-  background: none;
-  display: inline-flex;
-  align-items: center;
-  position: relative;
-  gap: 1px;
-}
-
-.icon {
-  width: 16px; /* Or whatever size you want */
-  height: 16px;
-  color: var(--icon-color); /* Use CSS variables if you have them */
-  transition: all ease-out 0.3s;
-}
-
-.icon:hover {
-  color: var(--icon-hover-color);
-}
-
-/* Specific style for the delete icon's hover state */
-.icon.delete:hover {
-  color: var(
-    --delete-hover-color
-  ); /* Use a specific variable for delete hover */
-}
 
 /* Tabs container */
 .tabs {
