@@ -62,9 +62,9 @@ export default function ContentTile({
 
       <p>
         {content.dateCreated
-          ? `${content.dateCreated.toLocaleString("en-US", {
+          ? `${new Date(content.dateCreated).toLocaleString("en-US", {
               month: "short",
-            })} ${content.dateCreated.getDate()}${
+            })} ${new Date(content.dateCreated).getDate()}${
               content.readtime ? ` - ${content.readtime} min read` : ""
             }`
           : ""}

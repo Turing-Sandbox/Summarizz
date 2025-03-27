@@ -122,7 +122,7 @@ export default function Page() {
         const normalizedContent = latestContent.map((content: Content) =>
           normalizeContentDates(content)
         );
-        
+
         setLatestContent(normalizedContent);
         return true;
       } else {
@@ -194,23 +194,21 @@ export default function Page() {
       )}
       {errorTrending && <p className='error'>{errorTrending}</p>}
 
-      <h2>Latest Post</h2>
-      {/* {latestContent.length === 0 ? (
+      {/* <h2>Latest Post</h2>
+      {latestContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
         <div className='content-list'>
           {latestContent.map((content, index) => (
-            <div>
-              <ContentTile
-                key={content.uid || index}
-                content={content}
-                index={index}
-              />
-            </div>
+            <ContentTile
+              key={content.uid || index}
+              content={content}
+              index={index}
+            />
           ))}
         </div>
-      )} */}
-      {errorLatest && <p className='error'>{errorLatest}</p>}
+      )}
+      {errorLatest && <p className='error'>{errorLatest}</p>} */}
 
       <h2>For You</h2>
       {personalizedContent.length === 0 ? (
