@@ -24,3 +24,17 @@
 .summarizz-logo-container {
   text-align: center;
 }
+
+
+// media queries
+@media screen and (max-width: 1024px) {
+  .content-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .content-list {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
