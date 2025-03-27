@@ -142,7 +142,6 @@ export default function Page() {
             }
           }
 
-          fetchedContent.id = contentId;
           validContent.push(fetchedContent);
         }
       } catch (error) {
@@ -182,10 +181,10 @@ export default function Page() {
         fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
       }
 
-      fetchedContent.id = contentId; // Ensure the ID is set
+      fetchedContent.uid = contentId; // Ensure the ID is set
       setContents((prevContents) => {
         // Prevent duplicates
-        if (!prevContents.some((c) => c.id === fetchedContent.id)) {
+        if (!prevContents.some((c) => c.uid === fetchedContent.uid)) {
           return [...prevContents, fetchedContent];
         }
         return prevContents;
@@ -281,7 +280,7 @@ export default function Page() {
 
       // Update the UI: Filter out the unshared content
       setSharedContent((prevSharedContent) =>
-        prevSharedContent.filter((content) => content.id !== contentId)
+        prevSharedContent.filter((content) => content.uid !== contentId)
       );
       // Refetch
       const userResponse = await axios.get(`${apiURL}/user/${id}`);
@@ -351,51 +350,6 @@ export default function Page() {
       alert("Failed to reject follow request. Please try again.");
     }
   };
-
-  // function renderContentItem(content: Content, index: number) {
-  //   return (
-  //     <div
-  //       key={content.id || index}
-  //       className='content-list-item'
-  //       onClick={() => router.push(`/content/${content.id}`)}
-  //     >
-  //       <h3 className='content-item-title'>{content.title}</h3>
-  //       <p>
-  //         {content.dateCreated
-  //           ? `${content.dateCreated.toLocaleString("en-US", {
-  //               month: "short",
-  //             })} ${content.dateCreated.getDate()}${
-  //               content.readtime ? ` - ${content.readtime} min read` : ""
-  //             }`
-  //           : ""}
-  //       </p>
-  //       {content.thumbnail && (
-  //         <div className='content-thumbnail-container'>
-  //           <Image
-  //             src={content.thumbnail}
-  //             alt='Thumbnail'
-  //             width={200}
-  //             height={200}
-  //             className='content-thumbnail'
-  //           />
-  //         </div>
-  //       )}
-  //       {/* Unshare Button */}
-  //       {sharedContent.some((sharedItem) => sharedItem.id === content.id) && (
-  //         <button
-  //           className='icon-button'
-  //           onClick={(e) => {
-  //             e.stopPropagation(); // Prevent content item click
-  //             handleUnshare(content.id);
-  //           }}
-  //           title='Unshare Content'
-  //         >
-  //           <TrashIcon className='icon delete' />
-  //         </button>
-  //       )}
-  //     </div>
-  //   );
-  // }
 
   if (isLoading) {
     return <div>Loading profile...</div>;
@@ -578,7 +532,7 @@ export default function Page() {
               <div className='content-list'>
                 {contents.map((content, index) => (
                   <ContentTile
-                    key={content.id || index}
+                    key={content.uid || index}
                     content={content}
                     index={index}
                   />
@@ -598,12 +552,12 @@ export default function Page() {
                 <div className='content-list'>
                   {sharedContent.map((content, index) => (
                     <ContentTile
-                      key={content.id || index}
+                      key={content.uid || index}
                       content={content}
                       index={index}
                       deleteShareOption={
                         sharedContent.some(
-                          (sharedItem) => sharedItem.id === content.id
+                          (sharedItem) => sharedItem.uid === content.uid
                         ) && userUID === id
                       }
                       handleUnshare={handleUnshare}

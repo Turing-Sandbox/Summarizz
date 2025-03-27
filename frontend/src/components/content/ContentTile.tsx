@@ -39,9 +39,9 @@ export default function ContentTile({
 
   return (
     <div
-      key={content.id || index}
+      key={content.uid || index}
       className='content-list-item'
-      onClick={() => router.push(`/content/${content.id}`)}
+      onClick={() => router.push(`/content/${content.uid}`)}
     >
       <div className='content-tile-header'>
         <h3 className='content-item-title'>{content.title}</h3>
@@ -51,7 +51,7 @@ export default function ContentTile({
             className='icon-button unshare'
             onClick={(e) => {
               e.stopPropagation();
-              handleUnshare(content.id);
+              handleUnshare(content.uid);
             }}
             title='Unshare Content'
           >

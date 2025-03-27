@@ -85,15 +85,6 @@ export default function Page() {
         );
       }
     }
-    if (contentObj.dateUpdated) {
-      if (typeof contentObj.dateUpdated === "string") {
-        contentObj.dateUpdated = new Date(contentObj.dateUpdated);
-      } else if (contentObj.dateUpdated.seconds) {
-        contentObj.dateUpdated = new Date(
-          contentObj.dateUpdated.seconds * 1000
-        );
-      }
-    }
     return contentObj;
   }
 
@@ -132,7 +123,7 @@ export default function Page() {
       let fetchedContent = contentResponse.data;
 
       fetchedContent = normalizeContentDates(fetchedContent);
-      fetchedContent.id = id;
+      fetchedContent.uid = id;
       setContent(contentResponse.data as Content);
 
       // Fetch creator info if available.
@@ -203,14 +194,14 @@ export default function Page() {
 
   // Update status content stats
   useEffect(() => {
-    if (content?.id) {
-      setIsBookmarked(user?.bookmarkedContent?.includes(content.id) || false);
+    if (content?.uid) {
+      setIsBookmarked(user?.bookmarkedContent?.includes(content.uid) || false);
       setBookmarks(content?.bookmarkedBy?.length || 0);
 
-      setIsShared(user?.sharedContent?.includes(content.id) || false);
+      setIsShared(user?.sharedContent?.includes(content.uid) || false);
       setShareCount(content?.shares || 0);
 
-      setIsLiked(user?.likedContent?.includes(content.id) || false);
+      setIsLiked(user?.likedContent?.includes(content.uid) || false);
       setLikes(content?.peopleWhoLiked?.length || 0);
     }
 
@@ -240,10 +231,10 @@ export default function Page() {
       try {
         // Delete comments
         const user_id = content?.creatorUID;
-        await axios.delete(`${apiURL}/comment/post/${content.id}/${user_id}`);
+        await axios.delete(`${apiURL}/comment/post/${content.uid}/${user_id}`);
 
         // Delete content
-        const content_id = content?.id;
+        const content_id = content?.uid;
         await axios({
           method: "delete",
           url: `${apiURL}/content/${content_id}`,
@@ -402,7 +393,7 @@ export default function Page() {
    * Redirects user to the edit page for the current content.
    */
   const editContent = () => {
-    if (content?.creatorUID === userUID) redirect(`edit/${content?.id}`);
+    if (content?.creatorUID === userUID) redirect(`edit/${content?.uid}`);
     else throw Error("You cannot edit this content");
   };
 

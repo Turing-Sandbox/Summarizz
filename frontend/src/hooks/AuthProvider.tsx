@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, createContext } from "react";
+import { useContext, createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -33,54 +33,51 @@ const AuthContext = createContext<AuthContextType>({
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
+  const [userUID, setUserUIDState] = useState<string | null>(null);
+  const [token, setTokenState] = useState<string | null>(null);
 
-  function setUserUID(userUID: string) {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
+  // Initialize state from localStorage on client-side only
+  useEffect(() => {
+    setUserUIDState(localStorage.getItem("userUID"));
+    setTokenState(localStorage.getItem("token"));
+  }, []);
 
-    localStorage.setItem("userUID", userUID);
+  function setUserUID(newUserUID: string) {
+    localStorage.setItem("userUID", newUserUID);
+    setUserUIDState(newUserUID);
   }
 
   function getUserUID() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return null;
-
-    return localStorage.getItem("userUID");
+    return userUID;
   }
 
-  function setToken(token: string) {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
-
-    localStorage.setItem("token", token);
+  function setToken(newToken: string) {
+    localStorage.setItem("token", newToken);
+    setTokenState(newToken);
   }
 
   function getToken() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return null;
-
-    return localStorage.getItem("token");
+    return token;
   }
 
-  function login(token: string, userUID: string) {
-    setToken(token);
-    setUserUID(userUID);
+  function login(newToken: string, newUserUID: string) {
+    setToken(newToken);
+    setUserUID(newUserUID);
   }
 
   function logout() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
-
     localStorage.removeItem("token");
     localStorage.removeItem("userUID");
+    setTokenState(null);
+    setUserUIDState(null);
     router.push("/authentication/login");
   }
 
   return (
     <AuthContext.Provider
       value={{
-        userUID: getUserUID(),
-        token: getToken(),
+        userUID,
+        token,
         setUserUID,
         getUserUID,
         setToken,

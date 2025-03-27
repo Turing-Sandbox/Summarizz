@@ -17,4 +17,5 @@ export interface Content {
   shares?: number; // Amount of times shared. This gets populated after someone clicks the share icon button.
   titleLower?: string; // Lowercase title, used for sharing.
   sharedBy?: string[]; // List of user IDs who shared the post
+  score?: number; // Score of the content
 }
