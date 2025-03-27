@@ -566,7 +566,7 @@ export class ContentService {
     allContent: any[]
   ): number {
     // If user has liked this content, we'll consider it but with consistent scoring
-    if (likedContent.includes(content.id)) {
+    if (likedContent.includes(content.uid)) {
       return 5; // Always give a positive score for content similar to what user liked
     }
 
