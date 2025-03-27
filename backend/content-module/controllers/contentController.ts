@@ -170,12 +170,9 @@ export class ContentController {
       }
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          error:
-            error.message || "You are not authorized to edit this content.",
-        });
+      res.status(500).json({
+        error: error.message || "You are not authorized to edit this content.",
+      });
     }
   }
 
@@ -282,14 +279,18 @@ export class ContentController {
 
     try {
       // Call the service layer to handle *both* sharing and incrementing
-      const updatedContent = await ContentService.shareContent(contentId, userId);
+      const updatedContent = await ContentService.shareContent(
+        contentId,
+        userId
+      );
 
       // Return success response
       res.status(200).json({ content: updatedContent }); // Return the updated content
     } catch (error) {
       console.error("Error sharing content:", error);
       res.status(500).json({
-        error: error instanceof Error ? error.message : "Failed to share content",
+        error:
+          error instanceof Error ? error.message : "Failed to share content",
       });
     }
   }
@@ -348,17 +349,17 @@ export class ContentController {
 
     try {
       const trendingContent = await ContentService.getTrendingContent(limit);
-      
+
       res.status(200).json({
         success: true,
         trendingContent,
-        message: "Trending content fetched successfully"
+        message: "Trending content fetched successfully",
       });
     } catch (error) {
       console.error("Error fetching trending content:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
-        error: error.message || "Failed to fetch trending content" 
+        error: error.message || "Failed to fetch trending content",
       });
     }
   }
@@ -367,17 +368,17 @@ export class ContentController {
     console.log("Fetching All Content...");
     try {
       const allContent = await ContentService.getAllContent();
-      
+
       res.status(200).json({
         success: true,
         content: allContent,
-        message: "All content fetched successfully"
+        message: "All content fetched successfully",
       });
     } catch (error) {
       console.error("Error fetching all content:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
-        error: error.message || "Failed to fetch all content" 
+        error: error.message || "Failed to fetch all content",
       });
     }
   }
@@ -389,20 +390,23 @@ export class ContentController {
 
     try {
       console.log(`Getting personalized content for user: ${userId}`);
-      const personalizedContent = await ContentService.getPersonalizedContent(userId, limit);
-      
+      const personalizedContent = await ContentService.getPersonalizedContent(
+        userId,
+        limit
+      );
+
       res.status(200).json({
         success: true,
         personalizedContent,
-        message: "Personalized content fetched successfully"
+        message: "Personalized content fetched successfully",
       });
     } catch (error) {
       console.error("Error fetching personalized content:", error);
 
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
         personalizedContent: [],
-        message: `Failed to fetch personalized content for user ${userId}, error: ${error.message}`
+        message: `Failed to fetch personalized content for user ${userId}, error: ${error.message}`,
       });
     }
   }

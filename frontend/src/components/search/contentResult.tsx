@@ -15,7 +15,7 @@ const ContentResult = ({ content }: { content: Content }) => {
    * @returns void
    */
   const handleClick = () => {
-    router.push(`/content/${content.id}`);
+    router.push(`/content/${content.uid}`);
   };
 
   return (

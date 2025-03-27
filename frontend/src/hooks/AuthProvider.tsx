@@ -4,29 +4,23 @@ import { useContext, createContext } from "react";
 import PropTypes from "prop-types";
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-
 interface AuthContextType {
   userUID: string | null;
   setUserUID: (arg0: string) => void;
   getUserUID: () => string | null;
-
   token: string | null;
   setToken: (arg0: string) => void;
   getToken: () => string | null;
-
   login: (token: string, userUID: string) => void;
   logout: () => void;
 }
-
 const AuthContext = createContext<AuthContextType>({
   userUID: null,
   setUserUID: () => {},
   getUserUID: () => null,
-
   token: null,
   setToken: () => {},
   getToken: () => null,
-
   login: () => {},
   logout: () => {},
 });

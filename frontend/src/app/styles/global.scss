@@ -191,3 +191,9 @@ textarea {
   color: red;
   margin: 2rem auto 0;
 }
+
+.content-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; /* Adjust the gap between items */
+}
