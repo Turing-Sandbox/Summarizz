@@ -332,7 +332,7 @@ function Navbar() {
               >
                 Summarizz Pro
               </a>
-
+              <hr className='menu-divider' />
               <a
                 className='menu-item'
                 onClick={() => {
