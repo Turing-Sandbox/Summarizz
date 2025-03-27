@@ -62,7 +62,7 @@ export class ContentService {
 
       addContentToUser(creatorUID, docRef.id);
 
-      return { id: docRef.id };
+      return { uid: docRef.id };
     } catch (error) {
       let errorMessage = error.message;
       // Remove "Firebase: " prefix from the error message
