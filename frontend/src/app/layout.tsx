@@ -21,11 +21,14 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <head>
-        <script
+        {/* Mondiad */}
+        <meta name='mnd-ver' content='tqpk2mhrbw7rn7kvycrga' />
+        {/* AdSense */}
+        {/* <script
           async
           src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5798408924792660'
           crossOrigin='anonymous'
-        ></script>
+        ></script> */}
       </head>
       <body>
         <AuthProvider>

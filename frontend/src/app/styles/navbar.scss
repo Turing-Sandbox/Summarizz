@@ -30,7 +30,8 @@
   }
 
   &-auth {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, auto);
     @include absolute-positioned;
     gap: 10px;
   }
@@ -39,6 +40,7 @@
     color: var(--text-color);
     text-decoration: none;
     font-size: 1rem;
+    font-weight: 400;
     cursor: pointer;
   }
 
@@ -73,6 +75,7 @@
     color: var(--text-color);
     font-size: 0.8rem;
     cursor: pointer;
+    font-weight: 400;
 
     &:hover {
       background-color: var(--input-border-color);
@@ -128,12 +131,15 @@
   padding: 10px 30px;
   margin: var(--navbar-margin);
   z-index: 2;
+  min-width: 150px;
 
   &-item {
     display: block;
     margin: 10px 0;
+    font-size: 1rem;
     text-align: center;
     cursor: pointer;
+    font-weight: 400;
   }
 }
 
@@ -203,7 +209,7 @@
 }
 
 .padding-right {
-  padding-right: 40px;
+  padding-right: 15px;
 }
 
 .searchBarContainer {

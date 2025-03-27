@@ -643,7 +643,6 @@ export default function Page() {
                   id='currentPassword'
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
                 />
               </div>
 
@@ -706,7 +705,6 @@ export default function Page() {
                   id='currentPassword'
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
                 />
               </div>
 

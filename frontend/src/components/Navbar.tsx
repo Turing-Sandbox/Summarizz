@@ -312,7 +312,7 @@ function Navbar() {
               >
                 View Profile
               </a>
-
+              <hr className='menu-divider' />
               <a
                 className='menu-item'
                 onClick={() => {
@@ -322,7 +322,7 @@ function Navbar() {
               >
                 Manage Profile
               </a>
-
+              <hr className='menu-divider' />
               <a
                 className='menu-item'
                 onClick={() => {

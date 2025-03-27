@@ -35,19 +35,27 @@ body {
   box-sizing: border-box;
 }
 
-%base-font {
-  font-weight: 400;
-  font-style: normal;
+h1 {
+  font-family: var(--font-headings);
+  font-weight: 900;
+  font-size: 2.5rem;
 }
 
-h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
   font-family: var(--font-headings);
-  @extend %base-font;
+  margin: 40px 0 0px;
+  padding: 0;
+  font-weight: 700;
+  font-style: normal;
+}
+
+%base-font {
+  font-weight: 200;
+  font-style: normal;
 }
 
 p,
@@ -55,7 +63,8 @@ label,
 input,
 textarea,
 ul,
-ol {
+ol,
+a {
   font-family: var(--font-body);
   font-size: small;
   @extend %base-font;
@@ -67,6 +76,20 @@ label {
   font-family: var(--font-interactive);
   text-decoration: none;
   @extend %base-font;
+}
+
+button {
+  font-weight: 400;
+}
+
+a {
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+a:hover {
+  color: var(--icon-hover-color);
+  font-weight: 500;
 }
 
 %block-style {
@@ -94,6 +117,63 @@ blockquote {
   border-radius: 5px;
 }
 
+.input-group {
+  text-align: left;
+  margin: 10px 0;
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin: 0 0.5rem 0 1rem;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  width: 100%;
+
+  margin: 0.5rem auto;
+  padding: 0.8rem;
+  box-sizing: border-box;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+
+  background-color: var(--input-field-color);
+  color: var(--text-color);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 50px;
+  max-height: 200px;
+}
+
+.save-button {
+  width: 100%;
+
+  margin: 1rem auto;
+  padding: 15px;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+.save-button:hover {
+  background-color: var(--input-border-color);
+  color: var(--background-color);
+
+  cursor: pointer;
+}
+
 .summarizz-logo {
   font-family: "Blanka";
   user-select: none;
@@ -101,7 +181,7 @@ blockquote {
 }
 
 .main-content {
-  width: 90vw;
+  width: 85vw;
   margin: 0 auto;
   padding-top: 120px;
   flex: 1;
