@@ -43,32 +43,35 @@ export default function ContentTile({
       className='content-list-item'
       onClick={() => router.push(`/content/${content.uid}`)}
     >
-      <div className='content-tile-header'>
-        <h3 className='content-item-title'>{content.title}</h3>
-        {/* Unshare Button */}
-        {deleteShareOption && (
-          <button
-            className='icon-button unshare'
-            onClick={(e) => {
-              e.stopPropagation();
-              handleUnshare(content.uid);
-            }}
-            title='Unshare Content'
-          >
-            <TrashIconOutline className='icon delete' />
-          </button>
-        )}
+      <div className='content-tile-info'>
+        <div className='content-tile-header'>
+          <h3 className='content-item-title'>{content.title}</h3>
+          {/* Unshare Button */}
+          {deleteShareOption && (
+            <button
+              className='icon-button unshare'
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUnshare(content.uid);
+              }}
+              title='Unshare Content'
+            >
+              <TrashIconOutline className='icon delete' />
+            </button>
+          )}
+        </div>
+
+        <p className="content-item-date">
+          {content.dateCreated
+            ? `${new Date(content.dateCreated).toLocaleString("en-US", {
+                month: "short",
+              })} ${new Date(content.dateCreated).getDate()}${
+                content.readtime ? ` - ${content.readtime} min read` : ""
+              }`
+            : ""}
+        </p>
       </div>
 
-      <p>
-        {content.dateCreated
-          ? `${new Date(content.dateCreated).toLocaleString("en-US", {
-              month: "short",
-            })} ${new Date(content.dateCreated).getDate()}${
-              content.readtime ? ` - ${content.readtime} min read` : ""
-            }`
-          : ""}
-      </p>
       {content.thumbnail && (
         <div className='content-thumbnail-container'>
           <Image

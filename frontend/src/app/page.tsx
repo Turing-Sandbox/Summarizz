@@ -8,6 +8,8 @@ import axios from "axios";
 import { User } from "@/models/User";
 import ContentTile from "@/components/content/ContentTile";
 
+import "@/app/styles/feed.scss";
+
 export default function Page() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
   const [latestContent, setLatestContent] = useState<Content[]>([]);
@@ -182,7 +184,7 @@ export default function Page() {
       {trendingContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
-        <div className='content-list'>
+        <div className='content-list-horizontal'>
           {trendingContent.map((content, index) => (
             <ContentTile
               key={content.uid || index}
