@@ -117,7 +117,13 @@ export default function Page() {
       });
 
       if (contentResponse.data && contentResponse.data.success) {
-        setLatestContent(contentResponse.data.content);
+        const latestContent = contentResponse.data.content;
+
+        const normalizedContent = latestContent.map((content: Content) =>
+          normalizeContentDates(content)
+        );
+        
+        setLatestContent(normalizedContent);
         return true;
       } else {
         setLatestContent([]);
@@ -142,7 +148,11 @@ export default function Page() {
       );
 
       if (personalizedResponse.data && personalizedResponse.data.success) {
-        setPersonalizedContent(personalizedResponse.data.personalizedContent);
+        const normalizedContent =
+          personalizedResponse.data.personalizedContent.map(
+            (content: Content) => normalizeContentDates(content)
+          );
+        setPersonalizedContent(normalizedContent);
         return true;
       } else {
         setPersonalizedContent([]);
@@ -159,11 +169,7 @@ export default function Page() {
         (content.dateCreated as any).seconds * 1000
       );
     }
-    if (content.dateUpdated && (content.dateUpdated as any).seconds) {
-      content.dateUpdated = new Date(
-        (content.dateUpdated as any).seconds * 1000
-      );
-    }
+
     return content;
   }
 
@@ -194,6 +200,24 @@ export default function Page() {
       ) : (
         <div className='content-list'>
           {latestContent.map((content, index) => (
+            <div>
+              <ContentTile
+                key={content.uid || index}
+                content={content}
+                index={index}
+              />
+            </div>
+          ))}
+        </div>
+      )} */}
+      {errorLatest && <p className='error'>{errorLatest}</p>}
+
+      <h2>For You</h2>
+      {personalizedContent.length === 0 ? (
+        <h3>No content found</h3>
+      ) : (
+        <div className='content-list'>
+          {personalizedContent.map((content, index) => (
             <ContentTile
               key={content.uid || index}
               content={content}
@@ -201,28 +225,7 @@ export default function Page() {
             />
           ))}
         </div>
-      )} */}
-      {/* <div className='content-list'>
-        {latestContent.map((content, index) => (
-          <ContentTile
-            key={content.id || index}
-            content={content}
-            index={index}
-          />
-        ))}
-      </div> */}
-      {errorLatest && <p className='error'>{errorLatest}</p>}
-
-      <h2>For You</h2>
-      {/* <div className='content-list'>
-        {personalizedContent.map((content, index) => (
-          <ContentTile
-            key={content.id || index}
-            content={content}
-            index={index}
-          />
-        ))}
-      </div> */}
+      )}
       {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
     </div>
   );
