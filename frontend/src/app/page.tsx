@@ -179,7 +179,13 @@ export default function Page() {
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
 
-      {user && <h1>Welcome, {user?.firstName}</h1>}
+      {user ? (
+        <h1>Welcome, {user?.firstName}</h1>
+      ) : (
+        <h1 className='summarizz-logo-container'>
+          <span className='summarizz-logo'>SUMMARIZZ</span>
+        </h1>
+      )}
       <h2>Top Trending</h2>
       {trendingContent.length === 0 ? (
         <h3>No content found</h3>
@@ -212,21 +218,25 @@ export default function Page() {
       )}
       {errorLatest && <p className='error'>{errorLatest}</p>} */}
 
-      <h2>For You</h2>
-      {personalizedContent.length === 0 ? (
-        <h3>No content found</h3>
-      ) : (
-        <div className='content-list'>
-          {personalizedContent.map((content, index) => (
-            <ContentTile
-              key={content.uid || index}
-              content={content}
-              index={index}
-            />
-          ))}
+      {user && (
+        <div>
+          <h2>For You</h2>
+          {personalizedContent.length === 0 ? (
+            <h3>No content found</h3>
+          ) : (
+            <div className='content-list'>
+              {personalizedContent.map((content, index) => (
+                <ContentTile
+                  key={content.uid || index}
+                  content={content}
+                  index={index}
+                />
+              ))}
+            </div>
+          )}
+          {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
         </div>
       )}
-      {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
     </div>
   );
 }

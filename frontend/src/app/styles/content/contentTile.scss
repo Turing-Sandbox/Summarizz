@@ -1,3 +1,6 @@
+@use "../colors.scss";
+@use "../global.scss";
+
 .content-tile-header {
   display: flex;
   align-items: flex-start;
@@ -47,7 +50,7 @@
   border-width: 1px;
   box-sizing: border-box;
 
-  background-color: var(--tile-color);
+  @include global.glassmorphic-background;
   color: var(--text-color);
 
   font-size: 1.1rem;
