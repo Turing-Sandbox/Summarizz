@@ -23,6 +23,7 @@ export default function RootLayout({
       <head>
         {/* Mondiad */}
         <meta name='mnd-ver' content='tqpk2mhrbw7rn7kvycrga' />
+        <script async src='https://ss.mrmnd.com/native.js'></script>
         {/* AdSense */}
         {/* <script
           async

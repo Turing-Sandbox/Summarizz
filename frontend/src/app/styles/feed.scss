@@ -3,3 +3,22 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
+
+.ad-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  padding: 20px;
+
+  border-radius: 20px;
+  border-width: 1px;
+  box-sizing: border-box;
+
+  @include global.glassmorphic-background;
+  color: var(--text-color);
+
+  font-size: 1.1rem;
+
+  height: 450px;
+}
