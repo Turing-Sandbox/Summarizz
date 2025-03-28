@@ -8,6 +8,8 @@ import axios from "axios";
 import { User } from "@/models/User";
 import ContentTile from "@/components/content/ContentTile";
 
+import "@/app/styles/feed.scss";
+
 export default function Page() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
   const [latestContent, setLatestContent] = useState<Content[]>([]);
@@ -177,12 +179,19 @@ export default function Page() {
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
 
-      {user && <h1>Welcome, {user?.firstName}</h1>}
+      {user ? (
+        <h1>Welcome, {user?.firstName}</h1>
+      ) : (
+        <h1 className='summarizz-logo-container'>
+          <span className='summarizz-logo'>SUMMARIZZ</span>
+        </h1>
+      )}
+
       <h2>Top Trending</h2>
       {trendingContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
-        <div className='content-list'>
+        <div className='content-list-horizontal'>
           {trendingContent.map((content, index) => (
             <ContentTile
               key={content.uid || index}
@@ -210,30 +219,34 @@ export default function Page() {
       )}
       {errorLatest && <p className='error'>{errorLatest}</p>} */}
 
-      <h2>For You</h2>
-      {personalizedContent.length === 0 ? (
-        <h3>No content found</h3>
-      ) : (
-        <div className='content-list'>
-          {personalizedContent.map((content, index) => (
-            <div>
-              {index % 8 === 0 ? (
-                <div
-                  className='ad-tile'
-                  data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
-                ></div>
-              ) : (
-                <ContentTile
-                  key={content.uid || index}
-                  content={content}
-                  index={index}
-                />
-              )}
+      {user && (
+        <div>
+          <h2>For You</h2>
+          {personalizedContent.length === 0 ? (
+            <h3>No content found</h3>
+          ) : (
+            <div className='content-list'>
+              {personalizedContent.map((content, index) => (
+                <div>
+                  {index % 8 === 0 ? (
+                    <div
+                      className='ad-tile'
+                      data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
+                    ></div>
+                  ) : (
+                    <ContentTile
+                      key={content.uid || index}
+                      content={content}
+                      index={index}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
+          )}
+          {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
         </div>
       )}
-      {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
     </div>
   );
 }
