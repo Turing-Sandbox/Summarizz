@@ -193,11 +193,17 @@ export default function Page() {
       ) : (
         <div className='content-list-horizontal'>
           {trendingContent.map((content, index) => (
-            <ContentTile
-              key={content.uid || index}
-              content={content}
-              index={index}
-            />
+            <div>
+              {index % 8 === 2 ? (
+                <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+              ) : (
+                <ContentTile
+                  key={content.uid || index}
+                  content={content}
+                  index={index}
+                />
+              )}
+            </div>
           ))}
         </div>
       )}
