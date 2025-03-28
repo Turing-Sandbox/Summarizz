@@ -186,6 +186,7 @@ export default function Page() {
           <span className='summarizz-logo'>SUMMARIZZ</span>
         </h1>
       )}
+
       <h2>Top Trending</h2>
       {trendingContent.length === 0 ? (
         <h3>No content found</h3>
@@ -218,7 +219,6 @@ export default function Page() {
       )}
       {errorLatest && <p className='error'>{errorLatest}</p>} */}
 
-
       {user && (
         <div>
           <h2>For You</h2>
@@ -227,25 +227,24 @@ export default function Page() {
           ) : (
             <div className='content-list'>
               {personalizedContent.map((content, index) => (
-
-            <div>
-              {index % 8 === 0 ? (
-                <div
-                  className='ad-tile'
-                  data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
-                ></div>
-              ) : (
-                <ContentTile
-                  key={content.uid || index}
-                  content={content}
-                  index={index}
-                />
-
+                <div>
+                  {index % 8 === 0 ? (
+                    <div
+                      className='ad-tile'
+                      data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
+                    ></div>
+                  ) : (
+                    <ContentTile
+                      key={content.uid || index}
+                      content={content}
+                      index={index}
+                    />
+                  )}
+                </div>
               ))}
             </div>
           )}
           {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
-          ))}
         </div>
       )}
     </div>
