@@ -566,6 +566,7 @@ export default function Page() {
                       key={content.uid || index}
                       content={content}
                       index={index}
+                      onPreview={(c) => openPreview(c)}
                       deleteShareOption={
                         sharedContent.some(
                           (sharedItem) => sharedItem.uid === content.uid

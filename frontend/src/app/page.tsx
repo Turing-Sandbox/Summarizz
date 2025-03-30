@@ -230,6 +230,7 @@ export default function Page() {
               key={content.uid || index}
               content={content}
               index={index}
+              onPreview={(c) => openPreview(c)}
             />
           ))}
         </div>
@@ -255,6 +256,7 @@ export default function Page() {
                       key={content.uid || index}
                       content={content}
                       index={index}
+                      onPreview={(c) => openPreview(c)}
                     />
                   )}
                 </div>
