@@ -7,6 +7,7 @@ import { apiURL } from "./scripts/api";
 import axios from "axios";
 import { User } from "@/models/User";
 import ContentTile from "@/components/content/ContentTile";
+import ContentPreviewPopup from "@/components/content/ContentPreviewPopup";
 
 import "@/app/styles/feed.scss";
 
@@ -14,6 +15,7 @@ export default function Page() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
   const [latestContent, setLatestContent] = useState<Content[]>([]);
   const [personalizedContent, setPersonalizedContent] = useState<Content[]>([]);
+  const [previewContent, setPreviewContent] = useState<Content | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const { userUID } = useAuth();
@@ -175,6 +177,14 @@ export default function Page() {
     return content;
   }
 
+  const openPreview = (content: Content) => {
+    setPreviewContent(content);
+  };
+
+  const closePreview = () => {
+    setPreviewContent(null);
+  };
+
   return (
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
@@ -201,6 +211,7 @@ export default function Page() {
                   key={content.uid || index}
                   content={content}
                   index={index}
+                  onPreview={(c) => openPreview(c)}
                 />
               )}
             </div>
@@ -252,6 +263,12 @@ export default function Page() {
           )}
           {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
         </div>
+      )}
+      {previewContent && (
+        <ContentPreviewPopup
+          content={previewContent}
+          onClose={closePreview}
+        />
       )}
     </div>
   );

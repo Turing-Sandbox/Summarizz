@@ -1,0 +1,92 @@
+@use "../colors.scss";
+@use "../global.scss";
+
+.glassmorphic-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glassmorphic-popup {
+  @include global.glassmorphic-background;
+  padding: 30px 40px;
+  border-radius: 25px;
+  max-width: 500px;
+  width: 90%;
+  position: relative;
+  text-align: center;
+  color: var(--text-color);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  font-family: var(--font-body);
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-color);
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+.popup-thumbnail {
+  border-radius: 10px;
+  margin-bottom: 15px;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.popup-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.popup-summary {
+  font-size: 1rem;
+  margin: 15px 0;
+}
+
+.popup-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.view-page-button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border-color);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--input-border-color);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+  

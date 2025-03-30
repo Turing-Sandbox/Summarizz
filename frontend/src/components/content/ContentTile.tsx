@@ -25,6 +25,7 @@ interface ContentTileProps {
   hideStats?: boolean;
   deleteShareOption?: boolean;
   handleUnshare?: (contentId: string) => void;
+  onPreview?: (content: Content) => void;
 }
 
 export default function ContentTile({
@@ -33,6 +34,7 @@ export default function ContentTile({
   hideStats = false,
   deleteShareOption = false,
   handleUnshare = () => {},
+  onPreview,
 }: ContentTileProps) {
   const router = useRouter();
   const { userUID } = useAuth();
@@ -69,6 +71,17 @@ export default function ContentTile({
                 content.readtime ? ` - ${content.readtime} min read` : ""
               }`
             : ""}
+            {onPreview && (
+              <button
+              className="preview-inline-button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreview(content);
+              }}
+            >
+              Preview
+            </button>
+            )}
         </p>
       </div>
 
