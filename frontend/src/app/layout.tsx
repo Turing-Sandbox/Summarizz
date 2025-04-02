@@ -21,12 +21,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
+      <head>
+        {/* Mondiad */}
+        <meta name='mnd-ver' content='tqpk2mhrbw7rn7kvycrga' />
+        <script async src='https://ss.mrmnd.com/native.js'></script>
+      </head>
       <body>
-        <Head>
-          {/* Mondiad */}
-          <meta name='mnd-ver' content='tqpk2mhrbw7rn7kvycrga' />
-          <script async src='https://ss.mrmnd.com/native.js'></script>
-        </Head>
         {/* Mondiad Script */}
         {/* AdSense Script (if needed) */}
         {/* <Script

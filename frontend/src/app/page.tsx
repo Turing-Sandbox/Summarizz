@@ -178,7 +178,6 @@ export default function Page() {
   return (
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
-
       {user ? (
         <h1>Welcome, {user?.firstName}</h1>
       ) : (
@@ -186,29 +185,30 @@ export default function Page() {
           <span className='summarizz-logo'>SUMMARIZZ</span>
         </h1>
       )}
-
-      <h2>Top Trending</h2>
-      {trendingContent.length === 0 ? (
-        <h3>No content found</h3>
-      ) : (
-        <div className='content-list-horizontal'>
-          {trendingContent.map((content, index) => (
-            <div>
-              {index % 8 === 2 ? (
-                <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-              ) : (
-                <ContentTile
-                  key={content.uid || index}
-                  content={content}
-                  index={index}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <h2>Top Trending</h2>{" "}
+      <div className='content-list-horizontal'>
+        <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+        {trendingContent.length === 0 ? (
+          <h3>No content found</h3>
+        ) : (
+          <div>
+            {trendingContent.map((content, index) => (
+              <div>
+                {index % 8 === 2 ? (
+                  <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                ) : (
+                  <ContentTile
+                    key={content.uid || index}
+                    content={content}
+                    index={index}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       {errorTrending && <p className='error'>{errorTrending}</p>}
-
       {/* <h2>Latest Post</h2>
       {latestContent.length === 0 ? (
         <h3>No content found</h3>
@@ -224,7 +224,6 @@ export default function Page() {
         </div>
       )}
       {errorLatest && <p className='error'>{errorLatest}</p>} */}
-
       {user && (
         <div>
           <h2>For You</h2>
