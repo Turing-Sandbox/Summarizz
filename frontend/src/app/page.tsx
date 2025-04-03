@@ -26,6 +26,30 @@ export default function Page() {
   );
 
   useEffect(() => {
+    // Function to reload the Mondiad script
+    const reloadMondiadScript = () => {
+      const existingScript = document.querySelector(
+        "script[src='https://ss.mrmnd.com/native.js']"
+      );
+      if (existingScript) {
+        // Remove the existing script
+        existingScript.remove();
+      }
+
+      // Create a new script element
+      const script = document.createElement("script");
+      script.src = "https://ss.mrmnd.com/native.js";
+      script.async = true;
+
+      // Append the script to the document head
+      document.head.appendChild(script);
+    };
+
+    // Reload the script whenever the component renders
+    reloadMondiadScript();
+  }, [trendingContent, personalizedContent]); // Dependency array ensures this runs when trendingContent changes
+
+  useEffect(() => {
     const fetchContent = async () => {
       setIsLoading(true);
 
@@ -188,24 +212,26 @@ export default function Page() {
 
       <h2 className='feed-section-title'>Top Trending</h2>
       <div className='content-list-horizontal'>
-        <div className='ad-tile'>
+        {/* <div className='ad-tile'>
           <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-        </div>
+        </div> */}
         {trendingContent.length === 0 ? (
           <h3>No content found</h3>
         ) : (
           <div className='content-list-horizontal'>
             {trendingContent.map((content, index) => (
               <div>
-                {/* {index % 8 === 2 ? (
-                  <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-                ) : ( */}
-                <ContentTile
-                  key={content.uid || index}
-                  content={content}
-                  index={index}
-                />
-                {/* )} */}
+                {index % 8 === 2 ? (
+                  <div className='ad-tile'>
+                    <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                  </div>
+                ) : (
+                  <ContentTile
+                    key={content.uid || index}
+                    content={content}
+                    index={index}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -236,15 +262,17 @@ export default function Page() {
             <div className='content-list'>
               {personalizedContent.map((content, index) => (
                 <div>
-                  {/* {index % 8 === 0 ? (
-                    <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-                  ) : ( */}
-                  <ContentTile
-                    key={content.uid || index}
-                    content={content}
-                    index={index}
-                  />
-                  {/* )} */}
+                  {index % 8 === 0 ? (
+                    <div className='ad-tile'>
+                      <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                    </div>
+                  ) : (
+                    <ContentTile
+                      key={content.uid || index}
+                      content={content}
+                      index={index}
+                    />
+                  )}
                 </div>
               ))}
             </div>
