@@ -5,7 +5,6 @@
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
-  // margin-top: 1rem;
 }
 
 .content-list-horizontal {
@@ -18,7 +17,6 @@
 
   width: 100%;
   overflow-y: scroll;
-  // margin-top: 1rem;
 }
 
 .feed-section-title {
@@ -70,11 +68,12 @@
   box-sizing: border-box;
 
   @include global.glassmorphic-background;
+  background-color: var(--input-border-color);
   color: var(--text-color);
 
   font-size: 1.1rem;
 
-  height: 450px;
+  height: 500px;
   min-width: 300px;
   max-width: 700px;
 }
