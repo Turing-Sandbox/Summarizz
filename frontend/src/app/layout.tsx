@@ -7,7 +7,6 @@ import Background from "@/components/Background";
 import Footer from "@/components/Footer";
 import AuthProvider from "@/hooks/AuthProvider";
 import NavbarWrapper from "@/components/NavbarWrapper";
-import Head from "next/head";
 
 export const metadata: Metadata = {
   title: "Summarizz",
@@ -40,6 +39,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </AuthProvider>
+        {/* <script async src='https://ss.mrmnd.com/native.js'></script> */}
       </body>
     </html>
   );
