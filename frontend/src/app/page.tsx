@@ -26,7 +26,7 @@ export default function Page() {
   );
 
   useEffect(() => {
-    // Function to reload the Mondiad script
+    // Function to reload the Mondiad script (ADS)
     const reloadMondiadScript = () => {
       const existingScript = document.querySelector(
         "script[src='https://ss.mrmnd.com/native.js']"
@@ -47,7 +47,7 @@ export default function Page() {
 
     // Reload the script whenever the component renders
     reloadMondiadScript();
-  }, [trendingContent, personalizedContent]); // Dependency array ensures this runs when trendingContent changes
+  }, [trendingContent, personalizedContent, latestContent]); // Dependency array ensures this runs when trendingContent changes
 
   useEffect(() => {
     const fetchContent = async () => {
