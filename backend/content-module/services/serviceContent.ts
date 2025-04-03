@@ -465,7 +465,7 @@ export class ContentService {
   }
 
   // Get all trending content
-  static async getTrendingContent(limit = 5) {
+  static async getTrendingContent(limit = 10) {
     console.log("Getting trending content...");
 
     try {

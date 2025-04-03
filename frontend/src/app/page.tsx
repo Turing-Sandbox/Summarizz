@@ -28,6 +28,30 @@ export default function Page() {
   );
 
   useEffect(() => {
+    // Function to reload the Mondiad script (ADS)
+    const reloadMondiadScript = () => {
+      const existingScript = document.querySelector(
+        "script[src='https://ss.mrmnd.com/native.js']"
+      );
+      if (existingScript) {
+        // Remove the existing script
+        existingScript.remove();
+      }
+
+      // Create a new script element
+      const script = document.createElement("script");
+      script.src = "https://ss.mrmnd.com/native.js";
+      script.async = true;
+
+      // Append the script to the document head
+      document.head.appendChild(script);
+    };
+
+    // Reload the script whenever the component renders
+    reloadMondiadScript();
+  }, [trendingContent, personalizedContent, latestContent]); // Dependency array ensures this runs when trendingContent changes
+
+  useEffect(() => {
     const fetchContent = async () => {
       setIsLoading(true);
 
@@ -188,7 +212,6 @@ export default function Page() {
   return (
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
-
       {user ? (
         <h1>Welcome, {user?.firstName}</h1>
       ) : (
@@ -197,30 +220,35 @@ export default function Page() {
         </h1>
       )}
 
-      <h2>Top Trending</h2>
-      {trendingContent.length === 0 ? (
-        <h3>No content found</h3>
-      ) : (
-        <div className='content-list-horizontal'>
-          {trendingContent.map((content, index) => (
-            <div>
-              {index % 8 === 2 ? (
-                <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-              ) : (
-                <ContentTile
-                  key={content.uid || index}
-                  content={content}
-                  index={index}
-                  onPreview={(c) => openPreview(c)}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <h2 className='feed-section-title'>Top Trending</h2>
+      <div className='content-list-horizontal'>
+        {/* <div className='ad-tile'>
+          <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+        </div> */}
+        {trendingContent.length === 0 ? (
+          <h3>No content found</h3>
+        ) : (
+          <div className='content-list-horizontal'>
+            {trendingContent.map((content, index) => (
+              <div>
+                {index % 8 === 2 ? (
+                  <div className='ad-tile'>
+                    <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                  </div>
+                ) : (
+                  <ContentTile
+                    key={content.uid || index}
+                    content={content}
+                    index={index}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
       {errorTrending && <p className='error'>{errorTrending}</p>}
-
-      {/* <h2>Latest Post</h2>
+      {/* <h2 className='feed-section-title'>Latest Post</h2>
       {latestContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
@@ -236,21 +264,19 @@ export default function Page() {
         </div>
       )}
       {errorLatest && <p className='error'>{errorLatest}</p>} */}
-
       {user && (
         <div>
-          <h2>For You</h2>
+          <h2 className='feed-section-title'>For You</h2>
           {personalizedContent.length === 0 ? (
             <h3>No content found</h3>
           ) : (
             <div className='content-list'>
               {personalizedContent.map((content, index) => (
                 <div>
-                  {index % 8 === 0 ? (
-                    <div
-                      className='ad-tile'
-                      data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
-                    ></div>
+                  {index % 10 === 4 ? (
+                    <div className='ad-tile'>
+                      <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                    </div>
                   ) : (
                     <ContentTile
                       key={content.uid || index}

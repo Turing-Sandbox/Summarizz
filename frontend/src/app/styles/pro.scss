@@ -13,14 +13,13 @@
   padding: 3rem 1rem;
   margin-top: 5rem;
   margin-bottom: 3rem;
-  background: linear-gradient(135deg, var(--left-bottom-rectangle) 0%, var(--middle-bottom-circle) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--background-color) 0%,
+    var(--middle-bottom-circle) 100%
+  );
   border-radius: 10px;
   color: white;
-
-  h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-  }
 
   .pro-subtitle {
     font-size: 1.5rem;
@@ -30,8 +29,8 @@
 }
 
 .pro-cta-button {
-  background-color: white;
-  color: var(--left-bottom-rectangle);
+  background-color: var(--background-color);
+  color: var(--text-color);
   font-weight: 600;
   font-size: 1.2rem;
   padding: 0.8rem 2rem;
@@ -49,12 +48,6 @@
 
 .pro-features {
   margin-bottom: 4rem;
-
-  h2 {
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 2rem;
-  }
 }
 
 .features-grid {
@@ -77,8 +70,8 @@
   .feature-icon {
     width: 50px;
     height: 50px;
-    background-color: var(--left-bottom-rectangle);
-    color: white;
+    background-color: var(--input-field-color);
+    color: var(--text-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -98,14 +91,16 @@
   }
 }
 
+.pro-section-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
 .pro-pricing {
   margin-bottom: 4rem;
   text-align: center;
-
-  h2 {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-  }
 }
 
 .pricing-card {
@@ -115,7 +110,7 @@
   border-radius: 10px;
   padding: 2.5rem 2rem;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  border: 2px solid var(--left-bottom-rectangle);
+  border: 2px solid var(--input-field-color);
 
   h3 {
     font-size: 1.5rem;
@@ -125,8 +120,9 @@
   .price {
     font-size: 3rem;
     font-weight: 700;
-    color: var(--left-bottom-rectangle);
+    color: var(--text-color);
     margin-bottom: 1.5rem;
+    font-family: sans-serif;
 
     span {
       font-size: 1.2rem;
@@ -143,7 +139,7 @@
 
   li {
     padding: 0.8rem 0;
-    border-bottom: 1px solid var(--input-border-color);
+    border-bottom: 1px solid var(--input-field-color);
 
     &:last-child {
       border-bottom: none;
@@ -152,8 +148,8 @@
 }
 
 .pricing-button {
-  background-color: var(--left-bottom-rectangle);
-  color: white;
+  background-color: var(--background-color);
+  color: var(--text-color);
   font-weight: 600;
   font-size: 1.1rem;
   padding: 0.8rem 2rem;
@@ -197,9 +193,10 @@
     top: 10px;
     left: 15px;
     font-size: 4rem;
-    color: var(--left-bottom-rectangle);
+    color: var(--text-color);
     opacity: 0.7;
     font-family: serif;
+    opacity: 50%;
   }
 
   p {
@@ -212,7 +209,8 @@
 
   .testimonial-author {
     font-weight: 600;
-    color: var(--left-bottom-rectangle);
+    color: var(--text-color);
+    opacity: 50%;
   }
 }
 

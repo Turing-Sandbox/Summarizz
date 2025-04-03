@@ -3,9 +3,8 @@
 
 .content-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 1rem;
-  margin-top: 1rem;
 }
 
 .content-list-horizontal {
@@ -18,7 +17,10 @@
 
   width: 100%;
   overflow-y: scroll;
-  margin-top: 1rem;
+}
+
+.feed-section-title {
+  margin-bottom: 1rem;
 }
 
 .summarizz-logo-container {
@@ -26,33 +28,52 @@
 }
 
 // media queries
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 2824px) {
+  .content-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media screen and (max-width: 2324px) {
+  .content-list {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media screen and (max-width: 1824px) {
+  .content-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 1224px) {
   .content-list {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 908px) {
   .content-list {
     grid-template-columns: repeat(1, 1fr);
   }
 }
 
 .ad-tile {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
   padding: 20px;
 
   border-radius: 20px;
+  border-style: solid;
+  border-color: var(--input-border-color);
   border-width: 1px;
   box-sizing: border-box;
 
   @include global.glassmorphic-background;
+  background-color: var(--input-border-color);
   color: var(--text-color);
 
   font-size: 1.1rem;
 
-  height: 450px;
+  height: 500px;
+  min-width: 300px;
+  max-width: 700px;
 }

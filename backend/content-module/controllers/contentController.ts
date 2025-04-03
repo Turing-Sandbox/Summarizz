@@ -345,7 +345,7 @@ export class ContentController {
 
   static async getTrendingContent(req: Request, res: Response) {
     console.log("Fetching Trending Content...");
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
 
     try {
       const trendingContent = await ContentService.getTrendingContent(limit);

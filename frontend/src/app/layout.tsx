@@ -24,20 +24,22 @@ export default function RootLayout({
         {/* Mondiad */}
         <meta name='mnd-ver' content='tqpk2mhrbw7rn7kvycrga' />
         <script async src='https://ss.mrmnd.com/native.js'></script>
-        {/* AdSense */}
-        {/* <script
-          async
-          src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5798408924792660'
-          crossOrigin='anonymous'
-        ></script> */}
       </head>
       <body>
+        {/* Mondiad Script */}
+        {/* AdSense Script (if needed) */}
+        {/* <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5798408924792660"
+          strategy="lazyOnload"
+          crossOrigin="anonymous"
+        /> */}
         <AuthProvider>
           <Background />
           <NavbarWrapper />
           {children}
           <Footer />
         </AuthProvider>
+        {/* <script async src='https://ss.mrmnd.com/native.js'></script> */}
       </body>
     </html>
   );
