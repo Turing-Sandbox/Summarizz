@@ -144,6 +144,14 @@ export default function Page() {
             }
           }
 
+          // Inject user (author) info
+          try {
+            const userRes = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+            fetchedContent.user = userRes.data;
+          } catch (userError) {
+            console.error("Failed to fetch author for shared content:", contentId);
+          }
+
           validContent.push(fetchedContent);
         }
       } catch (error) {
@@ -181,6 +189,14 @@ export default function Page() {
         );
       } else if (fetchedContent.dateCreated) {
         fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+      }
+
+      // Inject user (author) info
+      try {
+        const userRes = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+        fetchedContent.user = userRes.data;
+      } catch (userError) {
+        console.error("Failed to fetch author for content:", contentId);
       }
 
       fetchedContent.uid = contentId; // Ensure the ID is set

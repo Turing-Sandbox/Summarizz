@@ -1,3 +1,5 @@
+import { User } from "./User";
+
 export interface Content {
   uid: string; // Firebase UID
   creatorUID: string; // Content Creator UID
@@ -18,4 +20,5 @@ export interface Content {
   titleLower?: string; // Lowercase title, used for sharing.
   sharedBy?: string[]; // List of user IDs who shared the post
   score?: number; // Score of the content
+  user?: User; // User who created the content - supports author injection
 }
