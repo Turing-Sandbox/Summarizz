@@ -5,9 +5,10 @@ import { Content } from "@/models/Content";
 import { useEffect, useState } from "react";
 import { apiURL } from "./scripts/api";
 import axios from "axios";
-import { HeartIcon } from "@heroicons/react/24/outline";
-import ContentTile from "@/components/content/ContentTile";
 import { User } from "@/models/User";
+import ContentTile from "@/components/content/ContentTile";
+
+import "@/app/styles/feed.scss";
 
 export default function Page() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
@@ -25,6 +26,30 @@ export default function Page() {
   );
 
   useEffect(() => {
+    // Function to reload the Mondiad script (ADS)
+    const reloadMondiadScript = () => {
+      const existingScript = document.querySelector(
+        "script[src='https://ss.mrmnd.com/native.js']"
+      );
+      if (existingScript) {
+        // Remove the existing script
+        existingScript.remove();
+      }
+
+      // Create a new script element
+      const script = document.createElement("script");
+      script.src = "https://ss.mrmnd.com/native.js";
+      script.async = true;
+
+      // Append the script to the document head
+      document.head.appendChild(script);
+    };
+
+    // Reload the script whenever the component renders
+    reloadMondiadScript();
+  }, [trendingContent, personalizedContent, latestContent]); // Dependency array ensures this runs when trendingContent changes
+
+  useEffect(() => {
     const fetchContent = async () => {
       setIsLoading(true);
 
@@ -36,6 +61,10 @@ export default function Page() {
       let latestFetched = await fetchLatestContent();
       let trendingFetched = await fetchTrendingContent();
       let personalizedFetched = await fetchPersonalizedContent();
+
+      if (!userFetched) {
+        setUser(null);
+      }
 
       if (!latestFetched) {
         setErrorLatest(
@@ -92,7 +121,10 @@ export default function Page() {
       );
 
       if (trendingResponse.data && trendingResponse.data.success) {
-        setTrendingContent(trendingResponse.data.trendingContent);
+        const normalizedContent = trendingResponse.data.trendingContent.map(
+          (content: Content) => normalizeContentDates(content)
+        );
+        setTrendingContent(normalizedContent);
         return true;
       } else {
         setTrendingContent([]);
@@ -111,7 +143,13 @@ export default function Page() {
       });
 
       if (contentResponse.data && contentResponse.data.success) {
-        setLatestContent(contentResponse.data.content);
+        const latestContent = contentResponse.data.content;
+
+        const normalizedContent = latestContent.map((content: Content) =>
+          normalizeContentDates(content)
+        );
+
+        setLatestContent(normalizedContent);
         return true;
       } else {
         setLatestContent([]);
@@ -128,15 +166,19 @@ export default function Page() {
       setPersonalizedContent([]);
       return false;
     }
-  
+
     try {
       const personalizedResponse = await axios.get(
         `${apiURL}/content/feed/${userUID}`,
         { timeout: 5000 }
       );
-  
+
       if (personalizedResponse.data && personalizedResponse.data.success) {
-        setPersonalizedContent(personalizedResponse.data.personalizedContent);
+        const normalizedContent =
+          personalizedResponse.data.personalizedContent.map(
+            (content: Content) => normalizeContentDates(content)
+          );
+        setPersonalizedContent(normalizedContent);
         return true;
       } else {
         setPersonalizedContent([]);
@@ -147,34 +189,97 @@ export default function Page() {
     return false;
   }
 
+  function normalizeContentDates(content: Content): Content {
+    if (content.dateCreated && (content.dateCreated as any).seconds) {
+      content.dateCreated = new Date(
+        (content.dateCreated as any).seconds * 1000
+      );
+    }
+
+    return content;
+  }
+
   return (
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
+      {user ? (
+        <h1>Welcome, {user?.firstName}</h1>
+      ) : (
+        <h1 className='summarizz-logo-container'>
+          <span className='summarizz-logo'>SUMMARIZZ</span>
+        </h1>
+      )}
 
-      {user && <h1>Welcome, {user?.firstName}</h1>}
-      <h2>Top Trending</h2>
-      <div className='content-list'>
-        {trendingContent.map((content, index) => (
-          <ContentTile key={content.id} content={content} index={index} />
-        ))}
+      <h2 className='feed-section-title'>Top Trending</h2>
+      <div className='content-list-horizontal'>
+        {/* <div className='ad-tile'>
+          <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+        </div> */}
+        {trendingContent.length === 0 ? (
+          <h3>No content found</h3>
+        ) : (
+          <div className='content-list-horizontal'>
+            {trendingContent.map((content, index) => (
+              <div>
+                {index % 8 === 2 ? (
+                  <div className='ad-tile'>
+                    <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                  </div>
+                ) : (
+                  <ContentTile
+                    key={content.uid || index}
+                    content={content}
+                    index={index}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {errorTrending && <p className='error'>{errorTrending}</p>}
-
-      <h2>Latest Post</h2>
-      <div className='content-list'>
-        {latestContent.map((content, index) => (
-          <ContentTile key={content.id} content={content} index={index} />
-        ))}
-      </div>
-      {errorLatest && <p className='error'>{errorLatest}</p>}
-
-      <h2>For You</h2>
-      <div className='content-list'>
-        {personalizedContent.map((content, index) => (
-          <ContentTile key={content.id} content={content} index={index} />
-        ))}
-      </div>
-      {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
+      {/* <h2 className='feed-section-title'>Latest Post</h2>
+      {latestContent.length === 0 ? (
+        <h3>No content found</h3>
+      ) : (
+        <div className='content-list'>
+          {latestContent.map((content, index) => (
+            <ContentTile
+              key={content.uid || index}
+              content={content}
+              index={index}
+            />
+          ))}
+        </div>
+      )}
+      {errorLatest && <p className='error'>{errorLatest}</p>} */}
+      {user && (
+        <div>
+          <h2 className='feed-section-title'>For You</h2>
+          {personalizedContent.length === 0 ? (
+            <h3>No content found</h3>
+          ) : (
+            <div className='content-list'>
+              {personalizedContent.map((content, index) => (
+                <div>
+                  {index % 10 === 4 ? (
+                    <div className='ad-tile'>
+                      <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                    </div>
+                  ) : (
+                    <ContentTile
+                      key={content.uid || index}
+                      content={content}
+                      index={index}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
+        </div>
+      )}
     </div>
   );
 }

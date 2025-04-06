@@ -156,7 +156,9 @@ function SearchListContent({
       // Obtain the documents from the response data.
       const newDocuments = response.data.documents;
       // Create a set to easily check if the last query has duplicates
-      const contentSet = new Set(contentReturned.map((doc: Content) => doc.id));
+      const contentSet = new Set(
+        contentReturned.map((doc: Content) => doc.uid)
+      );
       // Get each document id from the GET response, then check
       // for whether at least one is not in the stored content set.
       const uniqueDocuments = newDocuments.filter(

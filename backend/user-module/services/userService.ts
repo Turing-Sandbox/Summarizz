@@ -10,7 +10,6 @@ import {
   getDocs,
   query,
   arrayUnion,
-  arrayRemove
 } from "firebase/firestore";
 import { User } from "../models/userModel";
 import {
