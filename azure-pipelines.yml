@@ -43,81 +43,10 @@ stages:
       displayName: 'Backend - Lint'
       continueOnError: true
 
-    - powershell: |
-        # Create .env file in the backend directory
-        # Initialize an empty array to hold each line of the YAML content
-        $yamlLines = @()
-
-        # Add each key-value pair to the array, substituting environment variable values
-        $yamlLines += "NODE_ENV=$($env:NODE_ENV)"
-        $yamlLines += "PORT=$($env:PORT)"
-        $yamlLines += "FIREBASE_API_KEY=$(FIREBASE_API_KEY)"
-        $yamlLines += "FIREBASE_AUTH_DOMAIN=$(FIREBASE_AUTH_DOMAIN)"
-        $yamlLines += "FIREBASE_PROJECT_ID=$(FIREBASE_PROJECT_ID)"
-        $yamlLines += "FIREBASE_STORAGE_BUCKET=$(FIREBASE_STORAGE_BUCKET)"
-        $yamlLines += "FIREBASE_MESSAGING_SENDER_ID=$(FIREBASE_MESSAGING_SENDER_ID)"
-        $yamlLines += "FIREBASE_APP_ID=$(FIREBASE_APP_ID)"
-        $yamlLines += "FIREBASE_MEASUREMENT_ID=$(FIREBASE_MEASUREMENT_ID)"
-        $yamlLines += "FIREBASE_DATABASE_URL=$(FIREBASE_DATABASE_URL)"
-        $yamlLines += "GOOGLE_CLIENT_ID=$(GOOGLE_CLIENT_ID)"
-        $yamlLines += "GOOGLE_CLIENT_SECRET=$(GOOGLE_CLIENT_SECRET)"
-        $yamlLines += "GITHUB_CLIENT_ID=$(GITHUB_CLIENT_ID)"
-        $yamlLines += "GITHUB_CLIENT_SECRET=$(GITHUB_CLIENT_SECRET)"
-        $yamlLines += "FRONTEND_URL=$(FRONTEND_URL)"
-        $yamlLines += "BACKEND_URL=$(BACKEND_URL)"
-        $yamlLines += "JWT_SECRET=$(JWT_SECRET)"
-        $yamlLines += "ALGOLIA_APP_ID=$(ALGOLIA_APP_ID)"
-        $yamlLines += "ALGOLIA_API_KEY=$(ALGOLIA_API_KEY)"
-        $yamlLines += "ALGOLIA_INDEX_NAME=$(ALGOLIA_INDEX_NAME)"
-
-        # Join the lines with newlines to create the final YAML string
-        $envContent = $yamlLines -join [System.Environment]::NewLine
-
-        Set-Content -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/.env" -Value $envContent
-        Write-Host "Created .env file in backend directory"
-      displayName: 'Create Backend .env File'
-
-    - powershell: |
-        $serverJob = Start-Process -FilePath "npm" -ArgumentList "run", "dev" -WorkingDirectory "$(System.DefaultWorkingDirectory)/$(backendDirectory)" -PassThru -NoNewWindow
-        Write-Host "Started backend server with PID: $($serverJob.Id)"
-        
-        # Wait for server to start
-        Write-Host "Waiting 15 seconds for server to start..."
-        Start-Sleep -Seconds 15
-        
-        # Store the PID in a variable that can be accessed by subsequent tasks
-        Write-Host "##vso[task.setvariable variable=ServerPID]$($serverJob.Id)"
-      displayName: 'Start Backend Server'
-
     - script: |
         cd $(backendDirectory)
         npm test
       displayName: 'Backend - Run tests'
-
-    - powershell: |
-        # Kill the process using the PID we saved earlier
-        $serverPID = $(ServerPID)
-        Write-Host "Stopping backend server with PID: $serverPID"
-        
-        if ($serverPID) {
-            try {
-                Stop-Process -Id $serverPID -Force -ErrorAction SilentlyContinue
-                Write-Host "Process stopped successfully"
-            } catch {
-                Write-Host "Error stopping process: $_"
-            }
-        }
-        
-        # As a backup, attempt to kill all node processes related to our backend
-        Write-Host "Attempting to stop any remaining node processes for backend..."
-        Get-Process -Name "node" -ErrorAction SilentlyContinue | 
-            Where-Object {$_.Path -like "*$(backendDirectory)*" -or $_.CommandLine -like "*$(backendDirectory)*"} | 
-            ForEach-Object {
-                Write-Host "Stopping process with ID: $($_.Id)"
-                Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
-            }
-      displayName: 'Stop Backend Server'
-      condition: always()
 
   - job: FrontendTests
     displayName: 'Frontend Tests'
