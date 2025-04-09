@@ -15,121 +15,103 @@ variables:
   backendDirectory: 'backend'
   frontendDirectory: 'frontend'
 
-stages:
-- stage: Test
-  displayName: 'Run Tests'
-  jobs:
-  - job: BackendTests
-    displayName: 'Backend Tests'
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '$(backendNodeVersion)'
-      displayName: 'Install Node.js $(backendNodeVersion)'
 
-    - script: |
-        cd $(backendDirectory)
-        npm ci
-      displayName: 'Backend - npm install'
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '$(backendNodeVersion)'
+    displayName: 'Install Node.js $(backendNodeVersion)'
 
-    - script: |
-        cd $(backendDirectory)
-        npm run lint
-      displayName: 'Backend - Lint'
-      continueOnError: true
+  - script: |
+      cd $(backendDirectory)
+      npm ci
+    displayName: 'Backend - npm install'
 
-    - script: |
-        cd $(backendDirectory)
-        npm test
-      displayName: 'Backend - Run tests'
+  - script: |
+      cd $(backendDirectory)
+      npm run lint
+    displayName: 'Backend - Lint'
+    continueOnError: true
 
-  - job: FrontendTests
-    displayName: 'Frontend Tests'
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '$(frontendNodeVersion)'
-      displayName: 'Install Node.js $(frontendNodeVersion)'
+  - script: |
+      cd $(backendDirectory)
+      npm test
+    displayName: 'Backend - Run tests'
 
-    - script: |
-        cd $(frontendDirectory)
-        npm ci
-      displayName: 'Frontend - npm install'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '$(frontendNodeVersion)'
+    displayName: 'Install Node.js $(frontendNodeVersion)'
 
-    - script: |
-        cd $(frontendDirectory)
-        npm run lint
-      displayName: 'Frontend - Lint'
-      continueOnError: true
+  - script: |
+      cd $(frontendDirectory)
+      npm ci
+    displayName: 'Frontend - npm install'
 
-- stage: Build
-  displayName: 'Build Applications'
-  dependsOn: Test
-  jobs:
-  - job: BuildBackend
-    displayName: 'Build Backend'
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '$(backendNodeVersion)'
-      displayName: 'Install Node.js $(backendNodeVersion)'
+  - script: |
+      cd $(frontendDirectory)
+      npm run lint
+    displayName: 'Frontend - Lint'
+    continueOnError: true
 
-    - script: |
-        cd $(backendDirectory)
-        npm ci
-      displayName: 'Backend - npm install'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '$(backendNodeVersion)'
+    displayName: 'Install Node.js $(backendNodeVersion)'
 
-    - script: |
-        cd $(backendDirectory)
-        npm run build
-      displayName: 'Backend - Build'
+  - script: |
+      cd $(backendDirectory)
+      npm ci
+    displayName: 'Backend - npm install'
 
-    - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: '$(backendDirectory)/dist'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/backend.zip'
-        replaceExistingArchive: true
-      displayName: 'Archive backend files'
+  - script: |
+      cd $(backendDirectory)
+      npm run build
+    displayName: 'Backend - Build'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/backend.zip'
-        ArtifactName: 'backend'
-        publishLocation: 'Container'
-      displayName: 'Publish backend artifact'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(backendDirectory)/dist'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/backend.zip'
+      replaceExistingArchive: true
+    displayName: 'Archive backend files'
 
-  - job: BuildFrontend
-    displayName: 'Build Frontend'
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '$(frontendNodeVersion)'
-      displayName: 'Install Node.js $(frontendNodeVersion)'
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/backend.zip'
+      ArtifactName: 'backend'
+      publishLocation: 'Container'
+    displayName: 'Publish backend artifact'
 
-    - script: |
-        cd $(frontendDirectory)
-        npm ci
-      displayName: 'Frontend - npm install'
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '$(frontendNodeVersion)'
+    displayName: 'Install Node.js $(frontendNodeVersion)'
 
-    - script: |
-        cd $(frontendDirectory)
-        npm run build
-      displayName: 'Frontend - Build'
+  - script: |
+      cd $(frontendDirectory)
+      npm ci
+    displayName: 'Frontend - npm install'
 
-    - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: '$(frontendDirectory)/.next'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/frontend.zip'
-        replaceExistingArchive: true
-      displayName: 'Archive frontend files'
+  - script: |
+      cd $(frontendDirectory)
+      npm run build
+    displayName: 'Frontend - Build'
 
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend.zip'
-        ArtifactName: 'frontend'
-        publishLocation: 'Container'
-      displayName: 'Publish frontend artifact'
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: '$(frontendDirectory)/.next'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/frontend.zip'
+      replaceExistingArchive: true
+    displayName: 'Archive frontend files'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend.zip'
+      ArtifactName: 'frontend'
+      publishLocation: 'Container'
+    displayName: 'Publish frontend artifact'
