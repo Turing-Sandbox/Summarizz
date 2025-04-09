@@ -7,7 +7,7 @@ trigger:
 - dev
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'Default'
 
 variables:
   nodeVersion: '18.x'
