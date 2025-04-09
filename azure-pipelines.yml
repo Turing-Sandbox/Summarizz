@@ -7,7 +7,7 @@ trigger:
 - dev
 
 pool:
-  name: 'Windows (BENJAMIN)'
+  name: 'Chris'
 
 variables:
 - name: backendNodeVersion
