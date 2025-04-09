@@ -38,11 +38,16 @@ stages:
       displayName: 'Backend - Lint'
       continueOnError: true
 
-    - script: |
-        cd $(backendDirectory)
-        start cmd /c "npm run dev"
-        # Allow time for the server to start
-        sleep 15
+    - powershell: |
+        $serverJob = Start-Process -FilePath "npm" -ArgumentList "run", "dev" -WorkingDirectory "$(System.DefaultWorkingDirectory)/$(backendDirectory)" -PassThru -NoNewWindow
+        Write-Host "Started backend server with PID: $($serverJob.Id)"
+        
+        # Wait for server to start
+        Write-Host "Waiting 15 seconds for server to start..."
+        Start-Sleep -Seconds 15
+        
+        # Store the PID in a variable that can be accessed by subsequent tasks
+        Write-Host "##vso[task.setvariable variable=ServerPID]$($serverJob.Id)"
       displayName: 'Start Backend Server'
 
     - script: |
@@ -50,11 +55,29 @@ stages:
         npm test
       displayName: 'Backend - Run tests'
 
-    - script: |
-        # Find and kill the Node.js process
-        FOR /F "tokens=5" %%T IN ('netstat -a -n -o ^| findstr :3000 ^| findstr LISTENING') DO taskkill /F /PID %%T
+    - powershell: |
+        # Kill the process using the PID we saved earlier
+        $serverPID = $(ServerPID)
+        Write-Host "Stopping backend server with PID: $serverPID"
+        
+        if ($serverPID) {
+            try {
+                Stop-Process -Id $serverPID -Force -ErrorAction SilentlyContinue
+                Write-Host "Process stopped successfully"
+            } catch {
+                Write-Host "Error stopping process: $_"
+            }
+        }
+        
+        # As a backup, attempt to kill all node processes related to our backend
+        Write-Host "Attempting to stop any remaining node processes for backend..."
+        Get-Process -Name "node" -ErrorAction SilentlyContinue | 
+            Where-Object {$_.Path -like "*$(backendDirectory)*" -or $_.CommandLine -like "*$(backendDirectory)*"} | 
+            ForEach-Object {
+                Write-Host "Stopping process with ID: $($_.Id)"
+                Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+            }
       displayName: 'Stop Backend Server'
-      continueOnError: true
       condition: always()
 
   - job: FrontendTests
