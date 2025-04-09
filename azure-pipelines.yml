@@ -40,8 +40,22 @@ stages:
 
     - script: |
         cd $(backendDirectory)
+        start cmd /c "npm run dev"
+        # Allow time for the server to start
+        sleep 15
+      displayName: 'Start Backend Server'
+
+    - script: |
+        cd $(backendDirectory)
         npm test
       displayName: 'Backend - Run tests'
+
+    - script: |
+        # Find and kill the Node.js process
+        FOR /F "tokens=5" %%T IN ('netstat -a -n -o ^| findstr :3000 ^| findstr LISTENING') DO taskkill /F /PID %%T
+      displayName: 'Stop Backend Server'
+      continueOnError: true
+      condition: always()
 
   - job: FrontendTests
     displayName: 'Frontend Tests'
