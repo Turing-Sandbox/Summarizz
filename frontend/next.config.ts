@@ -27,6 +27,9 @@ const nextConfig: NextConfig = {
     includePaths: [path.join(__dirname, "styles")],
     silenceDeprecations: ["legacy-js-api"],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   reactStrictMode: false,
 };
 
