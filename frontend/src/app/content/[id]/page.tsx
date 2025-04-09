@@ -276,6 +276,24 @@ export default function Page() {
       const response = await axios.post(url);
 
       if (response.status == 200) {
+        if (!isLiked && userUID != content?.creatorUID) {
+          await axios.post(`${apiURL}/notifications/create`,
+            {
+              userId: content?.creatorUID,
+              notification: {
+                userId: userUID,
+                username: user?.username,
+                type: "like",
+                textPreview: `"${content?.title
+                  && content?.title?.length > 30 ?
+                  content?.title.substring(0, 30) + '...' :
+                  content?.title}"!`,
+                contentId: content?.uid,
+                timestamp: Date.now(),
+                read: false
+              }
+            })
+        }
         setIsLiked(!isLiked);
         setLikes(isLiked ? likes - 1 : likes + 1);
       }
@@ -312,8 +330,7 @@ export default function Page() {
       }
     } catch (error) {
       alert(
-        `Failed to ${
-          isBookmarked ? "unbookmark" : "bookmark"
+        `Failed to ${isBookmarked ? "unbookmark" : "bookmark"
         } content. Please try again.`
       );
     }
@@ -345,12 +362,58 @@ export default function Page() {
       );
 
       if (shareResponse.status == 200) {
+
+        if (!isShared && userUID != content?.creatorUID) {
+          await axios.post(`${apiURL}/notifications/create`,
+            {
+              userId: content?.creatorUID,
+              notification: {
+                userId: userUID,
+                username: user?.username,
+                type: 'share',
+                textPreview: `"${content?.title && content?.title?.length > 30 ?
+                  content?.title.substring(0, 30) + '...' :
+                  content?.title}"!`,
+                contentId: content?.uid,
+                timestamp: Date.now(),
+                read: false,
+              }
+            }
+          )
+        }
+
+        if (!isShared) {
+          let followers = user?.followers || [];
+
+          for (let i = 0; i < followers.length; i++) {
+            await axios.post(`${apiURL}/notifications/create`,
+              {
+                userId: followers[i],
+                notification: {
+                  userId: userUID,
+                  username: user?.username,
+                  type: 'followedShare',
+                  textPreview: `"${content?.title &&
+                    content.title?.length > 30 ?
+                    content.title.substring(0, 30) + '...' :
+                    content?.title
+                    }"!`,
+                  contentID: content?.uid,
+                  timestamp: Date.now(),
+                  read: false,
+                }
+              }
+            )
+          }
+
+        }
+
         setIsShared(!isShared);
         setShareCount(isShared ? shareCount - 1 : shareCount + 1);
       }
     } catch (error) {
       alert(
-        `Failed to ${isShared ? "unshare" : "share"} content. Please try again.`
+        `Failed to ${isShared ? "unshare" : "share"} content.Please try again.`
       );
     }
   };
@@ -375,13 +438,27 @@ export default function Page() {
       const res = await axios.post(url);
 
       if (res.status === 200) {
+        if (!isFollowing && userUID != content.creatorUID) {
+          await axios.post(`${apiURL}/notifications/create`,
+            {
+              userId: content.creatorUID,
+              notification: {
+                userId: userUID,
+                username: user?.username,
+                type: 'follow',
+                textPreview: `You've gained one new follower!`,
+                timestamp: Date.now(),
+                read: false,
+              }
+            }
+          )
+        }
         setIsFollowing(!isFollowing);
       }
     } catch (error) {
       alert(
-        `Failed to ${
-          isFollowing ? "unfollow" : "follow"
-        } user. Please try again.`
+        `Failed to ${isFollowing ? "unfollow" : "follow"
+        } user.Please try again.`
       );
     }
   };
@@ -393,7 +470,7 @@ export default function Page() {
    * Redirects user to the edit page for the current content.
    */
   const editContent = () => {
-    if (content?.creatorUID === userUID) redirect(`edit/${content?.uid}`);
+    if (content?.creatorUID === userUID) redirect(`edit/${content?.uid} `);
     else throw Error("You cannot edit this content");
   };
 
@@ -436,7 +513,7 @@ export default function Page() {
                 className='thumbnail'
               />
             )}
-            <CommentList />
+            <CommentList content={content!} user={user!} />
           </div>
 
           {/* Right Column: Content Details */}

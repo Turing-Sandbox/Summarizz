@@ -6,6 +6,7 @@ import userRoutes from "../user-module/routes/userRoutes";
 import commentRoutes from "../comment-module/routes/commentRoutes";
 import searchRoutes from "../search-module/routes/searchRoutes";
 import oauthRoutes from "../user-module/routes/oauthRoutes";
+import notificationRoutes from "../notification-module/routes/notificationsRouter";
 import { logger } from "./loggingHandler";
 
 const app = express();
@@ -28,6 +29,7 @@ app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
 app.use("/search", searchRoutes);
 app.use("/oauth", oauthRoutes);
+app.use("/notifications", notificationRoutes);
 
 // Middleware to log all requests
 app.use((req, _, next) => {

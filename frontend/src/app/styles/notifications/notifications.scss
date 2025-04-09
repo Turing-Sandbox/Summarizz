@@ -1,0 +1,72 @@
+.notification {
+  color: var(--text-color);
+  margin-left: 1rem;
+  text-align: left;
+}
+
+.markRead {
+  background-color: var(--comment-background-color);
+  padding: 0.5rem;
+  border-radius: 10px;
+}
+
+.markRead:hover {
+  color: rgba(160, 160, 160, 1.0);
+}
+
+.notification>div {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  color: var(--text-color);
+  text-align: center;
+  margin: 1rem 1rem 1rem 0;
+  border-bottom: 3px solid var(--input-border-color);
+}
+
+.date {
+  color: var(--text-color-light);
+  font-size: large;
+}
+
+.notification-dropdown {
+  background-color: var(--tile-color);
+  color: var(--text-color);
+  max-height: 500px;
+  min-width: 400px;
+  padding-right: 2rem;
+  position: absolute;
+  top: 100%;
+  right: 0%;
+  margin-left: 1rem;
+  overflow-y: scroll;
+  background-color: var(--tile-color);
+  box-shadow: 0 0px 1rem var(--shadow-color),
+    inset 0 0px 1rem var(--shadow-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 15px;
+}
+
+.notificationTitle {
+  color: var(--text-color);
+  margin-top: 12px;
+}
+
+.unClickable {
+  font-weight: lighter;
+}
+
+.clickable {
+  font-weight: bolder;
+  color: var(--add-hover-color);
+}
+
+.notification-list {
+  max-width: 300px;
+}
+
+
+.badge {
+  color: var(--text-color);
+}

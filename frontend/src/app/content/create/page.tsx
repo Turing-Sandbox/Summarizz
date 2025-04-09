@@ -26,6 +26,8 @@ import Toolbar from "@/components/content/toolbar";
 
 // Stylesheets (Import)
 import "@/app/styles/content/createContent.scss";
+import axios from "axios";
+import { User } from "@/models/User";
 
 /**
  * Page() -> JSX.Element
@@ -44,10 +46,12 @@ export default function Page() {
   const [content, setContent] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSummarizing, setIsSummarizing] = useState(false);
   const auth = useAuth();
+  const { userUID } = useAuth();
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -91,9 +95,41 @@ export default function Page() {
     }
   }, [editor]);
 
+
+  useEffect(() => {
+    (async () => {
+      if (userUID) {
+        const user = await fetchUser(userUID);
+        if (user) {
+          setUser(user);
+        }
+      }
+    })();
+  }, [userUID])
+
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
+
+  /**
+   * fetchLoggedInuser() -> void
+   *
+   * @description
+   * Fetches the logged in user's information from the backend using the userUID
+   * provided in the AuthProvider, this will set the user accordingly.
+   *
+   * @returns void
+   */
+  const fetchUser = async (id: string): Promise<User | undefined> => {
+    try {
+      const res = await axios.get(`${apiURL}/user/${id}`);
+      return res.data;
+    } catch (error) {
+      console.error("Error fetching logged-in user:", error);
+      return undefined;
+    }
+  };
+
   /**
    * handleThumbnailChange() -> void
    *
@@ -149,7 +185,7 @@ export default function Page() {
       if (!response.ok) {
         setError(
           data.error ||
-            "Failed to summarize provided content. Please Try again."
+          "Failed to summarize provided content. Please Try again."
         );
       }
 
@@ -229,6 +265,32 @@ export default function Page() {
         })
         .then(async (response) => {
           if (response.status === 200 || response.status === 201) {
+
+            let followers = user?.followers || [];
+            console.log(`Followers: ${followers}`)
+
+            for (let i = 0; i < followers.length; i++) {
+              console.log(`Followers ${1}: ${followers[i]}`)
+
+              await axios.post(`${apiURL}/notifications/create`,
+                {
+                  userId: followers[i],
+                  notification: {
+                    userId: userUID,
+                    username: user?.username,
+                    type: 'followedPost',
+                    textPreview: `"${title &&
+                      title?.length > 30 ?
+                      title.substring(0, 30) + '...' :
+                      title
+                      }"`,
+                    timestamp: Date.now(),
+                    read: false,
+                  }
+                }
+              )
+            }
+
             Cookies.remove("content");
             localStorage.removeItem("title");
             router.push("/");
@@ -247,7 +309,34 @@ export default function Page() {
         body: JSON.stringify(newContent),
       })
         .then((response) => response.json())
-        .then(() => {
+        .then(async () => {
+
+
+          let followers = user?.followers || [];
+          console.log(`Followers: ${followers}`)
+
+          for (let i = 0; i < followers.length; i++) {
+            console.log(`Followers ${1}: ${followers[i]}`)
+
+            await axios.post(`${apiURL}/notifications/create`,
+              {
+                userId: followers[i],
+                notification: {
+                  userId: userUID,
+                  username: user?.username,
+                  type: 'followedPost',
+                  textPreview: `"${title &&
+                    title?.length > 30 ?
+                    title.substring(0, 30) + '...' :
+                    title
+                    }"`,
+                  timestamp: Date.now(),
+                  read: false,
+                }
+              }
+            )
+          }
+
           Cookies.remove("content");
           localStorage.removeItem("title");
           router.push("/");

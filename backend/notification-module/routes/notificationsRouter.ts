@@ -4,6 +4,9 @@ import { notificationController } from "../controllers/notificationController";
 
 const notificationRoutes = Router();
 
-notificationRoutes.get(`/`, notificationController.getNotifications);
+notificationRoutes.get(`/:userId`, notificationController.getNotifications);
+notificationRoutes.get(`/unread/:userId`, notificationController.getNewNotifications);
 notificationRoutes.post(`/:userId/:notificationId`, notificationController.markAsRead);
 notificationRoutes.post(`/create`, notificationController.pushNotification);
+
+export default notificationRoutes;

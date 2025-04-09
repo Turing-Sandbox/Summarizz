@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getNotifications, pushNotification, markAsRead, bundleNotifications } from "../services/notificationService";
+import { getNotifications, pushNotification, markAsRead, getNewNotifications } from "../services/notificationService";
 
 class NotificationController {
 	async pushNotification(req: Request, res: Response) {
@@ -28,7 +28,20 @@ class NotificationController {
 	async getNotifications(req: Request, res: Response) {
 		const { userId } = req.params;
 		try {
+			console.log(userId)
 			const notifications = await getNotifications(userId);
+			res.status(200).json(notifications);
+		} catch (error) {
+			console.error('Error retrieving notifications:', error);
+			res.status(500).send('Error retrieving notifications');
+		}
+	}
+
+	async getNewNotifications(req: Request, res: Response) {
+		const { userId } = req.params;
+		try {
+			console.log(userId)
+			const notifications = await getNewNotifications(userId);
 			res.status(200).json(notifications);
 		} catch (error) {
 			console.error('Error retrieving notifications:', error);

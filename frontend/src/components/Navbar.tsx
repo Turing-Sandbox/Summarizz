@@ -15,6 +15,7 @@ import { User } from "@/models/User";
 // Stylesheets
 import "@/app/styles/navbar.scss";
 import SearchList from "./search/searchList";
+import NotificationList from "./notifications/NotificationList";
 import { Content } from "@/models/Content";
 
 function Navbar() {
@@ -212,6 +213,11 @@ function Navbar() {
             >
               Create Content
             </button>
+
+            {/* Notifications */}
+            <div>
+              <NotificationList />
+            </div>
 
             {/* Profile Picture */}
             <div
