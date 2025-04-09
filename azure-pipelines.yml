@@ -10,10 +10,15 @@ pool:
   name: 'Windows (BENJAMIN)'
 
 variables:
-  backendNodeVersion: '18.x'
-  frontendNodeVersion: '18.x'
-  backendDirectory: 'backend'
-  frontendDirectory: 'frontend'
+- name: backendNodeVersion
+  value: '18.x'
+- name: frontendNodeVersion
+  value: '18.x'
+- name: backendDirectory
+  value: 'backend'
+- name: frontendDirectory
+  value: 'frontend'
+- group: SummarizzVars
 
 stages:
 - stage: Test
@@ -37,6 +42,34 @@ stages:
         npm run lint
       displayName: 'Backend - Lint'
       continueOnError: true
+
+    - powershell: |
+        # Create .env file in the backend directory
+        $envContent = @"
+NODE_ENV=$(NODE_ENV)
+PORT=$(PORT)
+FIREBASE_API_KEY=$(FIREBASE_API_KEY)
+FIREBASE_AUTH_DOMAIN=$(FIREBASE_AUTH_DOMAIN)
+FIREBASE_PROJECT_ID=$(FIREBASE_PROJECT_ID)
+FIREBASE_STORAGE_BUCKET=$(FIREBASE_STORAGE_BUCKET)
+FIREBASE_MESSAGING_SENDER_ID=$(FIREBASE_MESSAGING_SENDER_ID)
+FIREBASE_APP_ID=$(FIREBASE_APP_ID)
+FIREBASE_MEASUREMENT_ID=$(FIREBASE_MEASUREMENT_ID)
+FIREBASE_DATABASE_URL=$(FIREBASE_DATABASE_URL)
+GOOGLE_CLIENT_ID=$(GOOGLE_CLIENT_ID)
+GOOGLE_CLIENT_SECRET=$(GOOGLE_CLIENT_SECRET)
+GITHUB_CLIENT_ID=$(GITHUB_CLIENT_ID)
+GITHUB_CLIENT_SECRET=$(GITHUB_CLIENT_SECRET)
+FRONTEND_URL=$(FRONTEND_URL)
+BACKEND_URL=$(BACKEND_URL)
+JWT_SECRET=$(JWT_SECRET)
+ALGOLIA_APP_ID=$(ALGOLIA_APP_ID)
+ALGOLIA_API_KEY=$(ALGOLIA_API_KEY)
+ALGOLIA_INDEX_NAME=$(ALGOLIA_INDEX_NAME)
+"@
+        Set-Content -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/.env" -Value $envContent
+        Write-Host "Created .env file in backend directory"
+      displayName: 'Create Backend .env File'
 
     - powershell: |
         $serverJob = Start-Process -FilePath "npm" -ArgumentList "run", "dev" -WorkingDirectory "$(System.DefaultWorkingDirectory)/$(backendDirectory)" -PassThru -NoNewWindow
@@ -116,6 +149,34 @@ stages:
         npm install
       displayName: 'Backend - npm install'
 
+    - powershell: |
+        # Create .env file in the backend directory
+        $envContent = @"
+NODE_ENV=$(NODE_ENV)
+PORT=$(PORT)
+FIREBASE_API_KEY=$(FIREBASE_API_KEY)
+FIREBASE_AUTH_DOMAIN=$(FIREBASE_AUTH_DOMAIN)
+FIREBASE_PROJECT_ID=$(FIREBASE_PROJECT_ID)
+FIREBASE_STORAGE_BUCKET=$(FIREBASE_STORAGE_BUCKET)
+FIREBASE_MESSAGING_SENDER_ID=$(FIREBASE_MESSAGING_SENDER_ID)
+FIREBASE_APP_ID=$(FIREBASE_APP_ID)
+FIREBASE_MEASUREMENT_ID=$(FIREBASE_MEASUREMENT_ID)
+FIREBASE_DATABASE_URL=$(FIREBASE_DATABASE_URL)
+GOOGLE_CLIENT_ID=$(GOOGLE_CLIENT_ID)
+GOOGLE_CLIENT_SECRET=$(GOOGLE_CLIENT_SECRET)
+GITHUB_CLIENT_ID=$(GITHUB_CLIENT_ID)
+GITHUB_CLIENT_SECRET=$(GITHUB_CLIENT_SECRET)
+FRONTEND_URL=$(FRONTEND_URL)
+BACKEND_URL=$(BACKEND_URL)
+JWT_SECRET=$(JWT_SECRET)
+ALGOLIA_APP_ID=$(ALGOLIA_APP_ID)
+ALGOLIA_API_KEY=$(ALGOLIA_API_KEY)
+ALGOLIA_INDEX_NAME=$(ALGOLIA_INDEX_NAME)
+"@
+        Set-Content -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/.env" -Value $envContent
+        Write-Host "Created .env file in backend directory"
+      displayName: 'Create Backend .env File'
+
     - script: |
         cd $(backendDirectory)
         npm run build
@@ -149,6 +210,15 @@ stages:
         cd $(frontendDirectory)
         npm install
       displayName: 'Frontend - npm install'
+
+    - powershell: |
+        # Create .env file in the frontend directory
+        $envContent = @"
+NEXT_PUBLIC_API_URL=$(BACKEND_URL)
+"@
+        Set-Content -Path "$(System.DefaultWorkingDirectory)/$(frontendDirectory)/.env.local" -Value $envContent
+        Write-Host "Created .env.local file in frontend directory"
+      displayName: 'Create Frontend .env File'
 
     - script: |
         cd $(frontendDirectory)
