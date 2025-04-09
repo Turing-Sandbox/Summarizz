@@ -158,6 +158,7 @@ stages:
         $yamlLines = @()
 
         # Add each key-value pair to the array, substituting environment variable values
+        $yamlLines += "NODE_ENV=$(NODE_ENV)"
         $yamlLines += "NEXT_PUBLIC_API_URL=$(BACKEND_URL)"
 
         # Join the lines with newlines to create the final YAML string
