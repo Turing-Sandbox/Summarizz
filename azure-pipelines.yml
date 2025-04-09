@@ -158,7 +158,6 @@ stages:
         $yamlLines = @()
 
         # Add each key-value pair to the array, substituting environment variable values
-        $yamlLines += "NODE_ENV=$(NODE_ENV)"
         $yamlLines += "NEXT_PUBLIC_API_URL=$(BACKEND_URL)"
 
         # Join the lines with newlines to create the final YAML string
@@ -172,6 +171,8 @@ stages:
         cd $(frontendDirectory)
         npm run build
       displayName: 'Frontend - Build'
+      env:
+        NODE_ENV: production
 
     - task: ArchiveFiles@2
       inputs:
