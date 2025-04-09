@@ -7,7 +7,7 @@ trigger:
 - dev
 
 pool:
-  vmImage: 'Default'
+  name: 'Windows (BENJAMIN)'
 
 variables:
   nodeVersion: '18.x'
