@@ -7,7 +7,8 @@
     "start": "tsc && node dist/shared/server.js",
     "dev": "nodemon --watch 'shared/**/*.ts' --exec ts-node shared/server.ts",
     "lint": "eslint . --ext .ts",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
