@@ -267,28 +267,30 @@ export default function Page() {
           if (response.status === 200 || response.status === 201) {
 
             let followers = user?.followers || [];
-            console.log(`Followers: ${followers}`)
-
             for (let i = 0; i < followers.length; i++) {
-              console.log(`Followers ${1}: ${followers[i]}`)
-
-              await axios.post(`${apiURL}/notifications/create`,
-                {
-                  userId: followers[i],
-                  notification: {
-                    userId: userUID,
-                    username: user?.username,
-                    type: 'followedPost',
-                    textPreview: `"${title &&
-                      title?.length > 30 ?
-                      title.substring(0, 30) + '...' :
-                      title
-                      }"`,
-                    timestamp: Date.now(),
-                    read: false,
+              try {
+                await axios.post(`${apiURL}/notifications/create`,
+                  {
+                    userId: followers[i],
+                    notification: {
+                      userId: userUID,
+                      username: user?.username,
+                      type: 'followedPost',
+                      textPreview: `"${title &&
+                        title?.length > 30 ?
+                        title.substring(0, 30) + '...' :
+                        title
+                        }"`,
+                      timestamp: Date.now(),
+                      read: false,
+                    }
                   }
-                }
-              )
+                )
+              }
+
+              catch (error) {
+                console.error(`Error sending notifications: ${error}`)
+              }
             }
 
             Cookies.remove("content");
@@ -310,31 +312,31 @@ export default function Page() {
       })
         .then((response) => response.json())
         .then(async () => {
-
-
           let followers = user?.followers || [];
-          console.log(`Followers: ${followers}`)
 
           for (let i = 0; i < followers.length; i++) {
-            console.log(`Followers ${1}: ${followers[i]}`)
-
-            await axios.post(`${apiURL}/notifications/create`,
-              {
-                userId: followers[i],
-                notification: {
-                  userId: userUID,
-                  username: user?.username,
-                  type: 'followedPost',
-                  textPreview: `"${title &&
-                    title?.length > 30 ?
-                    title.substring(0, 30) + '...' :
-                    title
-                    }"`,
-                  timestamp: Date.now(),
-                  read: false,
+            try {
+              await axios.post(`${apiURL}/notifications/create`,
+                {
+                  userId: followers[i],
+                  notification: {
+                    userId: userUID,
+                    username: user?.username,
+                    type: 'followedPost',
+                    textPreview: `"${title &&
+                      title?.length > 30 ?
+                      title.substring(0, 30) + '...' :
+                      title
+                      }"`,
+                    timestamp: Date.now(),
+                    read: false,
+                  }
                 }
-              }
-            )
+              )
+            }
+            catch (error) {
+              console.error(`Error sending notifications: ${error}`)
+            }
           }
 
           Cookies.remove("content");

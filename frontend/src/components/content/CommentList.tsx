@@ -93,22 +93,27 @@ const CommentList: React.FC<CommentProps> = ({ content, user }) => {
       });
 
       if (content.creatorUID != userId) {
-        await axios.post(`${apiURL}/notifications/create`,
-          {
-            userId: content?.creatorUID,
-            notification: {
-              userId: userId,
-              username: user?.username,
-              type: 'comment',
-              textPreview: `\"${newComment && newComment.length > 30 ?
-                newComment.substring(0, 30) + '...'
-                : newComment}\"!`,
-              contentId: content.uid,
-              timestamp: Date.now(),
-              read: false,
+        try {
+          await axios.post(`${apiURL}/notifications/create`,
+            {
+              userId: content?.creatorUID,
+              notification: {
+                userId: userId,
+                username: user?.username,
+                type: 'comment',
+                textPreview: `\"${newComment && newComment.length > 30 ?
+                  newComment.substring(0, 30) + '...'
+                  : newComment}\"!`,
+                contentId: content.uid,
+                timestamp: Date.now(),
+                read: false,
+              }
             }
-          }
-        )
+          )
+        }
+        catch (error) {
+          console.error(`Error sending notifications: ${error}`)
+        }
       }
 
       await refreshComments();
