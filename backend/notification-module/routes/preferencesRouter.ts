@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { preferencesController } from "../controllers/preferencesController";
-const notificationRoutes = Router();
+const preferenceRoutes = Router();
 
-notificationRoutes.get(`/:userId`, preferencesController.getUserPreferences);
-notificationRoutes.put(`/:userId`, preferencesController.updateUserPreferences);
+preferenceRoutes.get(`/:userId`, preferencesController.getUserPreferences);
+preferenceRoutes.put(`/:userId`, preferencesController.updateUserPreferences);
