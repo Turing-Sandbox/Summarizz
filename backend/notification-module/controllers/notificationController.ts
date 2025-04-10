@@ -4,12 +4,30 @@ import { getNotifications, pushNotification, markAsRead, getNewNotifications } f
 class NotificationController {
 	async pushNotification(req: Request, res: Response) {
 		const { userId, notification } = req.body;
+		
+		// Validate required fields
+		if (!userId) {
+			return res.status(400).send('User ID is required');
+		}
+		
+		if (!notification) {
+			return res.status(400).send('Notification object is required');
+		}
+		
+		// Validate notification object structure
+		const requiredFields = ['userId', 'username', 'type', 'timestamp', 'read'];
+		for (const field of requiredFields) {
+			if (notification[field] === undefined) {
+				return res.status(400).send(`Notification is missing required field: ${field}`);
+			}
+		}
+		
 		try {
 			await pushNotification(userId, notification);
 			res.status(201).send('Notification pushed successfully');
 		} catch (error) {
 			console.error('Error pushing notification:', error);
-			res.status(500).send('Error pushing notification');
+			res.status(500).send(`Error pushing notification: ${error.message}`);
 		}
 	}
 
