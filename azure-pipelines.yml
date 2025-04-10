@@ -152,27 +152,27 @@ stages:
         npm install
       displayName: 'Frontend - npm install'
 
-    - powershell: |
-        # Create .env file in the frontend directory
-        # Initialize an empty array to hold each line of the YAML content
-        $yamlLines = @()
+    # - powershell: |
+    #     # Create .env file in the frontend directory
+    #     # Initialize an empty array to hold each line of the YAML content
+    #     $yamlLines = @()
 
-        # Add each key-value pair to the array, substituting environment variable values
-        $yamlLines += "NEXT_PUBLIC_API_URL=$(BACKEND_URL)"
+    #     # Add each key-value pair to the array, substituting environment variable values
+    #     $yamlLines += "NEXT_PUBLIC_API_URL=$(BACKEND_URL)"
 
-        # Join the lines with newlines to create the final YAML string
-        $envContent = $yamlLines -join [System.Environment]::NewLine
+    #     # Join the lines with newlines to create the final YAML string
+    #     $envContent = $yamlLines -join [System.Environment]::NewLine
         
-        Set-Content -Path "$(System.DefaultWorkingDirectory)/$(frontendDirectory)/.env.local" -Value $envContent
-        Write-Host "Created .env.local file in frontend directory"
-      displayName: 'Create Frontend .env File'
+    #     Set-Content -Path "$(System.DefaultWorkingDirectory)/$(frontendDirectory)/.env.local" -Value $envContent
+    #     Write-Host "Created .env.local file in frontend directory"
+    #   displayName: 'Create Frontend .env File'
 
     - script: |
         cd $(frontendDirectory)
         npm run build
       displayName: 'Frontend - Build'
-      env:
-        NODE_ENV: 'development'
+      # env:
+      #   NODE_ENV: 'development'
 
     - task: ArchiveFiles@2
       inputs:
