@@ -172,7 +172,7 @@ stages:
         npm run build
       displayName: 'Frontend - Build'
       env:
-        NODE_ENV: production
+        NODE_ENV: 'development'
 
     - task: ArchiveFiles@2
       inputs:
