@@ -12,6 +12,8 @@
   border-radius: 10px;
   margin-left: auto;
   margin-bottom: 10px;
+  user-select: none;
+  cursor: pointer;
 }
 
 .markRead:hover {
@@ -51,7 +53,6 @@
   @include global.glassmorphic-background;
   color: var(--text-color);
   max-height: 500px;
-  min-width: 200px;
   padding: 20px;
   overflow-y: scroll;
   border-radius: 15px;

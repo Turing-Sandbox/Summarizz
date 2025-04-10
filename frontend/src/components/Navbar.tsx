@@ -257,7 +257,11 @@ function Navbar() {
 
               {showNotificationList && (
                 <div className='notification-list-container'>
-                  <NotificationList notifications={notifications} />
+                  <NotificationList
+                    notifications={notifications}
+                    unreadCount={unreadCount}
+                    setUnreadCount={setUnreadCount}
+                  />
                 </div>
               )}
             </div>
