@@ -255,6 +255,22 @@ export default function Page() {
           setFollowRequested(true); // Just sent a request
         } else if (!user.isPrivate) {
           setIsFollowing(true); // Just followed directly
+
+          if (userUID != user.uid) {
+            await axios.post(`${apiURL}/notifications/create`,
+              {
+                userId: user.uid,
+                notification: {
+                  userId: userUID,
+                  type: 'follow',
+                  textPreview: `You've gained one new follower!`,
+                  timestamp: Date.now(),
+                  read: false,
+                }
+              }
+            )
+          }
+
         }
         // Refetch data
         const userResponse = await axios.get(`${apiURL}/user/${id}`);
@@ -416,24 +432,22 @@ export default function Page() {
               {/* Follow/Request Button (Conditional Rendering) */}
               {userUID !== id && ( // Don't show button if viewing own profile
                 <button
-                  className={`icon-button follow ${
-                    isFollowing ? "following" : ""
-                  }`}
+                  className={`icon-button follow ${isFollowing ? "following" : ""
+                    }`}
                   onClick={handleFollow}
                   title={
                     isFollowing
                       ? "Unfollow User"
                       : followRequested
-                      ? "Request Sent"
-                      : user?.isPrivate
-                      ? "Request to Follow"
-                      : "Follow User"
+                        ? "Request Sent"
+                        : user?.isPrivate
+                          ? "Request to Follow"
+                          : "Follow User"
                   }
                 >
                   <UserPlusIcon
-                    className={`icon follow ${
-                      isFollowing || followRequested ? "following" : ""
-                    }`}
+                    className={`icon follow ${isFollowing || followRequested ? "following" : ""
+                      }`}
                   />
                 </button>
               )}

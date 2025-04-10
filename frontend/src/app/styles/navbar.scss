@@ -27,6 +27,7 @@
     margin: var(--navbar-margin);
     z-index: 2;
     display: flex;
+    align-items: center;
   }
 
   &-auth {
@@ -65,10 +66,7 @@
   }
 
   &-button {
-    margin-top: 22px;
     padding: 8px;
-    right: 80px;
-    position: absolute;
     border: 1px solid var(--input-border-color);
     border-radius: 10px;
     background-color: var(--background-color);
@@ -83,6 +81,7 @@
     }
   }
 }
+
 .profile {
   &-picture {
     &-container {
@@ -141,6 +140,27 @@
     cursor: pointer;
     font-weight: 400;
   }
+}
+
+.notification-button .icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 20px;
+  margin-right: -1px;
+}
+.notification-button {
+  margin-right: -10px;
+  user-select: none;
+  cursor: pointer;
+}
+
+.notification-list-container {
+  position: fixed;
+  top: 90px;
+  right: -150px;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 400px;
 }
 
 .theme-toggle {

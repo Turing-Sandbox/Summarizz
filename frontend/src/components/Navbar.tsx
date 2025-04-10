@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 // Local Files (Import)
 import { useAuth } from "../hooks/AuthProvider";
@@ -15,6 +15,7 @@ import { User } from "@/models/User";
 // Stylesheets
 import "@/app/styles/navbar.scss";
 import SearchList from "./search/searchList";
+import NotificationList from "./notifications/NotificationList";
 import { Content } from "@/models/Content";
 
 function Navbar() {
@@ -23,6 +24,7 @@ function Navbar() {
   // ---------------------------------------
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showNotificationList, setShowNotificationList] = useState(false);
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [query, setQuery] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
@@ -33,6 +35,9 @@ function Navbar() {
   const [contentSearchResults, setContentSearchResults] = useState<Content[]>(
     []
   );
+
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const auth = useAuth();
   const router = useRouter();
@@ -76,6 +81,8 @@ function Navbar() {
   useEffect(() => {
     setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
     getUserInfo();
+    fetchNotifications();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -90,6 +97,12 @@ function Navbar() {
     document.documentElement.setAttribute("data-theme", newTheme);
     setIsDarkMode(!isDarkMode);
     localStorage.setItem("isDarkMode", isDarkMode ? "false" : "true");
+  };
+
+  const toggleNotificationList = () => {
+    setShowNotificationList(!showNotificationList);
+    setShowSearchResults(false);
+    setShowMenu(false);
   };
 
   /**
@@ -129,6 +142,7 @@ function Navbar() {
 
       setShowSearchResults(true);
       setShowMenu(false);
+      setShowNotificationList(false);
     } else {
       alert("You didn't search for anything.");
     }
@@ -147,6 +161,22 @@ function Navbar() {
     });
   }
 
+  const fetchNotifications = async (): Promise<void> => {
+    try {
+      const response = await axios.get(
+        `${apiURL}/notifications/unread/${auth.userUID}`
+      );
+      const notificationsData = response.data;
+      const notificationsArray: Notification[] =
+        Object.values(notificationsData);
+
+      setNotifications(notificationsArray);
+      setUnreadCount(notificationsArray.length);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
   const handleLogout = () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("title");
@@ -159,12 +189,13 @@ function Navbar() {
   // --------------------------------------
   return (
     <>
-      {(showSearchResults || showMenu) && (
+      {(showSearchResults || showMenu || showNotificationList) && (
         <div
           className='navbar-page-overlay'
           onClick={() => {
             setShowSearchResults(false);
             setShowMenu(false);
+            setShowNotificationList(false);
           }}
         ></div>
       )}
@@ -178,6 +209,7 @@ function Navbar() {
         >
           <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
         </a>
+
         {/* Create New Content */}
         {authenticated ? (
           <>
@@ -213,12 +245,34 @@ function Navbar() {
               Create Content
             </button>
 
+            {/* Notifications */}
+            <div>
+              <div
+                onClick={toggleNotificationList}
+                className='notification-button'
+              >
+                <BellIcon className='icon' />
+                {unreadCount > 0 && <span>{unreadCount}</span>}
+              </div>
+
+              {showNotificationList && (
+                <div className='notification-list-container'>
+                  <NotificationList
+                    notifications={notifications}
+                    unreadCount={unreadCount}
+                    setUnreadCount={setUnreadCount}
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Profile Picture */}
             <div
               className='profile-picture-container'
               onClick={() => {
                 updateAuthenticated();
                 setShowMenu(!showMenu);
+                setShowNotificationList(false);
                 setShowSearchResults(false);
               }}
             >

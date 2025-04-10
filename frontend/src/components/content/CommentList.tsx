@@ -4,7 +4,9 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/hooks/AuthProvider";
+import { Content } from "@/models/Content";
 import { Comment } from "@/models/Comment";
+import { User } from "@/models/User";
 import { redirect, useParams } from "next/navigation";
 import {
   PencilIcon,
@@ -14,7 +16,12 @@ import {
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
-const CommentList = () => {
+interface CommentProps {
+  content: Content,
+  user: User
+}
+
+const CommentList: React.FC<CommentProps> = ({ content, user }) => {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
@@ -84,6 +91,31 @@ const CommentList = () => {
         owner_id: userId,
         text: newComment,
       });
+
+      if (content.creatorUID != userId) {
+        try {
+          await axios.post(`${apiURL}/notifications/create`,
+            {
+              userId: content?.creatorUID,
+              notification: {
+                userId: userId,
+                username: user?.username,
+                type: 'comment',
+                textPreview: `\"${newComment && newComment.length > 30 ?
+                  newComment.substring(0, 30) + '...'
+                  : newComment}\"!`,
+                contentId: content.uid,
+                timestamp: Date.now(),
+                read: false,
+              }
+            }
+          )
+        }
+        catch (error) {
+          console.error(`Error sending notifications: ${error}`)
+        }
+      }
+
       await refreshComments();
       setNewComment("");
     } catch (error) {

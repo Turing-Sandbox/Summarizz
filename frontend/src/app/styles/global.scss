@@ -64,7 +64,8 @@ input,
 textarea,
 ul,
 ol,
-a {
+a,
+span {
   font-family: var(--font-body);
   font-size: small;
   @extend %base-font;
@@ -197,4 +198,3 @@ textarea {
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem; /* Adjust the gap between items */
 }
-
