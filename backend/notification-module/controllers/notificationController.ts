@@ -45,13 +45,16 @@ class NotificationController {
 
 	async getNotifications(req: Request, res: Response) {
 		const { userId } = req.params;
+		// Validate required parameters
+		if (!userId) {
+			return res.status(400).send('User ID is required');
+		}
 		try {
-			console.log(userId)
 			const notifications = await getNotifications(userId);
 			res.status(200).json(notifications);
 		} catch (error) {
 			console.error('Error retrieving notifications:', error);
-			res.status(500).send('Error retrieving notifications');
+			res.status(500).send(`Error retrieving notifications: ${error.message}`);
 		}
 	}
 
