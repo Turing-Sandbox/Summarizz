@@ -7,6 +7,7 @@ import { apiURL } from "./scripts/api";
 import axios from "axios";
 import { User } from "@/models/User";
 import ContentTile from "@/components/content/ContentTile";
+import ContentPreviewPopup from "@/components/content/ContentPreviewPopup";
 
 import "@/app/styles/feed.scss";
 
@@ -14,6 +15,7 @@ export default function Page() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
   const [latestContent, setLatestContent] = useState<Content[]>([]);
   const [personalizedContent, setPersonalizedContent] = useState<Content[]>([]);
+  const [previewContent, setPreviewContent] = useState<Content | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const { userUID } = useAuth();
@@ -24,30 +26,6 @@ export default function Page() {
   const [errorPersonalized, setErrorPersonalized] = useState<string | null>(
     null
   );
-
-  useEffect(() => {
-    // Function to reload the Mondiad script (ADS)
-    const reloadMondiadScript = () => {
-      const existingScript = document.querySelector(
-        "script[src='https://ss.mrmnd.com/native.js']"
-      );
-      if (existingScript) {
-        // Remove the existing script
-        existingScript.remove();
-      }
-
-      // Create a new script element
-      const script = document.createElement("script");
-      script.src = "https://ss.mrmnd.com/native.js";
-      script.async = true;
-
-      // Append the script to the document head
-      document.head.appendChild(script);
-    };
-
-    // Reload the script whenever the component renders
-    reloadMondiadScript();
-  }, [trendingContent, personalizedContent, latestContent]); // Dependency array ensures this runs when trendingContent changes
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -124,7 +102,9 @@ export default function Page() {
         const normalizedContent = trendingResponse.data.trendingContent.map(
           (content: Content) => normalizeContentDates(content)
         );
-        setTrendingContent(normalizedContent);
+
+        const withAuthors = await Promise.all(normalizedContent.map(attachUserData));
+        setTrendingContent(withAuthors);
         return true;
       } else {
         setTrendingContent([]);
@@ -143,13 +123,12 @@ export default function Page() {
       });
 
       if (contentResponse.data && contentResponse.data.success) {
-        const latestContent = contentResponse.data.content;
-
-        const normalizedContent = latestContent.map((content: Content) =>
+        const latestContent = contentResponse.data.content.map((content: Content) =>
           normalizeContentDates(content)
         );
 
-        setLatestContent(normalizedContent);
+        const withAuthors = await Promise.all(latestContent.map(attachUserData));
+        setLatestContent(withAuthors);
         return true;
       } else {
         setLatestContent([]);
@@ -178,7 +157,9 @@ export default function Page() {
           personalizedResponse.data.personalizedContent.map(
             (content: Content) => normalizeContentDates(content)
           );
-        setPersonalizedContent(normalizedContent);
+
+        const withAuthors = await Promise.all(normalizedContent.map(attachUserData));
+        setPersonalizedContent(withAuthors);
         return true;
       } else {
         setPersonalizedContent([]);
@@ -199,9 +180,29 @@ export default function Page() {
     return content;
   }
 
+  async function attachUserData(content: Content): Promise<Content> {
+    try {
+      const userRes = await axios.get(`${apiURL}/user/${content.creatorUID}`);
+      content.user = userRes.data;
+    } catch (error) {
+      console.error(`Failed to fetch author for content ID: ${content.uid}`);
+    }
+    return content;
+  }
+  
+
+  const openPreview = (content: Content) => {
+    setPreviewContent(content);
+  };
+
+  const closePreview = () => {
+    setPreviewContent(null);
+  };
+
   return (
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
+
       {user ? (
         <h1>Welcome, {user?.firstName}</h1>
       ) : (
@@ -210,35 +211,30 @@ export default function Page() {
         </h1>
       )}
 
-      <h2 className='feed-section-title'>Top Trending</h2>
-      <div className='content-list-horizontal'>
-        {/* <div className='ad-tile'>
-          <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-        </div> */}
-        {trendingContent.length === 0 ? (
-          <h3>No content found</h3>
-        ) : (
-          <div className='content-list-horizontal'>
-            {trendingContent.map((content, index) => (
-              <div>
-                {index % 8 === 2 ? (
-                  <div className='ad-tile'>
-                    <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-                  </div>
-                ) : (
-                  <ContentTile
-                    key={content.uid || index}
-                    content={content}
-                    index={index}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <h2>Top Trending</h2>
+      {trendingContent.length === 0 ? (
+        <h3>No content found</h3>
+      ) : (
+        <div className='content-list-horizontal'>
+          {trendingContent.map((content, index) => (
+            <div>
+              {index % 8 === 2 ? (
+                <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+              ) : (
+                <ContentTile
+                  key={content.uid || index}
+                  content={content}
+                  index={index}
+                  onPreview={(c) => openPreview(c)}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
       {errorTrending && <p className='error'>{errorTrending}</p>}
-      {/* <h2 className='feed-section-title'>Latest Post</h2>
+
+      {/* <h2>Latest Post</h2>
       {latestContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
@@ -248,29 +244,33 @@ export default function Page() {
               key={content.uid || index}
               content={content}
               index={index}
+              onPreview={(c) => openPreview(c)}
             />
           ))}
         </div>
       )}
       {errorLatest && <p className='error'>{errorLatest}</p>} */}
+
       {user && (
         <div>
-          <h2 className='feed-section-title'>For You</h2>
+          <h2>For You</h2>
           {personalizedContent.length === 0 ? (
             <h3>No content found</h3>
           ) : (
             <div className='content-list'>
               {personalizedContent.map((content, index) => (
                 <div>
-                  {index % 10 === 4 ? (
-                    <div className='ad-tile'>
-                      <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
-                    </div>
+                  {index % 8 === 0 ? (
+                    <div
+                      className='ad-tile'
+                      data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
+                    ></div>
                   ) : (
                     <ContentTile
                       key={content.uid || index}
                       content={content}
                       index={index}
+                      onPreview={(c) => openPreview(c)}
                     />
                   )}
                 </div>
@@ -279,6 +279,12 @@ export default function Page() {
           )}
           {errorPersonalized && <p className='error'>{errorPersonalized}</p>}
         </div>
+      )}
+      {previewContent && (
+        <ContentPreviewPopup
+          content={previewContent}
+          onClose={closePreview}
+        />
       )}
     </div>
   );

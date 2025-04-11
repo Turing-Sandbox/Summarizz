@@ -23,6 +23,7 @@ import { apiURL } from "@/app/scripts/api";
 // Stylesheets
 import "@/app/styles/profile/profile.scss";
 import ContentTile from "@/components/content/ContentTile";
+import ContentPreviewPopup from "@/components/content/ContentPreviewPopup";
 
 /**
  * Page() -> JSX.Element
@@ -42,6 +43,7 @@ export default function Page() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followRequested, setFollowRequested] = useState(false);
   const [sharedContent, setSharedContent] = useState<Content[]>([]);
+  const [previewContent, setPreviewContent] = useState<Content | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<"created" | "shared">("created");
   const [followUsernames, setFollowUsernames] = useState<{
@@ -142,6 +144,14 @@ export default function Page() {
             }
           }
 
+          // Inject user (author) info
+          try {
+            const userRes = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+            fetchedContent.user = userRes.data;
+          } catch (userError) {
+            console.error("Failed to fetch author for shared content:", contentId);
+          }
+
           validContent.push(fetchedContent);
         }
       } catch (error) {
@@ -179,6 +189,14 @@ export default function Page() {
         );
       } else if (fetchedContent.dateCreated) {
         fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
+      }
+
+      // Inject user (author) info
+      try {
+        const userRes = await axios.get(`${apiURL}/user/${fetchedContent.creatorUID}`);
+        fetchedContent.user = userRes.data;
+      } catch (userError) {
+        console.error("Failed to fetch author for content:", contentId);
       }
 
       fetchedContent.uid = contentId; // Ensure the ID is set
@@ -398,6 +416,14 @@ export default function Page() {
       return "Unknown User"; // Fallback in case of error
     }
   }
+  
+  const openPreview = (content: Content) => {
+    setPreviewContent(content);
+  };
+
+  const closePreview = () => {
+    setPreviewContent(null);
+  };
 
   if (isLoading) {
     return <div>Loading profile...</div>;
@@ -549,6 +575,7 @@ export default function Page() {
                     key={content.uid || index}
                     content={content}
                     index={index}
+                    onPreview={(c) => openPreview(c)} // Pass the content to the preview function
                   />
                 ))}
               </div>
@@ -569,6 +596,7 @@ export default function Page() {
                       key={content.uid || index}
                       content={content}
                       index={index}
+                      onPreview={(c) => openPreview(c)}
                       deleteShareOption={
                         sharedContent.some(
                           (sharedItem) => sharedItem.uid === content.uid
@@ -583,6 +611,12 @@ export default function Page() {
               <p>This account is private.</p>
             )}
           </>
+        )}
+        {previewContent && (
+          <ContentPreviewPopup
+            content={previewContent}
+            onClose={closePreview}
+          />
         )}
       </div>
     </>
