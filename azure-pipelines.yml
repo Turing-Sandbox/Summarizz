@@ -166,7 +166,7 @@ stages:
 
         # Add each key-value pair to the array, substituting environment variable values
         $yamlLines += "NEXT_PUBLIC_API_URL=$(BACKEND_URL)"
-        $yamlLines += "NODE_ENV=production"
+        # $yamlLines += "NODE_ENV=production"
 
         # Join the lines with newlines to create the final YAML string
         $envContent = $yamlLines -join [System.Environment]::NewLine
@@ -180,8 +180,8 @@ stages:
         cat .env.local
         npm run build
       displayName: 'Frontend - Build'
-      env:
-        NODE_ENV: 'production'
+      # env:
+      #   NODE_ENV: 'production'
 
     - task: ArchiveFiles@2
       inputs:
