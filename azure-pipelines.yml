@@ -128,7 +128,7 @@ stages:
     - powershell: |
         Copy-Item -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/.env" -Destination "$(System.DefaultWorkingDirectory)/$(backendDirectory)/dist/.env"
         Copy-Item -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/package.json" -Destination "$(System.DefaultWorkingDirectory)/$(backendDirectory)/dist/package.json"
-      displayName: 'Copy .env - for archival'
+      displayName: 'Copy .env and package.json for archival'
 
     - task: ArchiveFiles@2
       inputs:
