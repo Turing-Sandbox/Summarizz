@@ -1,9 +1,9 @@
 import Link from "next/link";
 import axios from "axios";
+import { useState } from "react";
 import { apiURL } from "@/app/scripts/api";
 import { useAuth } from "@/hooks/AuthProvider";
 import { Notification } from "@/models/Notification";
-import { useState } from "react";
 
 interface NotificationProps {
   notification: Notification;
@@ -89,8 +89,8 @@ export default function NotificationView({
               {notification.type === "follow"
                 ? ""
                 : notification.type === "followedPost"
-                ? "Check out their profile to see."
-                : notification.textPreview}
+                  ? "Check out their profile to see."
+                  : notification.textPreview}
             </Link>
           </p>
 
