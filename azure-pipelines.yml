@@ -176,6 +176,7 @@ stages:
 
     - script: |
         cd $(frontendDirectory)
+        cat .env.local
         npm run build
       displayName: 'Frontend - Build'
       env:
