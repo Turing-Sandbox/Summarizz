@@ -13,9 +13,9 @@ pool:
 
 variables:
 - name: backendNodeVersion
-  value: '18.x'
+  value: '22.x'
 - name: frontendNodeVersion
-  value: '18.x'
+  value: '22.x'
 - name: backendDirectory
   value: 'backend'
 - name: frontendDirectory
