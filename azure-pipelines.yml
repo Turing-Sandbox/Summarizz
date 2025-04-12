@@ -124,6 +124,10 @@ stages:
         npm run build
       displayName: 'Backend - Build'
 
+    - script: |
+        Copy-Item -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/.env" -Destination "$(System.DefaultWorkingDirectory)/$(backendDirectory)/dist/.env"
+      displayName: 'Copy .env - for archival'
+
     - task: ArchiveFiles@2
       inputs:
         rootFolderOrFile: '$(backendDirectory)/dist'
