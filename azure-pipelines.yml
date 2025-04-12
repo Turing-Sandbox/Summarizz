@@ -14,12 +14,8 @@ pool:
 variables:
 - name: backendNodeVersion
   value: '22.x'
-- name: frontendNodeVersion
-  value: '22.x'
 - name: backendDirectory
   value: 'backend'
-- name: frontendDirectory
-  value: 'frontend'
 - group: SummarizzVars
 
 stages:
@@ -49,25 +45,6 @@ stages:
         cd $(backendDirectory)
         npm test
       displayName: 'Backend - Run tests'
-
-  - job: FrontendTests
-    displayName: 'Frontend Tests'
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '$(frontendNodeVersion)'
-      displayName: 'Install Node.js $(frontendNodeVersion)'
-
-    - script: |
-        cd $(frontendDirectory)
-        npm install
-      displayName: 'Frontend - npm install'
-
-    - script: |
-        cd $(frontendDirectory)
-        npm run lint
-      displayName: 'Frontend - Lint'
-      continueOnError: true
 
 - stage: Build
   displayName: 'Build Applications'
@@ -145,56 +122,3 @@ stages:
         ArtifactName: 'backend'
         publishLocation: 'Container'
       displayName: 'Publish backend artifact'
-
-  - job: BuildFrontend
-    displayName: 'Build Frontend'
-    steps:
-    - task: NodeTool@0
-      inputs:
-        versionSpec: '$(frontendNodeVersion)'
-      displayName: 'Install Node.js $(frontendNodeVersion)'
-
-    - script: |
-        cd $(frontendDirectory)
-        npm install
-      displayName: 'Frontend - npm install'
-
-    - powershell: |
-        # Create .env file in the frontend directory
-        # Initialize an empty array to hold each line of the YAML content
-        $yamlLines = @()
-
-        # Add each key-value pair to the array, substituting environment variable values
-        $yamlLines += "NEXT_PUBLIC_API_URL=$(BACKEND_URL)"
-        # $yamlLines += "NODE_ENV=production"
-
-        # Join the lines with newlines to create the final YAML string
-        $envContent = $yamlLines -join [System.Environment]::NewLine
-        
-        Set-Content -Path "$(System.DefaultWorkingDirectory)/$(frontendDirectory)/.env.local" -Value $envContent
-        Write-Host "Created .env.local file in frontend directory"
-      displayName: 'Create Frontend .env File'
-
-    - script: |
-        cd $(frontendDirectory)
-        cat .env.local
-        npm run build
-      displayName: 'Frontend - Build'
-      # env:
-      #   NODE_ENV: 'production'
-
-    - task: ArchiveFiles@2
-      inputs:
-        rootFolderOrFile: '$(frontendDirectory)/.next'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/frontend.zip'
-        replaceExistingArchive: true
-      displayName: 'Archive frontend files'
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend.zip'
-        ArtifactName: 'frontend'
-        publishLocation: 'Container'
-      displayName: 'Publish frontend artifact'
