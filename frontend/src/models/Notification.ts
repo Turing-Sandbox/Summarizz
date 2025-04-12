@@ -1,5 +1,5 @@
 export interface Notification {
-  // Notification ID
+  // Notification ID:
   notificationId?: string;
   // User ID
   userId: string;
