@@ -55,7 +55,7 @@ const Notification: React.FC<NotificationProps> = ({ notification }) => {
       break;
     case 'followedPost':
       url = `/profile/${notification.userId}`;
-      text = `, who you follow, has posted something new!`;
+      text = `, who you follow, has posted something new: `;
       break;
     case 'followedShare':
       url = `/content/${notification.contentId}`;
@@ -84,7 +84,7 @@ const Notification: React.FC<NotificationProps> = ({ notification }) => {
             notification.type === 'follow'
               ? ""
               : notification.type === 'followedPost'
-                ? "Check out their profile to see."
+                ? notification.textPreview + " Check out their profile to see."
                 : notification.textPreview
           }
         </Link>
