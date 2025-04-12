@@ -103,9 +103,29 @@ stages:
       displayName: 'Backend - Build'
 
     - powershell: |
-        Copy-Item -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/.env" -Destination "$(System.DefaultWorkingDirectory)/$(backendDirectory)/dist/.env"
-        Copy-Item -Path "$(System.DefaultWorkingDirectory)/$(backendDirectory)/package.json" -Destination "$(System.DefaultWorkingDirectory)/$(backendDirectory)/dist/package.json"
-      displayName: 'Copy .env and package.json for archival'
+        # Define source and destination directories for clarity
+        $sourceDir = "$(System.DefaultWorkingDirectory)/$(backendDirectory)"
+        $destDir = "$sourceDir/dist"
+
+        Write-Host "Source Directory: $sourceDir"
+        Write-Host "Destination Directory: $destDir"
+
+        # Check if source web.config exists before copying
+        $sourceWebConfig = Join-Path -Path $sourceDir -ChildPath "web.config"
+        if (-not (Test-Path $sourceWebConfig)) {
+            Write-Error "Source web.config not found at $sourceWebConfig"
+            # Exit 1 # Optionally fail the build if web.config is missing
+        } else {
+            Write-Host "Found source web.config. Proceeding with copy operations..."
+            # Copy required files
+            Copy-Item -Path (Join-Path -Path $sourceDir -ChildPath ".env") -Destination (Join-Path -Path $destDir -ChildPath ".env") -Force
+            Copy-Item -Path (Join-Path -Path $sourceDir -ChildPath "package.json") -Destination (Join-Path -Path $destDir -ChildPath "package.json") -Force
+            Copy-Item -Path (Join-Path -Path $sourceDir -ChildPath "package-lock.json") -Destination (Join-Path -Path $destDir -ChildPath "package-lock.json") -Force
+            Copy-Item -Path $sourceWebConfig -Destination (Join-Path -Path $destDir -ChildPath "web.config") -Force # <-- THIS IS THE KEY ADDITION/CHANGE
+
+            Write-Host "Copied .env, package.json, package-lock.json, and web.config to $destDir"
+        }
+      displayName: 'Copy .env, package*, web.config to dist' # Updated display name
 
     - task: ArchiveFiles@2
       inputs:
