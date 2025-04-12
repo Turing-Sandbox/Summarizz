@@ -44,6 +44,7 @@ stages:
     - script: |
         cd $(backendDirectory)
         npm run test:coverage
+        echo $(System.DefaultWorkingDirectory)
       displayName: 'Backend - Run tests'
 
     - task: PublishCodeCoverageResults@1
