@@ -20,4 +20,14 @@ export interface User {
   isPrivate?: boolean; // Optional private account
   usernameLower?: string; // Field for lowercase username, used for search queries.
   followRequests?: string[]; // Optional follow requests
+  
+  // Subscription related fields
+  subscriptionStatus?: 'free' | 'active' | 'past_due' | 'canceled' | 'trialing' | 'incomplete' | 'incomplete_expired'; // User's subscription status
+  subscriptionTier?: 'free' | 'pro'; // User's subscription tier
+  stripeCustomerId?: string; // Stripe customer ID
+  stripeSubscriptionId?: string; // Stripe subscription ID
+  subscriptionPeriodEnd?: Date; // When the current subscription period ends
+  subscriptionPeriodStart?: Date; // When the current subscription period started
+  subscriptionCanceledAt?: Date; // When the subscription was canceled (if applicable)
+  gracePeriodEnd?: Date; // End of grace period for failed payments (if applicable)
 }

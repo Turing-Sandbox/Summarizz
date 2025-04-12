@@ -7,6 +7,8 @@ import commentRoutes from "../comment-module/routes/commentRoutes";
 import searchRoutes from "../search-module/routes/searchRoutes";
 import oauthRoutes from "../user-module/routes/oauthRoutes";
 import notificationRoutes from "../notification-module/routes/notificationsRouter";
+import subscriptionRoutes from "../subscription-module/routes/subscriptionRoutes";
+import webhookRoutes from "../subscription-module/routes/webhookRoutes";
 import { logger } from "./loggingHandler";
 
 const app = express();
@@ -22,7 +24,14 @@ app.use(
   })
 );
 
-app.use(express.json());
+// Parse JSON requests, but use raw body for webhook routes
+app.use((req, res, next) => {
+  if (req.originalUrl === '/stripe/webhook') {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 app.use("/comment", commentRoutes);
 app.use("/user", userRoutes);
@@ -30,6 +39,8 @@ app.use("/content", contentRoutes);
 app.use("/search", searchRoutes);
 app.use("/oauth", oauthRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/subscription", subscriptionRoutes);
+app.use("/stripe", webhookRoutes);
 
 // Middleware to log all requests
 app.use((req, _, next) => {

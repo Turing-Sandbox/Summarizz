@@ -1,17 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { useAuth } from "@/hooks/AuthProvider";
+import { apiURL } from "@/app/scripts/api";
 import "@/app/styles/pro.scss";
 import SummarizzPro from "@/components/SummarizzPro";
 
 export default function ProPage() {
   const router = useRouter();
   const auth = useAuth();
-  const [authenticated] = useState(
+  const [authenticated, setAuthenticated] = useState(
     auth.getUserUID() !== null && auth.getToken() !== null
   );
+  const [hasSubscription, setHasSubscription] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (authenticated) {
+      checkSubscriptionStatus();
+    } else {
+      setLoading(false);
+    }
+  }, [authenticated]);
+
+  const checkSubscriptionStatus = async () => {
+    try {
+      const token = auth.getToken();
+      const response = await axios.get(
+        `${apiURL}/subscription/status`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      setHasSubscription(response.data.active);
+    } catch (error) {
+      console.error("Error checking subscription status:", error);
+      setHasSubscription(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubscribe = () => {
     if (!authenticated) {
@@ -19,6 +52,10 @@ export default function ProPage() {
       return;
     }
     router.push("/pro/subscribe");
+  };
+  
+  const handleManageSubscription = () => {
+    router.push("/pro/manage");
   };
 
   return (
@@ -28,9 +65,19 @@ export default function ProPage() {
         <p className='pro-subtitle'>
           Unlock the full potential of your content
         </p>
-        <button className='pro-cta-button' onClick={handleSubscribe}>
-          Get Summarizz Pro
-        </button>
+        {loading ? (
+          <button className='pro-cta-button' disabled>
+            Loading...
+          </button>
+        ) : hasSubscription ? (
+          <button className='pro-cta-button manage-button' onClick={handleManageSubscription}>
+            Manage Your Subscription
+          </button>
+        ) : (
+          <button className='pro-cta-button' onClick={handleSubscribe}>
+            Get Summarizz Pro
+          </button>
+        )}
       </div>
 
       <div className='pro-features'>
@@ -89,9 +136,19 @@ export default function ProPage() {
             <li>Ad-Free Experience</li>
             <li>Priority Support</li>
           </ul>
-          <button className='pricing-button' onClick={handleSubscribe}>
-            Subscribe Now
-          </button>
+          {loading ? (
+            <button className='pricing-button' disabled>
+              Loading...
+            </button>
+          ) : hasSubscription ? (
+            <button className='pricing-button manage-button' onClick={handleManageSubscription}>
+              Manage Subscription
+            </button>
+          ) : (
+            <button className='pricing-button' onClick={handleSubscribe}>
+              Subscribe Now
+            </button>
+          )}
         </div>
       </div>
 
@@ -130,9 +187,19 @@ export default function ProPage() {
           Join thousands of satisfied users who have already upgraded to
           Summarizz Pro
         </p>
-        <button className='pro-cta-button' onClick={handleSubscribe}>
-          Get Started with Pro
-        </button>
+        {loading ? (
+          <button className='pro-cta-button' disabled>
+            Loading...
+          </button>
+        ) : hasSubscription ? (
+          <button className='pro-cta-button manage-button' onClick={handleManageSubscription}>
+            Manage Your Subscription
+          </button>
+        ) : (
+          <button className='pro-cta-button' onClick={handleSubscribe}>
+            Get Started with Pro
+          </button>
+        )}
       </div>
     </div>
   );
