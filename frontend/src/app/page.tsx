@@ -28,6 +28,30 @@ export default function Page() {
   );
 
   useEffect(() => {
+    // Function to reload the Mondiad script (ADS)
+    const reloadMondiadScript = () => {
+      const existingScript = document.querySelector(
+        "script[src='https://ss.mrmnd.com/native.js']"
+      );
+      if (existingScript) {
+        // Remove the existing script
+        existingScript.remove();
+      }
+
+      // Create a new script element
+      const script = document.createElement("script");
+      script.src = "https://ss.mrmnd.com/native.js";
+      script.async = true;
+
+      // Append the script to the document head
+      document.head.appendChild(script);
+    };
+
+    // Reload the script whenever the component renders
+    reloadMondiadScript();
+  }, [trendingContent, personalizedContent, latestContent]);
+
+  useEffect(() => {
     const fetchContent = async () => {
       setIsLoading(true);
 
@@ -103,7 +127,9 @@ export default function Page() {
           (content: Content) => normalizeContentDates(content)
         );
 
-        const withAuthors = await Promise.all(normalizedContent.map(attachUserData));
+        const withAuthors = await Promise.all(
+          normalizedContent.map(attachUserData)
+        );
         setTrendingContent(withAuthors);
         return true;
       } else {
@@ -123,11 +149,13 @@ export default function Page() {
       });
 
       if (contentResponse.data && contentResponse.data.success) {
-        const latestContent = contentResponse.data.content.map((content: Content) =>
-          normalizeContentDates(content)
+        const latestContent = contentResponse.data.content.map(
+          (content: Content) => normalizeContentDates(content)
         );
 
-        const withAuthors = await Promise.all(latestContent.map(attachUserData));
+        const withAuthors = await Promise.all(
+          latestContent.map(attachUserData)
+        );
         setLatestContent(withAuthors);
         return true;
       } else {
@@ -158,7 +186,9 @@ export default function Page() {
             (content: Content) => normalizeContentDates(content)
           );
 
-        const withAuthors = await Promise.all(normalizedContent.map(attachUserData));
+        const withAuthors = await Promise.all(
+          normalizedContent.map(attachUserData)
+        );
         setPersonalizedContent(withAuthors);
         return true;
       } else {
@@ -189,7 +219,6 @@ export default function Page() {
     }
     return content;
   }
-  
 
   const openPreview = (content: Content) => {
     setPreviewContent(content);
@@ -219,7 +248,9 @@ export default function Page() {
           {trendingContent.map((content, index) => (
             <div>
               {index % 8 === 2 ? (
-                <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                <div className='ad-tile'>
+                  <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                </div>
               ) : (
                 <ContentTile
                   key={content.uid || index}
@@ -261,10 +292,9 @@ export default function Page() {
               {personalizedContent.map((content, index) => (
                 <div>
                   {index % 8 === 0 ? (
-                    <div
-                      className='ad-tile'
-                      data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'
-                    ></div>
+                    <div className='ad-tile'>
+                      <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
+                    </div>
                   ) : (
                     <ContentTile
                       key={content.uid || index}
@@ -281,10 +311,7 @@ export default function Page() {
         </div>
       )}
       {previewContent && (
-        <ContentPreviewPopup
-          content={previewContent}
-          onClose={closePreview}
-        />
+        <ContentPreviewPopup content={previewContent} onClose={closePreview} />
       )}
     </div>
   );
