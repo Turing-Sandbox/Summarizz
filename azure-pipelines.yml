@@ -43,8 +43,13 @@ stages:
 
     - script: |
         cd $(backendDirectory)
-        npm test
+        npm run test:coverage
       displayName: 'Backend - Run tests'
+
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: Cobertura
+        summaryFileLocation: $(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml
 
 - stage: Build
   displayName: 'Build Applications'
