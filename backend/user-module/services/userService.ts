@@ -71,7 +71,7 @@ export async function login(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-    const token = jwt.sign({ _id: user.uid, email: email }, process.env.JWT_SECRET || 'default_secret', {
+    const token = jwt.sign({ uid: user.uid, email: email }, process.env.JWT_SECRET || 'default_secret', {
       expiresIn: "30d",
     });
 
