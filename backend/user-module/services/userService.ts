@@ -22,7 +22,9 @@ import {
 import jwt from "jsonwebtoken";
 import { ContentService } from "../../content-module/services/serviceContent";
 import { StorageService } from "../../storage-module/services/serviceStorage";
+import dotenv from 'dotenv';
 
+dotenv.config();
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
 // ----------------------------------------------------------
@@ -69,7 +71,7 @@ export async function login(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-    const token = jwt.sign({ _id: user.uid, email: email }, "YOUR_SECRET", {
+    const token = jwt.sign({ _id: user.uid, email: email }, process.env.JWT_SECRET || 'default_secret', {
       expiresIn: "30d",
     });
 
