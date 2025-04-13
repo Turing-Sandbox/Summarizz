@@ -410,4 +410,62 @@ export class ContentController {
       });
     }
   }
+
+  static async getRelatedContentCreators(req: Request, res: Response) {
+    console.log("Fetching Related Content Creators...");
+    const { userId } = req.params;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+
+    try {
+      console.log(`Getting related content creators for user: ${userId}`);
+      const relatedCreators = await ContentService.getRelatedContentCreators(
+        userId,
+        limit
+      );
+
+      res.status(200).json({
+        success: true,
+        relatedCreators,
+        message: "Related content creators fetched successfully",
+      });
+    } catch (error) {
+      console.error("Error fetching related content creators:", error);
+
+      res.status(500).json({
+        success: false,
+        relatedCreators: [],
+        message: `Failed to fetch related content creators for user ${userId}, error: ${error.message}`,
+      });
+    }
+  }
+
+  static async getRelatedContent(req: Request, res: Response) {
+    console.log("Fetching Related Content...");
+    const { contentId } = req.params;
+    const userId = req.query.userId as string || null;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
+
+    try {
+      console.log(`Getting related content for content ID: ${contentId}`);
+      const relatedContent = await ContentService.getRelatedContent(
+        contentId,
+        userId,
+        limit
+      );
+
+      res.status(200).json({
+        success: true,
+        relatedContent,
+        message: "Related content fetched successfully",
+      });
+    } catch (error) {
+      console.error("Error fetching related content:", error);
+
+      res.status(500).json({
+        success: false,
+        relatedContent: [],
+        message: `Failed to fetch related content for content ID ${contentId}, error: ${error.message}`,
+      });
+    }
+  }
 }

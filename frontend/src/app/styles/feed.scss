@@ -77,3 +77,137 @@
   min-width: 300px;
   max-width: 700px;
 }
+
+// related creators section
+.related-creators-section {
+  margin-bottom: 2rem;
+  padding: 0.5rem 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  /* Ensure no horizontal overflow */
+  box-sizing: border-box;
+  /* Include padding in width calculation */
+
+  h3 {
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+
+  .no-creators-message {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+}
+
+.creator-profiles-list {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 1.2rem;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+  width: 100%;
+  max-width: 100%;
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: thin;
+  /* Firefox */
+  padding-bottom: 10px;
+  /* Add padding to avoid scrollbar overlapping content */
+  justify-content: flex-start;
+  /* Ensure cards start from the left */
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+}
+
+.creator-profile-card {
+  width: 100%;
+  padding: 1.2rem;
+  border-radius: 12px;
+  @include global.glassmorphic-background;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--input-border-color);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px #0003;
+  }
+
+  .creator-profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .creator-profile-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .creator-profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+
+    .creator-username {
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 0.25rem;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    .creator-name {
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      font-weight: 500;
+    }
+
+    .creator-followers {
+      font-size: 0.75rem;
+      color: rgba(204, 204, 204, 0.8);
+    }
+  }
+}

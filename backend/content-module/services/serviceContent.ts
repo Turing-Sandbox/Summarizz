@@ -612,6 +612,170 @@ export class ContentService {
     return daysDiff < 7 ? (7 - daysDiff) * 0.5 : 0;
   }
 
+  // Get related content creators based on user's likes and follows
+  static async getRelatedContentCreators(userId: string, limit = 5) {
+    console.log("Getting related content creators for user:", userId);
+    try {
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        throw new Error("User not found");
+      }
+
+      const userData = userDoc.data();
+      const likedContent = userData.likedContent || [];
+      const following = userData.following || [];
+
+      console.log("User liked content:", likedContent);
+      console.log("User following:", following);
+
+      // If the user hasn't liked any content, get trending content creators instead
+      if (likedContent.length === 0) {
+        console.log("No liked content, getting trending creators instead");
+        const trendingContent = await this.getTrendingContent(20);
+        const trendingCreators = trendingContent
+          .map(content => content.creatorUID)
+          .filter((uid, index, self) =>
+            // Remove duplicates and exclude the user and those they already follow
+            self.indexOf(uid) === index && uid !== userId && !following.includes(uid)
+          )
+          .slice(0, limit);
+
+        console.log("Trending creators:", trendingCreators);
+        return trendingCreators;
+      }
+
+      // Get all content that the user has liked
+      const likedContentDetails = await Promise.all(
+        likedContent.map(async (contentId) => {
+          return await this.getContent(contentId);
+        })
+      );
+
+      console.log("Liked content details:", likedContentDetails);
+
+      // Extract creator UIDs from liked content
+      const creatorUids = likedContentDetails
+        .filter((content) => content !== null)
+        .map((content) => content.creatorUID)
+        .filter((uid) => !following.includes(uid) && uid !== userId); // Exclude already followed creators and self
+
+      console.log("Creator UIDs from liked content:", creatorUids);
+
+      // If no creators found from liked content, get trending creators
+      if (creatorUids.length === 0) {
+        console.log("No creators from liked content, getting trending creators");
+        const trendingContent = await this.getTrendingContent(20);
+        const trendingCreators = trendingContent
+          .map(content => content.creatorUID)
+          .filter((uid, index, self) =>
+            self.indexOf(uid) === index && uid !== userId && !following.includes(uid)
+          )
+          .slice(0, limit);
+
+        console.log("Trending creators:", trendingCreators);
+        return trendingCreators;
+      }
+
+      // Count occurrences of each creator to find most relevant ones
+      const creatorCounts = creatorUids.reduce((acc, uid) => {
+        acc[uid] = (acc[uid] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      console.log("Creator counts:", creatorCounts);
+
+      // Sort creators by frequency and take top ones
+      const sortedCreators = Object.entries(creatorCounts)
+        .sort(([, countA], [, countB]) => (countB as number) - (countA as number))
+        .slice(0, limit)
+        .map(([uid]) => uid);
+
+      console.log("Sorted creators:", sortedCreators);
+      return sortedCreators;
+    } catch (error) {
+      console.error("Error fetching related content creators: ", error);
+      throw new Error(error.message || "Failed to fetch related content creators");
+    }
+  }
+
+  static async getRelatedContent(contentId: string, userId: string = null, limit = 5) {
+    console.log("Getting related content for content ID:", contentId);
+    try {
+      const sourceContent = await this.getContent(contentId);
+      if (!sourceContent) {
+        throw new Error("Content not found");
+      }
+
+      console.log("Source content:", sourceContent.title);
+
+      const allContent = await this.getAllContent();
+      console.log("Total content count:", allContent.length);
+
+      const otherContent = allContent.filter(content => content.uid !== contentId);
+      console.log("Other content count:", otherContent.length);
+
+      const scoredContent = otherContent.map(content => {
+        let titleSimilarity = 0;
+        if (sourceContent.titleLower && content.titleLower) {
+          const sourceWords = sourceContent.titleLower.split(" ");
+          const contentWords = content.titleLower.split(" ");
+
+          const matchingWords = sourceWords.filter(
+            (word) => word.length > 3 && contentWords.includes(word)
+          ).length;
+
+          titleSimilarity = matchingWords * 3;
+        }
+
+        const creatorBonus = content.creatorUID === sourceContent.creatorUID ? 5 : 0;
+        const popularityScore = (content.likes || 0) * 0.2 + (content.views || 0) * 0.1;
+
+        let userScore = 0;
+        if (userId) {
+          // This would ideally check if the user has liked similar content,
+          // For now, we'll just use a placeholder that can be enhanced later
+          userScore = 0;
+        }
+
+        const totalScore = titleSimilarity + creatorBonus + popularityScore + userScore;
+        return { ...content, score: totalScore };
+      });
+
+      let relatedContent = scoredContent
+        .filter(content => content.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+
+      console.log("Related content with score > 0 count:", relatedContent.length);
+
+      // If we don't have enough related content, include some trending content
+      if (relatedContent.length < limit) {
+        console.log("Not enough related content, adding trending content");
+        const trendingContent = await this.getTrendingContent(limit * 2);
+
+        // Filter out content that's already in relatedContent and the source content
+        const additionalContent = trendingContent
+          .filter(content =>
+            content.uid !== contentId &&
+            !relatedContent.some(rc => rc.uid === content.uid)
+          )
+          .map(content => ({ ...content, score: 1 })) // Lower score for trending content
+          .slice(0, limit - relatedContent.length);
+
+        console.log("Additional trending content count:", additionalContent.length);
+        relatedContent = [...relatedContent, ...additionalContent];
+      }
+
+      console.log("Final related content count:", relatedContent.length);
+      return relatedContent;
+    } catch (error) {
+      console.error("Error fetching related content: ", error);
+      throw new Error(error.message || "Failed to fetch related content");
+    }
+  }
+
   //Increment the number of views on an article
   static async incrementViewCount(contentID: string) {
     try {

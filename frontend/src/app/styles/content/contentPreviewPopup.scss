@@ -19,15 +19,58 @@
 
 .glassmorphic-popup {
   @include global.glassmorphic-background;
-  padding: 30px 40px;
+  padding: 30px 40px 30px 40px;
   border-radius: 25px;
   max-width: 500px;
   width: 90%;
+  max-height: 85vh;
   position: relative;
   text-align: center;
   color: var(--text-color);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   font-family: var(--font-body);
+
+  // Create an inner container for scrolling
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 12px; // Width of the scrollbar area
+    background-color: transparent;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    pointer-events: none; // Allow clicks to pass through
+  }
+
+  // Create a scrollable inner container
+  .popup-content {
+    max-height: calc(85vh - 60px); // Account for padding
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 15px; // Add space for scrollbar
+    margin-right: -5px; // Pull back to maintain layout
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+    // Hide scrollbar for Chrome, Safari and Opera
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 10px 0; // Add some margin to keep scrollbar away from edges
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      border: 2px solid transparent; // Creates padding effect
+      background-clip: padding-box; // Ensures the background color doesn't extend to the border
+    }
+  }
 }
 
 .close-button {
@@ -38,6 +81,7 @@
   border: none;
   cursor: pointer;
   color: var(--text-color);
+  z-index: 10; // Ensure it's above other content
 }
 
 .icon {
@@ -49,8 +93,9 @@
   border-radius: 10px;
   margin-bottom: 15px;
   max-width: 100%;
+  max-height: 300px;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .popup-title {
@@ -63,8 +108,8 @@
 .popup-summary {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
-  background-color: rgba(255, 255, 255, 0.05); 
-  border-left: 4px solid #7dd3fc; 
+  background-color: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #7dd3fc;
   border-radius: 0.5rem;
   font-size: 0.95rem;
   color: #eee;
@@ -78,7 +123,7 @@
   font-weight: bold;
   font-size: 1rem;
   margin-bottom: 0.5rem;
-  color: #93c5fd; 
+  color: #93c5fd;
 }
 
 
@@ -123,6 +168,99 @@
   }
 }
 
+.related-content-section {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+
+  h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    text-align: left;
+    color: #93c5fd;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.4rem;
+  }
+
+  .related-content-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}
+
+.related-content-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.related-content-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  overflow: hidden;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .related-thumbnail {
+    border-radius: 6px;
+    object-fit: cover;
+    width: 50px;
+    height: 50px;
+    min-width: 50px;
+    /* Prevent shrinking */
+    min-height: 50px;
+    /* Prevent shrinking */
+  }
+
+  .related-content-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+
+    .related-title {
+      font-weight: 500;
+      font-size: 0.8rem;
+      margin-bottom: 0.2rem;
+      text-align: left;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .related-stats {
+      font-size: 0.7rem;
+      color: #ccc;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+  }
+}
+
+.loading-text {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: #ccc;
+  font-style: italic;
+}
+
 .view-page-button {
   padding: 10px 20px;
   border-radius: 10px;
@@ -130,6 +268,7 @@
   background-color: var(--background-color);
   color: var(--text-color);
   cursor: pointer;
+  margin-top: 1rem;
 
   &:hover {
     background-color: var(--input-border-color);
