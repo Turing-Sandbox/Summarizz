@@ -4,14 +4,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        uid: string;
-        email: string;
-      };
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      uid: string;
+      email: string;
+    };
   }
 }
 
