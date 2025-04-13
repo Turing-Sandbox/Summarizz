@@ -118,6 +118,12 @@ FIREBASE_STORAGE_BUCKET=...
 FIREBASE_MESSAGING_SENDER_ID=...
 FIREBASE_APP_ID=...
 FIREBASE_MEASUREMENT_ID=...
+
+# Stripe Configuration Variables
+STRIPE_SECRET_KEY=...
+STRIPE_WEBHOOK_SECRET=...
+STRIPE_PRICE_ID=...
+STRIPE_TEST_MODE=true
 ```
 AI Backend `.env.sample` file:
 ```bash
@@ -135,6 +141,45 @@ FLASK_RUN_HOST=0.0.0.0
 ```
 
 All of these variables can be set in the `.env` file in the root directory of the project, **NOTE** you will need to create this file yourself and set the values for each variable.
+
+### Setting Up Stripe for Local Testing
+
+To test the subscription functionality locally, you need to set up Stripe and configure webhook forwarding. Follow these steps:
+
+1. **Get Stripe API Keys from Discord**:
+   - Go to the our discord group and grab the new API keys.
+
+2. **Install Stripe CLI**:
+   - Download and install the [Stripe CLI](https://stripe.com/docs/stripe-cli) for your operating system.
+   - For Windows, you can use:
+     ```bash
+     choco install stripe-cli
+     ```
+   - For macOS:
+     ```bash
+     brew install stripe/stripe-cli/stripe
+     ```
+
+3. **Login to Stripe CLI**:
+   - Run the following command and follow the instructions:
+     ```bash
+     stripe login --api-key <STRIPE_SECRET_KEY>
+     ```
+
+4. **Forward Webhooks to Your Local Server**:
+   - Start the webhook forwarding with:
+     ```bash
+     stripe listen --forward-to http://localhost:3000/api/webhook
+     ```
+   - The CLI will display a webhook signing secret. Copy this value and add it to your `.env` file as `STRIPE_WEBHOOK_SECRET`.
+
+5. **Test the Subscription Flow**:
+   - With your backend and frontend running, and webhook forwarding active, you can now test the complete subscription flow.
+   - The Stripe CLI will show you incoming webhook events in real-time, which is helpful for debugging.
+   - You can use the test card: 4242 4242 4242 4242 with any future expiry date and a valid CVV.
+
+> [!NOTE]
+> You must keep the Stripe CLI running with the webhook forwarding while testing the subscription functionality. Each time you restart the CLI, you'll get a new webhook secret that needs to be updated in your `.env` file.
 
 ## Branching Strategy and Workflow
 

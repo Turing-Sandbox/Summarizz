@@ -1,0 +1,179 @@
+.manage-subscription-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
+  // Remove the background-color property to let the site's background show through
+}
+
+.subscription-card {
+  background-color: var(--card-background-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    text-align: center;
+  }
+  
+  p {
+    color: var(--secondary-text-color);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.subscription-details {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: var(--secondary-background-color);
+  border-radius: 6px;
+  
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    
+    &:last-child {
+      margin-bottom: 0;
+      border-bottom: none;
+    }
+  }
+  
+  .detail-label {
+    font-weight: 600;
+    color: var(--secondary-text-color);
+  }
+  
+  .detail-value {
+    color: var(--text-color);
+  }
+}
+
+.error-message {
+  background-color: var(--error-background-color, #ffebee);
+  color: var(--error-text-color, #c62828);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.success-message {
+  background-color: var(--success-background-color, #e8f5e9);
+  color: var(--success-text-color, #2e7d32);
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.subscribe-button, .cancel-button, .back-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  margin-bottom: 1rem;
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.subscribe-button {
+  background-color: var(--tile-color, rgba(176, 176, 176, 0.5));
+  color: var(--text-color, #2a2a2a);
+  border: 1px solid var(--input-border-color, rgba(0, 0, 0, 0.25));
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  
+  &:hover:not(:disabled) {
+    background-color: var(--icon-selected-color, rgba(120, 120, 120, 0.5));
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+  }
+}
+
+.cancel-button {
+  background-color: var(--card-background-color, white);
+  color: var(--danger-color, #f44336);
+  border: 1px solid var(--danger-color, #f44336);
+  
+  &:hover:not(:disabled) {
+    background-color: var(--danger-background-color, #ffebee);
+  }
+}
+
+.button-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: space-between;
+}
+
+.back-button {
+  background-color: var(--tile-color, rgba(176, 176, 176, 0.5));
+  color: var(--text-color, #2a2a2a);
+  border: 1px solid var(--input-border-color, rgba(0, 0, 0, 0.25));
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  
+  &:hover {
+    background-color: var(--icon-selected-color, rgba(120, 120, 120, 0.5));
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+  }
+}
+
+.refresh-button {
+  background-color: var(--add-hover-color, #2d559f);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin-left: auto;
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    background-color: var(--share-hover-color, rgb(37, 80, 251));
+    transform: translateY(-2px);
+  }
+}
+
+.subscription-info {
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  color: var(--secondary-text-color, #777);
+  
+  p {
+    margin-bottom: 0.5rem;
+  }
+}

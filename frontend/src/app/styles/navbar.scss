@@ -140,6 +140,27 @@
     cursor: pointer;
     font-weight: 400;
   }
+  
+  .upgrade-pro-item {
+    color: #FFD700; /* Gold color */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      transform: scale(1.05);
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+    
+    .pro-star-icon {
+      width: 18px;
+      height: 18px;
+      color: #FFD700; /* Gold color */
+    }
+  }
 }
 
 .notification-button .icon {
