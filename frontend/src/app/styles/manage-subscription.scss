@@ -139,7 +139,7 @@
 }
 
 .refresh-button {
-  background-color: var(--primary-color, #0070f3);
+  background-color: var(--add-hover-color, #2d559f);
   color: white;
   border: none;
   border-radius: 50%;
@@ -159,7 +159,7 @@
   }
   
   &:hover {
-    background-color: var(--primary-hover-color, #0051b3);
+    background-color: var(--share-hover-color, rgb(37, 80, 251));
     transform: translateY(-2px);
   }
 }

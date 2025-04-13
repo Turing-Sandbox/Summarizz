@@ -230,7 +230,11 @@ export default function ManageSubscriptionPage() {
           </div>
           
           <div className="detail-row">
-            <span className="detail-label">Current Period Ends:</span>
+            <span className="detail-label">
+              {isStatus(subscription.status, 'active', subscription) 
+                ? "Renewal Date:" 
+                : "Current Period Ends:"}
+            </span>
             <span className="detail-value">
               {subscription.periodEnd 
                 ? formatDate(subscription.periodEnd)
