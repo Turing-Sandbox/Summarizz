@@ -123,6 +123,7 @@ FIREBASE_MEASUREMENT_ID=...
 STRIPE_SECRET_KEY=...
 STRIPE_WEBHOOK_SECRET=...
 STRIPE_PRICE_ID=...
+STRIPE_TEST_MODE=true
 ```
 AI Backend `.env.sample` file:
 ```bash
@@ -175,6 +176,7 @@ To test the subscription functionality locally, you need to set up Stripe and co
 5. **Test the Subscription Flow**:
    - With your backend and frontend running, and webhook forwarding active, you can now test the complete subscription flow.
    - The Stripe CLI will show you incoming webhook events in real-time, which is helpful for debugging.
+   - You can use the test card: 4242 4242 4242 4242 with any future expiry date and a valid CVV.
 
 > [!NOTE]
 > You must keep the Stripe CLI running with the webhook forwarding while testing the subscription functionality. Each time you restart the CLI, you'll get a new webhook secret that needs to be updated in your `.env` file.
