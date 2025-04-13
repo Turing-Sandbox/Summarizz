@@ -4,14 +4,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        uid: string;
-        email: string;
-      };
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      uid: string;
+      email: string;
+    };
   }
 }
 
@@ -27,7 +25,12 @@ export const authenticateToken = (
   next: NextFunction
 ) => {
   const authHeader = req.headers['authorization'];
+
+  console.log('Auth Header:', authHeader);  // Debugging line
+
   const token = authHeader && authHeader.split(' ')[1];  // Bearer TOKEN
+
+  console.log('Token:', token);  // Debugging line
 
   if (!token) {
     return res.status(401).json({ error: 'Unauthorized: No token provided' });
@@ -38,6 +41,10 @@ export const authenticateToken = (
       uid: string;
       email: string;
     };
+
+    console.log('Decoded Token:', decoded);  // Debugging line
+    console.log('Decoded UID:', decoded.uid);  // Debugging line
+    console.log('Decoded Email:', decoded.email);  // Debugging line
 
     req.user = {
       uid: decoded.uid,
