@@ -381,10 +381,20 @@ function Navbar() {
                 className='menu-item'
                 onClick={() => {
                   setShowMenu(false);
-                  router.push("/pro");
+                  router.push("/pro/subscribe");
                 }}
               >
-                Summarizz Pro
+                Upgrade to Pro
+              </a>
+              <hr className='menu-divider' />
+              <a
+                className='menu-item'
+                onClick={() => {
+                  setShowMenu(false);
+                  router.push("/pro/manage");
+                }}
+              >
+                Manage Subscription
               </a>
               <hr className='menu-divider' />
               <a

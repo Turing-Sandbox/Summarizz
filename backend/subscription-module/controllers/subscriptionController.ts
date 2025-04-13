@@ -61,18 +61,16 @@ export class SubscriptionController {
         });
       }
 
-      // For production, create a real checkout session:
-      // const session = await stripeService.createCheckoutSession(
-      //   customerId,
-      //   process.env.STRIPE_PROD_ID || '',
-      //   `${process.env.FRONTEND_URL}/pro/success`,
-      //   `${process.env.FRONTEND_URL}/pro/cancel`
-      // );
-      // res.status(200).json({ url: session.url });
+      // Create a real checkout session with the customer ID
+      const session = await stripeService.createCheckoutSession(
+        customerId,
+        process.env.STRIPE_PRICE_ID || process.env.STRIPE_PROD_ID || 'price_1RDFHiR6xKT5wL0c4UXIJF92', // Use price ID from env or fallback
+        `${process.env.FRONTEND_URL || 'http://localhost:3001'}/pro/subscribe?status=success`,
+        `${process.env.FRONTEND_URL || 'http://localhost:3001'}/pro/subscribe?status=cancel`
+      );
       
-      const testCheckoutUrl = "https://buy.stripe.com/test_bIY5nxgiD2TyghO8ww";
-      
-      res.status(200).json({ url: testCheckoutUrl });
+      console.log(`Created checkout session for customer: ${customerId}, session ID: ${session.id}`);
+      res.status(200).json({ url: session.url });
     } catch (error: any) {
       console.error('Error creating checkout session:', error);
       res.status(500).json({ error: error.message });
@@ -144,6 +142,9 @@ export class SubscriptionController {
   async getSubscriptionStatus(req: Request, res: Response): Promise<void> {
     try {
       const uid = req.user?.uid;
+      const forceRefresh = req.query.forceRefresh === 'true';
+      
+      console.log(`Getting subscription status for user ${uid}, forceRefresh: ${forceRefresh}`);
       
       if (!uid) {
         res.status(401).json({ error: 'Unauthorized' });
@@ -157,15 +158,103 @@ export class SubscriptionController {
         res.status(404).json({ error: 'User not found' });
         return;
       }
-
-      const userData = userDoc.data();
+      
+      // Get initial user data
+      let userData = userDoc.data();
+      
+      // If forceRefresh is true and we have a subscription ID, get the latest status from Stripe
+      if (forceRefresh && userData?.stripeSubscriptionId) {
+        try {
+          console.log(`Force refreshing subscription status for subscription ID: ${userData.stripeSubscriptionId}`);
+          const subscription = await stripeService.getSubscription(userData.stripeSubscriptionId);
+          
+          // Update the user record with the latest status from Stripe
+          if (subscription) {
+            console.log(`Stripe subscription status: ${subscription.status}`);
+            await updateDoc(userRef, {
+              subscriptionStatus: subscription.status,
+            });
+            
+            // Reload the user data after update
+            const updatedUserDoc = await getDoc(userRef);
+            if (updatedUserDoc.exists) {
+              userData = updatedUserDoc.data();
+            }
+          }
+        } catch (err) {
+          console.error('Error refreshing subscription status from Stripe:', err);
+          // Continue with the existing data if there's an error
+        }
+      }
+      
+      // Convert Firestore timestamps to ISO strings for proper JSON serialization
+      const formatTimestamp = (timestamp: any) => {
+        if (!timestamp) return null;
+        
+        let date: Date | null = null;
+        
+        // Check if it's a Firestore timestamp
+        if (timestamp && typeof timestamp.toDate === 'function') {
+          date = timestamp.toDate();
+        }
+        // Check if it's a Date object
+        else if (timestamp instanceof Date) {
+          date = timestamp;
+        }
+        // If it's a number (Unix timestamp in seconds), convert to milliseconds
+        else if (typeof timestamp === 'number') {
+          // Ensure it's a valid timestamp (after 2020 and before 2030)
+          if (timestamp > 1577836800 && timestamp < 1893456000) { // Jan 1, 2020 to Jan 1, 2030
+            date = new Date(timestamp * 1000); // Convert seconds to milliseconds
+          }
+        }
+        // If it's a string that looks like a date
+        else if (typeof timestamp === 'string' && timestamp.match(/\d{4}-\d{2}-\d{2}/)) {
+          const parsed = new Date(timestamp);
+          if (!isNaN(parsed.getTime())) {
+            date = parsed;
+          }
+        }
+        
+        // Validate the date is reasonable (after 2020)
+        if (date && date.getTime() > 1577836800000) { // Jan 1, 2020
+          return date.toISOString();
+        }
+        
+        return null;
+      };
+      
+      // If subscription is active but has no period end, calculate a reasonable end date
+      // (30 days from now for monthly subscriptions)
+      let periodEnd = formatTimestamp(userData?.subscriptionPeriodEnd);
+      if (userData?.subscriptionStatus === 'active' && !periodEnd) {
+        // If we have a created date, use that as the base, otherwise use now
+        const baseDate = userData?.subscriptionCreatedAt 
+          ? formatTimestamp(userData.subscriptionCreatedAt)
+          : new Date().toISOString();
+        
+        // Calculate end date (30 days from base date)
+        const endDate = new Date(baseDate);
+        endDate.setDate(endDate.getDate() + 30);
+        periodEnd = endDate.toISOString();
+        
+        // Update the user record with this calculated end date
+        try {
+          await updateDoc(userRef, {
+            subscriptionPeriodEnd: endDate
+          });
+          console.log(`Updated missing period end date for user ${uid}`);
+        } catch (err) {
+          console.error('Error updating period end date:', err);
+        }
+      }
       
       res.status(200).json({
         status: userData?.subscriptionStatus || 'free',
         tier: userData?.subscriptionTier || 'free',
-        periodEnd: userData?.subscriptionPeriodEnd || null,
-        canceledAt: userData?.subscriptionCanceledAt || null,
-        gracePeriodEnd: userData?.gracePeriodEnd || null,
+        periodEnd,
+        canceledAt: formatTimestamp(userData?.subscriptionCanceledAt),
+        gracePeriodEnd: formatTimestamp(userData?.gracePeriodEnd),
       });
     } catch (error: any) {
       console.error('Error getting subscription status:', error);

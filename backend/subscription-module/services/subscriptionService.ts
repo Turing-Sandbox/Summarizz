@@ -56,7 +56,21 @@ export class SubscriptionService {
       const usersSnapshot = await getDocs(usersQuery);
       
       if (usersSnapshot.empty) {
-        throw new Error(`No user found with Stripe customer ID: ${customerId}`);
+        // Log the error but don't throw - this allows the webhook to complete successfully
+        console.warn(`No user found with Stripe customer ID: ${customerId}. Storing subscription info for later association.`);
+        
+        // Store the subscription info in a pending subscriptions collection for later association
+        const pendingSubRef = doc(db, 'pendingSubscriptions', subscriptionId);
+        await setDoc(pendingSubRef, {
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
+          status: subscription.status,
+          createdAt: new Date(),
+          periodStart: new Date((subscription as any).current_period_start * 1000),
+          periodEnd: new Date((subscription as any).current_period_end * 1000),
+          processed: false
+        });
+        return;
       }
       
       const userDoc = usersSnapshot.docs[0];
@@ -64,16 +78,22 @@ export class SubscriptionService {
       const periodStart = new Date((subscription as any).current_period_start * 1000);
       const periodEnd = new Date((subscription as any).current_period_end * 1000);
       
+      // When a new subscription is created, clear any previous cancellation data
       await this.updateUserSubscription(uid, {
         subscriptionStatus: subscription.status as any,
         subscriptionTier: 'pro',
         stripeSubscriptionId: subscriptionId,
         subscriptionPeriodStart: periodStart,
         subscriptionPeriodEnd: periodEnd,
+        subscriptionCanceledAt: null // Clear any previous cancellation date
       });
+      
+      // Log the subscription creation
+      console.log(`New subscription created for user ${uid}, cleared previous cancellation data`);
     } catch (error) {
       console.error('Error handling subscription created:', error);
-      throw error;
+      // Log error but don't throw to prevent webhook failure
+      // This allows Stripe to consider the webhook delivered
     }
   }
 
@@ -85,6 +105,24 @@ export class SubscriptionService {
   async handleSubscriptionUpdated(subscriptionId: string): Promise<void> {
     try {
       const subscription = await stripeService.getSubscription(subscriptionId);
+      
+      // First check if this is a pending subscription
+      const pendingSubRef = doc(db, 'pendingSubscriptions', subscriptionId);
+      const pendingSubDoc = await getDoc(pendingSubRef);
+      
+      if (pendingSubDoc.exists()) {
+        // Update the pending subscription data
+        await updateDoc(pendingSubRef, {
+          status: subscription.status,
+          periodStart: new Date((subscription as any).current_period_start * 1000),
+          periodEnd: new Date((subscription as any).current_period_end * 1000),
+          updatedAt: new Date()
+        });
+        console.log(`Updated pending subscription: ${subscriptionId}`);
+        return;
+      }
+      
+      // Try to find user with this subscription ID
       const usersQuery = query(
         collection(db, 'users'),
         where('stripeSubscriptionId', '==', subscriptionId)
@@ -92,7 +130,19 @@ export class SubscriptionService {
       const usersSnapshot = await getDocs(usersQuery);
       
       if (usersSnapshot.empty) {
-        throw new Error(`No user found with Stripe subscription ID: ${subscriptionId}`);
+        console.warn(`No user found with Stripe subscription ID: ${subscriptionId}. Storing for later association.`);
+        
+        // Create a pending subscription record
+        await setDoc(pendingSubRef, {
+          stripeSubscriptionId: subscriptionId,
+          stripeCustomerId: subscription.customer as string,
+          status: subscription.status,
+          createdAt: new Date(),
+          periodStart: new Date((subscription as any).current_period_start * 1000),
+          periodEnd: new Date((subscription as any).current_period_end * 1000),
+          processed: false
+        });
+        return;
       }
       
       const userDoc = usersSnapshot.docs[0];
@@ -107,7 +157,7 @@ export class SubscriptionService {
       });
     } catch (error) {
       console.error('Error handling subscription updated:', error);
-      throw error;
+      // Log error but don't throw to prevent webhook failure
     }
   }
 
@@ -119,6 +169,25 @@ export class SubscriptionService {
   async handleSubscriptionCanceled(subscriptionId: string): Promise<void> {
     try {
       const subscription = await stripeService.getSubscription(subscriptionId);
+      
+      // First check if this is a pending subscription
+      const pendingSubRef = doc(db, 'pendingSubscriptions', subscriptionId);
+      const pendingSubDoc = await getDoc(pendingSubRef);
+      
+      if (pendingSubDoc.exists()) {
+        // Update the pending subscription data
+        await updateDoc(pendingSubRef, {
+          status: 'canceled',
+          canceledAt: (subscription as any).canceled_at 
+            ? new Date((subscription as any).canceled_at * 1000) 
+            : new Date(),
+          updatedAt: new Date()
+        });
+        console.log(`Updated pending subscription to canceled: ${subscriptionId}`);
+        return;
+      }
+      
+      // Try to find user with this subscription ID
       const usersQuery = query(
         collection(db, 'users'),
         where('stripeSubscriptionId', '==', subscriptionId)
@@ -126,7 +195,21 @@ export class SubscriptionService {
       const usersSnapshot = await getDocs(usersQuery);
       
       if (usersSnapshot.empty) {
-        throw new Error(`No user found with Stripe subscription ID: ${subscriptionId}`);
+        console.warn(`No user found with Stripe subscription ID: ${subscriptionId} for cancellation. Storing for later processing.`);
+        
+        // Create a pending subscription record
+        await setDoc(pendingSubRef, {
+          stripeSubscriptionId: subscriptionId,
+          stripeCustomerId: subscription.customer as string,
+          status: 'canceled',
+          createdAt: new Date(),
+          canceledAt: (subscription as any).canceled_at 
+            ? new Date((subscription as any).canceled_at * 1000) 
+            : new Date(),
+          periodEnd: new Date((subscription as any).current_period_end * 1000),
+          processed: false
+        });
+        return;
       }
       
       const userDoc = usersSnapshot.docs[0];
@@ -134,7 +217,6 @@ export class SubscriptionService {
       const canceledAt = (subscription as any).canceled_at 
         ? new Date((subscription as any).canceled_at * 1000) 
         : new Date();
-      const periodEnd = new Date((subscription as any).current_period_end * 1000);
       
       await this.updateUserSubscription(uid, {
         subscriptionStatus: 'canceled',
@@ -142,7 +224,7 @@ export class SubscriptionService {
       });
     } catch (error) {
       console.error('Error handling subscription canceled:', error);
-      throw error;
+      // Log error but don't throw to prevent webhook failure
     }
   }
 
@@ -154,6 +236,26 @@ export class SubscriptionService {
   async handlePaymentFailed(subscriptionId: string): Promise<void> {
     try {
       const subscription = await stripeService.getSubscription(subscriptionId);
+      
+      // First check if this is a pending subscription
+      const pendingSubRef = doc(db, 'pendingSubscriptions', subscriptionId);
+      const pendingSubDoc = await getDoc(pendingSubRef);
+      
+      const gracePeriodEnd = new Date();
+      gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
+      
+      if (pendingSubDoc.exists()) {
+        // Update the pending subscription data
+        await updateDoc(pendingSubRef, {
+          status: 'past_due',
+          gracePeriodEnd,
+          updatedAt: new Date()
+        });
+        console.log(`Updated pending subscription to past_due: ${subscriptionId}`);
+        return;
+      }
+      
+      // Try to find user with this subscription ID
       const usersQuery = query(
         collection(db, 'users'),
         where('stripeSubscriptionId', '==', subscriptionId)
@@ -161,13 +263,22 @@ export class SubscriptionService {
       const usersSnapshot = await getDocs(usersQuery);
       
       if (usersSnapshot.empty) {
-        throw new Error(`No user found with Stripe subscription ID: ${subscriptionId}`);
+        console.warn(`No user found with Stripe subscription ID: ${subscriptionId} for payment failed. Storing for later processing.`);
+        
+        // Create a pending subscription record
+        await setDoc(pendingSubRef, {
+          stripeSubscriptionId: subscriptionId,
+          stripeCustomerId: subscription.customer as string,
+          status: 'past_due',
+          createdAt: new Date(),
+          gracePeriodEnd,
+          processed: false
+        });
+        return;
       }
       
       const userDoc = usersSnapshot.docs[0];
       const uid = userDoc.id;
-      const gracePeriodEnd = new Date();
-      gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
       
       await this.updateUserSubscription(uid, {
         subscriptionStatus: 'past_due',
@@ -175,7 +286,7 @@ export class SubscriptionService {
       });
     } catch (error) {
       console.error('Error handling payment failed:', error);
-      throw error;
+      // Log error but don't throw to prevent webhook failure
     }
   }
 
