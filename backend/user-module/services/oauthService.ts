@@ -119,13 +119,14 @@ export async function generateOAuthUrl(req: Request, res: Response) {
         // This would typically use Firebase Admin SDK to generate OAuth URLs
         // For demonstration, we're returning placeholder URLs
         let authUrl: string;
+        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
 
         switch (provider) {
             case 'google':
                 authUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${
                     process.env.GOOGLE_CLIENT_ID
                 }&redirect_uri=${encodeURIComponent(
-                    'http://localhost:3000/oauth/callback/google'
+                    `${backendUrl}/oauth/callback/google`
                 )}&scope=email profile&response_type=code`;
                 break;
 
@@ -133,7 +134,7 @@ export async function generateOAuthUrl(req: Request, res: Response) {
                 authUrl = `https://github.com/login/oauth/authorize?client_id=${
                     process.env.GITHUB_CLIENT_ID
                 }&redirect_uri=${encodeURIComponent(
-                    'http://localhost:3000/oauth/callback/github'
+                    `${backendUrl}/oauth/callback/github`
                 )}&scope=email profile&response_type=code`;
                 break;
 
