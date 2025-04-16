@@ -8,8 +8,8 @@ trigger:
 
 pool:
   # name: 'Chris'
-  # name: 'Windows (BENJAMIN)'
-  name: 'Windows (Ab)'
+  name: 'Windows (BENJAMIN)'
+  # name: 'Windows (Ab)'
 
 variables:
 - name: backendNodeVersion
@@ -43,13 +43,8 @@ stages:
 
     - script: |
         cd $(backendDirectory)
-        npm run test:coverage
+        npm test
       displayName: 'Backend - Run tests'
-
-    - task: PublishCodeCoverageResults@1
-      inputs:
-        codeCoverageTool: Cobertura
-        summaryFileLocation: $(backendDirectory)/coverage/cobertura-coverage.xml
 
 - stage: Build
   displayName: 'Build Applications'
