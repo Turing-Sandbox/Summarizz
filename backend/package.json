@@ -8,7 +8,6 @@
     "dev": "nodemon --watch 'shared/**/*.ts' --exec ts-node shared/server.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest",
-    "test:coverage": "jest --coverage --coverageReporters=cobertura",
     "build": "tsc"
   },
   "author": "",
