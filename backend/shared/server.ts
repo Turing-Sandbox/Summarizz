@@ -26,7 +26,7 @@ app.use(
 
 // Parse JSON requests, but use raw body for webhook routes
 app.use((req, res, next) => {
-  if (req.originalUrl === '/stripe/webhook') {
+  if (req.originalUrl === "/stripe/webhook") {
     next();
   } else {
     express.json()(req, res, next);

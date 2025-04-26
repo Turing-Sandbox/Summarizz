@@ -22,7 +22,7 @@ import {
 import jwt from "jsonwebtoken";
 import { ContentService } from "../../content-module/services/serviceContent";
 import { StorageService } from "../../storage-module/services/serviceStorage";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 // ----------------------------------------------------------
@@ -63,6 +63,7 @@ export async function register(
 
 export async function login(email: string, password: string) {
   const auth = getAuth();
+  
   try {
     // Sign in user - Firebase Auth (Email & Password)
     const userCredential = await signInWithEmailAndPassword(
@@ -71,9 +72,13 @@ export async function login(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-    const token = jwt.sign({ uid: user.uid, email: email }, process.env.JWT_SECRET || 'default_secret', {
-      expiresIn: "30d",
-    });
+    const token = jwt.sign(
+      { uid: user.uid, email: email },
+      process.env.JWT_SECRET || "default_secret",
+      {
+        expiresIn: "30d",
+      }
+    );
 
     return {
       userUID: user.uid,
@@ -100,7 +105,12 @@ export async function getUser(uid: string) {
 
 export async function updateUser(
   uid: string,
-  data: Partial<{ email: string; username: string; isPrivate: boolean; usernameLower: string }>
+  data: Partial<{
+    email: string;
+    username: string;
+    isPrivate: boolean;
+    usernameLower: string;
+  }>
 ) {
   data.usernameLower = data.username.toLowerCase();
   console.log(`updating user ${data.username}: ${JSON.stringify(data)}`);
@@ -444,46 +454,46 @@ export async function removeSharedContentFromUser(
 
 export async function followUser(userId: string, targetId: string) {
   if (userId === targetId) {
-      throw new Error("Users cannot follow themselves");
+    throw new Error("Users cannot follow themselves");
   }
 
   const userRef = doc(db, "users", userId);
   const targetRef = doc(db, "users", targetId);
 
   const [userDoc, targetDoc] = await Promise.all([
-      getDoc(userRef),
-      getDoc(targetRef),
+    getDoc(userRef),
+    getDoc(targetRef),
   ]);
 
   if (!userDoc.exists() || !targetDoc.exists()) {
-      throw new Error("User or target not found");
+    throw new Error("User or target not found");
   }
 
   const targetData = targetDoc.data() as User; // Use the User interface
 
   if (targetData.isPrivate) {
-      // Target user is private: create a follow request.
-      const requests = targetData.followRequests || [];
-      if (!requests.includes(userId)) {
-          await updateDoc(targetRef, {
-              followRequests: arrayUnion(userId), // Use arrayUnion
-          });
-      }
-      //Don't do the below if it's private
-      //We do not want to add the user as a follower or to the following list untill approved.
-      return; // Exit the function – request only
+    // Target user is private: create a follow request.
+    const requests = targetData.followRequests || [];
+    if (!requests.includes(userId)) {
+      await updateDoc(targetRef, {
+        followRequests: arrayUnion(userId), // Use arrayUnion
+      });
+    }
+    //Don't do the below if it's private
+    //We do not want to add the user as a follower or to the following list untill approved.
+    return; // Exit the function – request only
   }
 
   // Target user is public: follow directly.
   const userData = userDoc.data();
-  const following = userData.following || []; 
+  const following = userData.following || [];
   if (!following.includes(targetId)) {
-      await updateDoc(userRef, { following: arrayUnion(targetId) }); 
+    await updateDoc(userRef, { following: arrayUnion(targetId) });
   }
 
-  const followers = targetData.followers || []; 
+  const followers = targetData.followers || [];
   if (!followers.includes(userId)) {
-      await updateDoc(targetRef, { followers: arrayUnion(userId) });  
+    await updateDoc(targetRef, { followers: arrayUnion(userId) });
   }
 }
 
@@ -504,7 +514,7 @@ export async function unfollowUser(userId: string, targetId: string) {
     await updateDoc(userRef, { following: updatedFollowing });
 
     // Update the target's followers list
-    const followers = targetData.followers || []; 
+    const followers = targetData.followers || [];
     const updatedFollowers = followers.filter((id: string) => id !== userId);
     await updateDoc(targetRef, { followers: updatedFollowers });
   } else {
@@ -528,7 +538,10 @@ export async function requestFollow(userId: string, targetId: string) {
   }
 }
 
-export async function approveFollowRequest(userId: string, requesterId: string) {
+export async function approveFollowRequest(
+  userId: string,
+  requesterId: string
+) {
   const userRef = doc(db, "users", userId);
   const requesterRef = doc(db, "users", requesterId);
 
@@ -562,15 +575,15 @@ export async function approveFollowRequest(userId: string, requesterId: string) 
   }
 
   // Update both documents atomically
-    await Promise.all([
-        updateDoc(userRef, {
-            followRequests: followRequests,
-            followers: followers,
-        }),
-        updateDoc(requesterRef, {
-            following: following,
-        }),
-    ]);
+  await Promise.all([
+    updateDoc(userRef, {
+      followRequests: followRequests,
+      followers: followers,
+    }),
+    updateDoc(requesterRef, {
+      following: following,
+    }),
+  ]);
 }
 
 export async function rejectFollowRequest(userId: string, requesterId: string) {
@@ -578,15 +591,15 @@ export async function rejectFollowRequest(userId: string, requesterId: string) {
   const userDoc = await getDoc(userRef);
 
   if (!userDoc.exists()) {
-      throw new Error("User not found");
+    throw new Error("User not found");
   }
   const userData = userDoc.data() as User; // Use the User interface
 
   // Remove requesterId from followRequests
   const followRequests = (userData.followRequests || []).filter(
-      (id) => id !== requesterId
+    (id) => id !== requesterId
   );
   await updateDoc(userRef, {
-      followRequests: followRequests,
+    followRequests: followRequests,
   });
 }

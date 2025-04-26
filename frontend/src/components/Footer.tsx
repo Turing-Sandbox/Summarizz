@@ -1,23 +1,13 @@
-"use client";
+import { useLocation, useNavigate } from "react-router-dom";
 
-import "@/app/styles/footer.scss";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-
-/**
- * Footer() -> JSX.Element
- *
- * @description
- * Renders the footer component, with the Summarizz Logo and copyright year.
- *
- * @returns JSX.Element (Footer Component)
- */
 export default function Footer() {
   const year = new Date().getFullYear();
-  const pathname = usePathname();
-  const showFooterLinks = !pathname.startsWith("/auth");
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const router = useRouter();
+  // This replaces usePathname from Next.js
+  const pathname = location.pathname;
+  const showFooterLinks = !pathname.startsWith("/auth");
 
   return (
     <footer className='footer'>
@@ -27,31 +17,31 @@ export default function Footer() {
             <h4>Legal</h4>
 
             <div className='link'>
-              <a onClick={() => router.push("/legal/terms-of-service")}>
+              <a onClick={() => navigate("/legal/terms-of-service")}>
                 Terms of Service
               </a>
             </div>
 
             <div className='link'>
-              <a onClick={() => router.push("/legal/privacy-policy")}>
+              <a onClick={() => navigate("/legal/privacy-policy")}>
                 Privacy Policy
               </a>
             </div>
 
             <div className='link'>
-              <a onClick={() => router.push("/legal/cookie-policy")}>
+              <a onClick={() => navigate("/legal/cookie-policy")}>
                 Cookie Policy
               </a>
             </div>
 
             <div className='link'>
-              <a onClick={() => router.push("/legal/ai-disclaimer")}>
+              <a onClick={() => navigate("/legal/ai-disclaimer")}>
                 AI Disclaimer
               </a>
             </div>
 
             <div className='link'>
-              <a onClick={() => router.push("/legal/accessibility")}>
+              <a onClick={() => navigate("/legal/accessibility")}>
                 Accessibility
               </a>
             </div>
@@ -61,16 +51,17 @@ export default function Footer() {
             <h4>Social</h4>
 
             <div className='link'>
-              <a onClick={() => router.push("/about")}>About</a>
+              <a onClick={() => navigate("/about")}>About</a>
             </div>
 
             <div className='link'>
-              <a onClick={() => router.push("/contact")}>Contact</a>
+              <a onClick={() => navigate("/contact")}>Contact</a>
             </div>
           </div>
         </div>
       )}
-      <Image
+
+      <img
         src='/images/summarizz-logo.png'
         alt='Summarizz Logo'
         className='footer-logo'

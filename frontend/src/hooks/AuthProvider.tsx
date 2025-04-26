@@ -1,99 +1,60 @@
-"use client";
+import React, { useState, useEffect } from "react";
+import { AuthContext } from "./AuthContext";
+import { User } from "../models/User";
+import { fetchUser } from "../services/userService";
 
-import { useContext, createContext } from "react";
-import PropTypes from "prop-types";
-import { ReactNode } from "react";
-import { useRouter } from "next/navigation";
-interface AuthContextType {
-  userUID: string | null;
-  setUserUID: (arg0: string) => void;
-  getUserUID: () => string | null;
-  token: string | null;
-  setToken: (arg0: string) => void;
-  getToken: () => string | null;
-  login: (token: string, userUID: string) => void;
-  logout: () => void;
-}
-const AuthContext = createContext<AuthContextType>({
-  userUID: null,
-  setUserUID: () => {},
-  getUserUID: () => null,
-  token: null,
-  setToken: () => {},
-  getToken: () => null,
-  login: () => {},
-  logout: () => {},
-});
+// TODO: REVIEW THE AUTH PROVIDER TO IMPROVE SECURITY
+export default function AuthProvider({
+  children,
+}: React.PropsWithChildren<object>) {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
+  const login = async (newToken: string, userUID: string) => {
+    const userData = await fetchUser(userUID);
 
-  function setUserUID(userUID: string) {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
+    setToken(newToken);
+    if (!(userData instanceof Error)) {
+      setUser(userData || null);
+    } else {
+      console.error("Failed to fetch user:", userData);
+      setUser(null);
+    }
 
-    localStorage.setItem("userUID", userUID);
-  }
+    // TODO: Set a session cookie from backend instead of here
+  };
 
-  function getUserUID() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return null;
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    // TODO: Call backend logout endpoint
+  };
 
-    return localStorage.getItem("userUID");
-  }
+  useEffect(() => {
+    // TODO: fetch from a refresh endpoint (via httpOnly cookie) on load
+    const initializeUser = async () => {
+      try {
+        const res = await fetch("/api/auth/refresh", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setToken(data.token);
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.error("Auto-login failed", err);
+      }
+    };
 
-  function setToken(token: string) {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
-
-    localStorage.setItem("token", token);
-  }
-
-  function getToken() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return null;
-
-    return localStorage.getItem("token");
-  }
-
-  function login(token: string, userUID: string) {
-    setToken(token);
-    setUserUID(userUID);
-  }
-
-  function logout() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("userUID");
-    router.push("/authentication/login");
-  }
+    initializeUser();
+  }, []);
 
   return (
     <AuthContext.Provider
-      value={{
-        userUID: getUserUID(),
-        token: getToken(),
-        setUserUID,
-        getUserUID,
-        setToken,
-        getToken,
-        login,
-        logout,
-      }}
+      value={{ user, token, login, logout, isAuthenticated: !!user }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-export default AuthProvider;
-
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+}

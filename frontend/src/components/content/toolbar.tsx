@@ -2,14 +2,10 @@
 
 // React & NextJs (Import)
 import { useState, useEffect } from "react";
-import Image from "next/image";
 
 // TipTap (Import)
 import { Level } from "@tiptap/extension-heading";
 import { Editor } from "@tiptap/react";
-
-// Stylesheets (Import)
-import "@/app/styles/content/toolbar.scss";
 
 // ToolbarProps for Toolbar
 interface ToolbarProps {
@@ -38,11 +34,8 @@ const headingLevels = [
  * @returns JSX.Element
  */
 export default function Toolbar({ editor }: ToolbarProps) {
+  // TODO: REVIEW THE DARK MODE FUNCTIONALITY
   const [isDarkMode, setIsDarkMode] = useState(false);
-
-  {
-    /*ANCHOR - Fix this Code, Light Mode / Dark Mode is not Actively Working. */
-  }
 
   // EFFECT: Handle Dark Mode Preference for Formatting Options
   useEffect(() => {
@@ -68,7 +61,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
         setIsDarkMode(false);
       }
 
-      const handleChange = (evt: any) => {
+      const handleChange = (evt: MediaQueryListEvent) => {
         const isDark = evt.matches;
         document.documentElement.setAttribute(
           "data-theme",
@@ -225,7 +218,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
           editor.isActive("bulletList") ? "active" : ""
         }`}
       >
-        <Image
+        <img
           src={
             isDarkMode
               ? "/images/orderedListIcon-light.png"
@@ -245,7 +238,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
           editor.isActive("orderedList") ? "active" : ""
         }`}
       >
-        <Image
+        <img
           src={
             isDarkMode
               ? "/images/numberedListIcon-light.png"

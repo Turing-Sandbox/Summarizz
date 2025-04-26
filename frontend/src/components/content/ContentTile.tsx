@@ -1,8 +1,7 @@
-"use client";
+import { useNavigate } from "react-router-dom";
+import { Content } from "../../models/Content";
+import { useAuth } from "../../hooks/useAuth";
 
-import { Content } from "@/models/Content";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
   BookmarkIcon as BookmarkIconOutline,
   EyeIcon as EyeIconOutline,
@@ -15,9 +14,6 @@ import {
   ShareIcon as ShareIconFilled,
   BookmarkIcon as BookmarkIconFilled,
 } from "@heroicons/react/24/solid";
-
-import "@/app/styles/content/contentTile.scss";
-import { useAuth } from "@/hooks/AuthProvider";
 
 interface ContentTileProps {
   content: Content;
@@ -36,14 +32,14 @@ export default function ContentTile({
   handleUnshare = () => {},
   onPreview,
 }: ContentTileProps) {
-  const router = useRouter();
-  const { userUID } = useAuth();
+  const navigate = useNavigate();
+  const auth = useAuth();
 
   return (
     <div
       key={content.uid || index}
       className='content-list-item'
-      onClick={() => router.push(`/content/${content.uid}`)}
+      onClick={() => navigate(`/content/${content.uid}`)}
     >
       <div className='content-tile-info'>
         <div className='content-tile-header'>
@@ -63,7 +59,7 @@ export default function ContentTile({
           )}
         </div>
 
-        <p className="content-item-date">
+        <p className='content-item-date'>
           {content.dateCreated
             ? `${new Date(content.dateCreated).toLocaleString("en-US", {
                 month: "short",
@@ -71,9 +67,9 @@ export default function ContentTile({
                 content.readtime ? ` - ${content.readtime} min read` : ""
               }`
             : ""}
-            {onPreview && (
-              <button
-              className="preview-inline-button"
+          {onPreview && (
+            <button
+              className='preview-inline-button'
               onClick={(e) => {
                 e.stopPropagation();
                 onPreview(content);
@@ -81,13 +77,13 @@ export default function ContentTile({
             >
               Preview
             </button>
-            )}
+          )}
         </p>
       </div>
 
       {content.thumbnail && (
         <div className='content-thumbnail-container'>
-          <Image
+          <img
             src={content.thumbnail}
             alt='Thumbnail'
             width={200}
@@ -100,7 +96,8 @@ export default function ContentTile({
       {!hideStats && (
         <div className='content-stats'>
           <span className='stat-item'>
-            {userUID && content.peopleWhoLiked?.includes(userUID) ? (
+            {auth.user?.uid &&
+            content.peopleWhoLiked?.includes(auth.user?.uid) ? (
               <HeartIconFilled className='stat-icon' />
             ) : (
               <HeartIconOutline className='stat-icon' />
@@ -112,7 +109,7 @@ export default function ContentTile({
             <p className='stat-number'>{content.views || 0}</p>
           </span>
           <span className='stat-item'>
-            {userUID && content.sharedBy?.includes(userUID) ? (
+            {auth.user?.uid && content.sharedBy?.includes(auth.user?.uid) ? (
               <ShareIconFilled className='stat-icon' />
             ) : (
               <ShareIconOutline className='stat-icon' />
@@ -120,7 +117,8 @@ export default function ContentTile({
             <p className='stat-number'>{content.shares || 0}</p>
           </span>
           <span className='stat-item'>
-            {userUID && content.bookmarkedBy?.includes(userUID) ? (
+            {auth.user?.uid &&
+            content.bookmarkedBy?.includes(auth.user?.uid) ? (
               <BookmarkIconFilled className='stat-icon' />
             ) : (
               <BookmarkIconOutline className='stat-icon' />
