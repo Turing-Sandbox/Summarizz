@@ -14,6 +14,7 @@ import {
   changePasswordController,
   changeEmailController,
   changeUsernameController,
+  refreshUserController,
 } from "../controllers/userController";
 import { requestPasswordResetController } from "../controllers/passwordResetController";
 
@@ -21,6 +22,7 @@ const router = Router();
 
 router.post("/register", registerUserController); // Register a user
 router.post("/login", loginUserController); // Login a user
+router.post("/refresh-token", refreshUserController); // Refresh token route - using Firebase directly
 
 // Password reset route - using Firebase directly
 router.post("/reset-password-request", requestPasswordResetController); // Request password reset

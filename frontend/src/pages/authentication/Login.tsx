@@ -29,14 +29,11 @@ export default function Login() {
 
     // 2 - Login user
     await axios
-      .post(`${apiURL}/user/login`, user)
+      .post(`${apiURL}/user/login`, user, { withCredentials: true })
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
-          const userUID = res.data.userUID;
-          const token = res.data.token;
-
           // 3 - Set User Session (Save Token and User UID)
-          auth.login(token, res.data.userUID);
+          auth.login(res.data.userUID);
 
           // // Update user email
           // axios.put(`${apiURL}/user/${userUID}`, {

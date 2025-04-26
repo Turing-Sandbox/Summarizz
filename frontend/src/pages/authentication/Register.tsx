@@ -46,13 +46,11 @@ export default function Register() {
 
     // 3 - Register user
     axios
-      .post(`${apiURL}/user/register`, user)
+      .post(`${apiURL}/user/register`, user, { withCredentials: true })
       .then((res) => {
         if (res.status === 200 || res.status === 201) {
-          const token = res.data.token;
-
           // 3 - Set User Session (Save Token and User UID)
-          auth.login(token, res.data);
+          auth.login(res.data.userUID);
 
           // 4 - Redirect to home page
           navigate("/");

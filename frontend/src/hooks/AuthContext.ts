@@ -3,8 +3,7 @@ import { User } from "../models/User";
 
 export interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
+  login: (userUID: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
 }

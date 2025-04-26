@@ -63,7 +63,7 @@ export async function register(
 
 export async function login(email: string, password: string) {
   const auth = getAuth();
-  
+
   try {
     // Sign in user - Firebase Auth (Email & Password)
     const userCredential = await signInWithEmailAndPassword(
@@ -76,13 +76,20 @@ export async function login(email: string, password: string) {
       { uid: user.uid, email: email },
       process.env.JWT_SECRET || "default_secret",
       {
-        expiresIn: "30d",
+        expiresIn: "1d",
       }
     );
 
+     const refreshToken = jwt.sign(
+       { uid: user.uid },
+       process.env.JWT_REFRESH_SECRET,
+       { expiresIn: "30d" }
+     );
+
     return {
       userUID: user.uid,
-      token: token,
+      token,
+      refreshToken,
     };
   } catch (error) {
     let errorMessage = error.message;

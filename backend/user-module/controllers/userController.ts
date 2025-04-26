@@ -14,10 +14,11 @@ import {
   changeEmail,
   changeUsername,
   approveFollowRequest,
-  rejectFollowRequest
+  rejectFollowRequest,
 } from "../services/userService";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage-module/services/serviceStorage";
+import jwt from "jsonwebtoken";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -47,10 +48,50 @@ export async function loginUserController(req: Request, res: Response) {
 
   try {
     const response = await login(email, password);
-    res.status(201).json(response);
+    res.cookie("token", response.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      sameSite: "strict",
+    });
+    res.cookie("refreshToken", response.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      sameSite: "strict",
+    });
+    res
+      .status(201)
+      .json({ message: "Login successful", userUID: response.userUID });
   } catch (error) {
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
+}
+
+export async function refreshUserController(req: Request, res: Response) {
+  console.log("Refreshing user token...");
+  console.log("Cookies: ", req.cookies);
+  const refreshToken = req.cookies.refreshToken;
+
+  console.log("Refresh token:", refreshToken);
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token missing" });
+  }
+
+  jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+    const token = jwt.sign({ uid: user.uid }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+      sameSite: "strict",
+    });
+    res.json({ message: "Token refreshed", userUID: user.uid });
+  });
 }
 
 // ----------------------------------------------------------
@@ -253,25 +294,35 @@ export async function requestFollowController(req: Request, res: Response) {
 }
 
 // Approve Follow Request
-export async function approveFollowRequestController(req: Request, res: Response) {
+export async function approveFollowRequestController(
+  req: Request,
+  res: Response
+) {
   const { userId, requesterId } = req.params; // Get both IDs from params
   try {
-      await approveFollowRequest(userId, requesterId);
-      res.status(200).json({ message: "Follow request approved" });
+    await approveFollowRequest(userId, requesterId);
+    res.status(200).json({ message: "Follow request approved" });
   } catch (error) {
-      console.error("Error approving follow request:", error);
-      res.status(500).json({ error: error.message || "Failed to approve follow request" });
+    console.error("Error approving follow request:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to approve follow request" });
   }
 }
 
 // Reject Follow Request
-export async function rejectFollowRequestController(req: Request, res: Response) {
+export async function rejectFollowRequestController(
+  req: Request,
+  res: Response
+) {
   const { userId, requesterId } = req.params;
   try {
-      await rejectFollowRequest(userId, requesterId);
-      res.status(200).json({ message: "Follow request rejected" });
+    await rejectFollowRequest(userId, requesterId);
+    res.status(200).json({ message: "Follow request rejected" });
   } catch (error) {
-      console.error("Error rejecting follow request:", error);
-      res.status(500).json({ error: error.message || "Failed to reject follow request" });
+    console.error("Error rejecting follow request:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Failed to reject follow request" });
   }
 }

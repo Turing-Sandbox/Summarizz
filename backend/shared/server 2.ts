@@ -1,4 +1,5 @@
 import express from "express";
+import session from "express-session";
 import "./firebaseConfig";
 import cors from "cors";
 import contentRoutes from "../content-module/routes/contentRoutes";
@@ -10,7 +11,6 @@ import notificationRoutes from "../notification-module/routes/notificationsRoute
 import subscriptionRoutes from "../subscription-module/routes/subscriptionRoutes";
 import webhookRoutes from "../subscription-module/routes/webhookRoutes";
 import { logger } from "./loggingHandler";
-import cookieParser from "cookie-parser";
 
 const app = express();
 const port = 3000;
@@ -25,8 +25,6 @@ app.use(
     credentials: true,
   })
 );
-
-app.use(cookieParser());
 
 // Parse JSON requests, but use raw body for webhook routes
 app.use((req, res, next) => {
@@ -51,6 +49,21 @@ app.use((req, _, next) => {
   logger.http(`${req.method} ${req.url}`);
   next();
 });
+
+// Session middleware configuration
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET, 
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production
+      httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+      sameSite: "strict", // Help prevent CSRF attacks
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days session duration
+    },
+  })
+);
 
 app.get("/", (_, res) => {
   res.send("Server is Listening!");
