@@ -330,7 +330,14 @@ export default function Navbar() {
 
       {/* Profile Menu */}
       {showMenu && (
-        <div className='menu'>
+        <div
+          className='menu'
+          onClick={() => {
+            setShowMenu(false);
+            setShowNotificationList(false);
+            setShowSearchResults(false);
+          }}
+        >
           {!auth.isAuthenticated ? (
             <>
               <a

@@ -61,9 +61,6 @@ export default function Feed() {
       setErrorPersonalized(null);
       setErrorCreators(null);
 
-      // Fetch user to determine if we're logged in
-      const userFetched = await fetchUser();
-
       // Fetch content, after user is verified as logged in
       const latestFetched = await fetchLatestContent();
       const trendingFetched = await fetchTrendingContent();
@@ -76,10 +73,7 @@ export default function Feed() {
       }
 
       setIsLoading(false);
-
-      if (!userFetched) {
-        setUser(null);
-      }
+      setUser(auth.user);
 
       if (!latestFetched) {
         setErrorLatest(
@@ -111,29 +105,9 @@ export default function Feed() {
     fetchContent();
   }, []);
 
-  async function fetchUser(): Promise<boolean> {
-    if (!auth.user?.uid) {
-      setUser(null);
-      return false;
-    }
-
-    try {
-      const userResponse = await axios.get(`${apiURL}/user/${auth.user.uid}`, {
-        timeout: 5000,
-      });
-
-      if (userResponse.status === 200 || userResponse.status === 201) {
-        setUser(userResponse.data);
-        return true;
-      } else {
-        setUser(null);
-      }
-    } catch {
-      setUser(null);
-    }
-
-    return false;
-  }
+  useEffect(() => {
+    setUser(auth.user);
+  }, [auth.user]);
 
   async function fetchTrendingContent(): Promise<boolean> {
     try {
@@ -151,6 +125,7 @@ export default function Feed() {
           normalizedContent.map(attachUserData)
         );
         setTrendingContent(withAuthors);
+        console.log("Trending content:", normalizedContent);
         return true;
       } else {
         setTrendingContent([]);
@@ -177,6 +152,7 @@ export default function Feed() {
           latestContent.map(attachUserData)
         );
         setLatestContent(withAuthors);
+        console.log("Latest content:", latestContent);
         return true;
       } else {
         setLatestContent([]);
@@ -323,29 +299,23 @@ export default function Feed() {
     <div className='main-content'>
       {isLoading && <p>Loading...</p>}
 
-      {user ? (
-        <h1>Welcome, {user.firstName}</h1>
-      ) : (
-        <h1 className='summarizz-logo-container'>
-          <span className='summarizz-logo'>SUMMARIZZ</span>
-        </h1>
-      )}
+      {user && <h1>Welcome, {user.firstName}</h1>}
 
-      <h2>Top Trending</h2>
-      <br />
+      {/* Trending Content Section */}
+      <h2 className='feed-section-h2'>Top Trending</h2>
       {trendingContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
         <div className='content-list-horizontal'>
           {trendingContent.map((content, index) => (
-            <div>
+            <div key={`trending-${content.uid || index}`}>
               {index % 8 === 2 ? (
-                <div className='ad-tile'>
+                <div className='ad-tile' key={`ad-trending-${index}`}>
                   <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
                 </div>
               ) : (
                 <ContentTile
-                  key={content.uid || index}
+                  key={`content-trending-${content.uid || index}`}
                   content={content}
                   index={index}
                   onPreview={(c) => openPreview(c)}
@@ -357,11 +327,12 @@ export default function Feed() {
       )}
       {errorTrending && <p className='error'>{errorTrending}</p>}
 
-      {/* <h2>Latest Post</h2>
+      {/* Latest Content Section */}
+      <h2 className='feed-section-h2'>Latest Post</h2>
       {latestContent.length === 0 ? (
         <h3>No content found</h3>
       ) : (
-        <div className='content-list'>
+        <div className='content-list-horizontal'>
           {latestContent.map((content, index) => (
             <ContentTile
               key={content.uid || index}
@@ -372,14 +343,14 @@ export default function Feed() {
           ))}
         </div>
       )}
-      {errorLatest && <p className='error'>{errorLatest}</p>} */}
+      {errorLatest && <p className='error'>{errorLatest}</p>}
 
       {user && (
         <div>
           {/* Related Creators Section */}
           {creatorProfiles.length > 0 ? (
             <div className='related-creators-section'>
-              <h3>Creators You Might Like</h3>
+              <h2 className='feed-section-h2'>Creators You Might Like</h2>
               <div className='creator-profiles-list'>
                 {creatorProfiles.map((creator) => (
                   <div
@@ -424,22 +395,20 @@ export default function Feed() {
           {errorCreators && <p className='error'>{errorCreators}</p>}
 
           {/* Personalized Content Section */}
-          <h2>Content For You</h2>
-          <br />
-
+          <h2 className='feed-section-h2'>Content For You</h2>
           {personalizedContent.length === 0 ? (
             <h4>No content found</h4>
           ) : (
             <div className='content-list'>
               {personalizedContent.map((content, index) => (
-                <div key={content.uid || `content-${index}`}>
+                <div key={`personalized-${content.uid || index}`}>
                   {index % 8 === 0 ? (
-                    <div className='ad-tile'>
+                    <div className='ad-tile' key={`ad-personalized-${index}`}>
                       <div data-mndazid='ead3e00e-3a1a-42f1-b990-c294631f3d97'></div>
                     </div>
                   ) : (
                     <ContentTile
-                      key={content.uid || index}
+                      key={`content-personalized-${content.uid || index}`}
                       content={content}
                       index={index}
                       onPreview={(c) => openPreview(c)}

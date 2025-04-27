@@ -447,7 +447,7 @@ export class ContentService {
   }
 
   // Get all content from the database from every user
-  static async getAllContent() {
+  static async getAllContent(limit = 20) {
     console.log("Getting all content...");
 
     try {
@@ -457,7 +457,7 @@ export class ContentService {
         (doc) => doc.data() as Content
       );
 
-      return contentList;
+      return contentList.slice(0, limit) as Content[];
     } catch (error) {
       console.error("Error fetching all content: ", error);
       throw new Error(error.message || "Failed to fetch all content");
@@ -635,10 +635,13 @@ export class ContentService {
         console.log("No liked content, getting trending creators instead");
         const trendingContent = await this.getTrendingContent(20);
         const trendingCreators = trendingContent
-          .map(content => content.creatorUID)
-          .filter((uid, index, self) =>
-            // Remove duplicates and exclude the user and those they already follow
-            self.indexOf(uid) === index && uid !== userId && !following.includes(uid)
+          .map((content) => content.creatorUID)
+          .filter(
+            (uid, index, self) =>
+              // Remove duplicates and exclude the user and those they already follow
+              self.indexOf(uid) === index &&
+              uid !== userId &&
+              !following.includes(uid)
           )
           .slice(0, limit);
 
@@ -665,12 +668,17 @@ export class ContentService {
 
       // If no creators found from liked content, get trending creators
       if (creatorUids.length === 0) {
-        console.log("No creators from liked content, getting trending creators");
+        console.log(
+          "No creators from liked content, getting trending creators"
+        );
         const trendingContent = await this.getTrendingContent(20);
         const trendingCreators = trendingContent
-          .map(content => content.creatorUID)
-          .filter((uid, index, self) =>
-            self.indexOf(uid) === index && uid !== userId && !following.includes(uid)
+          .map((content) => content.creatorUID)
+          .filter(
+            (uid, index, self) =>
+              self.indexOf(uid) === index &&
+              uid !== userId &&
+              !following.includes(uid)
           )
           .slice(0, limit);
 
@@ -688,7 +696,9 @@ export class ContentService {
 
       // Sort creators by frequency and take top ones
       const sortedCreators = Object.entries(creatorCounts)
-        .sort(([, countA], [, countB]) => (countB as number) - (countA as number))
+        .sort(
+          ([, countA], [, countB]) => (countB as number) - (countA as number)
+        )
         .slice(0, limit)
         .map(([uid]) => uid);
 
@@ -696,11 +706,17 @@ export class ContentService {
       return sortedCreators;
     } catch (error) {
       console.error("Error fetching related content creators: ", error);
-      throw new Error(error.message || "Failed to fetch related content creators");
+      throw new Error(
+        error.message || "Failed to fetch related content creators"
+      );
     }
   }
 
-  static async getRelatedContent(contentId: string, userId: string = null, limit = 5) {
+  static async getRelatedContent(
+    contentId: string,
+    userId: string = null,
+    limit = 5
+  ) {
     console.log("Getting related content for content ID:", contentId);
     try {
       const sourceContent = await this.getContent(contentId);
@@ -713,10 +729,12 @@ export class ContentService {
       const allContent = await this.getAllContent();
       console.log("Total content count:", allContent.length);
 
-      const otherContent = allContent.filter(content => content.uid !== contentId);
+      const otherContent = allContent.filter(
+        (content) => content.uid !== contentId
+      );
       console.log("Other content count:", otherContent.length);
 
-      const scoredContent = otherContent.map(content => {
+      const scoredContent = otherContent.map((content) => {
         let titleSimilarity = 0;
         if (sourceContent.titleLower && content.titleLower) {
           const sourceWords = sourceContent.titleLower.split(" ");
@@ -729,8 +747,10 @@ export class ContentService {
           titleSimilarity = matchingWords * 3;
         }
 
-        const creatorBonus = content.creatorUID === sourceContent.creatorUID ? 5 : 0;
-        const popularityScore = (content.likes || 0) * 0.2 + (content.views || 0) * 0.1;
+        const creatorBonus =
+          content.creatorUID === sourceContent.creatorUID ? 5 : 0;
+        const popularityScore =
+          (content.likes || 0) * 0.2 + (content.views || 0) * 0.1;
 
         let userScore = 0;
         if (userId) {
@@ -739,16 +759,20 @@ export class ContentService {
           userScore = 0;
         }
 
-        const totalScore = titleSimilarity + creatorBonus + popularityScore + userScore;
+        const totalScore =
+          titleSimilarity + creatorBonus + popularityScore + userScore;
         return { ...content, score: totalScore };
       });
 
       let relatedContent = scoredContent
-        .filter(content => content.score > 0)
+        .filter((content) => content.score > 0)
         .sort((a, b) => b.score - a.score)
         .slice(0, limit);
 
-      console.log("Related content with score > 0 count:", relatedContent.length);
+      console.log(
+        "Related content with score > 0 count:",
+        relatedContent.length
+      );
 
       // If we don't have enough related content, include some trending content
       if (relatedContent.length < limit) {
@@ -757,14 +781,18 @@ export class ContentService {
 
         // Filter out content that's already in relatedContent and the source content
         const additionalContent = trendingContent
-          .filter(content =>
-            content.uid !== contentId &&
-            !relatedContent.some(rc => rc.uid === content.uid)
+          .filter(
+            (content) =>
+              content.uid !== contentId &&
+              !relatedContent.some((rc) => rc.uid === content.uid)
           )
-          .map(content => ({ ...content, score: 1 })) // Lower score for trending content
+          .map((content) => ({ ...content, score: 1 })) // Lower score for trending content
           .slice(0, limit - relatedContent.length);
 
-        console.log("Additional trending content count:", additionalContent.length);
+        console.log(
+          "Additional trending content count:",
+          additionalContent.length
+        );
         relatedContent = [...relatedContent, ...additionalContent];
       }
 
