@@ -211,7 +211,10 @@ export default function Navbar() {
         {/* Create New Content */}
         {auth.isAuthenticated ? (
           <>
-            <form onSubmit={handleSearch} className='searchBarContainer'>
+            <form
+              onSubmit={handleSearch}
+              className='searchBarContainer search-large-screen'
+            >
               <input
                 type='text'
                 className='searchBar'
@@ -233,7 +236,7 @@ export default function Navbar() {
             </form>
 
             <button
-              className='navbar-button'
+              className='navbar-button navbar-button-large-screen'
               onClick={() => {
                 navigate("/content/create");
                 localStorage.removeItem("title");
@@ -247,7 +250,7 @@ export default function Navbar() {
             <div>
               <div
                 onClick={toggleNotificationList}
-                className='notification-button'
+                className='notification-button notification-button-large-screen'
               >
                 <BellIcon className='icon' />
                 {unreadCount > 0 && <span>{unreadCount}</span>}
@@ -266,7 +269,7 @@ export default function Navbar() {
 
             {/* Profile Picture */}
             <div
-              className='profile-picture-container'
+              className='profile-picture-container profile-picture-container-large-screen'
               onClick={() => {
                 setShowMenu(!showMenu);
                 setShowNotificationList(false);
@@ -316,13 +319,13 @@ export default function Navbar() {
             </a>
 
             {/* Theme Slider */}
-            <label className='theme-toggle-auth'>
+            <label className='theme-toggle'>
               <input
                 type='checkbox'
                 checked={isDarkMode}
                 onChange={toggleTheme}
               />
-              <span className='slider-auth'></span>
+              <span className='slider'></span>
             </label>
           </div>
         )}
@@ -332,102 +335,133 @@ export default function Navbar() {
       {showMenu && (
         <div
           className='menu'
-          onClick={() => {
-            setShowMenu(false);
-            setShowNotificationList(false);
-            setShowSearchResults(false);
-          }}
+          // onClick={() => {
+          //   setShowMenu(false);
+          //   setShowNotificationList(false);
+          //   setShowSearchResults(false);
+          // }}
         >
-          {!auth.isAuthenticated ? (
-            <>
-              <a
-                className='menu-item'
+          <>
+            {/* MOBILE DISPLAY */}
+            <div className='menu-header'>
+              {/* Create Content */}
+              <button
+                className='navbar-button navrbar-button-mobile'
                 onClick={() => {
-                  setShowMenu(false);
-                  navigate("/authentication/login");
+                  navigate("/content/create");
+                  localStorage.removeItem("title");
+                  Cookies.remove("content");
                 }}
               >
-                Login
-              </a>
-              <a
-                className='menu-item'
+                Create Content
+              </button>
+
+              {/* Close Menu */}
+              <div
+                className='close-menu'
                 onClick={() => {
                   setShowMenu(false);
-                  navigate("/authentication/register");
+                  setShowNotificationList(false);
+                  setShowSearchResults(false);
                 }}
               >
-                Register
-              </a>
-            </>
-          ) : (
-            <>
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  navigate(`/profile/${auth.user?.uid}`);
-                }}
-              >
-                View Profile
-              </a>
-              <hr className='menu-divider' />
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  navigate(`/profile/manage`);
-                }}
-              >
-                Manage Profile
-              </a>
-              <hr className='menu-divider' />
-              {!isProUser && (
-                <>
-                  <a
-                    className='menu-item upgrade-pro-item'
-                    onClick={() => {
-                      setShowMenu(false);
-                      navigate("/pro");
-                    }}
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='icon icon-tabler icon-tabler-x'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  strokeWidth='2'
+                  stroke='currentColor'
+                  fill='none'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                >
+                  <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+                  <path d='M18 6l-12 12' />
+                  <path d='M6 6l12 12' />
+                </svg>
+              </div>
+            </div>
+
+            {/* ALWAYS DISPLAYED */}
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate(`/profile/${auth.user?.uid}`);
+              }}
+            >
+              View Profile
+            </a>
+            <hr className='menu-divider' />
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate(`/profile/manage`);
+              }}
+            >
+              Manage Profile
+            </a>
+            <hr className='menu-divider' />
+            {!isProUser && (
+              <>
+                <a
+                  className='menu-item upgrade-pro-item'
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate("/pro");
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='pro-star-icon'
+                    viewBox='0 0 24 24'
+                    fill='currentColor'
                   >
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      className='pro-star-icon'
-                      viewBox='0 0 24 24'
-                      fill='currentColor'
-                    >
-                      <path
-                        fillRule='evenodd'
-                        d='M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z'
-                        clipRule='evenodd'
-                      />
-                    </svg>
-                    Upgrade to Pro
-                  </a>
-                  <hr className='menu-divider' />
-                </>
-              )}
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  navigate("/pro/manage");
-                }}
-              >
-                Manage Subscription
-              </a>
-              <hr className='menu-divider' />
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  handleLogout();
-                }}
-              >
-                Logout
-              </a>
-            </>
-          )}
+                    <path
+                      fillRule='evenodd'
+                      d='M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
+                  Upgrade to Pro
+                </a>
+                <hr className='menu-divider' />
+              </>
+            )}
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate("/pro/manage");
+              }}
+            >
+              Manage Subscription
+            </a>
+            <hr className='menu-divider' />
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                handleLogout();
+              }}
+            >
+              Logout
+            </a>
+
+            {/* MOBILE DISPLAY */}
+            {/* Theme Slider */}
+            <label className='theme-toggle mobile-slider'>
+              <input
+                type='checkbox'
+                checked={isDarkMode}
+                onChange={toggleTheme}
+              />
+              <span className='slider '></span>
+            </label>
+          </>
         </div>
       )}
     </>
