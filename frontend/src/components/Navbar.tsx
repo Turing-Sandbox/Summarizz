@@ -319,13 +319,13 @@ export default function Navbar() {
             </a>
 
             {/* Theme Slider */}
-            <label className='theme-toggle'>
+            <label className='theme-toggle slider-auth'>
               <input
                 type='checkbox'
                 checked={isDarkMode}
                 onChange={toggleTheme}
               />
-              <span className='slider'></span>
+              <span className='slider slider-auth'></span>
             </label>
           </div>
         )}
@@ -333,29 +333,10 @@ export default function Navbar() {
 
       {/* Profile Menu */}
       {showMenu && (
-        <div
-          className='menu'
-          // onClick={() => {
-          //   setShowMenu(false);
-          //   setShowNotificationList(false);
-          //   setShowSearchResults(false);
-          // }}
-        >
+        <div className='menu'>
           <>
             {/* MOBILE DISPLAY */}
             <div className='menu-header'>
-              {/* Create Content */}
-              <button
-                className='navbar-button navrbar-button-mobile'
-                onClick={() => {
-                  navigate("/content/create");
-                  localStorage.removeItem("title");
-                  Cookies.remove("content");
-                }}
-              >
-                Create Content
-              </button>
-
               {/* Close Menu */}
               <div
                 className='close-menu'
@@ -450,18 +431,19 @@ export default function Navbar() {
             >
               Logout
             </a>
-
-            {/* MOBILE DISPLAY */}
-            {/* Theme Slider */}
-            <label className='theme-toggle mobile-slider'>
-              <input
-                type='checkbox'
-                checked={isDarkMode}
-                onChange={toggleTheme}
-              />
-              <span className='slider '></span>
-            </label>
           </>
+
+          {/* Create Content */}
+          <button
+            className='navbar-button navrbar-button-mobile'
+            onClick={() => {
+              navigate("/content/create");
+              localStorage.removeItem("title");
+              Cookies.remove("content");
+            }}
+          >
+            Create Content
+          </button>
         </div>
       )}
     </>
