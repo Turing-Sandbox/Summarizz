@@ -332,14 +332,6 @@ export default function Profile() {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading profile...</div>;
-  }
-
-  if (!user) {
-    return <div>User not found.</div>;
-  }
-
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
@@ -373,200 +365,204 @@ export default function Profile() {
     setPreviewContent(null);
   };
 
-  if (isLoading) {
-    return <div>Loading profile...</div>;
-  }
-
   if (!user) {
-    return <div>User not found.</div>;
+    return;
   }
   return (
     <>
       <div className='main-content'>
-        <div className='profile-banner'>
-          <div className='profile-banner-image'>
-            {user && user.profileImage ? (
-              <img
-                src={user.profileImage}
-                width={200}
-                height={200}
-                alt='Profile Picture'
-                className='profile-banner-image'
-              />
-            ) : (
-              <h1 className='profile-initial'>
-                {user?.username[0].toUpperCase()}
-              </h1>
-            )}
-          </div>
-
-          <div className='profile-banner-info'>
-            <div className='username-follow'>
-              <h1 className='username'>{user?.username}</h1>
-              {/* Follow/Request Button (Conditional Rendering) */}
-              {user.uid !== id && ( // Don't show button if viewing own profile
-                <button
-                  className={`icon-button follow ${
-                    isFollowing ? "following" : ""
-                  }`}
-                  onClick={handleFollow}
-                  title={
-                    isFollowing
-                      ? "Unfollow User"
-                      : followRequested
-                      ? "Request Sent"
-                      : user?.isPrivate
-                      ? "Request to Follow"
-                      : "Follow User"
-                  }
-                >
-                  <UserPlusIcon
-                    className={`icon follow ${
-                      isFollowing || followRequested ? "following" : ""
-                    }`}
+        {!user && !isLoading ? (
+          <h1>User not found</h1>
+        ) : (
+          <div>
+            <div className='profile-banner'>
+              <div className='profile-banner-image'>
+                {user && user.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    width={200}
+                    height={200}
+                    alt='Profile Picture'
+                    className='profile-banner-image'
                   />
-                </button>
-              )}
-            </div>
-
-            {canViewFullProfile ? (
-              <>
-                {/* Stats */}
-                <div className='profile-stats'>
-                  <div className='stat-item'>
-                    <span className='stat-number'>{followersCount}</span>
-                    <span className='stat-label'>Followers</span>
-                  </div>
-                  <div className='stat-item'>
-                    <span className='stat-number'>{followingCount}</span>
-                    <span className='stat-label'>Following</span>
-                  </div>
-                  <div className='stat-item'>
-                    <span className='stat-number'>{createdCount}</span>
-                    <span className='stat-label'>Created</span>
-                  </div>
-                  <div className='stat-item'>
-                    <span className='stat-number'>{sharedCount}</span>
-                    <span className='stat-label'>Shared</span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p>This account is private.</p>
-            )}
-
-            <p>
-              {user?.firstName} {user?.lastName}
-            </p>
-            <p>{user?.bio}</p>
-          </div>
-        </div>
-
-        {/* Follow Requests Section (Conditional Rendering) */}
-        {user.uid === id &&
-          user?.followRequests &&
-          user.followRequests.length > 0 && (
-            <div className='follow-requests-section'>
-              <h3>Follow Requests</h3>
-              <ul>
-                {user.followRequests.map((requesterId) => (
-                  <li key={requesterId}>
-                    <span>{followUsernames[requesterId] || "Loading..."}</span>
-                    <div className='request-buttons'>
-                      <button
-                        className='icon-button approve'
-                        onClick={() => handleApproveRequest(requesterId)}
-                        title='Approve Request'
-                      >
-                        <CheckIcon className='icon check' />
-                      </button>
-                      <button
-                        className='icon-button reject'
-                        onClick={() => handleRejectRequest(requesterId)}
-                        title='Reject Request'
-                      >
-                        <XMarkIcon className='icon xmark' />
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-        {/* Tabs for Created/Shared Content */}
-        <div className='tabs'>
-          <button
-            onClick={() => setTab("created")}
-            className={tab === "created" ? "tab-active" : "tab-inactive"}
-          >
-            Created
-          </button>
-          <button
-            onClick={() => setTab("shared")}
-            className={tab === "shared" ? "tab-active" : "tab-inactive"}
-          >
-            Shared
-          </button>
-        </div>
-
-        {/* Conditionally Render the Created vs Shared Section */}
-        {tab === "created" && (
-          <>
-            <h2 className='section-title'>
-              {contents.length === 1 ? "Content" : "Contents"}
-            </h2>
-            {contents.length === 0 ? (
-              <h3>No content found</h3>
-            ) : (
-              <div className='content-list'>
-                {contents.map((content, index) => (
-                  <ContentTile
-                    key={content.uid || index}
-                    content={content}
-                    index={index}
-                    onPreview={(c) => openPreview(c)} // Pass the content to the preview function
-                  />
-                ))}
+                ) : (
+                  <h1 className='profile-initial'>
+                    {user?.username[0].toUpperCase()}
+                  </h1>
+                )}
               </div>
-            )}
-          </>
-        )}
 
-        {tab === "shared" && (
-          <>
-            <h3 className='section-title'>Shared Content</h3>
-            {canViewFullProfile ? (
-              sharedContent.length === 0 ? (
-                <h4>No shared content found</h4>
-              ) : (
-                <div className='content-list'>
-                  {sharedContent.map((content, index) => (
-                    <ContentTile
-                      key={content.uid || index}
-                      content={content}
-                      index={index}
-                      onPreview={(c) => openPreview(c)}
-                      deleteShareOption={
-                        sharedContent.some(
-                          (sharedItem) => sharedItem.uid === content.uid
-                        ) && user.uid === id
+              <div className='profile-banner-info'>
+                <div className='username-follow'>
+                  <h1 className='username'>{user?.username}</h1>
+                  {/* Follow/Request Button (Conditional Rendering) */}
+                  {user.uid !== id && ( // Don't show button if viewing own profile
+                    <button
+                      className={`icon-button follow ${
+                        isFollowing ? "following" : ""
+                      }`}
+                      onClick={handleFollow}
+                      title={
+                        isFollowing
+                          ? "Unfollow User"
+                          : followRequested
+                          ? "Request Sent"
+                          : user?.isPrivate
+                          ? "Request to Follow"
+                          : "Follow User"
                       }
-                      handleUnshare={handleUnshare}
-                    />
-                  ))}
+                    >
+                      <UserPlusIcon
+                        className={`icon follow ${
+                          isFollowing || followRequested ? "following" : ""
+                        }`}
+                      />
+                    </button>
+                  )}
                 </div>
-              )
-            ) : (
-              <p>This account is private.</p>
+
+                {canViewFullProfile ? (
+                  <>
+                    {/* Stats */}
+                    <div className='profile-stats'>
+                      <div className='stat-item'>
+                        <span className='stat-number'>{followersCount}</span>
+                        <span className='stat-label'>Followers</span>
+                      </div>
+                      <div className='stat-item'>
+                        <span className='stat-number'>{followingCount}</span>
+                        <span className='stat-label'>Following</span>
+                      </div>
+                      <div className='stat-item'>
+                        <span className='stat-number'>{createdCount}</span>
+                        <span className='stat-label'>Created</span>
+                      </div>
+                      <div className='stat-item'>
+                        <span className='stat-number'>{sharedCount}</span>
+                        <span className='stat-label'>Shared</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p>This account is private.</p>
+                )}
+
+                <p>
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p>{user?.bio}</p>
+              </div>
+            </div>
+
+            {/* Follow Requests Section (Conditional Rendering) */}
+            {user.uid === id &&
+              user?.followRequests &&
+              user.followRequests.length > 0 && (
+                <div className='follow-requests-section'>
+                  <h3>Follow Requests</h3>
+                  <ul>
+                    {user.followRequests.map((requesterId) => (
+                      <li key={requesterId}>
+                        <span>
+                          {followUsernames[requesterId] || "Loading..."}
+                        </span>
+                        <div className='request-buttons'>
+                          <button
+                            className='icon-button approve'
+                            onClick={() => handleApproveRequest(requesterId)}
+                            title='Approve Request'
+                          >
+                            <CheckIcon className='icon check' />
+                          </button>
+                          <button
+                            className='icon-button reject'
+                            onClick={() => handleRejectRequest(requesterId)}
+                            title='Reject Request'
+                          >
+                            <XMarkIcon className='icon xmark' />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+            {/* Tabs for Created/Shared Content */}
+            <div className='tabs'>
+              <button
+                onClick={() => setTab("created")}
+                className={tab === "created" ? "tab-active" : "tab-inactive"}
+              >
+                Created
+              </button>
+              <button
+                onClick={() => setTab("shared")}
+                className={tab === "shared" ? "tab-active" : "tab-inactive"}
+              >
+                Shared
+              </button>
+            </div>
+
+            {/* Conditionally Render the Created vs Shared Section */}
+            {tab === "created" && (
+              <>
+                <h2 className='section-title'>
+                  {contents.length === 1 ? "Content" : "Contents"}
+                </h2>
+                {contents.length === 0 ? (
+                  <h3>No content found</h3>
+                ) : (
+                  <div className='content-list'>
+                    {contents.map((content, index) => (
+                      <ContentTile
+                        key={content.uid || index}
+                        content={content}
+                        index={index}
+                        onPreview={(c) => openPreview(c)} // Pass the content to the preview function
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
-          </>
-        )}
-        {previewContent && (
-          <ContentPreviewPopup
-            content={previewContent}
-            onClose={closePreview}
-          />
+
+            {tab === "shared" && (
+              <>
+                <h3 className='section-title'>Shared Content</h3>
+                {canViewFullProfile ? (
+                  sharedContent.length === 0 ? (
+                    <h4>No shared content found</h4>
+                  ) : (
+                    <div className='content-list'>
+                      {sharedContent.map((content, index) => (
+                        <ContentTile
+                          key={content.uid || index}
+                          content={content}
+                          index={index}
+                          onPreview={(c) => openPreview(c)}
+                          deleteShareOption={
+                            sharedContent.some(
+                              (sharedItem) => sharedItem.uid === content.uid
+                            ) && user.uid === id
+                          }
+                          handleUnshare={handleUnshare}
+                        />
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <p>This account is private.</p>
+                )}
+              </>
+            )}
+            {previewContent && (
+              <ContentPreviewPopup
+                content={previewContent}
+                onClose={closePreview}
+              />
+            )}
+          </div>
         )}
       </div>
     </>

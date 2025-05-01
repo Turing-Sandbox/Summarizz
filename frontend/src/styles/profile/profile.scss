@@ -50,20 +50,20 @@
 
 /* Follow icon styles */
 .icon.follow {
-  width: 16px; 
-  height: 16px; 
-  color: var(--icon-color); 
+  width: 16px;
+  height: 16px;
+  color: var(--icon-color);
 }
 
 .icon.follow.following {
-  color: var(--icon-selected-color); 
+  color: var(--icon-selected-color);
 }
 
 .profile-stats {
   display: flex;
   align-items: center;
-  gap: 0.7rem; 
-  margin-bottom: 1.25rem; 
+  gap: 0.7rem;
+  margin-bottom: 1.25rem;
   font-family: var(--font-body);
 }
 
@@ -81,7 +81,7 @@
 
 .stat-label {
   font-size: 0.7rem;
-  color: var(--text-color-light); 
+  color: var(--text-color-light);
 }
 
 .section-title {
@@ -99,9 +99,7 @@
 /* Tabs container */
 .tabs {
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem; /* spacing between tabs and content */
+  margin: 30px 0 -15px 0;
 
   /* Center tabs horizontally */
   justify-content: center;
@@ -112,27 +110,38 @@
 .tab-inactive {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 8px;
 
-  /* Transparent background so it blends with the page */
-  background-color: transparent;
+  background-color: var(--tile-color);
   color: var(--text-color);
 
   cursor: pointer;
   transition: color 0.3s ease;
   font-size: 1rem;
+  width: 160px;
+}
+
+// First tab button styling
+.tab-active:first-child,
+.tab-inactive:first-child {
+  border-radius: 20px 0 0 20px;
+}
+
+.tab-active:last-child,
+.tab-inactive:last-child {
+  border-radius: 0 20px 20px 0;
 }
 
 /* Active tab styling */
 .tab-active {
   font-weight: bold;
-  text-decoration: underline;
   color: var(--text-color);
+  background-color: var(--background-color);
 }
 
 /* Inactive tab styling */
 .tab-inactive:hover {
   color: var(--icon-hover-color);
+  font-weight: bold;
 }
 
 // media queries

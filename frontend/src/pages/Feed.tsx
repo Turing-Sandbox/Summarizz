@@ -12,7 +12,6 @@ export default function Feed() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
   const [latestContent, setLatestContent] = useState<Content[]>([]);
   const [personalizedContent, setPersonalizedContent] = useState<Content[]>([]);
-  const [relatedCreators, setRelatedCreators] = useState<string[]>([]);
   const [creatorProfiles, setCreatorProfiles] = useState<User[]>([]);
   const [previewContent, setPreviewContent] = useState<Content | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,7 +71,6 @@ export default function Feed() {
         creatorsFetched = await fetchRelatedCreators();
       }
 
-      setIsLoading(false);
       setUser(auth.user);
 
       if (!latestFetched) {
@@ -103,6 +101,7 @@ export default function Feed() {
     };
 
     fetchContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -198,7 +197,6 @@ export default function Feed() {
 
   async function fetchRelatedCreators(): Promise<boolean> {
     if (!auth.user?.uid) {
-      setRelatedCreators([]);
       setCreatorProfiles([]);
       return false;
     }
@@ -213,12 +211,9 @@ export default function Feed() {
         const creatorIds = creatorsResponse.data.relatedCreators || [];
 
         if (creatorIds.length === 0) {
-          setRelatedCreators([]);
           setCreatorProfiles([]);
           return false;
         }
-
-        setRelatedCreators(creatorIds);
 
         // Profiles for each creator
         const profiles = await Promise.all(
@@ -253,20 +248,22 @@ export default function Feed() {
           return false;
         }
       } else {
-        setRelatedCreators([]);
         setCreatorProfiles([]);
       }
     } catch {
-      setRelatedCreators([]);
       setCreatorProfiles([]);
     }
     return false;
   }
 
   function normalizeContentDates(content: Content): Content {
-    if (content.dateCreated && (content.dateCreated as any).seconds) {
+    if (
+      content.dateCreated &&
+      typeof content.dateCreated === "object" &&
+      "seconds" in content.dateCreated
+    ) {
       content.dateCreated = new Date(
-        (content.dateCreated as any).seconds * 1000
+        (content.dateCreated as { seconds: number }).seconds * 1000
       );
     }
 
@@ -297,14 +294,21 @@ export default function Feed() {
 
   return (
     <div className='main-content'>
-      {isLoading && <p>Loading...</p>}
-
       {user && <h1>Welcome, {user.firstName}</h1>}
 
       {/* Trending Content Section */}
       <h2 className='feed-section-h2'>Top Trending</h2>
-      {trendingContent.length === 0 ? (
-        <h3>No content found</h3>
+      {isLoading ? (
+        <div className='content-list-horizontal'>
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+        </div>
+      ) : trendingContent.length === 0 ? (
+        <h3>No trending content found</h3>
       ) : (
         <div className='content-list-horizontal'>
           {trendingContent.map((content, index) => (
@@ -329,8 +333,17 @@ export default function Feed() {
 
       {/* Latest Content Section */}
       <h2 className='feed-section-h2'>Latest Post</h2>
-      {latestContent.length === 0 ? (
-        <h3>No content found</h3>
+      {isLoading ? (
+        <div className='content-list-horizontal'>
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+          <div className='loading-tile' />
+        </div>
+      ) : latestContent.length === 0 ? (
+        <h3>No latest content found</h3>
       ) : (
         <div className='content-list-horizontal'>
           {latestContent.map((content, index) => (
@@ -348,9 +361,20 @@ export default function Feed() {
       {user && (
         <div>
           {/* Related Creators Section */}
-          {creatorProfiles.length > 0 ? (
+          <h2 className='feed-section-h2'>Creators You Might Like</h2>
+          {isLoading ? (
+            <div className='creator-profiles-list'>
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+            </div>
+          ) : creatorProfiles.length === 0 ? (
+            <h3>No related creators found</h3>
+          ) : (
             <div className='related-creators-section'>
-              <h2 className='feed-section-h2'>Creators You Might Like</h2>
               <div className='creator-profiles-list'>
                 {creatorProfiles.map((creator) => (
                   <div
@@ -386,18 +410,22 @@ export default function Feed() {
                 ))}
               </div>
             </div>
-          ) : (
-            <div className='related-creators-section'>
-              <h3>Creators You Might Like</h3>
-              <p className='no-creators-message'>Finding creators for you...</p>
-            </div>
           )}
           {errorCreators && <p className='error'>{errorCreators}</p>}
 
           {/* Personalized Content Section */}
           <h2 className='feed-section-h2'>Content For You</h2>
-          {personalizedContent.length === 0 ? (
-            <h4>No content found</h4>
+          {isLoading ? (
+            <div className='content-list'>
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+              <div className='loading-tile' />
+            </div>
+          ) : personalizedContent.length === 0 ? (
+            <h3>No content found</h3>
           ) : (
             <div className='content-list'>
               {personalizedContent.map((content, index) => (

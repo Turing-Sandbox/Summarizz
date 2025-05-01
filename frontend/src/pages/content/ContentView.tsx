@@ -515,9 +515,7 @@ export default function ContentView() {
                 className='thumbnail'
               />
             )}
-            {user && user.uid !== content?.creatorUID && (
-              <CommentList content={content!} user={user!} />
-            )}
+            {user && <CommentList content={content!} user={user!} />}
           </div>
 
           {/* Right Column: Content Details */}
