@@ -10,7 +10,7 @@ import {
   unfollowUserController,
   requestFollowController,
   approveFollowRequestController,
-  rejectFollowRequestController, 
+  rejectFollowRequestController,
   changePasswordController,
   changeEmailController,
   changeUsernameController,
@@ -18,7 +18,6 @@ import {
   logoutUserController,
 } from "../controllers/userController";
 import { requestPasswordResetController } from "../controllers/passwordResetController";
-import { log } from "winston";
 
 const router = Router();
 
