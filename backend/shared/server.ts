@@ -37,6 +37,12 @@ app.use((req, res, next) => {
   }
 });
 
+// Middleware to log all requests
+app.use((req, _, next) => {
+  logger.http(`${req.method} ${req.url}`);
+  next();
+});
+
 app.use("/comment", commentRoutes);
 app.use("/user", userRoutes);
 app.use("/content", contentRoutes);
@@ -45,12 +51,6 @@ app.use("/oauth", oauthRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/subscription", subscriptionRoutes);
 app.use("/stripe", webhookRoutes);
-
-// Middleware to log all requests
-app.use((req, _, next) => {
-  logger.http(`${req.method} ${req.url}`);
-  next();
-});
 
 app.get("/", (_, res) => {
   res.send("Server is Listening!");

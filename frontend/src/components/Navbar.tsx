@@ -71,11 +71,12 @@ export default function Navbar() {
 
   // Update user info
   useEffect(() => {
-    fetchNotifications();
-    checkSubscriptionStatus();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (auth.isAuthenticated !== undefined) {
+      // Only call these functions when the auth state is initialized
+      fetchNotifications();
+      checkSubscriptionStatus();
+    }
+  }, [auth.isAuthenticated]);
 
   // ---------------------------------------
   // -------------- Functions --------------

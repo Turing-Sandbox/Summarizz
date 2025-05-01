@@ -34,28 +34,16 @@ export default function ContentPreviewPopup({
   const fetchRelatedContent = async () => {
     setIsLoading(true);
     try {
-      console.log("Fetching related content for:", content.uid);
-      console.log(
-        "API URL:",
-        `${apiURL}/content/related/${content.uid}${
-          auth.user?.uid ? `?userId=${auth.user.uid}` : ""
-        }`
-      );
-
       const response = await axios.get(
         `${apiURL}/content/related/${content.uid}${
           auth.user?.uid ? `?userId=${auth.user.uid}` : ""
-        }`
+        }`,
+        { withCredentials: true }
       );
 
-      console.log("Related content response:", response.data);
-
       if (response.data && response.data.success) {
-        console.log("Setting related content:", response.data.relatedContent);
         setRelatedContent(response.data.relatedContent);
-      } else {
-        console.log("No success in response or empty data");
-      }
+      } 
     } catch (error) {
       console.error("Error fetching related content:", error);
     } finally {

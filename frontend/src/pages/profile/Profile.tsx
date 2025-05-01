@@ -36,6 +36,12 @@ export default function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         // 1. Fetch User Data
         const userResponse = await axios.get(`${apiURL}/user/${id}`);
@@ -60,9 +66,10 @@ export default function Profile() {
 
         // 4. Check follow status (only if viewing another user's profile)
         if (userData?.uid && userData.uid !== id) {
-          setIsFollowing(userData.followers?.includes(userData.uid) || false);
+          const viewerId = auth.user?.uid;
+          setIsFollowing(userData.followers?.includes(viewerId) || false);
           setFollowRequested(
-            userData.followRequests?.includes(userData.uid) || false
+            userData.followRequests?.includes(viewerId) || false
           );
         }
       } catch (error) {
@@ -233,7 +240,7 @@ export default function Profile() {
 
       if (isFollowing) {
         // Unfollow
-        url = `${apiURL}/user/${user.uid}/unfollow/${id}`;
+        url = `${apiURL}/user/${auth.user?.uid}/unfollow/${id}`;
       } else if (user.isPrivate) {
         // Private profile: Send request, or cancel if already requested (optional)
         if (followRequested) {
@@ -244,11 +251,11 @@ export default function Profile() {
           return; // for now
         } else {
           // Send Request
-          url = `${apiURL}/user/${user.uid}/request/${id}`;
+          url = `${apiURL}/user/${auth.user?.uid}/request/${id}`;
         }
       } else {
         // Public profile: Follow directly
-        url = `${apiURL}/user/${user.uid}/follow/${id}`;
+        url = `${apiURL}/user/${auth.user?.uid}/follow/${id}`;
       }
 
       // Only make the API call if a URL is set
@@ -263,7 +270,7 @@ export default function Profile() {
         } else if (!user.isPrivate) {
           setIsFollowing(true); // Just followed directly
 
-          if (user.uid != user.uid) {
+          if (user.uid !== auth.user?.uid) {
             await axios.post(`${apiURL}/notifications/create`, {
               userId: user.uid,
               notification: {

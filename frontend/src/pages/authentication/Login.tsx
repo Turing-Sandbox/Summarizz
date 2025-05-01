@@ -35,11 +35,6 @@ export default function Login() {
           // 3 - Set User Session (Save Token and User UID)
           auth.login(res.data.userUID);
 
-          // // Update user email
-          // axios.put(`${apiURL}/user/${userUID}`, {
-          //   email: user.email,
-          // });
-
           // 4 - Redirect to home page
           navigate("/");
 
@@ -61,10 +56,10 @@ export default function Login() {
       });
   };
 
-  // Authenticated users should not be able to access the login page
-  //   if (!auth.isAuthenticated) {
-  //     navigate("/");
-  //   }
+  // Redirect to home page if user is already logged in
+  if (auth.isAuthenticated) {
+    navigate("/");
+  }
 
   return (
     <>

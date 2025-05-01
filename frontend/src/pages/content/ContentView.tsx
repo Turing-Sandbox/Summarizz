@@ -21,6 +21,7 @@ import {
   ShareIcon as ShareIconOutline,
 } from "@heroicons/react/24/outline";
 import CommentList from "../../components/content/CommentList";
+import { normalizeContentDates } from "../../services/contentHelper";
 
 /**
  * Page() -> JSX.Element
@@ -60,24 +61,6 @@ export default function ContentView() {
   const [firstRender, setFirstRender] = useState(true);
 
   const navigate = useNavigate();
-
-  // ---------------------------------------
-  // -------------- Helpers ----------------
-  // ---------------------------------------
-
-  // Normalizes date fields into proper Date objects
-  function normalizeContentDates(contentObj: any): any {
-    if (contentObj.dateCreated) {
-      if (typeof contentObj.dateCreated === "string") {
-        contentObj.dateCreated = new Date(contentObj.dateCreated);
-      } else if (contentObj.dateCreated.seconds) {
-        contentObj.dateCreated = new Date(
-          contentObj.dateCreated.seconds * 1000
-        );
-      }
-    }
-    return contentObj;
-  }
 
   // ---------------------------------------
   // -------------- Data Fetching ----------
@@ -410,7 +393,7 @@ export default function ContentView() {
                       ? content.title.substring(0, 30) + "..."
                       : content?.title
                   }"!`,
-                  contentID: content?.uid,
+                  contentId: content?.uid,
                   timestamp: Date.now(),
                   read: false,
                 },
@@ -486,7 +469,7 @@ export default function ContentView() {
    * Redirects user to the edit page for the current content.
    */
   const editContent = () => {
-    if (content?.creatorUID === user?.uid) navigate(`edit/${content?.uid} `);
+    if (content?.creatorUID === user?.uid) navigate(`edit/${content?.uid}`);
     else throw Error("You cannot edit this content");
   };
 

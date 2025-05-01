@@ -351,8 +351,7 @@
     top: 50%;
     right: auto;
     left: auto;
-    transform: translateX(-50%);
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
     width: calc(100% - 30px);
     height: 100%;
     display: flex;

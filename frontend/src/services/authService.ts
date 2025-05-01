@@ -21,14 +21,12 @@ export const AuthService = {
 
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
-        throw new Error(error.response.data.error);
-      }
-      throw new Error(
+      const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
-          : "Failed to register user"
-      );
+          : "Failed to register user";
+
+      throw new Error(message);
     }
   },
 
@@ -41,14 +39,12 @@ export const AuthService = {
 
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
-        throw new Error(error.response.data.error);
-      }
-      throw new Error(
+      const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
-          : "Failed to login user"
-      );
+          : "Failed to login user";
+
+      throw new Error(message);
     }
   },
 
@@ -128,14 +124,12 @@ export const AuthService = {
         });
       }
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
-        throw new Error(error.response.data.error);
-      }
-      throw new Error(
+      const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
-          : "Failed to authenticate with provider"
-      );
+          : "Failed to authenticate with provider";
+
+      throw new Error(message);
     }
   },
 
@@ -152,14 +146,12 @@ export const AuthService = {
         token: response.data.token,
       };
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
-        throw new Error(error.response.data.error);
-      }
-      throw new Error(
+      const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
-          : "Failed to process authentication"
-      );
+          : "Failed to process authentication";
+
+      throw new Error(message);
     }
   },
 
@@ -168,14 +160,12 @@ export const AuthService = {
       await axios.post(`${apiURL}/user/logout`);
       return true;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
-        throw new Error(error.response.data.error);
-      }
-      throw new Error(
+      const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
-          : "Failed to logout user"
-      );
+          : "Failed to logout user";
+
+      throw new Error(message);
     }
   },
 };

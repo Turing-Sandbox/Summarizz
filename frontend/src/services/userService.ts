@@ -3,13 +3,13 @@ import { apiURL } from "../scripts/api";
 import { User } from "../models/User";
 
 /**
- * fetchLoggedInuser() -> void
+ * fetchUser(id: string) -> Promise<User | Error>
  *
  * @description
- * Fetches the logged in user's information from the backend using the userUID
- * provided in the AuthProvider, this will set the user accordingly.
+ * Fetches a user's information from the backend using the provided user ID
  *
- * @returns void
+ * @param id - The user ID to fetch
+ * @returns Promise resolving to User object or Error
  */
 export const fetchUser = async (id: string): Promise<User | Error> => {
   if (!id) {

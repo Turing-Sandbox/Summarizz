@@ -34,7 +34,7 @@ export class ContentService {
     try {
       console.log("Creating content...");
 
-      const readtime = await this.estimateReadTime(content);
+      const readtime = await ContentService.estimateReadTime(content);
 
       console.log("Readtime: ", readtime);
 
@@ -503,14 +503,18 @@ export class ContentService {
       // Extract scoring logic to separate methods for better maintainability
       const scoredContent = allContent.map((content) => {
         // Calculate different types of scores
-        const creatorScore = this.calculateCreatorScore(content, following);
-        const similarityScore = this.calculateSimilarityScore(
+        const creatorScore = ContentService.calculateCreatorScore(
+          content,
+          following
+        );
+        const similarityScore = ContentService.calculateSimilarityScore(
           content,
           likedContent,
           allContent
         );
-        const popularityScore = this.calculatePopularityScore(content);
-        const recencyScore = this.calculateRecencyScore(content);
+        const popularityScore =
+          ContentService.calculatePopularityScore(content);
+        const recencyScore = ContentService.calculateRecencyScore(content);
 
         // Combine all scores
         const score =
@@ -526,7 +530,7 @@ export class ContentService {
 
       if (personalizedContent.length < 5) {
         console.log("Not enough personalized content, adding trending content");
-        const trendingContent = await this.getTrendingContent(10);
+        const trendingContent = await ContentService.getTrendingContent(10);
 
         const existingUids = personalizedContent.map(
           (c) => (c as Content & { score: number }).uid
@@ -633,7 +637,7 @@ export class ContentService {
       // If the user hasn't liked any content, get trending content creators instead
       if (likedContent.length === 0) {
         console.log("No liked content, getting trending creators instead");
-        const trendingContent = await this.getTrendingContent(20);
+        const trendingContent = await ContentService.getTrendingContent(20);
         const trendingCreators = trendingContent
           .map((content) => content.creatorUID)
           .filter(
@@ -652,7 +656,7 @@ export class ContentService {
       // Get all content that the user has liked
       const likedContentDetails = await Promise.all(
         likedContent.map(async (contentId) => {
-          return await this.getContent(contentId);
+          return await ContentService.getContent(contentId);
         })
       );
 
@@ -671,7 +675,7 @@ export class ContentService {
         console.log(
           "No creators from liked content, getting trending creators"
         );
-        const trendingContent = await this.getTrendingContent(20);
+        const trendingContent = await ContentService.getTrendingContent(20);
         const trendingCreators = trendingContent
           .map((content) => content.creatorUID)
           .filter(
@@ -719,14 +723,14 @@ export class ContentService {
   ) {
     console.log("Getting related content for content ID:", contentId);
     try {
-      const sourceContent = await this.getContent(contentId);
+      const sourceContent = await ContentService.getContent(contentId);
       if (!sourceContent) {
         throw new Error("Content not found");
       }
 
       console.log("Source content:", sourceContent.title);
 
-      const allContent = await this.getAllContent();
+      const allContent = await ContentService.getAllContent();
       console.log("Total content count:", allContent.length);
 
       const otherContent = allContent.filter(
@@ -777,7 +781,9 @@ export class ContentService {
       // If we don't have enough related content, include some trending content
       if (relatedContent.length < limit) {
         console.log("Not enough related content, adding trending content");
-        const trendingContent = await this.getTrendingContent(limit * 2);
+        const trendingContent = await ContentService.getTrendingContent(
+          limit * 2
+        );
 
         // Filter out content that's already in relatedContent and the source content
         const additionalContent = trendingContent

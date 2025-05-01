@@ -91,23 +91,24 @@ export default function ManageSubscription() {
 
       // Force the subscription status to be 'canceled' immediately in the UI
       // but preserve all other data from the current subscription
-      setSubscription((prev) => ({
-        ...prev!,
-        status: "canceled",
-        canceledAt: new Date().toISOString(),
-      }));
+      setSubscription((prev) => {
+        const base = prev ?? currentSubscription;
+        return base
+          ? {
+              ...base,
+              status: "canceled",
+              canceledAt: new Date().toISOString(),
+            }
+          : null;
+      });
 
       setCancelSuccess(true);
 
       // Fetch the updated subscription status with force refresh to get the latest data from Stripe
       // Use a slightly longer delay to ensure backend has processed the change
       setTimeout(() => {
-        // If for some reason the subscription state is lost during this process,
-        // we'll use the stored subscription data as a fallback
-        if (!subscription) {
-          setSubscription(currentSubscription);
-        }
-        fetchSubscriptionStatus(true); // Pass true to force refresh from Stripe
+        setSubscription((s) => s ?? currentSubscription);
+        fetchSubscriptionStatus(true);
       }, 1500);
     } catch (error) {
       if (axios.isAxiosError(error)) {

@@ -7,6 +7,7 @@ import axios from "axios";
 import { apiURL } from "../scripts/api";
 import ContentTile from "../components/content/ContentTile";
 import ContentPreviewPopup from "../components/content/ContentPreviewPopup";
+import { normalizeContentDates } from "../services/contentHelper";
 
 export default function Feed() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
@@ -15,6 +16,7 @@ export default function Feed() {
   const [creatorProfiles, setCreatorProfiles] = useState<User[]>([]);
   const [previewContent, setPreviewContent] = useState<Content | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const navigate = useNavigate();
   const auth = useAuth();
@@ -26,6 +28,13 @@ export default function Feed() {
     null
   );
   const [errorCreators, setErrorCreators] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("Auth state:", auth.isAuthenticated, auth.user);
+    if (auth.isAuthenticated !== undefined) {
+      setAuthLoading(false); // Auth state is initialized
+    }
+  }, [auth.isAuthenticated]);
 
   useEffect(() => {
     // Function to reload the Mondiad script (ADS)
@@ -52,6 +61,8 @@ export default function Feed() {
   }, [trendingContent, personalizedContent, latestContent]);
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth to finish loading and user to be available
+
     const fetchContent = async () => {
       setIsLoading(true);
 
@@ -102,7 +113,7 @@ export default function Feed() {
 
     fetchContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading, auth.user]);
 
   useEffect(() => {
     setUser(auth.user);
@@ -172,7 +183,7 @@ export default function Feed() {
     try {
       const personalizedResponse = await axios.get(
         `${apiURL}/content/feed/${auth.user.uid}`,
-        { timeout: 5000 }
+        { timeout: 5000, withCredentials: true }
       );
 
       if (personalizedResponse.data && personalizedResponse.data.success) {
@@ -254,20 +265,6 @@ export default function Feed() {
       setCreatorProfiles([]);
     }
     return false;
-  }
-
-  function normalizeContentDates(content: Content): Content {
-    if (
-      content.dateCreated &&
-      typeof content.dateCreated === "object" &&
-      "seconds" in content.dateCreated
-    ) {
-      content.dateCreated = new Date(
-        (content.dateCreated as { seconds: number }).seconds * 1000
-      );
-    }
-
-    return content;
   }
 
   async function attachUserData(content: Content): Promise<Content> {

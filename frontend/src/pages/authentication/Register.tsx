@@ -74,9 +74,9 @@ export default function Register() {
   };
 
   // Redirect to home page if user is already logged in
-  //   if (!auth.isAuthenticated) {
-  //     navigate("/");
-  //   }
+  if (auth.isAuthenticated) {
+    navigate("/");
+  }
 
   return (
     <>
