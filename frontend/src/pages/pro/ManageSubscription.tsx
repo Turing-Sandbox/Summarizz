@@ -23,14 +23,13 @@ export default function ManageSubscription() {
     }
 
     fetchSubscriptionStatus();
-  }, [auth, navigate]);
+  }, []);
 
   const fetchSubscriptionStatus = async (forceRefresh = false) => {
     setLoading(true);
     setError("");
 
     try {
-      const token = auth.token;
       const url = forceRefresh
         ? `${apiURL}/subscription/status?forceRefresh=true&t=${new Date().getTime()}`
         : `${apiURL}/subscription/status`;
@@ -38,16 +37,8 @@ export default function ManageSubscription() {
       console.log("Fetching subscription status with URL:", url);
 
       const response = await axios.get(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
-
-      console.log("Subscription data received:", response.data);
-      console.log("Status value:", response.data.status);
-      console.log("Period end value:", response.data.periodEnd);
-      console.log("Period end type:", typeof response.data.periodEnd);
-      console.log("Canceled at:", response.data.canceledAt);
 
       if (response.data.periodEnd) {
         console.log("Parsed date:", new Date(response.data.periodEnd));
@@ -94,9 +85,7 @@ export default function ManageSubscription() {
         `${apiURL}/subscription/cancel`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${auth.token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -206,121 +195,125 @@ export default function ManageSubscription() {
 
   if (!subscription || subscription.status !== "active") {
     return (
-      <div className='manage-subscription-container'>
-        <div className='subscription-card'>
-          <h1>No Active Subscription</h1>
-          <p>You don't have an active Summarizz Pro subscription.</p>
-          <button
-            className='subscribe-button'
-            onClick={() => navigate("/pro/subscribe")}
-          >
-            Subscribe Now
-          </button>
+      <div className='main-content'>
+        <div className='manage-subscription-container'>
+          <div className='subscription-card'>
+            <h1>No Active Subscription</h1>
+            <p>You don't have an active Summarizz Pro subscription.</p>
+            <button
+              className='subscribe-button'
+              onClick={() => navigate("/pro/subscribe")}
+            >
+              Subscribe Now
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className='manage-subscription-container'>
-      <div className='subscription-card'>
-        <h1>Manage Your Subscription</h1>
+    <div className='main-content'>
+      <div className='manage-subscription-container'>
+        <div className='subscription-card'>
+          <h1>Manage Your Subscription</h1>
 
-        {error && <div className='error-message'>{error}</div>}
-        {cancelSuccess && (
-          <div className='success-message'>
-            Your subscription has been canceled successfully. You'll have access
-            until the end of your current billing period.
-          </div>
-        )}
+          {error && <div className='error-message'>{error}</div>}
+          {cancelSuccess && (
+            <div className='success-message'>
+              Your subscription has been canceled successfully. You'll have
+              access until the end of your current billing period.
+            </div>
+          )}
 
-        <div className='subscription-details'>
-          <div className='detail-row'>
-            <span className='detail-label'>Status:</span>
-            <span className='detail-value'>
-              {subscription.canceledAt
-                ? "Canceled (access until period end)"
-                : getStatusDisplay(subscription.status)}
-            </span>
-          </div>
-
-          <div className='detail-row'>
-            <span className='detail-label'>Plan:</span>
-            <span className='detail-value'>Summarizz Pro</span>
-          </div>
-
-          <div className='detail-row'>
-            <span className='detail-label'>
-              {isStatus(subscription.status, "active", subscription)
-                ? "Renewal Date:"
-                : "Current Period Ends:"}
-            </span>
-            <span className='detail-value'>
-              {subscription.periodEnd
-                ? formatDate(subscription.periodEnd)
-                : subscription.canceledAt
-                ? "End of current billing cycle"
-                : "Not applicable"}
-            </span>
-          </div>
-
-          {subscription.canceledAt && (
+          <div className='subscription-details'>
             <div className='detail-row'>
-              <span className='detail-label'>Canceled On:</span>
+              <span className='detail-label'>Status:</span>
               <span className='detail-value'>
-                {formatDate(subscription.canceledAt)}
+                {subscription.canceledAt
+                  ? "Canceled (access until period end)"
+                  : getStatusDisplay(subscription.status)}
               </span>
             </div>
-          )}
-        </div>
 
-        {!subscription.canceledAt && (
-          <button
-            className='cancel-button'
-            onClick={handleCancelSubscription}
-            disabled={cancelLoading}
-          >
-            {cancelLoading ? "Processing..." : "Cancel Subscription"}
-          </button>
-        )}
-
-        <div className='subscription-info'>
-          {cancelSuccess && !subscription.canceledAt && (
-            <div className='success-message'>
-              Your cancellation request has been processed. It will take effect
-              shortly.
+            <div className='detail-row'>
+              <span className='detail-label'>Plan:</span>
+              <span className='detail-value'>Summarizz Pro</span>
             </div>
-          )}
-          <p>
-            {subscription.canceledAt
-              ? "Your subscription has been canceled and will not renew. You'll have access to Pro features until the end of your current billing period."
-              : "You can cancel your subscription at any time. You'll continue to have access to Pro features until the end of your current billing period."}
-          </p>
-        </div>
 
-        <div className='button-container'>
-          <button className='back-button' onClick={() => navigate("/")}>
-            Back to Feed
-          </button>
-          <button
-            className='refresh-button'
-            onClick={() => fetchSubscriptionStatus(true)}
-            title='Refresh Subscription Status'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='16'
-              height='16'
-              fill='currentColor'
-              viewBox='0 0 16 16'
+            <div className='detail-row'>
+              <span className='detail-label'>
+                {isStatus(subscription.status, "active", subscription)
+                  ? "Renewal Date:"
+                  : "Current Period Ends:"}
+              </span>
+              <span className='detail-value'>
+                {subscription.periodEnd
+                  ? formatDate(subscription.periodEnd)
+                  : subscription.canceledAt
+                  ? "End of current billing cycle"
+                  : "Not applicable"}
+              </span>
+            </div>
+
+            {subscription.canceledAt && (
+              <div className='detail-row'>
+                <span className='detail-label'>Canceled On:</span>
+                <span className='detail-value'>
+                  {formatDate(subscription.canceledAt)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {!subscription.canceledAt && (
+            <button
+              className='cancel-button'
+              onClick={handleCancelSubscription}
+              disabled={cancelLoading}
             >
-              <path
-                fillRule='evenodd'
-                d='M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z'
-              />
-              <path d='M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z' />
-            </svg>
-          </button>
+              {cancelLoading ? "Processing..." : "Cancel Subscription"}
+            </button>
+          )}
+
+          <div className='subscription-info'>
+            {cancelSuccess && !subscription.canceledAt && (
+              <div className='success-message'>
+                Your cancellation request has been processed. It will take
+                effect shortly.
+              </div>
+            )}
+            <p>
+              {subscription.canceledAt
+                ? "Your subscription has been canceled and will not renew. You'll have access to Pro features until the end of your current billing period."
+                : "You can cancel your subscription at any time. You'll continue to have access to Pro features until the end of your current billing period."}
+            </p>
+          </div>
+
+          <div className='button-container'>
+            <button className='back-button' onClick={() => navigate("/")}>
+              Back to Feed
+            </button>
+            <button
+              className='refresh-button'
+              onClick={() => fetchSubscriptionStatus(true)}
+              title='Refresh Subscription Status'
+            >
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='16'
+                height='16'
+                fill='currentColor'
+                viewBox='0 0 16 16'
+              >
+                <path
+                  fillRule='evenodd'
+                  d='M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z'
+                />
+                <path d='M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z' />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -33,16 +33,13 @@ export default function SubscribePro() {
       // Clear the URL parameter without refreshing the page
       window.history.replaceState({}, document.title, "/pro/subscribe");
     }
-  }, [auth]);
+  }, []);
 
   // Function to check subscription status
   const checkSubscriptionStatus = async () => {
     try {
-      const token = auth.token;
       const response = await axios.get(`${apiURL}/subscription/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
 
       // If subscription is active, redirect to feed
@@ -67,14 +64,11 @@ export default function SubscribePro() {
     setError("");
 
     try {
-      const token = auth.token;
       const response = await axios.post(
         `${apiURL}/subscription/create-checkout-session`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 

@@ -17,15 +17,12 @@ export default function ProDetails() {
     } else {
       setLoading(false);
     }
-  }, [auth.isAuthenticated]);
+  }, []);
 
   const checkSubscriptionStatus = async () => {
     try {
-      const token = auth.token;
       const response = await axios.get(`${apiURL}/subscription/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
 
       setHasSubscription(response.data.active);

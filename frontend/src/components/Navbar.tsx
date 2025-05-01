@@ -155,11 +155,8 @@ export default function Navbar() {
     if (!auth.isAuthenticated) return;
 
     try {
-      const token = auth.token;
       const response = await axios.get(`${apiURL}/subscription/status`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
 
       // Check if user has an active subscription
