@@ -17,8 +17,16 @@ export default function AuthProvider({
     getUserData(userUID);
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    const logoutRequest = await axios.post(
+      `${apiURL}/user/logout`,
+      {},
+      { withCredentials: true }
+    );
+
+    if (logoutRequest.status === 200) {
+      setUser(null);
+    }
   };
 
   // Automatically refresh the user token and fetch user data

@@ -94,6 +94,13 @@ export async function refreshUserController(req: Request, res: Response) {
   });
 }
 
+export async function logoutUserController(req: Request, res: Response) {
+  console.log("Logging out user...");
+  res.clearCookie("token");
+  res.clearCookie("refreshToken");
+  res.status(200).json({ message: "Logged out successfully" });
+}
+
 // ----------------------------------------------------------
 // ---------------------- User - CRUD -----------------------
 // ----------------------------------------------------------
