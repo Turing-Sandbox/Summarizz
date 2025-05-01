@@ -51,6 +51,7 @@ import "./styles/summarizzPro.scss";
 import "./styles/global.scss";
 import "./styles/background.scss";
 import "./styles/colors.scss";
+import NotFound from "./pages/error/404";
 
 export default function App() {
   return (
@@ -99,6 +100,7 @@ export default function App() {
           <Route path='/pro/subscribe' element={<SubscribePro />} />
 
           {/* 404 */}
+          <Route path='*' element={<NotFound />} />
         </Routes>
         <Footer />
       </Router>
