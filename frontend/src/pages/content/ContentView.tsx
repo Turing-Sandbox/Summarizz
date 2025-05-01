@@ -488,18 +488,16 @@ export default function ContentView() {
       <div className='main-content'>
         <div className='row'>
           {/* Left Column: Thumbnail and Comments */}
-          <div className='col-1'>
-            {content?.thumbnail && (
-              <img
-                src={content.thumbnail}
-                alt='Thumbnail'
-                width={200}
-                height={200}
-                className='thumbnail'
-              />
-            )}
-            {user && <CommentList content={content!} user={user!} />}
-          </div>
+
+          {content?.thumbnail && (
+            <img
+              src={content.thumbnail}
+              alt='Thumbnail'
+              width={200}
+              height={200}
+              className='thumbnail thumbnail-mobile'
+            />
+          )}
 
           {/* Right Column: Content Details */}
           <div className='col-2'>
@@ -604,7 +602,7 @@ export default function ContentView() {
                       />
                     ) : (
                       <div className='profile-image-creator'>
-                        <h1 className='profile-initial'>
+                        <h1 className='content-profile-initial'>
                           {creator?.username[0].toUpperCase()}
                         </h1>
                       </div>
@@ -635,6 +633,20 @@ export default function ContentView() {
             {formatedContent && (
               <div dangerouslySetInnerHTML={{ __html: formatedContent }} />
             )}
+          </div>
+
+          {/* Left Column: Thumbnail and Comments */}
+          <div className='col-1'>
+            {content?.thumbnail && (
+              <img
+                src={content.thumbnail}
+                alt='Thumbnail'
+                width={200}
+                height={200}
+                className='thumbnail thumbnail-desktop'
+              />
+            )}
+            {user && <CommentList content={content!} user={user!} />}
           </div>
         </div>
       </div>
