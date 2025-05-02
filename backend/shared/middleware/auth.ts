@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 dotenv.config();
 
-declare module 'express-serve-static-core' {
+declare module "express-serve-static-core" {
   interface Request {
     user?: {
       uid: string;
@@ -24,27 +24,26 @@ export const authenticateToken = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers['authorization'];
+  const token = req.cookies.token;
 
-  console.log('Auth Header:', authHeader);  // Debugging line
-
-  const token = authHeader && authHeader.split(' ')[1];  // Bearer TOKEN
-
-  console.log('Token:', token);  // Debugging line
+  console.log("Token:", token); // Debugging line
 
   if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret') as {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "default_secret"
+    ) as {
       uid: string;
       email: string;
     };
 
-    console.log('Decoded Token:', decoded);  // Debugging line
-    console.log('Decoded UID:', decoded.uid);  // Debugging line
-    console.log('Decoded Email:', decoded.email);  // Debugging line
+    console.log("Decoded Token:", decoded); // Debugging line
+    console.log("Decoded UID:", decoded.uid); // Debugging line
+    console.log("Decoded Email:", decoded.email); // Debugging line
 
     req.user = {
       uid: decoded.uid,
@@ -52,7 +51,19 @@ export const authenticateToken = (
     };
 
     next();
-  } catch (error) {
-    return res.status(403).json({ error: 'Forbidden: Invalid token' });
+  } catch (error: any) {
+    console.error("Token verification error:", error); // Debugging line
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Unauthorized: Token expired" });
+    }
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ error: "Unauthorized: Invalid token" });
+    }
+    if (error.name === "NotBeforeError") {
+      return res.status(401).json({ error: "Unauthorized: Token not active" });
+    }
+    // Handle other errors
+    console.error("Token verification error:", error); // Debugging line
+    return res.status(403).json({ error: "Forbidden: Invalid token" });
   }
 };

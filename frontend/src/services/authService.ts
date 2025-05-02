@@ -1,7 +1,5 @@
-"use client";
-
 import axios from "axios";
-import { apiURL } from "../app/scripts/api";
+import { apiURL } from "../scripts/api";
 
 export const AuthService = {
   // Existing email/password authentication
@@ -22,8 +20,13 @@ export const AuthService = {
       });
 
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to register user");
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to register user";
+
+      throw new Error(message);
     }
   },
 
@@ -35,8 +38,13 @@ export const AuthService = {
       });
 
       return response.data;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to login user");
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to login user";
+
+      throw new Error(message);
     }
   },
 
@@ -48,10 +56,6 @@ export const AuthService = {
   async signInWithGithub(useRedirect = false) {
     return this.signInWithProvider("github", useRedirect);
   },
-
-  // async signInWithApple(useRedirect = false) {
-  //     return this.signInWithProvider('apple', useRedirect);
-  // },
 
   async signInWithProvider(provider: string, useRedirect = false) {
     try {
@@ -119,13 +123,17 @@ export const AuthService = {
           }, 1000);
         });
       }
-    } catch (error: any) {
-      console.error("OAuth Error:", error);
-      throw new Error(error.message || "Failed to authenticate with provider");
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to authenticate with provider";
+
+      throw new Error(message);
     }
   },
 
-  async handleCallbackResult(token: string, uid: string) {
+  async handleCallbackResult(token: string) {
     try {
       // Verify the token with our backend
       const response = await axios.post(`${apiURL}/oauth/verify`, {
@@ -137,11 +145,13 @@ export const AuthService = {
         userUID: response.data.userUID,
         token: response.data.token,
       };
-    } catch (error: any) {
-      console.error("Callback handling error:", error);
-      throw new Error(
-        error.response?.data?.error || "Failed to process authentication"
-      );
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to process authentication";
+
+      throw new Error(message);
     }
   },
 
@@ -149,8 +159,13 @@ export const AuthService = {
     try {
       await axios.post(`${apiURL}/user/logout`);
       return true;
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Failed to logout");
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to logout user";
+
+      throw new Error(message);
     }
   },
 };

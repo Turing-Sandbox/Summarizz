@@ -78,16 +78,11 @@ export class ContentController {
     const { contentId, userId } = req.params;
     const { data } = req.body;
 
-    console.log("edit body: ", req.body);
-    console.log(data);
-
     try {
       // const confirmation = await axios.get(`${apiURL}/content/${contentId}`)
       const confirmation = await ContentService.getContent(contentId);
       const owner_id = confirmation.creatorUID;
-      console.log(owner_id);
-      console.log(userId);
-      console.log(confirmation);
+     
       if (userId == owner_id) {
         //check whether they are allowed to edit the content
         const response = await ContentService.editContent(contentId, data);
@@ -106,16 +101,12 @@ export class ContentController {
   static async editContentAndThumbnail(req: Request, res: Response) {
     console.log("Editing Content and Thumbnail...");
     const { contentId, userId } = req.params;
-    console.log("Content ID: ", contentId);
-    console.log("User ID: ", userId);
 
     try {
       const confirmation = await ContentService.getContent(contentId);
       const owner_id = confirmation.creatorUID;
       if (userId == owner_id) {
         //check whether they are allowed to edit the content
-        console.log("User is authorized to edit");
-
         let file_path: string;
         let file_name: string;
         if (confirmation.thumbnail) {

@@ -1,34 +1,25 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import axios from "axios";
-import Cookies from "js-cookie";
 import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
+import { User } from "../models/User";
+import { Content } from "../models/Content";
+import { Notification } from "../models/Notification";
+import { useAuth } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { apiURL } from "../scripts/api";
+import SearchList from "./search/SearchList";
 
-// Local Files (Import)
-import { useAuth } from "../hooks/AuthProvider";
-import { apiURL } from "@/app/scripts/api";
-import { User } from "@/models/User";
+import Cookies from "js-cookie";
+import NotificationList from "./notification/NotificationList";
 
-// Stylesheets
-import "@/app/styles/navbar.scss";
-import SearchList from "./search/searchList";
-import NotificationList from "./notifications/NotificationList";
-import { Content } from "@/models/Content";
-
-function Navbar() {
+export default function Navbar() {
   // ---------------------------------------
   // -------------- Variables --------------
   // ---------------------------------------
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationList, setShowNotificationList] = useState(false);
-  const [userInfo, setUserInfo] = useState<User | null>(null);
   const [query, setQuery] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>();
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   const [userSearchResults, setUserSearchResults] = useState<User[]>([]);
@@ -37,11 +28,11 @@ function Navbar() {
   );
 
   const [unreadCount, setUnreadCount] = useState<number>(0);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isProUser, setIsProUser] = useState<boolean>(false);
 
   const auth = useAuth();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   // ---------------------------------------
   // ------------ Event Handler ------------
@@ -80,13 +71,12 @@ function Navbar() {
 
   // Update user info
   useEffect(() => {
-    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
-    getUserInfo();
-    fetchNotifications();
-    checkSubscriptionStatus();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (auth.isAuthenticated !== undefined) {
+      // Only call these functions when the auth state is initialized
+      fetchNotifications();
+      checkSubscriptionStatus();
+    }
+  }, [auth.isAuthenticated]);
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -138,10 +128,6 @@ function Navbar() {
 
       setUserSearchResults(userSearchResults.data.documents);
       setContentSearchResults(contentSearchResults.data.documents);
-
-      console.log(userSearchResults);
-      console.log(contentSearchResults);
-
       setShowSearchResults(true);
       setShowMenu(false);
       setShowNotificationList(false);
@@ -150,23 +136,10 @@ function Navbar() {
     }
   };
 
-  const updateAuthenticated = () => {
-    setAuthenticated(auth.getUserUID() !== null && auth.getToken() !== null);
-  };
-
-  function getUserInfo() {
-    const userID = auth.getUserUID();
-    if (!userID) return;
-
-    axios.get(`${apiURL}/user/${userID}`).then((res) => {
-      setUser(res.data);
-    });
-  }
-
   const fetchNotifications = async (): Promise<void> => {
     try {
       const response = await axios.get(
-        `${apiURL}/notifications/unread/${auth.userUID}`
+        `${apiURL}/notifications/unread/${auth.user?.uid}`
       );
       const notificationsData = response.data;
       const notificationsArray: Notification[] =
@@ -178,27 +151,21 @@ function Navbar() {
       console.error("Error fetching notifications:", error);
     }
   };
-  
+
   const checkSubscriptionStatus = async (): Promise<void> => {
-    if (!auth.getUserUID() || !auth.getToken()) return;
-    
+    if (!auth.isAuthenticated) return;
+
     try {
-      const token = auth.getToken();
-      const response = await axios.get(
-        `${apiURL}/subscription/status`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      
+      const response = await axios.get(`${apiURL}/subscription/status`, {
+        withCredentials: true,
+      });
+
       // Check if user has an active subscription
       const subscriptionData = response.data;
       setIsProUser(
-        subscriptionData && 
-        subscriptionData.status === 'active' && 
-        !subscriptionData.canceledAt
+        subscriptionData &&
+          subscriptionData.status === "active" &&
+          !subscriptionData.canceledAt
       );
     } catch (error) {
       console.error("Error checking subscription status:", error);
@@ -233,16 +200,19 @@ function Navbar() {
         <a
           onClick={() => {
             setShowMenu(false);
-            router.push("/");
+            navigate("/");
           }}
         >
           <h1 className='navbar-title summarizz-logo'>Summarizz</h1>
         </a>
 
         {/* Create New Content */}
-        {authenticated ? (
+        {auth.isAuthenticated ? (
           <>
-            <form onSubmit={handleSearch} className='searchBarContainer'>
+            <form
+              onSubmit={handleSearch}
+              className='searchBarContainer search-large-screen'
+            >
               <input
                 type='text'
                 className='searchBar'
@@ -264,9 +234,9 @@ function Navbar() {
             </form>
 
             <button
-              className='navbar-button'
+              className='navbar-button navbar-button-large-screen'
               onClick={() => {
-                router.push("/content/create");
+                navigate("/content/create");
                 localStorage.removeItem("title");
                 Cookies.remove("content");
               }}
@@ -278,7 +248,7 @@ function Navbar() {
             <div>
               <div
                 onClick={toggleNotificationList}
-                className='notification-button'
+                className='notification-button notification-button-large-screen'
               >
                 <BellIcon className='icon' />
                 {unreadCount > 0 && <span>{unreadCount}</span>}
@@ -297,17 +267,16 @@ function Navbar() {
 
             {/* Profile Picture */}
             <div
-              className='profile-picture-container'
+              className='profile-picture-container profile-picture-container-large-screen'
               onClick={() => {
-                updateAuthenticated();
                 setShowMenu(!showMenu);
                 setShowNotificationList(false);
                 setShowSearchResults(false);
               }}
             >
-              {user && user.profileImage ? (
-                <Image
-                  src={user.profileImage}
+              {auth.user && auth.user.profileImage ? (
+                <img
+                  src={auth.user.profileImage}
                   width={50}
                   height={50}
                   alt='Profile Picture'
@@ -316,7 +285,7 @@ function Navbar() {
               ) : (
                 <div className='no-profile-picture-container'>
                   <h1 className='no-profile-picture'>
-                    {user?.username[0].toUpperCase()}
+                    {auth.user?.username[0].toUpperCase()}
                   </h1>
                 </div>
               )}
@@ -336,25 +305,25 @@ function Navbar() {
           <div className='navbar-auth'>
             <a
               className='navbar-link'
-              onClick={() => router.push("/authentication/login")}
+              onClick={() => navigate("/authentication/login")}
             >
               Login
             </a>
             <a
               className='navbar-link padding-right'
-              onClick={() => router.push("/authentication/register")}
+              onClick={() => navigate("/authentication/register")}
             >
               Register
             </a>
 
             {/* Theme Slider */}
-            <label className='theme-toggle-auth'>
+            <label className='theme-toggle slider-auth'>
               <input
                 type='checkbox'
                 checked={isDarkMode}
                 onChange={toggleTheme}
               />
-              <span className='slider-auth'></span>
+              <span className='slider slider-auth'></span>
             </label>
           </div>
         )}
@@ -363,91 +332,118 @@ function Navbar() {
       {/* Profile Menu */}
       {showMenu && (
         <div className='menu'>
-          {!authenticated ? (
-            <>
-              <a
-                className='menu-item'
+          <>
+            {/* MOBILE DISPLAY */}
+            <div className='menu-header'>
+              {/* Close Menu */}
+              <div
+                className='close-menu'
                 onClick={() => {
                   setShowMenu(false);
-                  router.push("/authentication/login");
+                  setShowNotificationList(false);
+                  setShowSearchResults(false);
                 }}
               >
-                Login
-              </a>
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  router.push("/authentication/register");
-                }}
-              >
-                Register
-              </a>
-            </>
-          ) : (
-            <>
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  router.push(`/profile/${auth.getUserUID()}`);
-                }}
-              >
-                View Profile
-              </a>
-              <hr className='menu-divider' />
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  router.push(`/profile/${auth.getUserUID()}/manage`);
-                }}
-              >
-                Manage Profile
-              </a>
-              <hr className='menu-divider' />
-              {!isProUser && (
-                <>
-                  <a
-                    className='menu-item upgrade-pro-item'
-                    onClick={() => {
-                      setShowMenu(false);
-                      router.push("/pro");
-                    }}
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='icon icon-tabler icon-tabler-x'
+                  width='24'
+                  height='24'
+                  viewBox='0 0 24 24'
+                  strokeWidth='2'
+                  stroke='currentColor'
+                  fill='none'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                >
+                  <path stroke='none' d='M0 0h24v24H0z' fill='none' />
+                  <path d='M18 6l-12 12' />
+                  <path d='M6 6l12 12' />
+                </svg>
+              </div>
+            </div>
+
+            {/* ALWAYS DISPLAYED */}
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate(`/profile/${auth.user?.uid}`);
+              }}
+            >
+              View Profile
+            </a>
+            <hr className='menu-divider' />
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate(`/profile/manage`);
+              }}
+            >
+              Manage Profile
+            </a>
+            <hr className='menu-divider' />
+            {!isProUser && (
+              <>
+                <a
+                  className='menu-item upgrade-pro-item'
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate("/pro");
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='pro-star-icon'
+                    viewBox='0 0 24 24'
+                    fill='currentColor'
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="pro-star-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    Upgrade to Pro
-                  </a>
-                  <hr className='menu-divider' />
-                </>
-              )}
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  router.push("/pro/manage");
-                }}
-              >
-                Manage Subscription
-              </a>
-              <hr className='menu-divider' />
-              <a
-                className='menu-item'
-                onClick={() => {
-                  setShowMenu(false);
-                  handleLogout();
-                }}
-              >
-                Logout
-              </a>
-            </>
-          )}
+                    <path
+                      fillRule='evenodd'
+                      d='M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
+                  Upgrade to Pro
+                </a>
+                <hr className='menu-divider' />
+              </>
+            )}
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate("/pro/manage");
+              }}
+            >
+              Manage Subscription
+            </a>
+            <hr className='menu-divider' />
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                handleLogout();
+              }}
+            >
+              Logout
+            </a>
+          </>
+
+          {/* Create Content */}
+          <button
+            className='navbar-button navrbar-button-mobile'
+            onClick={() => {
+              navigate("/content/create");
+              localStorage.removeItem("title");
+              Cookies.remove("content");
+            }}
+          >
+            Create Content
+          </button>
         </div>
       )}
     </>
   );
 }
-
-export default Navbar;

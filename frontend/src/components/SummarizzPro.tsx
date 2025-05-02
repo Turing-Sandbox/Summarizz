@@ -1,5 +1,3 @@
-import "@/app/styles/summarizzPro.scss";
-
 export default function SummarizzPro() {
   return (
     <div className='summarizz-pro-container'>

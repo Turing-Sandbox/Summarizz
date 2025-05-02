@@ -10,6 +10,7 @@ import notificationRoutes from "../notification-module/routes/notificationsRoute
 import subscriptionRoutes from "../subscription-module/routes/subscriptionRoutes";
 import webhookRoutes from "../subscription-module/routes/webhookRoutes";
 import { logger } from "./loggingHandler";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = 3000;
@@ -21,16 +22,25 @@ app.use(
       process.env.BACKEND_URL,
       process.env.NETLIFY_URL,
     ],
+    credentials: true,
   })
 );
 
+app.use(cookieParser());
+
 // Parse JSON requests, but use raw body for webhook routes
 app.use((req, res, next) => {
-  if (req.originalUrl === '/stripe/webhook') {
+  if (req.originalUrl === "/stripe/webhook") {
     next();
   } else {
     express.json()(req, res, next);
   }
+});
+
+// Middleware to log all requests
+app.use((req, _, next) => {
+  logger.http(`${req.method} ${req.url}`);
+  next();
 });
 
 app.use("/comment", commentRoutes);
@@ -41,12 +51,6 @@ app.use("/oauth", oauthRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/subscription", subscriptionRoutes);
 app.use("/stripe", webhookRoutes);
-
-// Middleware to log all requests
-app.use((req, _, next) => {
-  logger.http(`${req.method} ${req.url}`);
-  next();
-});
 
 app.get("/", (_, res) => {
   res.send("Server is Listening!");

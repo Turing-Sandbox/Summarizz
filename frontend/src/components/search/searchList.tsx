@@ -1,22 +1,11 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { User } from "../../models/User";
+import { Content } from "../../models/Content";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { apiURL } from "@/app/scripts/api";
-
-//models
-import { User } from "@/models/User";
-import { Content } from "@/models/Content";
-
-//components
-import UserResult from "@/components/search/userResult";
-import ContentResult from "@/components/search/contentResult";
-import Navbar from "@/components/Navbar";
-
-//styles
-import "@/app/styles/search/search.scss";
-import Error from "next/error";
+import { apiURL } from "../../scripts/api";
+import ContentSearchResult from "./ContentSearchResult";
+import UserSearchResults from "./UserSearchResult";
 
 function SearchListContent({
   userSearchResults,
@@ -30,7 +19,8 @@ function SearchListContent({
   // ---------------------------------------
 
   // Retrieve the search text from the url.
-  const param = useSearchParams().get("query");
+  const [searchParams] = useSearchParams();
+  const param = searchParams.get("query");
   const [usersReturned, setUsersReturned] = useState<User[]>([]);
   const [userDisabled, setUserDisabled] = useState(true);
   const [contentReturned, setContentReturned] = useState<Content[]>([]);
@@ -118,10 +108,8 @@ function SearchListContent({
         // If there are no unique documents, disable the button
         setUserDisabled(true);
       }
-    } catch (error: any) {
-      alert(`USER FETCHING ERROR: ${error}`);
-      console.error("User fetching error: ", error);
-      throw new Error(error);
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
     } finally {
       setFetching(false);
     }
@@ -174,10 +162,8 @@ function SearchListContent({
         //   uniqueDocuments[uniqueDocuments.length - 1].titleLower
         // );
       }
-    } catch (error: any) {
-      alert(`CONTENT ERROR ${error}`);
-      console.error("Error fetching contents: ", error);
-      throw new Error(error);
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error));
     } finally {
       setFetching(false);
     }
@@ -194,7 +180,7 @@ function SearchListContent({
         ) : (
           usersReturned.map((user: User, index) => (
             <div key={index} className='searchItem'>
-              <UserResult user={user} />
+              <UserSearchResults user={user} />
             </div>
           ))
         )}
@@ -213,7 +199,7 @@ function SearchListContent({
             (content: Content, index) =>
               index < numberOfContentsToDisplay && (
                 <div key={index} className='searchItem'>
-                  <ContentResult content={content} />
+                  <ContentSearchResult content={content} />
                 </div>
               )
           )

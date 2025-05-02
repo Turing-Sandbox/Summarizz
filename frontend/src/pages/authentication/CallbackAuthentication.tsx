@@ -1,0 +1,101 @@
+import { Suspense, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { AuthService } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
+
+function Callback() {
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const auth = useAuth();
+
+  useEffect(() => {
+    const processCallbackData = async () => {
+      try {
+        const token = searchParams.get("token");
+        const uid = searchParams.get("uid");
+        const errorMsg = searchParams.get("error");
+
+        if (errorMsg) {
+          setError(decodeURIComponent(errorMsg));
+          return;
+        }
+
+        if (!token || !uid) {
+          setError("Invalid authentication data received");
+          return;
+        }
+
+        // Verify token with backend
+        const result = await AuthService.handleCallbackResult(token);
+
+        // Login and redirect
+        auth.login(result.token, result.userUID);
+        navigate("/");
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message || "Authentication failed");
+        } else {
+          setError("Authentication failed");
+        }
+      }
+    };
+
+    processCallbackData();
+  }, [auth, navigate, searchParams]);
+
+  // If this is a popup callback, we need to send the data back to the opener window
+  useEffect(() => {
+    // Only proceed if we're in the browser environment
+    if (typeof window === "undefined") return;
+
+    if (window.opener) {
+      const token = searchParams.get("token");
+      const uid = searchParams.get("uid");
+      const errorMsg = searchParams.get("error");
+
+      if (errorMsg) {
+        window.opener.postMessage(
+          { error: decodeURIComponent(errorMsg) },
+          window.location.origin
+        );
+      } else if (token && uid) {
+        window.opener.postMessage({ token, uid }, window.location.origin);
+      } else {
+        window.opener.postMessage(
+          { error: "Invalid authentication data received" },
+          window.location.origin
+        );
+      }
+
+      // Close the popup
+      window.close();
+    }
+  }, [searchParams]);
+
+  return (
+    <div className='auth-callback-container'>
+      <div className='auth-callback-content'>
+        <h1>Authentication in progress...</h1>
+        {error ? (
+          <div className='auth-callback-error'>
+            <p>Authentication failed: {error}</p>
+            <button onClick={() => navigate("/authentication/login")}>
+              Back to Login
+            </button>
+          </div>
+        ) : (
+          <p>Please wait while we complete your authentication.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function CallbackAuthentication() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Callback />
+    </Suspense>
+  );
+}

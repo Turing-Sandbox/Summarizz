@@ -1,37 +1,36 @@
-"use client";
-
-import { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import { apiURL } from "@/app/scripts/api";
-import { useAuth } from "@/hooks/AuthProvider";
-import { Content } from "@/models/Content";
-import { Comment } from "@/models/Comment";
-import { User } from "@/models/User";
-import { redirect, useParams } from "next/navigation";
 import {
   PencilIcon,
   TrashIcon,
   PaperAirplaneIcon,
-  CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { XCircleIcon } from "@heroicons/react/24/outline";
 
-interface CommentProps {
-  content: Content,
-  user: User
-}
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { apiURL } from "../../scripts/api";
 
-const CommentList: React.FC<CommentProps> = ({ content, user }) => {
+import { Content } from "../../models/Content";
+import { User } from "../../models/User";
+import { Comment } from "../../models/Comment";
+
+export default function CommentList({
+  content,
+  user,
+}: {
+  content: Content;
+  user: User;
+}) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState("");
   const [numComments, setNumComments] = useState(0);
   const [loading, setLoading] = useState(true);
-  const auth = useAuth();
-  const userId = auth.userUID;
+
   const postId = useParams().id;
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
 
   async function refreshComments() {
     setLoading(true);
@@ -82,37 +81,36 @@ const CommentList: React.FC<CommentProps> = ({ content, user }) => {
     }
   }, [editingCommentText]);
 
-  const handleAddComment = async (e: any) => {
+  const handleAddComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newComment) return;
-    if (!userId) redirect(`../authentication/login`);
+    if (!user.uid) navigate(`../authentication/login`);
     try {
       await axios.post(`${apiURL}/comment/comments/${postId}`, {
-        owner_id: userId,
+        owner_id: user.uid,
         text: newComment,
       });
 
-      if (content.creatorUID != userId) {
+      if (content && content.creatorUID != user.uid) {
         try {
-          await axios.post(`${apiURL}/notifications/create`,
-            {
-              userId: content?.creatorUID,
-              notification: {
-                userId: userId,
-                username: user?.username,
-                type: 'comment',
-                textPreview: `\"${newComment && newComment.length > 30 ?
-                  newComment.substring(0, 30) + '...'
-                  : newComment}\"!`,
-                contentId: content.uid,
-                timestamp: Date.now(),
-                read: false,
-              }
-            }
-          )
-        }
-        catch (error) {
-          console.error(`Error sending notifications: ${error}`)
+          await axios.post(`${apiURL}/notifications/create`, {
+            userId: content?.creatorUID,
+            notification: {
+              userId: user.uid,
+              username: user?.username,
+              type: "comment",
+              textPreview: `"${
+                newComment && newComment.length > 30
+                  ? newComment.substring(0, 30) + "..."
+                  : newComment
+              }"!`,
+              contentId: content.uid,
+              timestamp: Date.now(),
+              read: false,
+            },
+          });
+        } catch (error) {
+          console.error(`Error sending notifications: ${error}`);
         }
       }
 
@@ -123,13 +121,13 @@ const CommentList: React.FC<CommentProps> = ({ content, user }) => {
     }
   };
 
-  const handleEditComment = async (e: any) => {
+  const handleEditComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!editingCommentText) return;
-    if (!userId) redirect(`../authentication/login`);
+    if (!user.uid) navigate(`../authentication/login`);
     try {
       await axios.put(
-        `${apiURL}/comment/comments/${postId}/${editingCommentId}/${userId}`,
+        `${apiURL}/comment/comments/${postId}/${editingCommentId}/${user.uid}`,
         {
           text: editingCommentText,
         }
@@ -143,10 +141,10 @@ const CommentList: React.FC<CommentProps> = ({ content, user }) => {
   };
 
   const handleDeleteComment = async (id: string) => {
-    if (!userId) redirect(`../authentication/login`);
+    if (!user.uid) navigate(`../authentication/login`);
     try {
       await axios.delete(
-        `${apiURL}/comment/comments/${postId}/${id}/${userId}`
+        `${apiURL}/comment/comments/${postId}/${id}/${user.uid}`
       );
     } catch (error) {
       console.error("Error deleting comment:", error);
@@ -243,7 +241,7 @@ const CommentList: React.FC<CommentProps> = ({ content, user }) => {
                     <h4 className={"comment-username"}>{comment.username}</h4>
 
                     {/* COMMENT OWNER SETTINGS */}
-                    {comment.owner_id === userId && (
+                    {comment.owner_id === user.uid && (
                       <div className={"comment-icons"}>
                         <button
                           className={"icon-button"}
@@ -276,6 +274,4 @@ const CommentList: React.FC<CommentProps> = ({ content, user }) => {
       </div>
     </>
   );
-};
-
-export default CommentList;
+}

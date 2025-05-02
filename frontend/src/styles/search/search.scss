@@ -1,0 +1,70 @@
+@use "../global.scss";
+
+.userSearchResults,
+.contentSearchResults {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+
+  &:hover {
+    @include global.glassmorphic-background;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+  }
+}
+
+.userSearchResults {
+  margin: 10px 0;
+  padding: 0px;
+}
+
+.searchItem {
+  list-style-type: none;
+}
+
+.search-content-thumbnail {
+  width: 200px;
+  height: 100px;
+  margin: 10px 10px 10px 0;
+  border-radius: 10px;
+  object-fit: cover;
+  background-color: var(--input-border-color);
+}
+
+.searchResults {
+  @include global.glassmorphic-background;
+  padding: 20px 40px;
+  border-radius: 25px;
+  margin-bottom: 30px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.fetchMoreButton {
+  width: 100%;
+
+  margin: 1rem auto;
+  padding: 15px;
+
+  border-radius: 10px;
+  border-style: solid;
+  border-color: var(--input-border-color);
+  border-width: 1px;
+  box-sizing: border-box;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+
+  cursor: pointer;
+}
+
+.fetchMoreButton:hover {
+  background-color: var(--input-border-color);
+  color: var(--text-color);
+}
+
+.fetchMoreButton:active {
+  background-color: var(--input-border-color);
+  color: var(--text-color);
+  transform: scale(0.95);
+}

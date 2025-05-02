@@ -1,99 +1,77 @@
-"use client";
+import React, { useState, useEffect } from "react";
+import { AuthContext } from "./AuthContext";
+import { User } from "../models/User";
+import { fetchUser } from "../services/userService";
+import axios from "axios";
+import { apiURL } from "../scripts/api";
 
-import { useContext, createContext } from "react";
-import PropTypes from "prop-types";
-import { ReactNode } from "react";
-import { useRouter } from "next/navigation";
-interface AuthContextType {
-  userUID: string | null;
-  setUserUID: (arg0: string) => void;
-  getUserUID: () => string | null;
-  token: string | null;
-  setToken: (arg0: string) => void;
-  getToken: () => string | null;
-  login: (token: string, userUID: string) => void;
-  logout: () => void;
-}
-const AuthContext = createContext<AuthContextType>({
-  userUID: null,
-  setUserUID: () => {},
-  getUserUID: () => null,
-  token: null,
-  setToken: () => {},
-  getToken: () => null,
-  login: () => {},
-  logout: () => {},
-});
+// TODO: REVIEW THE AUTH PROVIDER TO IMPROVE SECURITY
+export default function AuthProvider({
+  children,
+}: React.PropsWithChildren<object>) {
+  const [user, setUser] = useState<User | null>(null);
 
-const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
+  const login = async (userUID: string) => {
+    console.log("Logging in user...");
 
-  function setUserUID(userUID: string) {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
+    getUserData(userUID);
+  };
 
-    localStorage.setItem("userUID", userUID);
-  }
+  const logout = async () => {
+    const logoutRequest = await axios.post(
+      `${apiURL}/user/logout`,
+      {},
+      { withCredentials: true }
+    );
 
-  function getUserUID() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return null;
+    if (logoutRequest.status === 200) {
+      setUser(null);
+    }
+  };
 
-    return localStorage.getItem("userUID");
-  }
+  // Automatically refresh the user token and fetch user data
+  useEffect(() => {
+    const initializeUser = async () => {
+      try {
+        const res = await axios.post(
+          `${apiURL}/user/refresh-token`,
+          {},
+          { withCredentials: true }
+        );
 
-  function setToken(token: string) {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
+        if (res.status === 200) {
+          const data = res.data;
+          console.log("User data:", data);
 
-    localStorage.setItem("token", token);
-  }
+          await getUserData(data.userUID);
+        }
+      } catch (err) {
+        console.error("Auto-login failed", err);
+      }
+    };
 
-  function getToken() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return null;
+    initializeUser();
+  }, []);
 
-    return localStorage.getItem("token");
-  }
+  async function getUserData(userUID: string) {
+    // Fetch user data from the server
+    console.log("Fetching user data... for UID:", userUID);
+    const userData = await fetchUser(userUID);
 
-  function login(token: string, userUID: string) {
-    setToken(token);
-    setUserUID(userUID);
-  }
-
-  function logout() {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("userUID");
-    router.push("/authentication/login");
+    console.log("User data:", userData);
+    if (!(userData instanceof Error)) {
+      setUser(userData || null);
+    } else {
+      console.error("Failed to fetch user:", userData);
+      setUser(null);
+    }
   }
 
   return (
     <AuthContext.Provider
-      value={{
-        userUID: getUserUID(),
-        token: getToken(),
-        setUserUID,
-        getUserUID,
-        setToken,
-        getToken,
-        login,
-        logout,
-      }}
+      value={{ user, login, logout, isAuthenticated: !!user }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
-
-AuthProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-
-export default AuthProvider;
-
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+}
