@@ -7,7 +7,7 @@ import axios from "axios";
 import { apiURL } from "../scripts/api";
 import ContentTile from "../components/content/ContentTile";
 import ContentPreviewPopup from "../components/content/ContentPreviewPopup";
-import { normalizeContentDates } from "../services/contentHelper";
+import { normalizeContentDates } from "../utils/contentHelper";
 
 export default function Feed() {
   const [trendingContent, setTrendingContent] = useState<Content[]>([]);
