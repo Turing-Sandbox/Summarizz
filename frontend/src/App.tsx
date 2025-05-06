@@ -55,8 +55,8 @@ import NotFound from "./pages/error/404";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Background />
         <NavbarWrapper />
 
@@ -103,7 +103,7 @@ export default function App() {
           <Route path='*' element={<NotFound />} />
         </Routes>
         <Footer />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
