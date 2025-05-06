@@ -16,17 +16,15 @@ import { logger } from "../../../shared/utils/logger";
 
 export class SearchService {
   private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;
-  private static readonly ALGOLIA_INDEX_NAME = process.env
-    .ALGOLIA_INDEX_NAME as string;
+  private static readonly ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME as string;
 
   private static getAlgoliaClient() {
     if (!SearchService.algoliaClient) {
       const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID as string;
       const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY as string;
-
       SearchService.algoliaClient = algoliasearch(
-        ALGOLIA_APP_ID as string,
-        ALGOLIA_ADMIN_KEY as string
+        ALGOLIA_APP_ID,
+        ALGOLIA_ADMIN_KEY
       );
     }
     return SearchService.algoliaClient;
@@ -43,10 +41,7 @@ export class SearchService {
    * @param startingPoint - The starting point for the search query.
    * @returns An array of users matching the search query.
    */
-  static async searchUsers(
-    searchText: string,
-    startingPoint: string | null = null
-  ) {
+  static async searchUsers(searchText: string, startingPoint: string | null = null) {
     logger.info(`Searching for users that match the following: ${searchText}`);
     const userRef = collection(db, "users");
     const limitNumber: number = 5;
@@ -91,48 +86,53 @@ export class SearchService {
    * @returns - Object containing the documents and next starting point
    * @throws - Error if search fails, i.e if the search query fails
    */
-
   static async searchContents(searchText: string) {
-    const client = this.getAlgoliaClient();
-    const index = client.initIndex(this.ALGOLIA_INDEX_NAME as string);
-    const { hits } = await index.search(searchText);
+    if (!searchText) {
+      return { documents: [], nextStartingPoint: null };
+    }
 
-    logger.info(
-      `Algolia search results length: ${hits.length}, hits: ${JSON.stringify(
-        hits
-      )}`
-    );
+    const client = SearchService.getAlgoliaClient();
+    const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
 
-    // Fetch corresponding Firebase content documents
-    const firebaseContents = await Promise.all(
-      hits.map(async (hit) => {
-        const docRef = doc(db, "contents", hit.objectID);
-        const docSnap = await getDoc(docRef);
+    try {
+      const { hits } = await index.search(searchText);
 
-        if (docSnap.exists()) {
-          return {
-            id: docSnap.id,
-            ...docSnap.data(),
-            searchRanking: hit._rankingInfo?.nbTypos ?? 0,
-          };
-        }
-        return null;
-      })
-    );
+      logger.info(
+        `Algolia search results length: ${hits.length}, hits: ${JSON.stringify(
+          hits
+        )}`
+      );
 
-    // Filter out any null values (in case some documents weren't found in Firebase)
-    const contents = firebaseContents.filter(
-      (content): content is NonNullable<typeof content> => content !== null
-    );
+      // Fetch corresponding Firebase content documents
+      const firebaseContents = await Promise.all(
+        hits.map(async (hit) => {
+          const docRef = doc(db, "contents", hit.objectID);
+          const docSnap = await getDoc(docRef);
 
-    return {
-      contents,
-      nextStartingPoint: null, // Placeholder for future pagination logic
-    };
-  }
-  catch(err: any) {
-    logger.error(`Failed to search for contents, error: ${err}`);
-    throw new Error(`Failed to search for contents, error: ${err}`);
+          if (docSnap.exists()) {
+            return {
+              id: docSnap.id,
+              ...docSnap.data(),
+              searchRanking: hit._rankingInfo?.nbTypos ?? 0,
+            };
+          }
+          return null;
+        })
+      );
+
+      // Filter out any null values (in case some documents weren't found in Firebase)
+      const contents = firebaseContents.filter(
+        (content): content is NonNullable<typeof content> => content !== null
+      );
+
+      return {
+        contents,
+        nextStartingPoint: null, // Placeholder for future pagination logic
+      };
+    } catch (err) {
+      logger.error(`Failed to search for contents, error: ${err}`);
+      throw new Error(`Failed to search for contents, error: ${err}`);
+    }
   }
 }
 
