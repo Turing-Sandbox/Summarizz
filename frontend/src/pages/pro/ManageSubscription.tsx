@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { SubscriptionStatus } from "../../models/SubscriptionStatus";
 import { SubscriptionService } from "../../services/SubscriptionService";
 
@@ -29,29 +28,20 @@ export default function ManageSubscription() {
     setLoading(true);
     setError("");
 
-    try {
-      const response = await SubscriptionService.getSubscriptionStatus(
-        forceRefresh
-      );
+    const subscriptionStatus = await SubscriptionService.getSubscriptionStatus(
+      forceRefresh
+    );
 
-      // Reset cancelSuccess if the status is already canceled to avoid UI conflicts
-      if (response.data.status === "canceled") {
+    if (subscriptionStatus instanceof Error) {
+      setError(subscriptionStatus.message);
+    } else {
+      if (subscriptionStatus.status === "canceled") {
         setCancelSuccess(false);
       }
-
-      setSubscription(response.data);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.error ||
-            "Failed to load subscription details. Please try again."
-        );
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
+      setSubscription(subscriptionStatus);
     }
+
+    setLoading(false);
   };
 
   const handleCancelSubscription = async () => {
@@ -71,12 +61,14 @@ export default function ManageSubscription() {
     setCancelLoading(true);
     setError("");
 
-    try {
-      // Store the current subscription data before cancellation
-      const currentSubscription = subscription ? { ...subscription } : null;
+    // Store the current subscription data before cancellation
+    const currentSubscription = subscription ? { ...subscription } : null;
 
-      await SubscriptionService.cancelSubscription();
+    const cancellationResult = await SubscriptionService.cancelSubscription();
 
+    if (cancellationResult instanceof Error) {
+      setError(cancellationResult.message);
+    } else {
       // Force the subscription status to be 'canceled' immediately in the UI
       // but preserve all other data from the current subscription
       setSubscription((prev) => {
@@ -98,18 +90,9 @@ export default function ManageSubscription() {
         setSubscription((s) => s ?? currentSubscription);
         fetchSubscriptionStatus(true);
       }, 1500);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.error ||
-            "Failed to cancel subscription. Please try again."
-        );
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setCancelLoading(false);
     }
+
+    setCancelLoading(false);
   };
 
   const formatDate = (dateString: string | null) => {

@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { apiURL } from "../scripts/api";
 import { SubscriptionStatus } from "../models/SubscriptionStatus";
 
@@ -10,9 +10,7 @@ export class SubscriptionService {
    * @returns A promise that resolves to the response containing the session URL.
    * @throws An error if the request fails.
    */
-  static async createSubscriptionSession(): Promise<
-    AxiosResponse<{ url: string }>
-  > {
+  static async createSubscriptionSession(): Promise<{ url: string } | Error> {
     try {
       const response = await axios.post(
         `${apiURL}/subscription/create-checkout-session`,
@@ -22,21 +20,25 @@ export class SubscriptionService {
         }
       );
 
-      return response;
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        throw new Error(
+        return new Error(
           `Failed to create subscription session: ${
             error.response?.data?.message || error.message
           }`
         );
       }
-      throw new Error("Failed to create subscription session: Unknown error");
+      return new Error("Failed to create subscription session: Unknown error");
     }
   }
 
   static async cancelSubscription(): Promise<
-    AxiosResponse<{ message: string; willEndOn: Date }>
+    | {
+        message: string;
+        willEndOn: Date;
+      }
+    | Error
   > {
     try {
       const response = await axios.post(
@@ -47,23 +49,23 @@ export class SubscriptionService {
         }
       );
 
-      return response;
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        throw new Error(
+        return new Error(
           `Failed to cancel subscription: ${
             error.response?.data?.message || error.message
           }`
         );
       }
-      throw new Error("Failed to cancel subscription: Unknown error");
+      return new Error("Failed to cancel subscription: Unknown error");
     }
   }
 
   // GET
   static async getSubscriptionStatus(
     forceRefresh: boolean = false
-  ): Promise<AxiosResponse<SubscriptionStatus>> {
+  ): Promise<SubscriptionStatus | Error> {
     try {
       const url = forceRefresh
         ? `${apiURL}/subscription/status?forceRefresh=true&t=${new Date().getTime()}`
@@ -73,16 +75,16 @@ export class SubscriptionService {
         withCredentials: true,
       });
 
-      return response;
+      return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        throw new Error(
+        return new Error(
           `Failed to get subscription status: ${
             error.response?.data?.message || error.message
           }`
         );
       }
-      throw new Error("Failed to get subscription status: Unknown error");
+      return new Error("Failed to get subscription status: Unknown error");
     }
   }
 }

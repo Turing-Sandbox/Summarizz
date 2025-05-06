@@ -156,19 +156,18 @@ export default function Navbar() {
   const checkSubscriptionStatus = async (): Promise<void> => {
     if (!auth.isAuthenticated) return;
 
-    try {
-      const response = await SubscriptionService.getSubscriptionStatus();
-      
-      // Check if user has an active subscription
-      const subscriptionData = response.data;
-      setIsProUser(
-        subscriptionData &&
-          subscriptionData.status === "active" &&
-          !subscriptionData.canceledAt
-      );
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
+    const subscriptionStatus =
+      await SubscriptionService.getSubscriptionStatus();
+
+    if (subscriptionStatus instanceof Error) {
+      console.error("Error fetching subscription status:", subscriptionStatus);
       setIsProUser(false);
+    } else {
+      setIsProUser(
+        subscriptionStatus &&
+          subscriptionStatus.status === "active" &&
+          !subscriptionStatus.canceledAt
+      );
     }
   };
 
