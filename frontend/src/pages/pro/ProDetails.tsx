@@ -19,16 +19,16 @@ export default function ProDetails() {
   }, []);
 
   const checkSubscriptionStatus = async () => {
-    try {
-      const response = await SubscriptionService.getSubscriptionStatus();
+    const subscriptionStatus =
+      await SubscriptionService.getSubscriptionStatus();
 
-      setHasSubscription(response.data.status == "active");
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
+    if (subscriptionStatus instanceof Error) {
       setHasSubscription(false);
-    } finally {
-      setLoading(false);
+    } else {
+      setHasSubscription(subscriptionStatus.status == "active");
     }
+
+    setLoading(false);
   };
 
   const handleSubscribe = () => {
