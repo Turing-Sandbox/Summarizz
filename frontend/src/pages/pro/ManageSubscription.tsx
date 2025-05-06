@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import { apiURL } from "../../scripts/api";
 import axios from "axios";
 import { SubscriptionStatus } from "../../models/SubscriptionStatus";
+import { SubscriptionService } from "../../services/SubscriptionService";
 
 export default function ManageSubscription() {
   const navigate = useNavigate();
@@ -30,20 +30,9 @@ export default function ManageSubscription() {
     setError("");
 
     try {
-      const url = forceRefresh
-        ? `${apiURL}/subscription/status?forceRefresh=true&t=${new Date().getTime()}`
-        : `${apiURL}/subscription/status`;
-
-      console.log("Fetching subscription status with URL:", url);
-
-      const response = await axios.get(url, {
-        withCredentials: true,
-      });
-
-      if (response.data.periodEnd) {
-        console.log("Parsed date:", new Date(response.data.periodEnd));
-        console.log("Timestamp:", new Date(response.data.periodEnd).getTime());
-      }
+      const response = await SubscriptionService.getSubscriptionStatus(
+        forceRefresh
+      );
 
       // Reset cancelSuccess if the status is already canceled to avoid UI conflicts
       if (response.data.status === "canceled") {
@@ -66,6 +55,11 @@ export default function ManageSubscription() {
   };
 
   const handleCancelSubscription = async () => {
+    if (!auth.isAuthenticated) {
+      navigate("/authentication/login?redirect=/pro/manage");
+      return;
+    }
+
     if (
       !window.confirm(
         "Are you sure you want to cancel your subscription? You'll still have access until the end of your current billing period."
@@ -81,13 +75,7 @@ export default function ManageSubscription() {
       // Store the current subscription data before cancellation
       const currentSubscription = subscription ? { ...subscription } : null;
 
-      await axios.post(
-        `${apiURL}/subscription/cancel`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      SubscriptionService.cancelSubscription();
 
       // Force the subscription status to be 'canceled' immediately in the UI
       // but preserve all other data from the current subscription
