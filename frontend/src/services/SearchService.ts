@@ -22,8 +22,6 @@ export class SearchService {
         params: { searchText, userStartingPoint },
       });
 
-      console.log("search user response: ", response.data.users);
-
       return response.data;
     } catch (error) {
       if (error instanceof Error) {
@@ -40,8 +38,6 @@ export class SearchService {
       const response = await axios.get(`${apiURL}/search/contents`, {
         params: { searchText },
       });
-
-      console.log("search content response: ", response.data.contents);
 
       return response.data;
     } catch (error) {
