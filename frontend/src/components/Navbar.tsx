@@ -12,6 +12,7 @@ import SearchList from "./search/SearchList";
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
+import { SearchService } from "../services/SearchService";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -107,34 +108,37 @@ export default function Navbar() {
    */
   const handleSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    if (query) {
-      // Redirect to the search results page, where the actual searching happens.
-      // router.push(`/search?query=${encodeURIComponent(query)}`);
-      // window.location.href = `/search?query=${encodeURIComponent(query)}`;
 
-      const userSearchResults = await axios.get(`${apiURL}/search/users/`, {
-        params: {
-          searchText: query,
-        },
-      });
-
-      const contentSearchResults = await axios.get(
-        `${apiURL}/search/content/`,
-        {
-          params: {
-            searchText: query,
-          },
-        }
-      );
-
-      setUserSearchResults(userSearchResults.data.documents);
-      setContentSearchResults(contentSearchResults.data.documents);
-      setShowSearchResults(true);
-      setShowMenu(false);
-      setShowNotificationList(false);
-    } else {
-      alert("You didn't search for anything.");
+    // Validation
+    if (!query) {
+      setShowSearchResults(false);
+      return;
     }
+
+    // Search Queries
+    const userSearchResults = await SearchService.searchUsers(query);
+    const contentSearchResults = await SearchService.searchContents(query);
+
+    // Display Search Results
+    if (userSearchResults instanceof Error) {
+      console.error("Error fetching user search results:", userSearchResults);
+    } else {
+      setUserSearchResults(userSearchResults.users);
+    }
+
+    if (contentSearchResults instanceof Error) {
+      console.error(
+        "Error fetching content search results:",
+        contentSearchResults
+      );
+    } else {
+      setContentSearchResults(contentSearchResults.contents);
+    }
+
+    // Update states
+    setShowSearchResults(true);
+    setShowMenu(false);
+    setShowNotificationList(false);
   };
 
   const fetchNotifications = async (): Promise<void> => {
