@@ -7,12 +7,12 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
-import SearchList from "./search/SearchList";
 
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
 import { SearchService } from "../services/SearchService";
+import SearchList from "./search/SearchListContent";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -115,9 +115,11 @@ export default function Navbar() {
       return;
     }
 
+    const trimmedQuery = query.trim();
+
     // Search Queries
-    const userSearchResults = await SearchService.searchUsers(query);
-    const contentSearchResults = await SearchService.searchContents(query);
+    const userSearchResults = await SearchService.searchUsers(trimmedQuery);
+    const contentSearchResults = await SearchService.searchContents(trimmedQuery);
 
     // Display Search Results
     if (userSearchResults instanceof Error) {
