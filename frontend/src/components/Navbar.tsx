@@ -7,11 +7,11 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
-import SearchList from "./search/SearchList";
 
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
+import SearchList from "./search/searchList";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -107,34 +107,29 @@ export default function Navbar() {
    */
   const handleSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    if (query) {
-      // Redirect to the search results page, where the actual searching happens.
-      // router.push(`/search?query=${encodeURIComponent(query)}`);
-      // window.location.href = `/search?query=${encodeURIComponent(query)}`;
-
-      const userSearchResults = await axios.get(`${apiURL}/search/users/`, {
-        params: {
-          searchText: query,
-        },
-      });
-
-      const contentSearchResults = await axios.get(
-        `${apiURL}/search/content/`,
-        {
-          params: {
-            searchText: query,
-          },
-        }
-      );
-
-      setUserSearchResults(userSearchResults.data.documents);
-      setContentSearchResults(contentSearchResults.data.documents);
-      setShowSearchResults(true);
-      setShowMenu(false);
-      setShowNotificationList(false);
-    } else {
-      alert("You didn't search for anything.");
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      setShowSearchResults(false);
+      return;
     }
+
+    const userSearchResults = await axios.get(`${apiURL}/search/users/`, {
+      params: {
+        searchText: query,
+      },
+    });
+
+    const contentSearchResults = await axios.get(`${apiURL}/search/content/`, {
+      params: {
+        searchText: query,
+      },
+    });
+
+    setUserSearchResults(userSearchResults.data.documents);
+    setContentSearchResults(contentSearchResults.data.documents);
+    setShowSearchResults(true);
+    setShowMenu(false);
+    setShowNotificationList(false);
   };
 
   const fetchNotifications = async (): Promise<void> => {

@@ -124,14 +124,10 @@ function SearchListContent({
    * @returns void
    */
   const fetchContentData = async () => {
-    if (!param) {
+    if (!param || fetching) {
       return;
     }
 
-    if (fetching) {
-      alert("Already Fetching!!!!");
-      return;
-    }
     setFetching(true);
 
     try {
