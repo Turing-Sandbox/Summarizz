@@ -11,6 +11,7 @@ import SearchList from "./search/SearchList";
 
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
+import { SubscriptionService } from "../services/SubscriptionService";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -173,10 +174,8 @@ export default function Navbar() {
     if (!auth.isAuthenticated) return;
 
     try {
-      const response = await axios.get(`${apiURL}/subscription/status`, {
-        withCredentials: true,
-      });
-
+      const response = await SubscriptionService.getSubscriptionStatus();
+      
       // Check if user has an active subscription
       const subscriptionData = response.data;
       setIsProUser(

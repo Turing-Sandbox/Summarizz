@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { apiURL } from "../../scripts/api";
+import { SubscriptionService } from "../../services/SubscriptionService";
 
 export default function SubscribePro() {
   const navigate = useNavigate();
@@ -38,9 +38,7 @@ export default function SubscribePro() {
   // Function to check subscription status
   const checkSubscriptionStatus = async () => {
     try {
-      const response = await axios.get(`${apiURL}/subscription/status`, {
-        withCredentials: true,
-      });
+      const response = await SubscriptionService.getSubscriptionStatus();
 
       // If subscription is active, redirect to feed
       if (response.data.status === "active" && response.data.tier === "pro") {
@@ -64,15 +62,9 @@ export default function SubscribePro() {
     setError("");
 
     try {
-      const response = await axios.post(
-        `${apiURL}/subscription/create-checkout-session`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+      const response = await SubscriptionService.createSubscriptionSession();
 
-      // Open Stripe Checkout in a new tab
+      // Redirect to Stripe Checkout
       window.location.href = response.data.url;
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.data?.error) {
