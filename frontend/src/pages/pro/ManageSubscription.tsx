@@ -75,7 +75,7 @@ export default function ManageSubscription() {
       // Store the current subscription data before cancellation
       const currentSubscription = subscription ? { ...subscription } : null;
 
-      SubscriptionService.cancelSubscription();
+      await SubscriptionService.cancelSubscription();
 
       // Force the subscription status to be 'canceled' immediately in the UI
       // but preserve all other data from the current subscription
