@@ -4,11 +4,13 @@ import { User } from "../models/User";
 import { fetchUser } from "../services/userService";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
+import { useNavigate } from "react-router-dom";
 
 // TODO: REVIEW THE AUTH PROVIDER TO IMPROVE SECURITY
 export default function AuthProvider({
   children,
 }: React.PropsWithChildren<object>) {
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (userUID: string) => {
@@ -26,6 +28,7 @@ export default function AuthProvider({
 
     if (logoutRequest.status === 200) {
       setUser(null);
+      navigate("/authentication/login");
     }
   };
 
