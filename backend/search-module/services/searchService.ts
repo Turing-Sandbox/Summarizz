@@ -12,6 +12,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { getLoggerWithContext } from "../../shared/loggingHandler";
+import { User } from "../../user-module/models/userModel";
 
 const logger = getLoggerWithContext("SearchService");
 
@@ -47,8 +48,8 @@ export class SearchService {
     const userRef = collection(db, "users");
     const limitNumber: number = 5;
 
-    // Create the base user query (no previous query)
-    const userQuery = query(
+    // Build the base query
+    const baseQuery = query(
       userRef,
       where("usernameLower", ">=", searchText.toLowerCase()),
       where("usernameLower", "<=", searchText.toLowerCase() + "\uf8ff"),
@@ -56,56 +57,24 @@ export class SearchService {
       limit(limitNumber)
     );
 
-    /**
-     * If a starting point is provided, create a new query starting at that point
-     * (fetch next 5 documents starting after the starting point)
-     */
-    if (startingPoint) {
-      logger.info(`Starting point: ${startingPoint}.`);
-      logger.info("Starting point (JSON):", JSON.stringify(startingPoint, null, 3));
+    // If a starting point is provided, add it to the query
+    const finalQuery = startingPoint
+      ? query(baseQuery, startAfter(startingPoint))
+      : baseQuery;
 
-      const nextUserQuery = query(
-        userRef,
-        where("usernameLower", ">=", searchText.toLowerCase()),
-        where("usernameLower", "<=", searchText.toLowerCase() + "\uf8ff"),
-        orderBy("usernameLower"),
-        limit(limitNumber),
-        startAfter(startingPoint)
-      );
+    // Execute the query
+    const results = await getDocs(finalQuery);
 
-      const results = await getDocs(nextUserQuery);
-      const documents = results.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      let nextStartingPoint = null;
+    const users = results.docs.map((doc) => doc.data() as User);
 
-      if (documents.length >= limitNumber) {
-        nextStartingPoint =
-          results.docs[results.docs.length - 1]?.data().usernameLower;
-      }
+    // Determine the next starting point
+    const nextStartingPoint =
+      users.length >= limitNumber
+        ? results.docs[results.docs.length - 1]?.data().usernameLower
+        : null;
 
-      logger.info(`Setting starting point: ${nextStartingPoint}.`);
-      return { documents, nextStartingPoint };
-    } else {
-      // If there's no starting point, execute base query
-      logger.info("No starting point provided, starting from the beginning.");
-
-      const results = await getDocs(userQuery);
-      const documents = results.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      let newStartingPoint = null;
-
-      if (documents.length >= limitNumber) {
-        newStartingPoint =
-          results.docs[results.docs.length - 1]?.data().usernameLower;
-      }
-
-      logger.info(`Setting starting point: ${newStartingPoint}.`);
-      return { documents, newStartingPoint };
-    }
+    logger.info(`Next starting point: ${nextStartingPoint}`);
+    return { users, nextStartingPoint };
   }
 
   /**
@@ -119,20 +88,25 @@ export class SearchService {
    * @returns - Object containing the documents and next starting point
    * @throws - Error if search fails, i.e if the search query fails
    */
-  static async searchContent(searchText: string) {
-    try {
-      if (!searchText) {
-        return { documents: [], nextStartingPoint: null };
-      }
+  static async searchContents(searchText: string) {
+    if (!searchText) {
+      return { documents: [], nextStartingPoint: null };
+    }
 
-      const client = this.getAlgoliaClient();
-      const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
+    const client = SearchService.getAlgoliaClient();
+    const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
+
+    try {
       const { hits } = await index.search(searchText);
 
-      logger.info(`Algolia search results length: ${hits.length}, hits: ${hits}`);
+      logger.info(
+        `Algolia search results length: ${hits.length}, hits: ${JSON.stringify(
+          hits
+        )}`
+      );
 
-      // Fetch corresponding Firebase documents
-      const firebaseDocuments = await Promise.all(
+      // Fetch corresponding Firebase content documents
+      const firebaseContents = await Promise.all(
         hits.map(async (hit) => {
           const docRef = doc(db, "contents", hit.objectID);
           const docSnap = await getDoc(docRef);
@@ -149,18 +123,17 @@ export class SearchService {
       );
 
       // Filter out any null values (in case some documents weren't found in Firebase)
-      const documents = firebaseDocuments.filter(
-        (doc): doc is NonNullable<typeof doc> => doc !== null
+      const contents = firebaseContents.filter(
+        (content): content is NonNullable<typeof content> => content !== null
       );
 
       return {
-        documents,
-        nextStartingPoint: null,
+        contents,
+        nextStartingPoint: null, // Placeholder for future pagination logic
       };
     } catch (err) {
-      logger.error(`Something went wrong, error: ${err}`);
-      throw new Error(`Failed to search for content, error: ${err}`);
-
+      logger.error(`Failed to search for contents, error: ${err}`);
+      throw new Error(`Failed to search for contents, error: ${err}`);
     }
   }
 }
