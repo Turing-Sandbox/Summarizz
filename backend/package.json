@@ -5,7 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "start": "tsc && node dist/shared/server.js",
-    "dev": "nodemon --watch 'shared/**/*.ts' --exec ts-node shared/server.ts",
+    "dev": "nodemon --watch 'src/shared/**/*.ts' --exec ts-node src/shared/server.ts",
     "lint": "eslint . --ext .ts",
     "test": "jest"
   },
