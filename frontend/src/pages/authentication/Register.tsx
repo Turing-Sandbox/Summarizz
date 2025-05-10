@@ -145,9 +145,12 @@ export default function Register() {
               <button type='submit' className='auth-button'>
                 Register
               </button>
-
-              <OAuthButtons />
             </form>
+            
+            <div className="oauth-container">
+              <p className="oauth-separator">OR</p>
+              <OAuthButtons />
+            </div>
 
             <p>
               Already have an account? <a href='/authentication/login'>Login</a>

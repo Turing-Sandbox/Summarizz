@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-
-dotenv.config();
+import { env } from "../config/environment";
 
 declare module "express-serve-static-core" {
   interface Request {
@@ -35,7 +33,7 @@ export const authenticateToken = (
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || "default_secret"
+      env.jwt.secret
     ) as {
       uid: string;
       email: string;

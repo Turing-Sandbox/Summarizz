@@ -137,11 +137,25 @@ export default function Navbar() {
   };
 
   const fetchNotifications = async (): Promise<void> => {
+    // Only fetch notifications if user is authenticated and has a UID
+    if (!auth.isAuthenticated || !auth.user?.uid) {
+      return;
+    }
+    
     try {
       const response = await axios.get(
-        `${apiURL}/notifications/unread/${auth.user?.uid}`
+        `${apiURL}/notifications/unread/${auth.user.uid}`,
+        { withCredentials: true }
       );
+      
       const notificationsData = response.data;
+      // Check if the response is a string (error message) or an object (notifications)
+      if (typeof notificationsData === 'string') {
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
+      
       const notificationsArray: Notification[] =
         Object.values(notificationsData);
 
@@ -149,6 +163,9 @@ export default function Navbar() {
       setUnreadCount(notificationsArray.length);
     } catch (error) {
       console.error("Error fetching notifications:", error);
+      // Set empty notifications on error
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 

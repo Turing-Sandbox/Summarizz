@@ -1,0 +1,30 @@
+import cors from 'cors';
+import { json, urlencoded } from 'express';
+import helmet from 'helmet';
+import compression from 'compression';
+import cookieParser from 'cookie-parser';
+import { env } from './shared/config/environment';
+
+export const appConfig = {
+  middleware: {
+    cors: cors({
+      origin: [
+        env.app.frontend,
+        env.app.backend,
+        env.app.netlify,
+      ],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: true,
+    }),
+    json: json({ limit: '10mb' }),
+    urlencoded: urlencoded({ extended: true, limit: '10mb' }),
+    helmet: helmet(),
+    compression: compression(),
+    cookieParser: cookieParser(),
+  },
+  rateLimiting: {
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+  },
+};
