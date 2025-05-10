@@ -25,7 +25,7 @@ export default function ProDetails() {
     if (subscriptionStatus instanceof Error) {
       setHasSubscription(false);
     } else {
-      setHasSubscription(subscriptionStatus.status == "active");
+      setHasSubscription(subscriptionStatus.status === "active");
     }
 
     setLoading(false);

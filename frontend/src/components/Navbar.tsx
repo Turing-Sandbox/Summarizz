@@ -7,12 +7,12 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
-import SearchList from "./search/SearchList";
 
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
 import { SearchService } from "../services/SearchService";
+import SearchList from "./search/searchList";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -114,6 +114,12 @@ export default function Navbar() {
       setShowSearchResults(false);
       return;
     }
+        
+    setQuery(query.trim());
+    if (!trimmedQuery) {
+      setShowSearchResults(false);
+      return;
+    }
 
     // Search Queries
     const userSearchResults = await SearchService.searchUsers(query);
@@ -135,7 +141,6 @@ export default function Navbar() {
       setContentSearchResults(contentSearchResults.contents);
     }
 
-    // Update states
     setShowSearchResults(true);
     setShowMenu(false);
     setShowNotificationList(false);

@@ -120,12 +120,12 @@ function SearchListContent({
    * @returns void
    */
   const fetchContentData = async () => {
+
     if (!query) {
       return;
     }
 
-    if (fetching) {
-      alert("Already Fetching!!!!");
+    if (!param || fetching) {
       return;
     }
 

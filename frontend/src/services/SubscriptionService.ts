@@ -6,9 +6,9 @@ export class SubscriptionService {
   /**
    * Creates a subscription session for the user.
    *
-   * @param user - The user object for whom the subscription session is created.
    * @returns A promise that resolves to the response containing the session URL.
-   * @throws An error if the request fails.
+   * @returns {Promise<{url: string}>} The checkout session URL on success
+   * @returns {Error} Error object with message if the request fails
    */
   static async createSubscriptionSession(): Promise<{ url: string } | Error> {
     try {
@@ -33,6 +33,13 @@ export class SubscriptionService {
     }
   }
 
+  /**
+   * Cancels the user's subscription.
+   *
+   * @returns A promise that resolves to a response containing the cancellation message and end date.
+   * @returns {Promise<{message: string, willEndOn: Date}>} The cancellation message and end date on success
+   * @returns {Error} Error object with message if the request fails
+   */
   static async cancelSubscription(): Promise<
     | {
         message: string;
@@ -62,7 +69,14 @@ export class SubscriptionService {
     }
   }
 
-  // GET
+  /**
+   * Retrieves the subscription status for the user.
+   *
+   * @param forceRefresh - Whether to force a refresh of the subscription status.
+   * @returns A promise that resolves to the subscription status or an error.
+   * @returns {Promise<SubscriptionStatus | Error>} The subscription status on success
+   * @returns {Error} Error object with message if the request fails
+   */
   static async getSubscriptionStatus(
     forceRefresh: boolean = false
   ): Promise<SubscriptionStatus | Error> {
