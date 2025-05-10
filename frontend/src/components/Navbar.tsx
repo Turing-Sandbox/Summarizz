@@ -115,11 +115,11 @@ export default function Navbar() {
       return;
     }
 
-    const trimmedQuery = query.trim();
+    setQuery(query.trim());
 
     // Search Queries
-    const userSearchResults = await SearchService.searchUsers(trimmedQuery);
-    const contentSearchResults = await SearchService.searchContents(trimmedQuery);
+    const userSearchResults = await SearchService.searchUsers(query);
+    const contentSearchResults = await SearchService.searchContents(query);
 
     // Display Search Results
     if (userSearchResults instanceof Error) {

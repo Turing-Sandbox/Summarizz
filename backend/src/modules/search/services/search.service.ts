@@ -1,5 +1,4 @@
 import algoliasearch from "algoliasearch";
-import { db } from "../../../shared/config/firebase.config";
 import {
   collection,
   query,
@@ -11,20 +10,21 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { logger } from "../../../shared/utils/logger";
 import { User } from "../../user/models/user.model";
+import { db } from "../../../shared/config/firebase.config";
+import { logger } from "../../../shared/utils/logger";
 
 export class SearchService {
   private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;
-  private static readonly ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME;
+  private static readonly ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME as string;
 
   private static getAlgoliaClient() {
     if (!SearchService.algoliaClient) {
-      const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
-      const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY;
+      const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID as string;
+      const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY as string;
       SearchService.algoliaClient = algoliasearch(
-        ALGOLIA_APP_ID as string,
-        ALGOLIA_ADMIN_KEY as string
+        ALGOLIA_APP_ID,
+        ALGOLIA_ADMIN_KEY
       );
     }
     return SearchService.algoliaClient;
@@ -92,10 +92,7 @@ export class SearchService {
     }
 
     const client = SearchService.getAlgoliaClient();
-    if (!SearchService.ALGOLIA_INDEX_NAME) {
-      throw new Error("ALGOLIA_INDEX_NAME is not defined in the environment variables.");
-    }
-    const index = client.initIndex(SearchService.ALGOLIA_INDEX_NAME);
+    const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
 
     try {
       const { hits } = await index.search(searchText);

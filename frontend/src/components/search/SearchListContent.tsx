@@ -124,11 +124,6 @@ function SearchListContent({
       return;
     }
 
-    if (fetching) {
-      alert("Already Fetching!!!!");
-      return;
-    }
-
     setFetching(true);
 
     const searchContentResults = await SearchService.searchContents(query);
