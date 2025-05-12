@@ -4,17 +4,16 @@ import { User } from "../models/User";
 import { fetchUser } from "../services/userService";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
+import LoadingPage from "../pages/loading/LoadingPage";
 
-// TODO: REVIEW THE AUTH PROVIDER TO IMPROVE SECURITY
 export default function AuthProvider({
   children,
 }: React.PropsWithChildren<object>) {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const login = async (userUID: string) => {
-    console.log("Logging in user...");
-
-    getUserData(userUID);
+    await getUserData(userUID);
   };
 
   const logout = async () => {
@@ -29,7 +28,6 @@ export default function AuthProvider({
     }
   };
 
-  // Automatically refresh the user token and fetch user data
   useEffect(() => {
     const initializeUser = async () => {
       try {
@@ -47,6 +45,9 @@ export default function AuthProvider({
         }
       } catch (err) {
         console.error("Auto-login failed", err);
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -54,17 +55,20 @@ export default function AuthProvider({
   }, []);
 
   async function getUserData(userUID: string) {
-    // Fetch user data from the server
     console.log("Fetching user data... for UID:", userUID);
     const userData = await fetchUser(userUID);
 
-    console.log("User data:", userData);
     if (!(userData instanceof Error)) {
       setUser(userData || null);
     } else {
       console.error("Failed to fetch user:", userData);
       setUser(null);
     }
+  }
+
+  if (loading) {
+    // Render a fallback while loading
+    return <LoadingPage />;
   }
 
   return (
