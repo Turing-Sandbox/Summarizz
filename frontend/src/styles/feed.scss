@@ -3,20 +3,8 @@
 
 .content-list {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, 1fr) !important;
   gap: 1rem;
-}
-
-.content-list-horizontal {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-  overflow-y: scroll;
-  margin: -25px -25px;
-  padding: 25px 25px;
 }
 
 .feed-section-title {
@@ -83,7 +71,7 @@
   border-width: 1px;
   box-sizing: border-box;
   @include global.glassmorphic-background;
-  
+
   background: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0.1) 0%,
@@ -138,55 +126,15 @@
   }
 }
 
-.related-creators-section {
-  margin-bottom: 2rem;
-  padding: 0.5rem 0;
-  width: 100%;
-  max-width: 100%;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.related-creators-section h3 {
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-.related-creators-section .no-creators-message {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 1rem;
-  font-style: italic;
-}
-
 .creator-profiles-list {
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
   gap: 1.2rem;
-  padding: 0.5rem 0;
-  margin-bottom: 1rem;
-  width: 100%;
-  max-width: 100%;
-  -ms-overflow-style: none;
-  scrollbar-width: thin;
-  padding-bottom: 10px;
+  scrollbar-width: none;
+  margin: -20px;
+  padding: 20px;
   justify-content: flex-start;
-}
-
-.creator-profiles-list::-webkit-scrollbar {
-  height: 6px;
-}
-
-.creator-profiles-list::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.creator-profiles-list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
 }
 
 .creator-profile-card {
