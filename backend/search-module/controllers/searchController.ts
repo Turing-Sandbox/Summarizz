@@ -15,10 +15,8 @@ export class SearchController {
 	 * @param res - Express response object.
 	 */
 	static async searchUsers(req: Request, res: Response) {
-		const query: Record<string, any> = req.query;
-
-		const searchText = query.searchText;
-		const userStartingPoint = query.userStartingPoint;
+		const searchText = req.query.searchText as string;
+		const userStartingPoint = req.query.userStartingPoint;
 
 		logger.info(`Searching for users that match the following: ${searchText}`);
 		try {
@@ -38,14 +36,12 @@ export class SearchController {
 	 * @param req - Express request object.
 	 * @param res - Express response object.
 	 */
-	static async searchContent(req: Request, res: Response) {
-		const query: Record<string, any> = req.query;
-
-		const searchText = query.searchText;
+	static async searchContents(req: Request, res: Response) {
+		const searchText = req.query.searchText as string;
 		logger.info(`Searching for content that matches the following: ${searchText}`);
 
 		try {
-			const response = await SearchService.searchContent(searchText);
+			const response = await SearchService.searchContents(searchText);
 			res.status(200).json(response);
 		} catch (error) {
 			logger.error(`Error searching content: ${error.message || error}`);

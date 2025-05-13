@@ -11,6 +11,7 @@ import { apiURL } from "../scripts/api";
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
+import { SearchService } from "../services/SearchService";
 import SearchList from "./search/searchList";
 
 export default function Navbar() {
@@ -107,26 +108,39 @@ export default function Navbar() {
    */
   const handleSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    const trimmedQuery = query.trim();
+
+    // Validation
+    if (!query) {
+      setShowSearchResults(false);
+      return;
+    }
+        
+    setQuery(query.trim());
     if (!trimmedQuery) {
       setShowSearchResults(false);
       return;
     }
 
-    const userSearchResults = await axios.get(`${apiURL}/search/users/`, {
-      params: {
-        searchText: query,
-      },
-    });
+    // Search Queries
+    const userSearchResults = await SearchService.searchUsers(query);
+    const contentSearchResults = await SearchService.searchContents(query);
 
-    const contentSearchResults = await axios.get(`${apiURL}/search/content/`, {
-      params: {
-        searchText: query,
-      },
-    });
+    // Display Search Results
+    if (userSearchResults instanceof Error) {
+      console.error("Error fetching user search results:", userSearchResults);
+    } else {
+      setUserSearchResults(userSearchResults.users);
+    }
 
-    setUserSearchResults(userSearchResults.data.documents);
-    setContentSearchResults(contentSearchResults.data.documents);
+    if (contentSearchResults instanceof Error) {
+      console.error(
+        "Error fetching content search results:",
+        contentSearchResults
+      );
+    } else {
+      setContentSearchResults(contentSearchResults.contents);
+    }
+
     setShowSearchResults(true);
     setShowMenu(false);
     setShowNotificationList(false);

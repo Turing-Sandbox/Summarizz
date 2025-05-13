@@ -2,10 +2,9 @@ import { Suspense, useEffect, useState } from "react";
 import { User } from "../../models/User";
 import { Content } from "../../models/Content";
 import { useSearchParams } from "react-router-dom";
-import axios from "axios";
-import { apiURL } from "../../scripts/api";
 import ContentSearchResult from "./ContentSearchResult";
 import UserSearchResults from "./UserSearchResult";
+import { SearchService } from "../../services/SearchService";
 
 function SearchListContent({
   userSearchResults,
@@ -20,14 +19,15 @@ function SearchListContent({
 
   // Retrieve the search text from the url.
   const [searchParams] = useSearchParams();
-  const param = searchParams.get("query");
+  const query = searchParams.get("query");
+
   const [usersReturned, setUsersReturned] = useState<User[]>([]);
   const [userDisabled, setUserDisabled] = useState(true);
-  const [contentReturned, setContentReturned] = useState<Content[]>([]);
-
   const [userStartingPoint, setUserStartingPoint] = useState<string | null>(
     null
   );
+
+  const [contentReturned, setContentReturned] = useState<Content[]>([]);
   // const [contentStartingPoint, setContentStartingPoint] = useState<
   //   string | null
   // >(null);
@@ -44,75 +44,71 @@ function SearchListContent({
   useEffect(() => {
     if (userSearchResults) {
       setUsersReturned(userSearchResults);
-    } else if (param) {
+    } else if (query) {
       fetchUserData();
     }
 
     if (contentSearchResults) {
       setContentReturned(contentSearchResults);
-    } else if (param) {
+    } else if (query) {
       fetchContentData();
     }
-  }, [userSearchResults, contentSearchResults, param]);
+  }, [userSearchResults, contentSearchResults, query]);
 
   /**
    * fetchUserData() -> void
    *
    * @description
-   *Send a get request to the api endpoint for searching for users.
+   * Sends a GET request to the API endpoint for searching users.
    *
    * @returns void
    */
   const fetchUserData = async () => {
-    if (!param) {
-      return;
-    }
+    if (!query) return;
 
     if (fetching) {
-      alert("Already Fetching!!!!");
+      alert("Already Fetching!");
       return;
     }
+
     setFetching(true);
 
-    try {
-      const response = await axios.get(`${apiURL}/search/users/`, {
-        params: {
-          searchText: param,
-          userStartingPoint: userStartingPoint,
-        },
-      });
+    const userSearchResults = await SearchService.searchUsers(
+      query,
+      userStartingPoint
+    );
 
-      const newDocuments = response.data.documents;
-      // Create a set to easily check if the last query has duplicates
-      const usersSet = new Set(usersReturned.map((doc: User) => doc.uid));
-      // Create a get each user document id from the GET response, then check
-      // for whether at least one is not in the stored user set.
-      const uniqueDocuments = newDocuments.filter(
-        (doc: { uid: string }) => !usersSet.has(doc.uid)
+    if (userSearchResults instanceof Error) {
+      console.error("Error fetching user data:", userSearchResults);
+      setFetching(false);
+      return;
+    }
+
+    const users = userSearchResults.users || [];
+    const existingUserIds = new Set(
+      usersReturned.map((user: User) => user.uid)
+    );
+
+    // Filter out duplicate users
+    const uniqueUsers = users.filter(
+      (user: { uid: string }) => !existingUserIds.has(user.uid)
+    );
+
+    if (uniqueUsers && uniqueUsers.length > 0) {
+      setUsersReturned((prev) => [...prev, ...uniqueUsers]);
+
+      // Update the starting point for the next fetch
+      setUserStartingPoint(
+        uniqueUsers[uniqueUsers.length - 1]?.usernameLower || null
       );
 
-      // If there are unique documents, update the state
-      if (uniqueDocuments.length > 0 && !fetching) {
-        setUsersReturned((prev) => [...prev, ...uniqueDocuments]);
-        // Update the starting point for the next fetch
-        setUserStartingPoint(
-          uniqueDocuments[uniqueDocuments.length - 1].usernameLower
-        );
-
-        if (usersReturned.length < 5) {
-          setUserDisabled(true);
-        } else {
-          setUserDisabled(false);
-        }
-      } else {
-        // If there are no unique documents, disable the button
-        setUserDisabled(true);
-      }
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    } finally {
-      setFetching(false);
+      // Enable or disable the "Fetch more" button based on the number of users
+      setUserDisabled(usersReturned.length + uniqueUsers.length < 5);
+    } else {
+      setUserDisabled(true); // Disable the button if no unique users are found
     }
+
+    setFetching(false);
   };
 
   /**
@@ -124,52 +120,49 @@ function SearchListContent({
    * @returns void
    */
   const fetchContentData = async () => {
+
+    if (!query) {
+      return;
+    }
+
     if (!param || fetching) {
       return;
     }
 
     setFetching(true);
 
-    try {
-      const response = await axios.get(`${apiURL}/search/content/`, {
-        params: {
-          searchText: param,
-        },
-      });
+    const searchContentResults = await SearchService.searchContents(query);
 
-      // Obtain the documents from the response data.
-      const newDocuments = response.data.documents;
-      // Create a set to easily check if the last query has duplicates
-      const contentSet = new Set(
-        contentReturned.map((doc: Content) => doc.uid)
-      );
-      // Get each document id from the GET response, then check
-      // for whether at least one is not in the stored content set.
-      const uniqueDocuments = newDocuments.filter(
-        (doc: { id: string }) => !contentSet.has(doc.id)
-      );
-
-      // If there are unique documents, update the state
-      if (uniqueDocuments.length > 0 && !fetching) {
-        // Append the new data to the list of stored articles.
-        setContentReturned((prev) => [...prev, ...uniqueDocuments]);
-        // Update the starting point for the next fetch.
-        // setContentStartingPoint(
-        //   uniqueDocuments[uniqueDocuments.length - 1].titleLower
-        // );
-      }
-    } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error));
-    } finally {
+    if (searchContentResults instanceof Error) {
+      console.error("Error fetching content data:", searchContentResults);
       setFetching(false);
+      return;
     }
+
+    const contents = searchContentResults.contents || [];
+    const existingContentIds = new Set(
+      contentReturned.map((content: Content) => content.uid)
+    );
+
+    // Filter out duplicate users
+    const uniqueContents = contents.filter(
+      (content: { uid: string }) => !existingContentIds.has(content.uid)
+    );
+
+    if (uniqueContents && uniqueContents.length > 0) {
+      setContentReturned((prev) => [...prev, ...uniqueContents]);
+    } else {
+      setUserDisabled(true); // Disable the button if no unique users are found
+    }
+
+    setFetching(false);
   };
 
   return (
     <>
       {/* <div className='main-content'> */}
       <div className='searchResults'>
-        {param && <h1>Search Results for: {param}</h1>}
+        {query && <h1>Search Results for: {query}</h1>}
         <h2>Users</h2>
         {usersReturned?.length === 0 ? (
           <p>Nothing found...</p>
