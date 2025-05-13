@@ -1,6 +1,6 @@
 import { realtime_db } from '../../../shared/config/firebase.config';
 import { ref, get, set, remove, update, child, push } from 'firebase/database';
-import { Comment } from '../models/commentModel';
+import { Comment } from '../models/comment.model';
 
 
 export async function createComment(post_id: string, owner_id: string, text: string, username:string): Promise<Comment> {

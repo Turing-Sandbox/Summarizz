@@ -16,8 +16,8 @@ import {
   changeUsernameController,
   refreshUserController,
   logoutUserController,
-} from "../controllers/userController";
-import { requestPasswordResetController } from "../controllers/passwordResetController";
+} from "../controllers/user.controller";
+import { requestPasswordResetController } from "../controllers/password_reset.controller";
 
 const router = Router();
 

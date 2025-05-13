@@ -5,7 +5,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { storage } from "../../../shared/config/firebase.config";
-import { logger } from "../../../shared/loggingHandler";
+import { logger } from "../../../shared/utils/logger";
 import fs from "fs/promises";
 
 export class StorageService {

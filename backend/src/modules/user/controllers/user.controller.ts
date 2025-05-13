@@ -1,4 +1,4 @@
-// src/modules/user/controllers/userController.ts
+// src/modules/user/controllers/user.controller.ts
 import { Request, Response } from "express";
 import {
   createUser,
@@ -15,9 +15,9 @@ import {
   changeUsername,
   approveFollowRequest,
   rejectFollowRequest,
-} from "../services/userService";
+} from "../services/user.service";
 import { IncomingForm } from "formidable";
-import { StorageService } from "../../storage/services/serviceStorage";
+import { StorageService } from "../../storage/services/storage.service";
 import jwt from "jsonwebtoken";
 import { env } from "../../../shared/config/environment";
 

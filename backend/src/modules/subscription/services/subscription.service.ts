@@ -1,6 +1,6 @@
 import { db } from '../../../shared/config/firebase.config';
-import { User } from '../../user/models/userModel';
-import stripeService from './stripeService';
+import { User } from '../../user/models/user.model';
+import stripeService from './stripe.service';
 import {
   doc,
   setDoc,

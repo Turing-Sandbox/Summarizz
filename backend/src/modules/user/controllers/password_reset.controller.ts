@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
-import { sendPasswordResetEmail_Firebase } from "../services/passwordResetService";
-import { getLoggerWithContext } from "../../../shared/loggingHandler";
-
-const logger = getLoggerWithContext("PasswordResetController");
+import { sendPasswordResetEmail_Firebase } from "../services/password_reset.service";
+import { logger } from "../../../shared/utils/logger";
 
 /**
  * Controller for handling password reset requests, 

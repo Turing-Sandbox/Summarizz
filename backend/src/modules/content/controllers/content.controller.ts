@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { ContentService } from "../services/serviceContent";
+import { ContentService } from "../services/content.service";
 import { IncomingForm } from "formidable";
-import { StorageService } from "../../storage/services/serviceStorage";
+import { StorageService } from "../../storage/services/storage.service";
 
 export class ContentController {
   static async createContent(req: Request, res: Response) {

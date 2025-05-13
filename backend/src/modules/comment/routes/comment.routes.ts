@@ -5,7 +5,7 @@ import {
     deleteCommentController,
     getCommentsByPostController,
     getCommentByIdController, deletePostController
-} from '../controllers/commentController';
+} from '../controllers/comment.controller';
 const router = Router();
 
 router.post('/comments/:post_id', createCommentController);

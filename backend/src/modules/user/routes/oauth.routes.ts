@@ -3,7 +3,7 @@ import {
     verifyOAuthToken,
     generateOAuthUrl,
     handleOAuthCallback
-} from "../services/oauthService";
+} from "../services/oauth.service";
 
 const router = Router();
 

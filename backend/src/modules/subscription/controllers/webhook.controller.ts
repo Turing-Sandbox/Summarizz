@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import stripeService from '../services/stripeService';
-import subscriptionService from '../services/subscriptionService';
+import stripeService from '../services/stripe.service';
+import subscriptionService from '../services/subscription.service';
 
 /**
  * Controller for handling Stripe webhook events

@@ -1,4 +1,4 @@
-import { adminAuth } from "../../../shared/firebaseAdminConfig";
+import { adminAuth } from "../../../shared/config/firebase-admin.config";
 import { db } from "../../../shared/config/firebase.config";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { Request, Response } from "express";

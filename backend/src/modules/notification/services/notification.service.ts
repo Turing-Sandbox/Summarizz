@@ -1,6 +1,6 @@
 import { db } from '../../../shared/config/firebase.config';
 import { getDoc, doc, setDoc, updateDoc, collection, getDocs, query, where } from "firebase/firestore";
-import { Notification } from '../models/notificationModel';
+import { Notification } from '../models/notification.model';
 
 export const pushNotification = async (userId: string, notification: Notification): Promise<void> => {
 	// Create the user document if it doesn't exist

@@ -5,10 +5,10 @@ import {
 	getAllComments,
 	getComment,
 	updateComment
-} from '../services/commentService';
-import {ContentService} from '../../content/services/serviceContent'
+} from '../services/comment.service';
+import {ContentService} from '../../content/services/content.service'
 import {Request, Response} from 'express';
-import {getUser} from "../../user/services/userService";
+import {getUser} from "../../user/services/user.service";
 
 export async function createCommentController(req: Request, res: Response): Promise<void> {
 	const { post_id } = req.params

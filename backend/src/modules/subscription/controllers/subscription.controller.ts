@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { db } from '../../../shared/config/firebase.config';
-import stripeService from '../services/stripeService';
-import subscriptionService from '../services/subscriptionService';
+import stripeService from '../services/stripe.service';
+import subscriptionService from '../services/subscription.service';
 import dotenv from 'dotenv';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 

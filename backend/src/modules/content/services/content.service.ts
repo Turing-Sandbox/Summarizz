@@ -20,9 +20,9 @@ import {
   removeLikedContentFromUser,
   addBookmarkedContentToUser,
   removeBookmarkedContentFromUser,
-} from "../../user/services/userService";
-import { StorageService } from "../../storage/services/serviceStorage";
-import { Content } from "../models/contentModel";
+} from "../../user/services/user.service";
+import { StorageService } from "../../storage/services/storage.service";
+import { Content } from "../models/content.model";
 
 export class ContentService {
   static async createContent(

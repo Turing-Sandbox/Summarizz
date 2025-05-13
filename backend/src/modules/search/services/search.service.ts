@@ -11,9 +11,8 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { getLoggerWithContext } from "../../../shared/loggingHandler";
+import { logger } from "../../../shared/utils/logger";
 
-const logger = getLoggerWithContext("SearchService");
 
 export class SearchService {
   private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;

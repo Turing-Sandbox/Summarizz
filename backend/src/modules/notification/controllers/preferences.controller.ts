@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { updateUserPreferences, getUserPreferences } from '../services/preferencesService';
+import { updateUserPreferences, getUserPreferences } from '../services/preferences.service';
 
 class PreferencesController {
 	async getUserPreferences(req: Request, res: Response) {

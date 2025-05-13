@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import SearchService from "../services/searchService";
-import { getLoggerWithContext } from "../../../shared/loggingHandler";
+import SearchService from "../services/search.service";
+import { logger } from "../../../shared/utils/logger";
 
-const logger = getLoggerWithContext("SearchController");
 
 export class SearchController {
 	/**

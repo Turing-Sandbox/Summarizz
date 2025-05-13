@@ -11,7 +11,7 @@ import {
   query,
   arrayUnion,
 } from "firebase/firestore";
-import { User } from "../models/userModel";
+import { User } from "../models/user.model";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -20,8 +20,8 @@ import {
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 import jwt from "jsonwebtoken";
-import { ContentService } from "../../content/services/serviceContent";
-import { StorageService } from "../../storage/services/serviceStorage";
+import { ContentService } from "../../content/services/content.service";
+import { StorageService } from "../../storage/services/storage.service";
 import { env } from "../../../shared/config/environment";
 
 // ----------------------------------------------------------

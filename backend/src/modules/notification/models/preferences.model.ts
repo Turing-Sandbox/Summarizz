@@ -1,4 +1,4 @@
-export interface UserPreferences {
+export interface PreferencesModel {
 	// List of important notification types (like, follow, etc)
 	important: string[];
 	// Whether or not the user wishes to receive comment notifications.
