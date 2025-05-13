@@ -17,8 +17,9 @@ export const appConfig = {
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,
     }),
-    json: json({ limit: '10mb' }),
-    urlencoded: urlencoded({ extended: true, limit: '10mb' }),
+    // Lower default body-parser limits to mitigate DoS risk; adjust per-route as needed
+    json: json({ limit: '2mb' }),
+    urlencoded: urlencoded({ extended: true, limit: '2mb' }),
     helmet: helmet(),
     compression: compression(),
     cookieParser: cookieParser(),
