@@ -4,6 +4,12 @@ import { logger } from './shared/utils/logger';
 
 const startServer = () => {
   try {
++   // Handle uncaught exceptions - register early
++   process.on('uncaughtException', (err: Error) => {
++     logger.error('UNCAUGHT EXCEPTION: Shutting down...', err);
++     process.exit(1);
++   });
+
     const server = app.listen(env.node.port, () => {
       logger.info(`Server running in ${env.node.env} mode on port ${env.node.port}`);
     });
@@ -16,11 +22,11 @@ const startServer = () => {
       });
     });
 
-    // Handle uncaught exceptions
-    process.on('uncaughtException', (err: Error) => {
-      logger.error('UNCAUGHT EXCEPTION: Shutting down...', err);
-      process.exit(1);
-    });
+-   // Handle uncaught exceptions
+-   process.on('uncaughtException', (err: Error) => {
+-     logger.error('UNCAUGHT EXCEPTION: Shutting down...', err);
+-     process.exit(1);
+-   });
 
     // Handle SIGTERM
     process.on('SIGTERM', () => {
