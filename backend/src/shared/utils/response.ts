@@ -23,15 +23,15 @@ export type ApiResponse<T = unknown> = {
     },
   });
   
-  export const createErrorResponse = (
-    message: string,
-    metadata: Record<string, unknown> = {}
-  ): ApiResponse => ({
-    status: 'error',
-    message,
-    metadata: {
-      timestamp: new Date().toISOString(),
-      ...metadata,
-    },
-  });
+export const createErrorResponse = (
+  message: string,
+  metadata: Record<string, unknown> = {}
+): ApiResponse<never> => ({
+  status: 'error',
+  message,
+  metadata: {
+    timestamp: new Date().toISOString(),
+    ...metadata,
+  },
+});
   
