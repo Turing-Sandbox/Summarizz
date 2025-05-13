@@ -22,6 +22,7 @@ export class SearchService {
     if (!SearchService.algoliaClient) {
       const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID as string;
       const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY as string;
+
       SearchService.algoliaClient = algoliasearch(
         ALGOLIA_APP_ID,
         ALGOLIA_ADMIN_KEY
@@ -86,6 +87,7 @@ export class SearchService {
    * @returns - Object containing the documents and next starting point
    * @throws - Error if search fails, i.e if the search query fails
    */
+
   static async searchContents(searchText: string) {
     if (!searchText) {
       return { documents: [], nextStartingPoint: null };
