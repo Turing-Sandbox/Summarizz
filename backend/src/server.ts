@@ -37,6 +37,14 @@ const startServer = () => {
         logger.info("Process terminated");
       });
     });
+
+    // Handle SIGTERM
+    process.on("SIGTERM", () => {
+      logger.info("SIGTERM RECEIVED. Shutting down gracefully");
+      server.close(() => {
+        logger.info("Process terminated");
+      });
+    });
   } catch (error) {
     logger.error("Error starting server:", error);
     process.exit(1);
