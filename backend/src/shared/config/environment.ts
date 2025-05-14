@@ -1,9 +1,21 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
-// Load environment from the root of the backend directory
-const envPath = path.resolve(__dirname, '../../../.env');
+// Possible locations for .env file
+const possibleEnvPaths = [
+  path.resolve(__dirname, '../../../.env'),      // dev: src/
+  path.resolve(__dirname, '../../../../.env'),   // prod: dist/src/
+];
+
+// Find the first existing .env file
+const envPath = possibleEnvPaths.find(fs.existsSync);
+
 console.log('Loading environment from:', envPath);
+
+if (!envPath) {
+  throw new Error('Failed to find .env file in expected locations.');
+}
 
 const result = dotenv.config({ path: envPath });
 
