@@ -16,7 +16,8 @@ import { logger } from "../../../shared/utils/logger";
 
 export class SearchService {
   private static algoliaClient: ReturnType<typeof algoliasearch> | null = null;
-  private static readonly ALGOLIA_INDEX_NAME = process.env.ALGOLIA_INDEX_NAME as string;
+  private static readonly ALGOLIA_INDEX_NAME = process.env
+    .ALGOLIA_INDEX_NAME as string;
 
   private static getAlgoliaClient() {
     if (!SearchService.algoliaClient) {
@@ -24,8 +25,8 @@ export class SearchService {
       const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY as string;
 
       SearchService.algoliaClient = algoliasearch(
-        ALGOLIA_APP_ID,
-        ALGOLIA_ADMIN_KEY
+        ALGOLIA_APP_ID as string,
+        ALGOLIA_ADMIN_KEY as string
       );
     }
     return SearchService.algoliaClient;
@@ -42,7 +43,10 @@ export class SearchService {
    * @param startingPoint - The starting point for the search query.
    * @returns An array of users matching the search query.
    */
-  static async searchUsers(searchText: string, startingPoint: string | null = null) {
+  static async searchUsers(
+    searchText: string,
+    startingPoint: string | null = null
+  ) {
     logger.info(`Searching for users that match the following: ${searchText}`);
     const userRef = collection(db, "users");
     const limitNumber: number = 5;
@@ -89,52 +93,46 @@ export class SearchService {
    */
 
   static async searchContents(searchText: string) {
-    if (!searchText) {
-      return { documents: [], nextStartingPoint: null };
-    }
+    const client = this.getAlgoliaClient();
+    const index = client.initIndex(this.ALGOLIA_INDEX_NAME as string);
+    const { hits } = await index.search(searchText);
 
-    const client = SearchService.getAlgoliaClient();
-    const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
+    logger.info(
+      `Algolia search results length: ${hits.length}, hits: ${JSON.stringify(
+        hits
+      )}`
+    );
 
-    try {
-      const { hits } = await index.search(searchText);
+    // Fetch corresponding Firebase content documents
+    const firebaseContents = await Promise.all(
+      hits.map(async (hit) => {
+        const docRef = doc(db, "contents", hit.objectID);
+        const docSnap = await getDoc(docRef);
 
-      logger.info(
-        `Algolia search results length: ${hits.length}, hits: ${JSON.stringify(
-          hits
-        )}`
-      );
+        if (docSnap.exists()) {
+          return {
+            id: docSnap.id,
+            ...docSnap.data(),
+            searchRanking: hit._rankingInfo?.nbTypos ?? 0,
+          };
+        }
+        return null;
+      })
+    );
 
-      // Fetch corresponding Firebase content documents
-      const firebaseContents = await Promise.all(
-        hits.map(async (hit) => {
-          const docRef = doc(db, "contents", hit.objectID);
-          const docSnap = await getDoc(docRef);
+    // Filter out any null values (in case some documents weren't found in Firebase)
+    const contents = firebaseContents.filter(
+      (content): content is NonNullable<typeof content> => content !== null
+    );
 
-          if (docSnap.exists()) {
-            return {
-              id: docSnap.id,
-              ...docSnap.data(),
-              searchRanking: hit._rankingInfo?.nbTypos ?? 0,
-            };
-          }
-          return null;
-        })
-      );
-
-      // Filter out any null values (in case some documents weren't found in Firebase)
-      const contents = firebaseContents.filter(
-        (content): content is NonNullable<typeof content> => content !== null
-      );
-
-      return {
-        contents,
-        nextStartingPoint: null, // Placeholder for future pagination logic
-      };
-    } catch (err) {
-      logger.error(`Failed to search for contents, error: ${err}`);
-      throw new Error(`Failed to search for contents, error: ${err}`);
-    }
+    return {
+      contents,
+      nextStartingPoint: null, // Placeholder for future pagination logic
+    };
+  }
+  catch(err: any) {
+    logger.error(`Failed to search for contents, error: ${err}`);
+    throw new Error(`Failed to search for contents, error: ${err}`);
   }
 }
 
