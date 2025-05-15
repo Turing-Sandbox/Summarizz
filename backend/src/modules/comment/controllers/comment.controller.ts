@@ -15,7 +15,7 @@ export async function createCommentController(req: Request, res: Response): Prom
 	const { owner_id, text } = req.body;
 	try {
 		const response = await getUser(owner_id);
-		const creation = await createComment(post_id, owner_id, text, response.username);
+		const creation = await createComment(post_id, owner_id, text, response?.username);
 		res.status(201).json({ message: 'Comment created successfully', creation});
 	} catch (error) {
 		console.log(error)
@@ -40,7 +40,7 @@ export async function createCommentController(req: Request, res: Response): Prom
 export async function updateCommentController(req: Request, res: Response) {
 	const { post_id, comment_id, user_id} = req.params;
 	const comment = await getComment(post_id, comment_id)
-	if (comment.owner_id == user_id){
+	if (comment?.owner_id == user_id){
 		const updatedComment = req.body;
 		try {
 			await updateComment(post_id, comment_id, updatedComment);
@@ -57,7 +57,7 @@ export async function updateCommentController(req: Request, res: Response) {
 export async function deleteCommentController(req: Request, res: Response) {
 	const { post_id, comment_id, user_id} = req.params;
 	const comment = await getComment(post_id, comment_id)
-	if (comment.owner_id == user_id){
+	if (comment?.owner_id == user_id){
 		try {
 			await deleteComment(post_id, comment_id);
 			res.status(200).json({ message: 'Comment deleted successfully' });
@@ -73,7 +73,7 @@ export async function deleteCommentController(req: Request, res: Response) {
 export async function deletePostController(req: Request, res: Response) {
 	const { post_id, user_id } = req.params;
 	const post = await ContentService.getContent(post_id)
-	const creator_id = post.creatorUID
+	const creator_id = post?.creatorUID
 	if (creator_id == user_id){
 		try {
 			await deletePost(post_id);

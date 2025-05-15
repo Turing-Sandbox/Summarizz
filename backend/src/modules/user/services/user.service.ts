@@ -50,7 +50,7 @@ export async function register(
 
     // Log the user
     return await login(email, password);
-  } catch (error) {
+  } catch (error: any) {
     let errorMessage = error.message;
     // Remove "Firebase: " prefix from the error message
     if (errorMessage.startsWith("Firebase: ")) {
@@ -90,7 +90,7 @@ export async function login(email: string, password: string) {
       token,
       refreshToken,
     };
-  } catch (error) {
+  } catch (error: any) {
     let errorMessage = error.message;
     // Remove "Firebase: " prefix from the error message
     if (errorMessage.startsWith("Firebase: ")) {
@@ -118,7 +118,7 @@ export async function updateUser(
     usernameLower: string;
   }>
 ) {
-  data.usernameLower = data.username.toLowerCase();
+  data.usernameLower = data.username?.toLowerCase();
   console.log(`updating user ${data.username}: ${JSON.stringify(data)}`);
   await updateDoc(doc(db, "users", uid), data);
 }
@@ -138,7 +138,7 @@ export async function createUser(
     email: email,
     createdAt: new Date(),
     isPrivate: false,
-    usernameLower: username.toLowerCase(),
+    usernameLower: username?.toLowerCase(),
   };
 
   await setDoc(doc(db, "users", uid), user);
@@ -169,7 +169,7 @@ export async function changePassword(
 
     // Update password
     await updatePassword(firebaseUser, newPassword);
-  } catch (error) {
+  } catch (error: any) {
     let errorMessage = error.message;
     // Remove "Firebase: " prefix from the error message
     if (errorMessage.startsWith("Firebase: ")) {
@@ -215,7 +215,7 @@ export async function changeEmail(
   // If a new email is provided and different from the current one:
   // Update Firebase Authentication
   // await updateEmail(firebaseUser, newEmail);
-  await verifyBeforeUpdateEmail(firebaseUser, newEmail);
+  await verifyBeforeUpdateEmail(firebaseUser, newEmail!);
 }
 
 export async function changeUsername(userId: string, newUsername: string) {

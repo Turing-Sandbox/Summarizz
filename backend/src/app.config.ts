@@ -9,9 +9,9 @@ export const appConfig = {
   middleware: {
     cors: cors({
       origin: [
-        env.app.frontend,
-        env.app.backend,
-        env.app.netlify,
+        env.app.frontend!,
+        env.app.backend!,
+        env.app.netlify!,
       ],
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],

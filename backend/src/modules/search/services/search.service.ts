@@ -23,8 +23,8 @@ export class SearchService {
       const ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
       const ALGOLIA_ADMIN_KEY = process.env.ALGOLIA_API_KEY;
       SearchService.algoliaClient = algoliasearch(
-        ALGOLIA_APP_ID,
-        ALGOLIA_ADMIN_KEY
+        ALGOLIA_APP_ID as string,
+        ALGOLIA_ADMIN_KEY as string
       );
     }
     return SearchService.algoliaClient;
@@ -125,7 +125,7 @@ export class SearchService {
       }
 
       const client = this.getAlgoliaClient();
-      const index = client.initIndex(this.ALGOLIA_INDEX_NAME);
+      const index = client.initIndex(this.ALGOLIA_INDEX_NAME as string);
       const { hits } = await index.search(searchText);
 
       logger.info(`Algolia search results length: ${hits.length}, hits: ${hits}`);

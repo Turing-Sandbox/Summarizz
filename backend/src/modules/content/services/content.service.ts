@@ -63,7 +63,7 @@ export class ContentService {
       addContentToUser(creatorUID, docRef.id);
 
       return { uid: docRef.id };
-    } catch (error) {
+    } catch (error: any) {
       let errorMessage = error.message;
       // Remove "Firebase: " prefix from the error message
       if (errorMessage.startsWith("Firebase: ")) {
@@ -105,7 +105,7 @@ export class ContentService {
 
       // 4- Remove content from user list
       await removeContentFromUser(contentData.creatorUID, content_id);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error! ", error);
       throw new Error(error);
     }
@@ -116,13 +116,13 @@ export class ContentService {
     console.log("Editing content...");
     console.log(content_id);
     console.log(data);
-    data.titleLower = data.title.toLowerCase();
+    data.titleLower = data.title?.toLowerCase();
     console.log(data.titleLower);
     console.log(data);
     try {
       await updateDoc(doc(db, `contents/${content_id}`), data);
       console.log("EDIT^^^^^^^^^^^^^^^^^EDIT");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error while editing content! ", error);
       throw new Error(error);
     }
@@ -172,7 +172,7 @@ export class ContentService {
       };
 
       return { content: updatedContent }; // Return updated content
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error liking content:", error);
       throw new Error(error.message || "Failed to like content");
     }
@@ -210,7 +210,7 @@ export class ContentService {
       const updatedContent = updatedContentDoc.data();
 
       return { content: { ...updatedContent, id: contentID } }; // Return updated content with id
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unliking content:", error);
       throw new Error(error.message || "Failed to unlike content");
     }
@@ -248,7 +248,7 @@ export class ContentService {
       const updatedContent = updatedContentDoc.data();
 
       return { content: updatedContent }; // Return updated content with the bookmarkedBy list updated
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error bookmarking content:", error);
       throw new Error(error.message || "Failed to bookmark content");
     }
@@ -286,7 +286,7 @@ export class ContentService {
       const updatedContent = updatedContentDoc.data();
 
       return { content: updatedContent }; // Return updated content with the bookmarkedBy list updated
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unbookmarking content:", error);
       throw new Error(error.message || "Failed to unbookmark content");
     }
@@ -365,7 +365,7 @@ export class ContentService {
       });
 
       return { content: updatedContent };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sharing content:", error);
       throw new Error(error.message || "Failed to share content");
     }
@@ -440,7 +440,7 @@ export class ContentService {
       });
 
       return { content: updatedContent };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unsharing content:", error);
       throw new Error(error.message || "Failed to unshare content");
     }
@@ -458,7 +458,7 @@ export class ContentService {
       );
 
       return contentList.slice(0, limit) as Content[];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching all content: ", error);
       throw new Error(error.message || "Failed to fetch all content");
     }
@@ -477,7 +477,7 @@ export class ContentService {
         .slice(0, limit);
 
       return trendingContent as Content[];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching trending content: ", error);
       throw new Error(error.message || "Failed to fetch trending content");
     }
@@ -549,7 +549,7 @@ export class ContentService {
       }
 
       return personalizedContent as Content[];
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching personalized content: ", error);
       throw new Error(error.message || "Failed to fetch personalized content");
     }
@@ -655,7 +655,7 @@ export class ContentService {
 
       // Get all content that the user has liked
       const likedContentDetails = await Promise.all(
-        likedContent.map(async (contentId) => {
+        likedContent.map(async (contentId: string) => {
           return await ContentService.getContent(contentId);
         })
       );
@@ -708,7 +708,7 @@ export class ContentService {
 
       console.log("Sorted creators:", sortedCreators);
       return sortedCreators;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching related content creators: ", error);
       throw new Error(
         error.message || "Failed to fetch related content creators"
@@ -718,7 +718,7 @@ export class ContentService {
 
   static async getRelatedContent(
     contentId: string,
-    userId: string = null,
+    userId: string = "",
     limit = 5
   ) {
     console.log("Getting related content for content ID:", contentId);
@@ -804,7 +804,7 @@ export class ContentService {
 
       console.log("Final related content count:", relatedContent.length);
       return relatedContent;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching related content: ", error);
       throw new Error(error.message || "Failed to fetch related content");
     }
@@ -825,7 +825,7 @@ export class ContentService {
       // Update the document with the new number of views
       await updateDoc(contentRef, { views: views + 1 });
       return "Successfully incremented view count!";
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error incrementing the view count: ", error);
       throw error;
     }
@@ -846,7 +846,7 @@ export class ContentService {
       // Update the document with the new number of shares
       await updateDoc(contentRef, { shares: shares + 1 });
       return "Successfully incremented share count!";
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error incrementing the share count: ", error);
       throw error;
     }

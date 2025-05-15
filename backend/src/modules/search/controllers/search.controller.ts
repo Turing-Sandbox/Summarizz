@@ -23,7 +23,7 @@ export class SearchController {
 		try {
 			const response = await SearchService.searchUsers(searchText, userStartingPoint);
 			res.status(200).json(response);
-		} catch (error) {
+		} catch (error: any) {
 			logger.error(`Error searching users: ${error.message || error}`);
 			res.status(500).json({ error: 'Failed to search users' });
 		}
@@ -46,7 +46,7 @@ export class SearchController {
 		try {
 			const response = await SearchService.searchContent(searchText);
 			res.status(200).json(response);
-		} catch (error) {
+		} catch (error: any) {
 			logger.error(`Error searching content: ${error.message || error}`);
 			res.status(500).json({ error: 'Failed to search content' });
 		}

@@ -21,7 +21,7 @@ export class StorageService {
    * @throws - Error if file upload fails
    */
   static async uploadFile(
-    file,
+    file: File,
     filePath: string,
     fileName: string,
     fileType: string
@@ -33,7 +33,7 @@ export class StorageService {
       const metadata = {
         contentType: fileType,
       };
-      const fileBuffer = await fs.readFile(file.filepath);
+      const fileBuffer = await fs.readFile(file.webkitRelativePath);
 
       const snapshot = await uploadBytes(storageRef, fileBuffer, metadata);
       logger.info(`
@@ -50,7 +50,7 @@ export class StorageService {
       logger.info("Download URL:", downloadURL);
 
       return { url: downloadURL };
-    } catch (error) {
+    } catch (error: any) {
       let errorMessage = error.message;
 
       // Remove "Firebase: " prefix from the error message
@@ -85,7 +85,7 @@ export class StorageService {
       await deleteObject(fileRef);
       logger.info(`File ${filePath} deleted.`);
 
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`Error deleting file ${filePath}: `, error);
 
     }

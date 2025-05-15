@@ -10,7 +10,7 @@ export async function createComment(post_id: string, owner_id: string, text: str
 	const time = Date.now() // store the current time
 	const newComment: Comment = { // populate the Comment object
 		post_id: post_id, // use the post id returned above
-		comment_id: newCommentID,
+		comment_id: newCommentID!,
 		owner_id: owner_id,
 		username: username,
 		text: text,
@@ -18,7 +18,7 @@ export async function createComment(post_id: string, owner_id: string, text: str
 		last_edited_timestamp: time,
 		like_count: 0,
 	}
-	await set(child(commentsRef, newCommentID), newComment); // update the empty object created earlier by setting the
+	await set(child(commentsRef, newCommentID!), newComment); // update the empty object created earlier by setting the
 	// value to the Comment created above
 	console.log(newComment)
 	return newComment; // if successful, return the new comment
@@ -81,7 +81,7 @@ export async function getAllComments(post_id: string): Promise<Comment[]> {
 		} else {
 			return []; // if not, return an empty array
 		}
-	} catch (e){
+	} catch (e: any){
 		throw new Error(e) // if anything fails, throw an error
 	}
 }

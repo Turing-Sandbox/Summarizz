@@ -25,7 +25,7 @@ class NotificationController {
 		try {
 			await pushNotification(userId, notification);
 			res.status(201).send('Notification pushed successfully');
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error pushing notification:', error);
 			res.status(500).send(`Error pushing notification: ${error.message}`);
 		}
@@ -37,7 +37,7 @@ class NotificationController {
 			await markAsRead(userId, notificationId);
 			res.status(200).send(`Notification ${notificationId} marked as read`);
 		}
-		catch (error) {
+		catch (error: any) {
 			console.error(`Error marking ${notificationId} as read.`)
 			res.status(500).send(`Error marking ${notificationId} as read.`)
 		}
@@ -52,7 +52,7 @@ class NotificationController {
 		try {
 			const notifications = await getNotifications(userId);
 			res.status(200).json(notifications);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error retrieving notifications:', error);
 			res.status(500).send(`Error retrieving notifications: ${error.message}`);
 		}
@@ -67,7 +67,7 @@ class NotificationController {
 		try {
 			const notifications = await getNewNotifications(userId);
 			res.status(200).json(notifications);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error retrieving notifications:', error);
 			res.status(500).send(`Error retrieving notifications: ${error.message}`);
 		}

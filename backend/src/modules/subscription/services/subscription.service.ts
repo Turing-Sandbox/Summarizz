@@ -85,7 +85,7 @@ export class SubscriptionService {
         stripeSubscriptionId: subscriptionId,
         subscriptionPeriodStart: periodStart,
         subscriptionPeriodEnd: periodEnd,
-        subscriptionCanceledAt: null // Clear any previous cancellation date
+        subscriptionCanceledAt: undefined // Clear any previous cancellation date
       });
       
       // Log the subscription creation

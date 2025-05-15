@@ -46,7 +46,7 @@ export const getNotifications = async (userId: string) => {
 	const notificationsSnapshot = await getDocs(notificationsRef);
 
 	// console.log(notificationsSnapshot)
-	const notifications = {};
+	const notifications: any = {};
 	notificationsSnapshot.forEach((doc) => {
 		notifications[doc.id] = doc.data();
 		console.log(`doc.id: ${doc.id},\ndoc: ${JSON.stringify(doc.data())}`)
@@ -65,8 +65,8 @@ export const getNewNotifications = async (userId: string) => {
 	const q = query(notificationsRef, where("read", "==", false)); // Query for unread notifications
 	const querySnapshot = await getDocs(q);
 
-	const unreadNotifications = {};
-	querySnapshot.forEach((doc) => {
+	const unreadNotifications: any = {};
+	querySnapshot.forEach((doc: any) => {
 		unreadNotifications[doc.id] = doc.data();
 	});
 

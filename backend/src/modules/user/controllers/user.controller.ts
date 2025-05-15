@@ -38,7 +38,7 @@ export async function registerUserController(req: Request, res: Response) {
       password
     );
     res.status(201).json(response);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to register user" });
   }
 }
@@ -62,7 +62,7 @@ export async function loginUserController(req: Request, res: Response) {
     res
       .status(201)
       .json({ message: "Login successful", userUID: response.userUID });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to login user" });
   }
 }
@@ -78,7 +78,7 @@ export async function refreshUserController(req: Request, res: Response) {
     return res.status(401).json({ message: "Refresh token missing" });
   }
 
-  jwt.verify(refreshToken, env.jwt.refreshSecret, (err, user) => {
+  jwt.verify(refreshToken, env.jwt.refreshSecret, (err: any, user: any) => {
     if (err) {
       return res.status(403).json({ message: "Invalid refresh token" });
     }
@@ -113,7 +113,7 @@ export async function uploadProfileImageController(
   console.log("Uploading Profile Image...");
   const form = new IncomingForm();
 
-  form.parse(req, async (err, fields, files) => {
+  form.parse(req, async (err: any, fields: any, files: any) => {
     if (err) {
       return res.status(500).json({ error: "Failed to upload profile image." });
     }
@@ -126,8 +126,8 @@ export async function uploadProfileImageController(
     const oldProfileImage = fields.oldProfileImage;
     if (oldProfileImage) {
       try {
-        await StorageService.deleteFile(oldProfileImage);
-      } catch (error) {
+        await StorageService.deleteFile(oldProfileImage as string);
+      } catch (error: any) {
         return res.status(500).json({
           error:
             error.message || "Server Error: Failed to delete old profile image",
@@ -145,7 +145,7 @@ export async function uploadProfileImageController(
         fileType
       );
       res.status(201).json(response);
-    } catch (error) {
+    } catch (error: any) {
       res
         .status(500)
         .json({ error: error.message || "Failed to upload profile image" });
@@ -161,7 +161,7 @@ export async function createUserController(req: Request, res: Response) {
   try {
     await createUser(firstName, lastName, username, email, password);
     res.status(201).json({ message: "User created successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to create user" });
   }
 }
@@ -175,7 +175,7 @@ export async function getUserController(req: Request, res: Response) {
     const user = await getUser(uid);
     if (user) res.status(200).json(user);
     else res.status(404).json({ error: "User not found" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to fetch user" });
   }
 }
@@ -188,7 +188,7 @@ export async function updateUserController(req: Request, res: Response) {
   try {
     await updateUser(uid, data);
     res.status(200).json({ message: "User updated successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to update user" });
   }
 }
@@ -202,7 +202,7 @@ export async function changePasswordController(req: Request, res: Response) {
   try {
     await changePassword(userId, currentPassword, newPassword);
     res.status(200).json({ message: "Password updated successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res
       .status(500)
       .json({ error: error.message || "Failed to update password" });
@@ -221,7 +221,7 @@ export async function changeEmailController(req: Request, res: Response) {
       message:
         "A verification email has been sent to your new email address. Please check your inbox and verify it to complete the email update.",
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to update email" });
   }
 }
@@ -235,7 +235,7 @@ export async function changeUsernameController(req: Request, res: Response) {
   try {
     await changeUsername(userId, newUsername);
     res.status(200).json({ message: "Username updated successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res
       .status(500)
       .json({ error: error.message || "Failed to update username" });
@@ -251,7 +251,7 @@ export async function deleteUserController(req: Request, res: Response) {
   try {
     await deleteUser(uid, password, email);
     res.status(200).json({ message: "User deleted successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to delete user" });
   }
 }
@@ -268,7 +268,7 @@ export async function followUserController(req: Request, res: Response) {
   try {
     await followUser(userId, targetId);
     res.status(200).json({ message: "User followed successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to follow user" });
   }
 }
@@ -281,7 +281,7 @@ export async function unfollowUserController(req: Request, res: Response) {
   try {
     await unfollowUser(userId, targetId);
     res.status(200).json({ message: "User unfollowed successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to unfollow user" });
   }
 }
@@ -294,7 +294,7 @@ export async function requestFollowController(req: Request, res: Response) {
   try {
     await requestFollow(userId, targetId);
     res.status(200).json({ message: "Follow request sent successfully" });
-  } catch (error) {
+  } catch (error: any) {
     res
       .status(500)
       .json({ error: error.message || "Failed to send follow request" });
@@ -310,7 +310,7 @@ export async function approveFollowRequestController(
   try {
     await approveFollowRequest(userId, requesterId);
     res.status(200).json({ message: "Follow request approved" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error approving follow request:", error);
     res
       .status(500)
@@ -327,7 +327,7 @@ export async function rejectFollowRequestController(
   try {
     await rejectFollowRequest(userId, requesterId);
     res.status(200).json({ message: "Follow request rejected" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error rejecting follow request:", error);
     res
       .status(500)

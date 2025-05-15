@@ -177,7 +177,7 @@ export class SubscriptionController {
             
             // Reload the user data after update
             const updatedUserDoc = await getDoc(userRef);
-            if (updatedUserDoc.exists) {
+            if (updatedUserDoc.exists()) {
               userData = updatedUserDoc.data();
             }
           }
@@ -229,12 +229,12 @@ export class SubscriptionController {
       let periodEnd = formatTimestamp(userData?.subscriptionPeriodEnd);
       if (userData?.subscriptionStatus === 'active' && !periodEnd) {
         // If we have a created date, use that as the base, otherwise use now
-        const baseDate = userData?.subscriptionCreatedAt 
+        const baseDate: string | null = userData?.subscriptionCreatedAt 
           ? formatTimestamp(userData.subscriptionCreatedAt)
           : new Date().toISOString();
         
         // Calculate end date (30 days from base date)
-        const endDate = new Date(baseDate);
+        const endDate = new Date(baseDate as string);
         endDate.setDate(endDate.getDate() + 30);
         periodEnd = endDate.toISOString();
         

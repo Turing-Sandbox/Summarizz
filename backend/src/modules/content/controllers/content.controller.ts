@@ -20,7 +20,7 @@ export class ContentController {
       console.log(error);
       res
         .status(500)
-        .json({ error: error.message || "Failed to create content" });
+        .json({ error: error as string || "Failed to create content" });
     }
   }
 
@@ -29,7 +29,7 @@ export class ContentController {
     console.log(req.body);
     console.log(req.params);
     const form = new IncomingForm();
-    form.parse(req, async (err, fields, files) => {
+    form.parse(req, async (err, fields, files: any) => {
       if (err) {
         console.error("Error parsing form: ", err);
         return res.status(500).json({ error: "Failed to upload thumbnail." });
@@ -49,11 +49,11 @@ export class ContentController {
           fileType
         );
         res.status(201).json(response);
-      } catch (error) {
+      } catch (error: any) {
         console.log(error);
         res
           .status(500)
-          .json({ error: error.message || "Failed to upload thumbnail" });
+          .json({ error: error as string || "Failed to upload thumbnail" });
       }
     });
   }
@@ -65,7 +65,7 @@ export class ContentController {
     try {
       const response = await ContentService.getContent(contentId);
       res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       res
         .status(500)
@@ -81,7 +81,7 @@ export class ContentController {
     try {
       // const confirmation = await axios.get(`${apiURL}/content/${contentId}`)
       const confirmation = await ContentService.getContent(contentId);
-      const owner_id = confirmation.creatorUID;
+      const owner_id = confirmation?.creatorUID;
      
       if (userId == owner_id) {
         //check whether they are allowed to edit the content
@@ -90,7 +90,7 @@ export class ContentController {
       } else {
         throw Error("You do not have this permission.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       res
         .status(401)
@@ -104,12 +104,12 @@ export class ContentController {
 
     try {
       const confirmation = await ContentService.getContent(contentId);
-      const owner_id = confirmation.creatorUID;
+      const owner_id = confirmation?.creatorUID;
       if (userId == owner_id) {
         //check whether they are allowed to edit the content
         let file_path: string;
         let file_name: string;
-        if (confirmation.thumbnail) {
+        if (confirmation?.thumbnail) {
           file_path = decodeURIComponent(
             confirmation.thumbnail.split("/o/")[1].split("?")[0]
           ); //Converts things like "%2F" to "/", etc.
@@ -118,7 +118,7 @@ export class ContentController {
 
         console.log("Form is being created:...");
         const form = new IncomingForm();
-        form.parse(req, async (err, fields, files) => {
+        form.parse(req, async (err, fields: any, files: any) => {
           if (err) {
             console.error("Error parsing form: ", err);
             return res
@@ -149,7 +149,7 @@ export class ContentController {
             console.log("updateData");
             await ContentService.editContent(contentId, updateData);
             res.status(201).json(response);
-          } catch (error) {
+          } catch (error: any) {
             console.log(error);
             res
               .status(500)
@@ -159,7 +159,7 @@ export class ContentController {
       } else {
         res.status(401).json("You are not authorized to edit this content.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       res.status(500).json({
         error: error.message || "You are not authorized to edit this content.",
@@ -174,7 +174,7 @@ export class ContentController {
 
     try {
       const confirmation = await ContentService.getContent(contentId);
-      const owner_id = confirmation.creatorUID;
+      const owner_id = confirmation?.creatorUID;
 
       if (userId == owner_id) {
         const response = await ContentService.deleteContent(contentId);
@@ -185,7 +185,7 @@ export class ContentController {
       } else {
         throw new Error("You don't have the permission to delete this!!");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       res
         .status(500)
@@ -201,7 +201,7 @@ export class ContentController {
     try {
       const response = await ContentService.likeContent(contentId, userId);
       res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error liking content:", error);
       res.status(500).json({
         error:
@@ -218,7 +218,7 @@ export class ContentController {
     try {
       const response = await ContentService.unlikeContent(contentId, userId);
       res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unliking content:", error);
       res.status(500).json({
         error:
@@ -234,7 +234,7 @@ export class ContentController {
     try {
       const response = await ContentService.bookmarkContent(contentId, userId);
       res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error bookmarking content:", error);
       res.status(500).json({
         error:
@@ -253,7 +253,7 @@ export class ContentController {
         userId
       );
       res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unbookmarking content:", error);
       res.status(500).json({
         error:
@@ -277,7 +277,7 @@ export class ContentController {
 
       // Return success response
       res.status(200).json({ content: updatedContent }); // Return the updated content
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error sharing content:", error);
       res.status(500).json({
         error:
@@ -293,7 +293,7 @@ export class ContentController {
     try {
       const response = await ContentService.unshareContent(contentId, userId);
       res.status(200).json(response);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error unsharing content:", error);
       res.status(500).json({
         error:
@@ -308,7 +308,7 @@ export class ContentController {
     try {
       await ContentService.incrementShareCount(contentId);
       res.status(200).json("Successfully incremented!");
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({
         error:
           error instanceof Error
@@ -324,7 +324,7 @@ export class ContentController {
     try {
       await ContentService.incrementViewCount(contentId);
       res.status(200).json("Successfully incremented!");
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({
         error:
           error instanceof Error
@@ -346,7 +346,7 @@ export class ContentController {
         trendingContent,
         message: "Trending content fetched successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching trending content:", error);
       res.status(500).json({
         success: false,
@@ -365,7 +365,7 @@ export class ContentController {
         content: allContent,
         message: "All content fetched successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching all content:", error);
       res.status(500).json({
         success: false,
@@ -391,7 +391,7 @@ export class ContentController {
         personalizedContent,
         message: "Personalized content fetched successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching personalized content:", error);
 
       res.status(500).json({
@@ -419,7 +419,7 @@ export class ContentController {
         relatedCreators,
         message: "Related content creators fetched successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching related content creators:", error);
 
       res.status(500).json({
@@ -433,7 +433,7 @@ export class ContentController {
   static async getRelatedContent(req: Request, res: Response) {
     console.log("Fetching Related Content...");
     const { contentId } = req.params;
-    const userId = req.query.userId as string || null;
+    const userId = req.query.userId as string || undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
 
     try {
@@ -449,7 +449,7 @@ export class ContentController {
         relatedContent,
         message: "Related content fetched successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching related content:", error);
 
       res.status(500).json({
