@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import { StringValue } from 'ms';
+
 
 // Possible locations for .env file
 const possibleEnvPaths = [
@@ -35,8 +37,8 @@ export const env = {
   jwt: {
     secret: process.env.JWT_SECRET || 'default_secret',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'refresh_default_secret',
-    expiresIn: process.env.JWT_EXPIRES_IN || '1d',
-    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d'
+    expiresIn: process.env.JWT_EXPIRES_IN as StringValue || '1d',
+    refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN as StringValue || '30d',
   },
   ai: {
     geminiKey: process.env.GEMINI_API_KEY,
