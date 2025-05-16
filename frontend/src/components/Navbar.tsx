@@ -141,21 +141,21 @@ export default function Navbar() {
     if (!auth.isAuthenticated || !auth.user?.uid) {
       return;
     }
-    
+
     try {
       const response = await axios.get(
-        `${apiURL}/notifications/unread/${auth.user.uid}`,
+        `${apiURL}/notification/unread/${auth.user.uid}`,
         { withCredentials: true }
       );
-      
+
       const notificationsData = response.data;
       // Check if the response is a string (error message) or an object (notifications)
-      if (typeof notificationsData === 'string') {
+      if (typeof notificationsData === "string") {
         setNotifications([]);
         setUnreadCount(0);
         return;
       }
-      
+
       const notificationsArray: Notification[] =
         Object.values(notificationsData);
 
