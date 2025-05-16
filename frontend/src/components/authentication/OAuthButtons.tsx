@@ -1,34 +1,28 @@
 import { useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { apiURL } from "../../scripts/api";
 
 export function OAuthButtons() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const auth = useAuth();
-  const navigate = useNavigate();
 
   const handleOAuthSignIn = async (provider: string) => {
     try {
       setError("");
       setIsLoading(true);
 
-      // Check if we're on mobile - use redirect flow for better mobile experience
-      const useRedirect = window.innerWidth < 768;
-
-      // TODO: Add type for AuthService
-      // @ts-ignore
-      const result = await AuthService[
-        `signInWith${provider.charAt(0).toUpperCase() + provider.slice(1)}`
-      ](useRedirect);
-
-      if (result) {
-        // Set user session
-        auth.login(result.token, result.userUID);
-
-        // Redirect to home page
-        navigate("/");
+      // Get the OAuth URL from the backend
+      const response = await fetch(`${apiURL}/oauth/${provider}`);
+      const data = await response.json();
+      
+      if (data.authUrl) {
+        // Redirect to the OAuth provider's login page
+        window.location.href = data.authUrl;
+      } else {
+        throw new Error(`Failed to get ${provider} authentication URL`);
       }
+      
+      // The redirect will handle the rest of the authentication flow
+      // When the user is redirected back to our app, they'll be logged in automatically
     } catch (error) {
       setError(
         error instanceof Error

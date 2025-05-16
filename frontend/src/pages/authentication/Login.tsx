@@ -94,9 +94,12 @@ export default function Login() {
               <button type='submit' className='auth-button'>
                 Login
               </button>
-
-              <OAuthButtons />
             </form>
+            
+            <div className="oauth-container">
+              <p className="oauth-separator">OR</p>
+              <OAuthButtons />
+            </div>
 
             <p>
               Don&apos;t have an account?{" "}

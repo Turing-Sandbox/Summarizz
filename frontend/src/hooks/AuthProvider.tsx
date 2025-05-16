@@ -31,17 +31,27 @@ export default function AuthProvider({
   useEffect(() => {
     const initializeUser = async () => {
       try {
+        // Check if we have cookies before attempting to refresh
         const res = await axios.post(
           `${apiURL}/user/refresh-token`,
           {},
-          { withCredentials: true }
+          { 
+            withCredentials: true,
+            // Add a timeout to prevent long-hanging requests
+            timeout: 5000
+          }
         );
 
         if (res.status === 200) {
           const data = res.data;
-          console.log("User data:", data);
+          console.log("Token refreshed successfully");
 
-          await getUserData(data.userUID);
+          // Only try to get user data if we have a userUID
+          if (data.userUID) {
+            await getUserData(data.userUID);
+          } else {
+            console.warn("No userUID received from refresh token endpoint");
+          }
         }
       } catch (err) {
         console.error("Auto-login failed", err);
