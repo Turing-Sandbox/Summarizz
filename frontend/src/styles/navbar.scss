@@ -26,7 +26,7 @@
   top: 0;
   left: 0;
   margin: var(--navbar-margin);
-  z-index: 2;
+  z-index: 5;
   display: flex;
   align-items: center;
 }
@@ -127,7 +127,7 @@
   right: 0;
   padding: 10px 30px;
   margin: var(--navbar-margin);
-  z-index: 2;
+  z-index: 10;
   min-width: 150px;
 }
 
@@ -179,7 +179,7 @@
   top: 90px;
   right: -150px;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: 10;
   width: 400px;
 }
 
@@ -277,7 +277,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 50%;
-  z-index: 2;
+  z-index: 10;
 }
 
 .navbar-page-overlay {
@@ -289,7 +289,7 @@
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  z-index: 1;
+  z-index: 2;
 }
 
 .close-menu {
