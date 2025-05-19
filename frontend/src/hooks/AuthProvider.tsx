@@ -5,12 +5,15 @@ import { fetchUser } from "../services/userService";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
 import LoadingPage from "../pages/loading/LoadingPage";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthProvider({
   children,
 }: React.PropsWithChildren<object>) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   const login = async (userUID: string) => {
     await getUserData(userUID);
@@ -25,6 +28,7 @@ export default function AuthProvider({
 
     if (logoutRequest.status === 200) {
       setUser(null);
+      navigate("/authentication/login");
     }
   };
 
