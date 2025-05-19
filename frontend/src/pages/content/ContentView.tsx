@@ -21,7 +21,7 @@ import {
   ShareIcon as ShareIconOutline,
 } from "@heroicons/react/24/outline";
 import CommentList from "../../components/content/CommentList";
-import { normalizeContentDates } from "../../services/contentHelper";
+import { normalizeContentDates } from "../../utils/contentHelper";
 
 /**
  * Page() -> JSX.Element
