@@ -1,9 +1,9 @@
 import axios from "axios";
 import { apiURL } from "../scripts/api";
 
-export const AuthenticationService = {
+export class AuthenticationService {
   // Existing email/password authentication
-  async register(
+  static async register(
     firstName: string,
     lastName: string,
     username: string,
@@ -28,9 +28,9 @@ export const AuthenticationService = {
 
       throw new Error(message);
     }
-  },
+  }
 
-  async login(email: string, password: string) {
+  static async login(email: string, password: string) {
     try {
       const response = await axios.post(`${apiURL}/user/login`, {
         email,
@@ -46,18 +46,18 @@ export const AuthenticationService = {
 
       throw new Error(message);
     }
-  },
+  }
 
   // OAuth authentication methods
-  async signInWithGoogle(useRedirect = false) {
+  static async signInWithGoogle(useRedirect = false) {
     return this.signInWithProvider("google", useRedirect);
-  },
+  }
 
-  async signInWithGithub(useRedirect = false) {
+  static async signInWithGithub(useRedirect = false) {
     return this.signInWithProvider("github", useRedirect);
-  },
+  }
 
-  async signInWithProvider(provider: string, useRedirect = false) {
+  static async signInWithProvider(provider: string, useRedirect = false) {
     try {
       // Only proceed if we're in the browser environment
       if (typeof window === "undefined") return null;
@@ -131,9 +131,9 @@ export const AuthenticationService = {
 
       throw new Error(message);
     }
-  },
+  }
 
-  async handleCallbackResult(token: string) {
+  static async handleCallbackResult(token: string) {
     try {
       // Verify the token with our backend
       const response = await axios.post(`${apiURL}/oauth/verify`, {
@@ -153,9 +153,9 @@ export const AuthenticationService = {
 
       throw new Error(message);
     }
-  },
+  }
 
-  async logout() {
+  static async logout() {
     try {
       await axios.post(`${apiURL}/user/logout`);
       return true;
@@ -167,5 +167,5 @@ export const AuthenticationService = {
 
       throw new Error(message);
     }
-  },
-};
+  }
+}
