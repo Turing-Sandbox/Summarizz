@@ -1,7 +1,7 @@
 import axios from "axios";
 import { apiURL } from "../scripts/api";
 
-export const AuthService = {
+export const AuthenticationService = {
   // Existing email/password authentication
   async register(
     firstName: string,
