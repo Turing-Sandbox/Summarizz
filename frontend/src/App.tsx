@@ -51,6 +51,9 @@ import "./styles/summarizzPro.scss";
 import "./styles/global.scss";
 import "./styles/background.scss";
 import "./styles/colors.scss";
+
+import "./styles/toast-notification.scss";
+
 import NotFound from "./pages/error/404";
 
 export default function App() {
