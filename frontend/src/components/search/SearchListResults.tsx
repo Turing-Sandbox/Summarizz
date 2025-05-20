@@ -3,7 +3,7 @@ import { User } from "../../models/User";
 import { Content } from "../../models/Content";
 import { useSearchParams } from "react-router-dom";
 import ContentSearchResult from "./ContentSearchResult";
-import UserSearchResults from "./UserSearchResult";
+import UserSearchResult from "./UserSearchResult";
 import { SearchService } from "../../services/SearchService";
 
 function SearchListResults({
@@ -94,7 +94,7 @@ function SearchListResults({
       setUserStartingPoint(uniqueUsers[uniqueUsers.length - 1]?.uid || null);
 
       // Enable or disable the "Fetch more" button based on the number of users
-      setUserDisabled(usersReturned.length + uniqueUsers.length < 5);
+      setUserDisabled(!userSearchResults.nextStartingPoint);
     } else {
       setUserDisabled(true); // Disable the button if no unique users are found
     }
@@ -143,8 +143,8 @@ function SearchListResults({
         uniqueContents[uniqueContents.length - 1]?.uid || null
       );
 
-      // Enable or disable the "Fetch more" button based on the number of users
-      setContentDisabled(contentReturned.length + uniqueContents.length < 5);
+      // Enable or disable the "Fetch more" button based on the number of contents
+      setContentDisabled(!searchContentResults.nextStartingPoint);
     } else {
       setContentDisabled(true); // Disable the button if no unique content are found
     }
@@ -163,10 +163,11 @@ function SearchListResults({
         ) : (
           usersReturned.map((user: User, index) => (
             <div key={index} className='searchItem'>
-              <UserSearchResults user={user} />
+              <UserSearchResult user={user} />
             </div>
           ))
         )}
+        {fetching && <p>Loading...</p>}
         {!userDisabled && (
           <button className='fetchMoreButton' onClick={fetchUserData}>
             Fetch more users
@@ -183,7 +184,7 @@ function SearchListResults({
             </div>
           ))
         )}
-
+        {fetching && <p>Loading...</p>}
         {!contentDisabled && (
           <button className='fetchMoreButton' onClick={fetchContentData}>
             Fetch more contents
