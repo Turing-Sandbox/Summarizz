@@ -9,6 +9,8 @@ import { Content } from "../../models/Content";
 import ContentPreviewPopup from "../../components/content/ContentPreviewPopup";
 import ContentTile from "../../components/content/ContentTile";
 import { User } from "../../models/User";
+import UserService from "../../services/UserService";
+import FollowService from "../../services/FollowService";
 
 export default function Profile() {
   const { id } = useParams();
@@ -22,12 +24,9 @@ export default function Profile() {
   const [previewContent, setPreviewContent] = useState<Content | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<"created" | "shared">("created");
-  const [followUsernames, setFollowUsernames] = useState<{
-    [userId: string]: string;
-  }>({}); // Cache for usernames
+  const [followRequests, setFollowRequest] = useState<User[]>([]); // Cache for usernames
 
-  const [user, setUser] = useState<User | null>(null); // User data
-
+  const [user, setUser] = useState<User | null>(null);
   const auth = useAuth();
 
   // ----------------------------------------
@@ -42,71 +41,68 @@ export default function Profile() {
         return;
       }
 
-      try {
-        // 1. Fetch User Data
-        const userResponse = await axios.get(`${apiURL}/user/${id}`);
-        const userData = userResponse.data;
-        setUser(userData);
+      // 1. Fetch User Data
+      const user = await UserService.fetchUserWithID(id);
 
-        // 2. Fetch User's Created Content
-        if (userData?.content) {
-          const contentPromises = userData.content.map((contentId: string) =>
-            getContent(contentId)
-          );
-          await Promise.all(contentPromises);
-        }
-
-        // 3. Fetch Shared Content (only if sharedContent exists)
-        if (userData?.sharedContent) {
-          const validSharedContent = await getAndFilterSharedContent(
-            userData.sharedContent
-          );
-          setSharedContent(validSharedContent);
-        }
-
-        // 4. Check follow status (only if viewing another user's profile)
-        if (userData?.uid && userData.uid !== id) {
-          const viewerId = auth.user?.uid;
-          setIsFollowing(userData.followers?.includes(viewerId) || false);
-          setFollowRequested(
-            userData.followRequests?.includes(viewerId) || false
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
+      if (user instanceof Error) {
+        console.error("Error fetching user data:", user.message);
         setIsLoading(false);
+        return;
       }
+
+      setUser(user);
+
+      // 2. Fetch User's Created Content
+      if (user?.content) {
+        const contentPromises = user.content.map((contentId: string) =>
+          getContent(contentId)
+        );
+        await Promise.all(contentPromises);
+      }
+
+      // 3. Fetch Shared Content (only if sharedContent exists)
+      if (user?.sharedContent) {
+        const validSharedContent = await getAndFilterSharedContent(
+          user.sharedContent
+        );
+        setSharedContent(validSharedContent);
+      }
+
+      // 4. Check follow status (only if viewing another user's profile)
+      if (user?.uid && user.uid !== id) {
+        const viewerId = auth.user?.uid;
+        setIsFollowing(
+          viewerId ? user.followers?.includes(viewerId) || false : false
+        );
+        setFollowRequested(
+          viewerId ? user.followRequests?.includes(viewerId) || false : false
+        );
+      }
+
+      setIsLoading(false);
     };
-
-    console.log("Fetching data for user ID:", id);
-
-    console.log("User ID:", id);
-    console.log("Auth Content Length:", auth.user?.content?.length);
 
     fetchData();
   }, [id]);
 
-  // Fetch usernames for follow requests
+  // Fetch follow requests for the user
   useEffect(() => {
-    if (!user || !user.followRequests) return;
+    async function updateFollowRequests() {
+      if (!user || user.uid === auth.user?.uid) return;
 
-    const followRequests = user.followRequests;
+      setFollowRequest([]);
 
-    async function fetchUsernames() {
-      const usernamesMap: { [key: string]: string } = {};
-      for (const requesterId of followRequests) {
-        try {
-          const username = await getUsername(requesterId);
-          usernamesMap[requesterId] = username;
-        } catch {
-          usernamesMap[requesterId] = "Unknown User";
-        }
+      const followRequestsResponse = await FollowService.getFollowRequests(
+        user.uid
+      );
+
+      if (followRequestsResponse instanceof Error) {
+        return;
       }
-      setFollowUsernames(usernamesMap);
-    }
 
-    fetchUsernames();
+      setFollowRequest(followRequestsResponse.users);
+    }
+    updateFollowRequests();
   }, [user]);
 
   // Helper function to fetch and filter shared content
@@ -134,18 +130,18 @@ export default function Profile() {
             }
           }
 
-          // Inject user (author) info
-          try {
-            const userRes = await axios.get(
-              `${apiURL}/user/${fetchedContent.creatorUID}`
-            );
-            fetchedContent.user = userRes.data;
-          } catch {
-            console.error(
-              "Failed to fetch author for shared content:",
-              contentId
-            );
-          }
+          // TODO: QUERY USER INFO LINKED WITH CONTENT
+          // try {
+          //   const userRes = await axios.get(
+          //     `${apiURL}/user/${fetchedContent.creatorUID}`
+          //   );
+          //   fetchedContent.user = userRes.data;
+          // } catch {
+          //   console.error(
+          //     "Failed to fetch author for shared content:",
+          //     contentId
+          //   );
+          // }
 
           validContent.push(fetchedContent);
         }
@@ -186,15 +182,15 @@ export default function Profile() {
         fetchedContent.dateCreated = new Date(fetchedContent.dateCreated);
       }
 
-      // Inject user (author) info
-      try {
-        const userRes = await axios.get(
-          `${apiURL}/user/${fetchedContent.creatorUID}`
-        );
-        fetchedContent.user = userRes.data;
-      } catch {
-        console.error("Failed to fetch author for content:", contentId);
-      }
+      // TODO: QUERY USER INFO LINKED WITH CONTENT
+      // try {
+      //   const userRes = await axios.get(
+      //     `${apiURL}/user/${fetchedContent.creatorUID}`
+      //   );
+      //   fetchedContent.user = userRes.data;
+      // } catch {
+      //   console.error("Failed to fetch author for content:", contentId);
+      // }
 
       fetchedContent.uid = contentId; // Ensure the ID is set
       setContents((prevContents) => {
@@ -219,7 +215,7 @@ export default function Profile() {
    * @returns void
    */
   const handleFollow = async () => {
-    if (!auth.isAuthenticated) {
+    if (!auth.user) {
       alert("Please log in to follow users.");
       return;
     }
@@ -230,63 +226,35 @@ export default function Profile() {
       return;
     }
 
-    if (user.uid === id) {
+    if (user.uid === auth.user.uid) {
       alert("You can't follow yourself.");
       return;
     }
 
-    try {
-      let url = "";
+    // Update following status
+    let response: { message: string } | Error;
+    if (isFollowing) {
+      response = await FollowService.unfollowUser(auth.user.uid, user.uid);
+    } else {
+      response = await FollowService.followUser(auth.user.uid, user.uid);
+    }
 
-      if (isFollowing) {
-        // Unfollow
-        url = `${apiURL}/user/${auth.user?.uid}/unfollow/${id}`;
-      } else if (user.isPrivate) {
-        // Private profile: Send request, or cancel if already requested (optional)
-        if (followRequested) {
-          // cancel request (OPTIONAL: Handle Cancel Request (requires backend endpoint))
-          // url = `${apiURL}/user/${userUID}/cancel-request/${id}`;
-          // await axios.post(url); // UNCOMMENT WHEN ENDPOINT IS READY
-          // setFollowRequested(false); // OPTIONAL: Update local state
-          return; // for now
-        } else {
-          // Send Request
-          url = `${apiURL}/user/${auth.user?.uid}/request/${id}`;
-        }
-      } else {
-        // Public profile: Follow directly
-        url = `${apiURL}/user/${auth.user?.uid}/follow/${id}`;
-      }
+    // Check if the response is an error
+    if (response instanceof Error) {
+      alert(
+        `Failed to ${
+          isFollowing ? "unfollow" : "follow"
+        } user. Please try again.`
+      );
+      return;
+    }
 
-      // Only make the API call if a URL is set
-      if (url) {
-        await axios.post(url);
-
-        // Optimistically update the UI *immediately*
-        if (isFollowing) {
-          setIsFollowing(false); // Just unfollowed
-        } else if (user.isPrivate && !followRequested) {
-          setFollowRequested(true); // Just sent a request
-        } else if (!user.isPrivate) {
-          setIsFollowing(true); // Just followed directly
-
-          if (user.uid !== auth.user?.uid) {
-            await axios.post(`${apiURL}/notifications/create`, {
-              userId: user.uid,
-              notification: {
-                userId: user.uid,
-                type: "follow",
-                textPreview: `You've gained one new follower!`,
-                timestamp: Date.now(),
-                read: false,
-              },
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error handling follow/request:", error);
-      alert("An error occurred. Please try again.");
+    if (isFollowing) {
+      setIsFollowing(false); // Just unfollowed
+    } else if (user.isPrivate && !followRequested) {
+      setFollowRequested(true); // Just sent a request
+    } else if (!user.isPrivate) {
+      setIsFollowing(true); // Just followed directly
     }
   };
 
@@ -323,19 +291,37 @@ export default function Profile() {
 
   // Approve Follow Request
   const handleApproveRequest = async (requesterId: string) => {
-    try {
-      await axios.post(`${apiURL}/user/${id}/approve/${requesterId}`);
-    } catch {
+    if (!auth.user) {
+      alert("Please log in to approve follow requests.");
+      return;
+    }
+
+    const response = await FollowService.approveFollowRequest(
+      auth.user.uid,
+      requesterId
+    );
+
+    if (response instanceof Error) {
       alert("Failed to approve follow request. Please try again.");
+      return;
     }
   };
 
   // Reject Follow Request
   const handleRejectRequest = async (requesterId: string) => {
-    try {
-      await axios.post(`${apiURL}/user/${id}/reject/${requesterId}`);
-    } catch {
-      alert("Failed to reject follow request. Please try again.");
+    if (!auth.user) {
+      alert("Please log in to approve follow requests.");
+      return;
+    }
+
+    const response = await FollowService.rejectFollowRequest(
+      auth.user.uid,
+      requesterId
+    );
+
+    if (response instanceof Error) {
+      alert("Failed to approve follow request. Please try again.");
+      return;
     }
   };
 
@@ -350,19 +336,8 @@ export default function Profile() {
 
   const canViewFullProfile =
     !user?.isPrivate ||
-    user.uid === id ||
-    (user.uid && user?.followers?.includes(user.uid));
-
-  // Helper function to get username by ID (Simplified)
-  async function getUsername(userId: string): Promise<string> {
-    try {
-      const userResponse = await axios.get(`${apiURL}/user/${userId}`);
-      return userResponse.data.username || "Unknown User"; // Provide a fallback
-    } catch (error) {
-      console.error("Error fetching username:", error);
-      return "Unknown User"; // Fallback in case of error
-    }
-  }
+    (user && user.uid === id) ||
+    (user && user.uid && user?.followers?.includes(user.uid));
 
   const openPreview = (content: Content) => {
     setPreviewContent(content);
@@ -462,38 +437,38 @@ export default function Profile() {
             </div>
 
             {/* Follow Requests Section (Conditional Rendering) */}
-            {user.uid === id &&
-              user?.followRequests &&
-              user.followRequests.length > 0 && (
-                <div className='follow-requests-section'>
-                  <h3>Follow Requests</h3>
-                  <ul>
-                    {user.followRequests.map((requesterId) => (
-                      <li key={requesterId}>
-                        <span>
-                          {followUsernames[requesterId] || "Loading..."}
-                        </span>
-                        <div className='request-buttons'>
-                          <button
-                            className='icon-button approve'
-                            onClick={() => handleApproveRequest(requesterId)}
-                            title='Approve Request'
-                          >
-                            <CheckIcon className='icon check' />
-                          </button>
-                          <button
-                            className='icon-button reject'
-                            onClick={() => handleRejectRequest(requesterId)}
-                            title='Reject Request'
-                          >
-                            <XMarkIcon className='icon xmark' />
-                          </button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+            {user.uid === id && followRequests.length > 0 && (
+              <div className='follow-requests-section'>
+                <h3>Follow Requests</h3>
+                <ul>
+                  {followRequests.map((userRequesting, index) => (
+                    <li key={index}>
+                      <span>{userRequesting.username || "Loading..."}</span>
+                      <div className='request-buttons'>
+                        <button
+                          className='icon-button approve'
+                          onClick={() =>
+                            handleApproveRequest(userRequesting.uid)
+                          }
+                          title='Approve Request'
+                        >
+                          <CheckIcon className='icon check' />
+                        </button>
+                        <button
+                          className='icon-button reject'
+                          onClick={() =>
+                            handleRejectRequest(userRequesting.uid)
+                          }
+                          title='Reject Request'
+                        >
+                          <XMarkIcon className='icon xmark' />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Tabs for Created/Shared Content */}
             <div className='tabs'>

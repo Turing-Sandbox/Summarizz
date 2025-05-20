@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { apiURL } from "../../scripts/api";
-import axios from "axios";
+import { AuthenticationService } from "../../services/AuthenticationService";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -35,22 +34,16 @@ export default function ResetPassword() {
     setIsLoading(true);
     setMessage("");
 
-    try {
-      await axios.post(`${apiURL}/user/reset-password-request`, { email });
-      setMessage(
-        "✓ Reset link sent! Please check your email inbox (and spam folder) for instructions."
-      );
-      setIsButtonDisabled(true);
-    } catch (error) {
-      // Display the same message even if there's an error to prevent email enumeration
-      setMessage(
-        "✓ Reset link sent! Please check your email inbox (and spam folder) for instructions."
-      );
-      setIsButtonDisabled(true);
-      console.error("Error requesting password reset:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    await AuthenticationService.resetPassword(email);
+
+    // No need to check if the email exists, as the backend will handle that. Display no error message
+    // to avoid exposing the existence of the email to the user or email enumeration attacks.
+    setMessage(
+      "✓ Reset link sent! Please check your email inbox (and spam folder) for instructions."
+    );
+
+    setIsButtonDisabled(true);
+    setIsLoading(false);
   };
 
   return (

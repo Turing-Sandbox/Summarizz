@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { AuthService } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
+import { AuthenticationService } from "../../services/AuthenticationService";
 
 function Callback() {
   const [error, setError] = useState<string | null>(null);
@@ -11,7 +11,7 @@ function Callback() {
 
   useEffect(() => {
     const processCallbackData = async () => {
-      try {
+  
         const token = searchParams.get("token");
         const uid = searchParams.get("uid");
         const errorMsg = searchParams.get("error");
@@ -27,18 +27,17 @@ function Callback() {
         }
 
         // Verify token with backend
-        const result = await AuthService.handleCallbackResult(token);
+        const result = await AuthenticationService.handleCallbackResult(token);
+
+        if (result instanceof Error) {
+          setError(result.message || "Authentication failed");
+          return;
+        } 
 
         // Login and redirect
-        auth.login(result.token, result.userUID);
+        auth.login(result.userUID);
         navigate("/");
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message || "Authentication failed");
-        } else {
-          setError("Authentication failed");
-        }
-      }
+     
     };
 
     processCallbackData();

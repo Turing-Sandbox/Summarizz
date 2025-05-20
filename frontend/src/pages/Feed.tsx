@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
 import { useAuth } from "../hooks/useAuth";
-import { apiURL } from "../scripts/api";
-
 import { User } from "../models/User";
 import ContentList from "../components/feed/ContentList";
 
@@ -42,64 +38,65 @@ export default function Feed() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // TODO: Get list of related creators from backend instead of querying each one
   async function fetchRelatedCreators(): Promise<boolean> {
     if (!auth.user?.uid) {
       setCreatorProfiles([]);
       return false;
     }
 
-    try {
-      const creatorsResponse = await axios.get(
-        `${apiURL}/content/feed/creators/${auth.user.uid}`,
-        { timeout: 8000 }
-      );
+    // try {
+    //   const creatorsResponse = await axios.get(
+    //     `${apiURL}/content/feed/creators/${auth.user.uid}`,
+    //     { timeout: 8000 }
+    //   );
 
-      if (creatorsResponse.data && creatorsResponse.data.success) {
-        const creatorIds = creatorsResponse.data.relatedCreators || [];
+    //   if (creatorsResponse.data && creatorsResponse.data.success) {
+    //     const creatorIds = creatorsResponse.data.relatedCreators || [];
 
-        if (creatorIds.length === 0) {
-          setCreatorProfiles([]);
-          return false;
-        }
+    //     if (creatorIds.length === 0) {
+    //       setCreatorProfiles([]);
+    //       return false;
+    //     }
 
         // Profiles for each creator
-        const profiles = await Promise.all(
-          creatorIds.map(async (creatorId: string) => {
-            try {
-              const userResponse = await axios.get(
-                `${apiURL}/user/${creatorId}`,
-                { timeout: 5000 }
-              );
-              if (userResponse.data) {
-                return userResponse.data;
-              }
-              return null;
-            } catch {
-              console.error(
-                `Failed to fetch user profile for ID: ${creatorId}`
-              );
-              return null;
-            }
-          })
-        );
+        // const profiles = await Promise.all(
+        //   creatorIds.map(async (creatorId: string) => {
+        //     try {
+        //       const userResponse = await axios.get(
+        //         `${apiURL}/user/${creatorId}`,
+        //         { timeout: 5000 }
+        //       );
+        //       if (userResponse.data) {
+        //         return userResponse.data;
+        //       }
+        //       return null;
+        //     } catch {
+        //       console.error(
+        //         `Failed to fetch user profile for ID: ${creatorId}`
+        //       );
+        //       return null;
+        //     }
+        //   })
+        // );
 
-        // Filter null profiles or profiles that don't exist
-        const validProfiles = profiles.filter((profile) => profile !== null);
-        console.log("Valid creator profiles:", validProfiles);
+        // // Filter null profiles or profiles that don't exist
+        // const validProfiles = profiles.filter((profile) => profile !== null);
+        // console.log("Valid creator profiles:", validProfiles);
 
-        if (validProfiles.length > 0) {
-          setCreatorProfiles(validProfiles);
-          return true;
-        } else {
-          setCreatorProfiles([]);
-          return false;
-        }
-      } else {
-        setCreatorProfiles([]);
-      }
-    } catch {
-      setCreatorProfiles([]);
-    }
+    //     if (validProfiles.length > 0) {
+    //       setCreatorProfiles(validProfiles);
+    //       return true;
+    //     } else {
+    //       setCreatorProfiles([]);
+    //       return false;
+    //     }
+    //   } else {
+    //     setCreatorProfiles([]);
+    //   }
+    // } catch {
+    //   setCreatorProfiles([]);
+    // }
     return false;
   }
 

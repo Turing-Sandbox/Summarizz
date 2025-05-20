@@ -23,6 +23,7 @@ import jwt from "jsonwebtoken";
 import { ContentService } from "../../content/services/content.service";
 import { StorageService } from "../../storage/services/storage.service";
 import { env } from "../../../shared/config/environment";
+import { pushNotification } from "../../notification/services/notification.service";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -71,19 +72,13 @@ export async function login(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-    const token = jwt.sign(
-      { uid: user.uid, email: email },
-      env.jwt.secret,
-      {
-        expiresIn: env.jwt.expiresIn,
-      }
-    );
+    const token = jwt.sign({ uid: user.uid, email: email }, env.jwt.secret, {
+      expiresIn: env.jwt.expiresIn,
+    });
 
-     const refreshToken = jwt.sign(
-       { uid: user.uid },
-       env.jwt.refreshSecret,
-       { expiresIn: env.jwt.refreshExpiresIn }
-     );
+    const refreshToken = jwt.sign({ uid: user.uid }, env.jwt.refreshSecret, {
+      expiresIn: env.jwt.refreshExpiresIn,
+    });
 
     return {
       userUID: user.uid,
@@ -475,16 +470,27 @@ export async function followUser(userId: string, targetId: string) {
     throw new Error("User or target not found");
   }
 
-  const targetData = targetDoc.data() as User; // Use the User interface
+  const targetData = targetDoc.data() as User;
 
   if (targetData.isPrivate) {
     // Target user is private: create a follow request.
     const requests = targetData.followRequests || [];
     if (!requests.includes(userId)) {
       await updateDoc(targetRef, {
-        followRequests: arrayUnion(userId), // Use arrayUnion
+        followRequests: arrayUnion(userId),
       });
     }
+
+    // Send a notification to the target user
+    pushNotification(targetId, {
+      userId: userId,
+      username: (userDoc.data() as User).username,
+      type: "follow",
+      textPreview: `You've received a follow request!`,
+      timestamp: Date.now(),
+      read: false,
+    });
+
     //Don't do the below if it's private
     //We do not want to add the user as a follower or to the following list untill approved.
     return; // Exit the function – request only
@@ -501,6 +507,16 @@ export async function followUser(userId: string, targetId: string) {
   if (!followers.includes(userId)) {
     await updateDoc(targetRef, { followers: arrayUnion(userId) });
   }
+
+  // Send a notification to the target user
+  pushNotification(targetId, {
+    userId: userId,
+    username: (userDoc.data() as User).username,
+    type: "follow",
+    textPreview: `You've gained one new follower!`,
+    timestamp: Date.now(),
+    read: false,
+  });
 }
 
 export async function unfollowUser(userId: string, targetId: string) {

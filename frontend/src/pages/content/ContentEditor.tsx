@@ -15,7 +15,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { apiURL } from "../../scripts/api";
 import axios from "axios";
-import Toolbar from "../../components/content/Toolbar";
+import Toolbar from "../../components/content/toolbar";
 
 // TODO: Implement Edit/Create Content Logic to adapt this page based on the selected mode.
 

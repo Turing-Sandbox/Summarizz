@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-
-import axios from "axios";
-
-import { apiURL } from "../../scripts/api";
 import { OAuthButtons } from "../../components/authentication/OAuthButtons";
+import { AuthenticationService } from "../../services/AuthenticationService";
 
 export default function Login() {
   const [error, setError] = useState("");
@@ -28,32 +25,26 @@ export default function Login() {
     setError("");
 
     // 2 - Login user
-    await axios
-      .post(`${apiURL}/user/login`, user, { withCredentials: true })
-      .then((res) => {
-        if (res.status === 200 || res.status === 201) {
-          // 3 - Set User Session (Save Token and User UID)
-          auth.login(res.data.userUID);
+    const response = await AuthenticationService.login(
+      user.email,
+      user.password
+    );
 
-          // 4 - Redirect to home page
-          navigate("/");
+    // 3 - Check if response is an error
+    if (response instanceof Error) {
+      setError(response.message || "An error occurred. Please try again.");
+      return;
+    }
 
-          // 5 - Error Handling
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.error
-        ) {
-          setError(error.response.data.error);
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-      });
+    // 4 - Check if the user is logged in
+    if (response.userUID) {
+      // 5 - Set User Session (Save Token and User UID)
+      auth.login(response.userUID);
+      // 6 - Redirect to home page
+      navigate("/");
+    } else {
+      setError("An error occurred. Please try again.");
+    }
   };
 
   // Redirect to home page if user is already logged in
@@ -76,7 +67,6 @@ export default function Login() {
                 id='email'
                 placeholder='Email'
                 className='auth-input'
-                required
               />
               <input
                 type='password'
@@ -86,7 +76,6 @@ export default function Login() {
                 id='password'
                 placeholder='Password'
                 className='auth-input'
-                required
               />
 
               {error && <p className='auth-error'>{error}</p>}
@@ -95,9 +84,9 @@ export default function Login() {
                 Login
               </button>
             </form>
-            
-            <div className="oauth-container">
-              <p className="oauth-separator">OR</p>
+
+            <div className='oauth-container'>
+              <p className='oauth-separator'>OR</p>
               <OAuthButtons />
             </div>
 

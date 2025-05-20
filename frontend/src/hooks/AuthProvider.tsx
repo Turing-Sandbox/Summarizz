@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import { User } from "../models/User";
-import { fetchUser } from "../services/userService";
-import axios from "axios";
-import { apiURL } from "../scripts/api";
 import LoadingPage from "../pages/loading/LoadingPage";
+import UserService from "../services/UserService";
+import { AuthenticationService } from "../services/AuthenticationService";
+import { useNavigate } from "react-router-dom";
 
 export default function AuthProvider({
   children,
@@ -12,66 +12,49 @@ export default function AuthProvider({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const navigate = useNavigate();
+
   const login = async (userUID: string) => {
     await getUserData(userUID);
   };
 
   const logout = async () => {
-    const logoutRequest = await axios.post(
-      `${apiURL}/user/logout`,
-      {},
-      { withCredentials: true }
-    );
+    const logoutRequest = await AuthenticationService.logout();
 
-    if (logoutRequest.status === 200) {
+    if (logoutRequest) {
       setUser(null);
+      navigate("/authentication/login");
     }
   };
 
   useEffect(() => {
     const initializeUser = async () => {
-      try {
-        // Check if we have cookies before attempting to refresh
-        const res = await axios.post(
-          `${apiURL}/user/refresh-token`,
-          {},
-          { 
-            withCredentials: true,
-            // Add a timeout to prevent long-hanging requests
-            timeout: 5000
-          }
-        );
+      // Check if we have cookies before attempting to refresh
+      const response = await AuthenticationService.refreshToken();
 
-        if (res.status === 200) {
-          const data = res.data;
-          console.log("Token refreshed successfully");
-
-          // Only try to get user data if we have a userUID
-          if (data.userUID) {
-            await getUserData(data.userUID);
-          } else {
-            console.warn("No userUID received from refresh token endpoint");
-          }
-        }
-      } catch (err) {
-        console.error("Auto-login failed", err);
+      if (response instanceof Error) {
         setUser(null);
-      } finally {
         setLoading(false);
+        return;
       }
+
+      // Only try to get user data if we have a userUID
+      if (response.userUID) {
+        await getUserData(response.userUID);
+      }
+
+      setLoading(false);
     };
 
     initializeUser();
   }, []);
 
   async function getUserData(userUID: string) {
-    console.log("Fetching user data... for UID:", userUID);
-    const userData = await fetchUser(userUID);
+    const userData = await UserService.fetchUserWithID(userUID);
 
     if (!(userData instanceof Error)) {
       setUser(userData || null);
     } else {
-      console.error("Failed to fetch user:", userData);
       setUser(null);
     }
   }
