@@ -129,17 +129,18 @@ export default function ManageProfile() {
     }
 
     // 3- Update user profile
-    try {
-      const res = await UserService.updateUserWithID(user);
 
-      // 3- Handle error response
-      if (res instanceof Error) {
-        setErrorEditProfile(res.message);
-        return;
-      }
-    } catch {
-      setErrorEditProfile("Failed to update profile. Please try again.");
+    const res = await UserService.updateUserWithID(user);
+
+    // 3- Handle error response
+    if (res instanceof Error) {
+      setErrorEditProfile(res.message);
+      return;
     }
+
+    // 4- Update user in auth provider
+    auth.setUser(user);
+    setSuccessEditProfile("Profile has been successfully updated.");
   };
 
   /**
@@ -172,7 +173,7 @@ export default function ManageProfile() {
       return;
     }
 
-    user.profileImage = response.url;
+    setUser({ ...user, profileImage: response.url });
   };
 
   /**
@@ -259,6 +260,7 @@ export default function ManageProfile() {
       return;
     }
 
+    auth.setUser({ ...auth.user, email: newEmail });
     setSuccessEditEmail(response.message);
   };
 
@@ -310,6 +312,7 @@ export default function ManageProfile() {
       return;
     }
 
+    auth.setUser({ ...auth.user, username: newUsername });
     setSuccessEditUsername(response.message);
   };
 

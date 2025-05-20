@@ -68,7 +68,7 @@ export default function Contact() {
         Someone from our team will respond to you within 48 hours.
       </p>
 
-      // TODO: IMPLEMENT CONTACT MODULE WITH DATABASE DETAILS STORED FOR ACCESSIBILITY BY ALL TEAM MEMBER???
+      {/* // TODO: IMPLEMENT CONTACT MODULE WITH DATABASE DETAILS STORED FOR ACCESSIBILITY BY ALL TEAM MEMBER??? */}
       <form onSubmit={handleSubmit}>
         <div className='input-group'>
           <label htmlFor='name'>Name:</label>

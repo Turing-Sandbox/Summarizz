@@ -435,10 +435,15 @@ export default function ContentView() {
     }
 
     if (isFollowing) {
-      setIsFollowing(false); // Just unfollowed
-    } else if (user.isPrivate && !followRequested) {
-      setFollowRequested(true); // Just sent a request
-    } else if (!user.isPrivate) {
+      setIsFollowing(false);
+      setFollowRequested(false);
+    } else if (creator?.isPrivate) {
+      if (!followRequested) {
+        setFollowRequested(true); // Just sent a request
+      } else {
+        setFollowRequested(false); // Optionally allow canceling request
+      }
+    } else {
       setIsFollowing(true); // Just followed directly
     }
   };

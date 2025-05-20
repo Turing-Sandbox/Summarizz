@@ -302,7 +302,7 @@ export default function Navbar() {
               ) : (
                 <div className='no-profile-picture-container'>
                   <h1 className='no-profile-picture'>
-                    {auth.user?.username[0].toUpperCase()}
+                    {auth.user?.username[0].toUpperCase() || ""}
                   </h1>
                 </div>
               )}

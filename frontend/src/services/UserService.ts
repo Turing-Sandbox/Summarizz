@@ -39,7 +39,9 @@ export default class UserService {
    * @param user - The user object to update
    * @returns Promise resolving to updated User object or Error
    */
-  static async updateUserWithID(user: User): Promise<User | Error> {
+  static async updateUserWithID(
+    user: User
+  ): Promise<{ message: string } | Error> {
     try {
       const response = await axios.put(`${apiURL}/user/${user.uid}`, user);
       return response.data;
@@ -298,7 +300,9 @@ export default class UserService {
    * @param username - The username to fetch
    * @returns Promise resolving to User object or Error
    */
-  static async getRelatedContentCreators(userId: string): Promise<User[] | Error> {
+  static async getRelatedContentCreators(
+    userId: string
+  ): Promise<User[] | Error> {
     try {
       const response = await axios.get(
         `${apiURL}/user/${userId}/related-content-creators`
@@ -306,9 +310,13 @@ export default class UserService {
       return response.data;
     } catch (error) {
       if (error instanceof Error) {
-        return new Error("Failed to fetch related content creators: " + error.message);
+        return new Error(
+          "Failed to fetch related content creators: " + error.message
+        );
       }
-      return new Error("Failed to fetch related content creators: Unknown error");
+      return new Error(
+        "Failed to fetch related content creators: Unknown error"
+      );
     }
   }
 }

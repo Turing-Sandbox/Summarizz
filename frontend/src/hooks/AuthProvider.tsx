@@ -95,7 +95,7 @@ export default function AuthProvider({
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, isAuthenticated: !!user }}
+      value={{ user, setUser, login, logout, isAuthenticated: !!user }}
     >
       {children}
       {toast && (
