@@ -3,10 +3,11 @@ import { apiURL } from "../scripts/api";
 import { User } from "../models/User";
 
 /**
- * FollowService class
+ * UserService class
  *
  * @description
- * This class provides methods to follow, unfollow, and manage follow requests between users.
+ * This class provides methods for user management, including fetching,
+ * updating, deleting users, and managing user-related actions.
  */
 export default class UserService {
   /**
@@ -31,13 +32,13 @@ export default class UserService {
   }
 
   /**
-   * updateUserWithID(user: User) -> Promise<User | Error>
+   * updateUserWithID(user: User) -> Promise<{ message: string } | Error>
    *
    * @description
    * Updates user data in the backend using the provided user object
    *
    * @param user - The user object to update
-   * @returns Promise resolving to updated User object or Error
+   * @returns Promise resolving to a success message or Error
    */
   static async updateUserWithID(
     user: User

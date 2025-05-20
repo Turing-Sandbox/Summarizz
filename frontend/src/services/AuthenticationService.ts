@@ -10,7 +10,7 @@ import { apiURL } from "../scripts/api";
  */
 export class AuthenticationService {
   /**
-   * register() -> Promise<{ userUID: string; token: string; refreshToken: string } | Error>
+   * register() -> Promise<{ userUID: string; } | Error>
    *
    * @description
    * Registers a new user by sending a POST request to the backend
@@ -57,7 +57,7 @@ export class AuthenticationService {
   }
 
   /**
-   * login() -> Promise<{ userUID: string; token: string; refreshToken: string } | Error>
+   * login() -> Promise<{ userUID: string; } | Error>
    *
    * @description
    * Logs in a user by sending a POST request to the backend
