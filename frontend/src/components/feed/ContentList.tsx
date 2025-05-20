@@ -3,7 +3,7 @@ import ContentTile from "../content/ContentTile";
 import { Content } from "../../models/Content";
 import { apiURL } from "../../scripts/api";
 import axios from "axios";
-import { normalizeContentDates } from "../../services/contentHelper";
+import { normalizeContentDates } from "../../utils/contentHelper";
 import { useAuth } from "../../hooks/useAuth";
 import ContentPreviewPopup from "../content/ContentPreviewPopup";
 

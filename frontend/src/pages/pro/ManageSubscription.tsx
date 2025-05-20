@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import { apiURL } from "../../scripts/api";
-import axios from "axios";
 import { SubscriptionStatus } from "../../models/SubscriptionStatus";
+import { SubscriptionService } from "../../services/SubscriptionService";
 
 export default function ManageSubscription() {
   const navigate = useNavigate();
@@ -29,43 +28,28 @@ export default function ManageSubscription() {
     setLoading(true);
     setError("");
 
-    try {
-      const url = forceRefresh
-        ? `${apiURL}/subscription/status?forceRefresh=true&t=${new Date().getTime()}`
-        : `${apiURL}/subscription/status`;
+    const subscriptionStatus = await SubscriptionService.getSubscriptionStatus(
+      forceRefresh
+    );
 
-      console.log("Fetching subscription status with URL:", url);
-
-      const response = await axios.get(url, {
-        withCredentials: true,
-      });
-
-      if (response.data.periodEnd) {
-        console.log("Parsed date:", new Date(response.data.periodEnd));
-        console.log("Timestamp:", new Date(response.data.periodEnd).getTime());
-      }
-
-      // Reset cancelSuccess if the status is already canceled to avoid UI conflicts
-      if (response.data.status === "canceled") {
+    if (subscriptionStatus instanceof Error) {
+      setError(subscriptionStatus.message);
+    } else {
+      if (subscriptionStatus.status === "canceled") {
         setCancelSuccess(false);
       }
-
-      setSubscription(response.data);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.error ||
-            "Failed to load subscription details. Please try again."
-        );
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
+      setSubscription(subscriptionStatus);
     }
+
+    setLoading(false);
   };
 
   const handleCancelSubscription = async () => {
+    if (!auth.isAuthenticated) {
+      navigate("/authentication/login?redirect=/pro/manage");
+      return;
+    }
+
     if (
       !window.confirm(
         "Are you sure you want to cancel your subscription? You'll still have access until the end of your current billing period."
@@ -77,18 +61,14 @@ export default function ManageSubscription() {
     setCancelLoading(true);
     setError("");
 
-    try {
-      // Store the current subscription data before cancellation
-      const currentSubscription = subscription ? { ...subscription } : null;
+    // Store the current subscription data before cancellation
+    const currentSubscription = subscription ? { ...subscription } : null;
 
-      await axios.post(
-        `${apiURL}/subscription/cancel`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+    const cancellationResult = await SubscriptionService.cancelSubscription();
 
+    if (cancellationResult instanceof Error) {
+      setError(cancellationResult.message);
+    } else {
       // Force the subscription status to be 'canceled' immediately in the UI
       // but preserve all other data from the current subscription
       setSubscription((prev) => {
@@ -110,18 +90,9 @@ export default function ManageSubscription() {
         setSubscription((s) => s ?? currentSubscription);
         fetchSubscriptionStatus(true);
       }, 1500);
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.error ||
-            "Failed to cancel subscription. Please try again."
-        );
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setCancelLoading(false);
     }
+
+    setCancelLoading(false);
   };
 
   const formatDate = (dateString: string | null) => {
