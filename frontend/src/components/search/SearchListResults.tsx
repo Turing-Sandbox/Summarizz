@@ -6,7 +6,7 @@ import ContentSearchResult from "./ContentSearchResult";
 import UserSearchResults from "./UserSearchResult";
 import { SearchService } from "../../services/SearchService";
 
-function SearchListContent({
+function SearchListResults({
   userSearchResults,
   contentSearchResults,
 }: {
@@ -212,7 +212,7 @@ const SearchList = (props: {
 }) => {
   return (
     <Suspense fallback={<div>Loading search results...</div>}>
-      <SearchListContent {...props} />
+      <SearchListResults {...props} />
     </Suspense>
   );
 };

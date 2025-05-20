@@ -12,7 +12,7 @@ import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
 import { SearchService } from "../services/SearchService";
-import SearchList from "./search/SearchListContent";
+import SearchList from "./search/SearchListResults";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -110,12 +110,11 @@ export default function Navbar() {
     e.preventDefault();
 
     // Validation
-    if (!query) {
+    const trimmedQuery = query.trim();
+    if (trimmedQuery === "") {
       setShowSearchResults(false);
       return;
     }
-
-    const trimmedQuery = query.trim();
 
     // Search Queries
     const userSearchResults = await SearchService.searchUsers(trimmedQuery);
