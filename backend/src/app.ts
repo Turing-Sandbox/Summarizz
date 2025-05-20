@@ -35,17 +35,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// TODO: re-enable rate limiting once we are not sending 156+ requests per page refresh
 // Apply rate limiting
-// const limiter = rateLimit({
-//   ...appConfig.rateLimiting,
-//   handler: (req, res) => {
-//     res.status(429).json(
-//       createErrorResponse('Too many requests, please try again later')
-//     );
-//   },
-// });
-// app.use(limiter);
+const limiter = rateLimit({
+  ...appConfig.rateLimiting,
+  handler: (req, res) => {
+    res.status(429).json(
+      createErrorResponse('Too many requests, please try again later')
+    );
+  },
+});
+app.use(limiter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

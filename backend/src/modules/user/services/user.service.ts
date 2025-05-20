@@ -23,6 +23,7 @@ import jwt from "jsonwebtoken";
 import { ContentService } from "../../content/services/content.service";
 import { StorageService } from "../../storage/services/storage.service";
 import { env } from "../../../shared/config/environment";
+import { pushNotification } from "../../notification/services/notification.service";
 
 // ----------------------------------------------------------
 // --------------------- Authentication ---------------------
@@ -71,19 +72,13 @@ export async function login(email: string, password: string) {
       password
     );
     const user = userCredential.user;
-    const token = jwt.sign(
-      { uid: user.uid, email: email },
-      env.jwt.secret,
-      {
-        expiresIn: env.jwt.expiresIn,
-      }
-    );
+    const token = jwt.sign({ uid: user.uid, email: email }, env.jwt.secret, {
+      expiresIn: env.jwt.expiresIn,
+    });
 
-     const refreshToken = jwt.sign(
-       { uid: user.uid },
-       env.jwt.refreshSecret,
-       { expiresIn: env.jwt.refreshExpiresIn }
-     );
+    const refreshToken = jwt.sign({ uid: user.uid }, env.jwt.refreshSecret, {
+      expiresIn: env.jwt.refreshExpiresIn,
+    });
 
     return {
       userUID: user.uid,
@@ -111,16 +106,9 @@ export async function getUser(uid: string) {
 
 export async function updateUser(
   uid: string,
-  data: Partial<{
-    email: string;
-    username: string;
-    isPrivate: boolean;
-    usernameLower: string;
-  }>
+  data: Partial<User>
 ) {
-  data.usernameLower = data.username?.toLowerCase();
-  console.log(`updating user ${data.username}: ${JSON.stringify(data)}`);
-  await updateDoc(doc(db, "users", uid), data);
+  await updateDoc(doc(db, "users", uid), { ...data });
 }
 
 export async function createUser(
@@ -287,6 +275,50 @@ export async function deleteUser(uid: string, password: string, email: string) {
 
   // 4 - Delete the user from Firebase Authentication
   firebaseUser.delete();
+}
+
+export async function getRelatedContentCreators(uid: string): Promise<User[]> {
+  // Find related content creators based on the user current following.
+  // 1 - Get the user document for user uid
+  const user = await getUser(uid);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // 2 - Get the following list of iser for the user found in step 1
+  const following: string[] = user.following || [];
+  if (following.length === 0) {
+    return [];
+  }
+
+  // 3 - Get the list of users that are followed by the users found in step 2
+  const secondDegreeSet = new Set<string>();
+  for (const followedUserId of following) {
+    const followedUser = await getUser(followedUserId);
+    if (followedUser && followedUser.following) {
+      for (const secondDegreeId of followedUser.following) {
+        secondDegreeSet.add(secondDegreeId);
+      }
+    }
+  }
+
+  // 4 - Filter the list of users to remove the user itself and the users already followed by the user
+  secondDegreeSet.delete(uid);
+  for (const alreadyFollowingId of following) {
+    secondDegreeSet.delete(alreadyFollowingId);
+  }
+
+  // 5 - Return the list of users up to 10 users (fetch their user data)
+  const relatedUserIds = Array.from(secondDegreeSet).slice(0, 10);
+  const relatedUsers: User[] = [];
+  for (const relatedUserId of relatedUserIds) {
+    const relatedUser = await getUser(relatedUserId);
+    if (relatedUser) {
+      relatedUsers.push(relatedUser as User);
+    }
+  }
+
+  return relatedUsers;
 }
 
 // ----------------------------------------------------------
@@ -475,16 +507,27 @@ export async function followUser(userId: string, targetId: string) {
     throw new Error("User or target not found");
   }
 
-  const targetData = targetDoc.data() as User; // Use the User interface
+  const targetData = targetDoc.data() as User;
 
   if (targetData.isPrivate) {
     // Target user is private: create a follow request.
     const requests = targetData.followRequests || [];
     if (!requests.includes(userId)) {
       await updateDoc(targetRef, {
-        followRequests: arrayUnion(userId), // Use arrayUnion
+        followRequests: arrayUnion(userId),
       });
     }
+
+    // Send a notification to the target user
+    pushNotification(targetId, {
+      userId: userId,
+      username: (userDoc.data() as User).username,
+      type: "follow",
+      textPreview: `You've received a follow request!`,
+      timestamp: Date.now(),
+      read: false,
+    });
+
     //Don't do the below if it's private
     //We do not want to add the user as a follower or to the following list untill approved.
     return; // Exit the function – request only
@@ -501,6 +544,16 @@ export async function followUser(userId: string, targetId: string) {
   if (!followers.includes(userId)) {
     await updateDoc(targetRef, { followers: arrayUnion(userId) });
   }
+
+  // Send a notification to the target user
+  pushNotification(targetId, {
+    userId: userId,
+    username: (userDoc.data() as User).username,
+    type: "follow",
+    textPreview: `You've gained one new follower!`,
+    timestamp: Date.now(),
+    read: false,
+  });
 }
 
 export async function unfollowUser(userId: string, targetId: string) {

@@ -1,11 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import { useEffect, useRef, useState } from "react";
-import axios from "axios";
-import { apiURL } from "../../scripts/api";
+import { useEffect, useState } from "react";
 import { User } from "../../models/User";
+import UserService from "../../services/UserService";
 
-// TODO: ADD LOGIC TO REALOAD THE USER DATA IN THE AUTH PROVIDER AFTER EDITING
 export default function ManageProfile() {
   // ---------------------------------------
   // -------------- Variables --------------
@@ -49,22 +47,6 @@ export default function ManageProfile() {
   // ---------------------------------------
   // ------------ Event Handlers -----------
   // ---------------------------------------
-  /**
-   * @description
-   * Used to prevent fetching user data on page load.
-   *
-   * @returns void
-   */
-  const hasFetchedData = useRef(false);
-  useEffect(() => {
-    if (!hasFetchedData.current) {
-      if (typeof id === "string") {
-        getUserInfo(id);
-      }
-      hasFetchedData.current = true;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // Update profile image if it exists
   useEffect(() => {
@@ -146,18 +128,18 @@ export default function ManageProfile() {
     }
 
     // 3- Update user profile
-    try {
-      const res = await axios.put(`${apiURL}/user/${id}`, user);
 
-      // 3- Handle response
-      if (res.status === 200 || res.status === 201) {
-        setSuccessEditProfile("Profile updated successfully.");
-      } else {
-        setErrorEditProfile("An error occurred. Please try again.");
-      }
-    } catch {
-      setErrorEditProfile("Failed to update profile. Please try again.");
+    const res = await UserService.updateUserWithID(user);
+
+    // 3- Handle error response
+    if (res instanceof Error) {
+      setErrorEditProfile(res.message);
+      return;
     }
+
+    // 4- Update user in auth provider
+    auth.setUser(user);
+    setSuccessEditProfile("Profile has been successfully updated.");
   };
 
   /**
@@ -180,27 +162,17 @@ export default function ManageProfile() {
 
     const oldProfileImage = user.profileImage || "";
 
-    try {
-      const formData = new FormData();
-      formData.append("profileImage", profileImage);
-      formData.append("oldProfileImage", oldProfileImage);
+    const response = await UserService.uploadProfileImage(
+      profileImage,
+      oldProfileImage
+    );
 
-      const res = await axios.post(
-        `${apiURL}/user/upload-profile-image`,
-        formData
-      );
-
-      if (res.status === 200 || res.status === 201) {
-        user.profileImage = res.data.url;
-      } else {
-        console.error("Error uploading profile image:", res);
-        setErrorEditProfile("An error occurred. Please try again.");
-        return;
-      }
-    } catch {
-      setErrorEditProfile("Failed to upload profile image. Please try again.");
+    if (response instanceof Error) {
+      setErrorEditProfile(response.message);
       return;
     }
+
+    setUser({ ...user, profileImage: response.url });
   };
 
   /**
@@ -218,60 +190,24 @@ export default function ManageProfile() {
     setErrorEditPassword("");
     setSuccessEditPassord("");
 
-    // Validation
-    if (!currentPassword) {
-      setErrorEditPassword("Please provide your current password.");
+    if (!id) {
+      setErrorEditPassword("No user found.");
       return;
     }
 
-    if (!newPassword || !confirmPassword) {
-      setErrorEditPassword("Please provide a new password.");
+    const response = await UserService.changePassword(
+      id,
+      currentPassword,
+      newPassword,
+      confirmPassword
+    );
+
+    if (response instanceof Error) {
+      setErrorEditPassword(response.message);
       return;
     }
 
-    if (newPassword !== confirmPassword) {
-      setErrorEditPassword("New passwords do not match.");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setErrorEditPassword("Password must be at least 8 characters long.");
-      return;
-    }
-
-    if (newPassword === currentPassword) {
-      setErrorEditPassword(
-        "New password cannot be the same as the current password."
-      );
-      return;
-    }
-
-    if (
-      !/[a-z]/.test(newPassword) ||
-      !/[A-Z]/.test(newPassword) ||
-      !/[0-9]/.test(newPassword)
-    ) {
-      setErrorEditPassword(
-        "Password must contain at least one number, one lowercase and one uppercase letter."
-      );
-      return;
-    }
-
-    try {
-      // Send a request to the backend to change the password
-      await axios.post(`${apiURL}/user/${id}/change-password`, {
-        userId: id,
-        currentPassword,
-        newPassword,
-      });
-      setSuccessEditPassord("Password has been successfully updated.");
-    } catch (error) {
-      const errorMessage =
-        (axios.isAxiosError(error) && error.response?.data?.error) ||
-        (error instanceof Error ? error.message : "Unknown error") ||
-        "Failed to update password.";
-      setErrorEditPassword(errorMessage);
-    }
+    setSuccessEditPassord("Password has been successfully updated.");
   };
 
   /**
@@ -289,7 +225,7 @@ export default function ManageProfile() {
     setErrorEditEmail("");
     setSuccessEditEmail("");
 
-    if (!auth.user) {
+    if (!auth.user || !id) {
       setErrorEditEmail("No user is signed in.");
       return;
     }
@@ -311,21 +247,20 @@ export default function ManageProfile() {
       return;
     }
 
-    try {
-      // Send a request to the backend to change the email
-      const res = await axios.post(`${apiURL}/user/${id}/change-email`, {
-        currentPassword,
-        newEmail,
-      });
+    // Send a request to the backend to change the email
+    const response = await UserService.changeEmail(
+      id,
+      newEmail,
+      currentPassword
+    );
 
-      setSuccessEditEmail(res.data.message);
-    } catch (error) {
-      const errorMessage =
-        (axios.isAxiosError(error) && error.response?.data?.error) ||
-        (error instanceof Error ? error.message : "Unknown error") ||
-        "Failed to update information.";
-      setErrorEditEmail(errorMessage);
+    if (response instanceof Error) {
+      setErrorEditEmail(response.message);
+      return;
     }
+
+    auth.setUser({ ...auth.user, email: newEmail });
+    setSuccessEditEmail(response.message);
   };
 
   /**
@@ -344,7 +279,7 @@ export default function ManageProfile() {
     setErrorEditUsername("");
     setSuccessEditUsername("");
 
-    if (!user) {
+    if (!auth.user || !id) {
       setErrorEditUsername("No user is signed in.");
       return;
     }
@@ -354,7 +289,6 @@ export default function ManageProfile() {
       return;
     }
 
-    // Valid format for username
     if (newUsername.length < 3 || newUsername.length > 20) {
       setErrorEditUsername(
         "Username must be between 3 and 20 characters in length."
@@ -369,20 +303,16 @@ export default function ManageProfile() {
       return;
     }
 
-    try {
-      // Send a request to the backend to change the email
-      const res = await axios.post(`${apiURL}/user/${id}/change-username`, {
-        newUsername,
-      });
+    // Send a request to the backend to change the email
+    const response = await UserService.changeUsername(id, newUsername);
 
-      setSuccessEditUsername(res.data.message);
-    } catch (error) {
-      const errorMessage =
-        (axios.isAxiosError(error) && error.response?.data?.error) ||
-        (error instanceof Error ? error.message : "Unknown error") ||
-        "Failed to update information.";
-      setErrorEditUsername(errorMessage);
+    if (response instanceof Error) {
+      setErrorEditUsername(response.message);
+      return;
     }
+
+    auth.setUser({ ...auth.user, username: newUsername });
+    setSuccessEditUsername(response.message);
   };
 
   const handleDeleteAccount = async (
@@ -403,56 +333,24 @@ export default function ManageProfile() {
       return;
     }
 
-    try {
-      // Send a request to the backend to delete the account
-      const res = await axios.delete(`${apiURL}/user/${id}`, {
-        data: {
-          email,
-          password,
-        },
-      });
-
-      setSuccessDeleteAccount(res.data.message);
-
-      // Log the user out
-      auth.logout();
-    } catch (error) {
-      const errorMessage =
-        (axios.isAxiosError(error) && error.response?.data?.error) ||
-        (error instanceof Error ? error.message : "Unknown error") ||
-        "Failed to delete account.";
-      setErrorDeleteAccount(errorMessage);
+    if (!id) {
+      setErrorDeleteAccount("No user found.");
+      return;
     }
+
+    const response = await UserService.deleteUserWithID(id, email, password);
+
+    if (response instanceof Error) {
+      setErrorDeleteAccount(response.message);
+      return;
+    }
+
+    setSuccessDeleteAccount(response.message);
+
+    // Log the user out
+    auth.logout();
   };
 
-  // --------------------------------------
-  // ------------- Functions --------------
-  // --------------------------------------
-
-  /**
-   * getUserInfo() -> void
-   *
-   * @description
-   * Fetches user data from the backend using the id provided in the route, this
-   * will fetch { firstName, lastName, bio, profileImage, followers, followRequests }
-   * from the backend and set the user accordingly.
-   *
-   * @param userId - The id of the user to fetch
-   */
-  function getUserInfo(userId: string) {
-    axios
-      .get(`${apiURL}/user/${userId}`)
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching user info:", error);
-      });
-  }
-
-  // --------------------------------------
-  // -------------- Render ----------------
-  // --------------------------------------
   return (
     <div className='main-content'>
       {/******************** EDIT PROFILE  ********************/}
@@ -460,7 +358,7 @@ export default function ManageProfile() {
         <h2>Edit Profile</h2>
 
         <form onSubmit={handleEditProfile}>
-          {/* TODO: Profile Image */}
+          {/* Profile Image */}
           <div className='profile-image-section'>
             <div className='input-group'>
               {profileImagePreview ? (
@@ -493,7 +391,7 @@ export default function ManageProfile() {
           </div>
 
           <div className='form-group'>
-            {/* TODO: First Name */}
+            {/* First Name */}
             <div className='input-group'>
               <label htmlFor='firstName'>First Name *</label>
               <input
@@ -507,7 +405,7 @@ export default function ManageProfile() {
               />
             </div>
 
-            {/* TODO: Last Name */}
+            {/* Last Name */}
             <div className='input-group'>
               <label htmlFor='lastName'>Last Name *</label>
               <input
@@ -522,7 +420,7 @@ export default function ManageProfile() {
             </div>
           </div>
 
-          {/* TODO: Bio */}
+          {/* Bio */}
           <div className='input-group'>
             <label htmlFor='bio'>Bio</label>
             <textarea
@@ -535,7 +433,7 @@ export default function ManageProfile() {
             />
           </div>
 
-          {/* TODO: Phone */}
+          {/* Phone */}
           <div className='input-group'>
             <label htmlFor='phone'>Phone</label>
             <input
@@ -549,7 +447,7 @@ export default function ManageProfile() {
             />
           </div>
 
-          {/* TODO: Date of Birth */}
+          {/* Date of Birth */}
           <div className='input-group'>
             <label htmlFor='dob'>Date of Birth</label>
             <input

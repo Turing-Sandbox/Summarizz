@@ -21,6 +21,8 @@ import {
   ShareIcon as ShareIconOutline,
 } from "@heroicons/react/24/outline";
 import CommentList from "../../components/content/CommentList";
+import UserService from "../../services/UserService";
+import FollowService from "../../services/FollowService";
 import { normalizeContentDates } from "../../utils/contentHelper";
 
 /**
@@ -53,6 +55,7 @@ export default function ContentView() {
   const [bookmarks, setBookmarks] = useState(0);
 
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followRequested, setFollowRequested] = useState(false);
 
   const [isShared, setIsShared] = useState(false);
   const [shareCount, setShareCount] = useState(0);
@@ -61,29 +64,6 @@ export default function ContentView() {
   const [firstRender, setFirstRender] = useState(true);
 
   const navigate = useNavigate();
-
-  // ---------------------------------------
-  // -------------- Data Fetching ----------
-  // ---------------------------------------
-
-  /**
-   * fetchLoggedInuser() -> void
-   *
-   * @description
-   * Fetches the logged in user's information from the backend using the userUID
-   * provided in the AuthProvider, this will set the user accordingly.
-   *
-   * @returns void
-   */
-  const fetchUser = async (id: string): Promise<User | undefined> => {
-    try {
-      const res = await axios.get(`${apiURL}/user/${id}`);
-      return res.data;
-    } catch (error) {
-      console.error("Error fetching logged-in user:", error);
-      return undefined;
-    }
-  };
 
   // ---------------------------------------
   // -------------- useEffects -------------
@@ -115,10 +95,18 @@ export default function ContentView() {
         fetchedContent.uid = id;
         setContent(contentResponse.data as Content);
 
-        // Fetch creator info if available.
+        // TODO: Fetch creator info with content in same request.
         if (fetchedContent.creatorUID) {
-          const creator = await fetchUser(fetchedContent.creatorUID);
-          if (creator) {
+          const creator = await UserService.fetchUserWithID(
+            fetchedContent.creatorUID
+          );
+
+          // Check if creator is an instance of Error
+          // and handle accordingly.
+          if (creator instanceof Error) {
+            console.error("Error fetching creator data:", creator.message);
+            setCreator(null);
+          } else if (creator) {
             setCreator(creator);
           }
         }
@@ -423,42 +411,40 @@ export default function ContentView() {
    * @returns void
    */
   const handleFollow = async () => {
-    try {
-      if (!user?.uid || !content?.creatorUID) {
-        console.error("User ID or Creator ID not available");
-        return;
-      }
+    // Check if the user is logged in
+    if (!user?.uid || !content?.creatorUID) {
+      return;
+    }
 
-      const action = isFollowing ? "unfollow" : "follow";
-      const url = `${apiURL}/user/${user.uid}/${action}/${content.creatorUID}`;
-      const res = await axios.post(url);
+    // Update following status
+    let response: { message: string } | Error;
+    if (isFollowing) {
+      response = await FollowService.unfollowUser(user.uid, content.creatorUID);
+    } else {
+      response = await FollowService.followUser(user.uid, content.creatorUID);
+    }
 
-      if (res.status === 200) {
-        if (!isFollowing && user.uid != content.creatorUID) {
-          try {
-            await axios.post(`${apiURL}/notifications/create`, {
-              userId: content.creatorUID,
-              notification: {
-                userId: user.uid,
-                username: user.username,
-                type: "follow",
-                textPreview: `You've gained one new follower!`,
-                timestamp: Date.now(),
-                read: false,
-              },
-            });
-          } catch (error) {
-            console.error(`Error sending notifications: ${error}`);
-          }
-        }
-        setIsFollowing(!isFollowing);
-      }
-    } catch {
+    // Check if the response is an error
+    if (response instanceof Error) {
       alert(
         `Failed to ${
           isFollowing ? "unfollow" : "follow"
-        } user.Please try again.`
+        } user. Please try again.`
       );
+      return;
+    }
+
+    if (isFollowing) {
+      setIsFollowing(false);
+      setFollowRequested(false);
+    } else if (creator?.isPrivate) {
+      if (!followRequested) {
+        setFollowRequested(true); // Just sent a request
+      } else {
+        setFollowRequested(false); // Optionally allow canceling request
+      }
+    } else {
+      setIsFollowing(true); // Just followed directly
     }
   };
 
@@ -615,7 +601,13 @@ export default function ContentView() {
                       onClick={handleFollow}
                       title={isFollowing ? "Unfollow Author" : "Follow Author"}
                     >
-                      {isFollowing ? "Following" : "Follow"}
+                      {isFollowing
+                        ? "Following"
+                        : followRequested
+                        ? "Request Sent"
+                        : creator?.isPrivate
+                        ? "Request Follow"
+                        : "Follow"}
                     </button>
                   )}
                 </div>

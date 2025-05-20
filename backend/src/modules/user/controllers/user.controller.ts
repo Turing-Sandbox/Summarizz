@@ -15,6 +15,7 @@ import {
   changeUsername,
   approveFollowRequest,
   rejectFollowRequest,
+  getRelatedContentCreators,
 } from "../services/user.service";
 import { IncomingForm } from "formidable";
 import { StorageService } from "../../storage/services/storage.service";
@@ -182,11 +183,11 @@ export async function getUserController(req: Request, res: Response) {
 
 // Update User
 export async function updateUserController(req: Request, res: Response) {
-  console.log("Updating user...");
   const { uid } = req.params;
-  const data = req.body;
+  const user = req.body;
+
   try {
-    await updateUser(uid, data);
+    await updateUser(uid, user);
     res.status(200).json({ message: "User updated successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message || "Failed to update user" });
@@ -206,6 +207,22 @@ export async function changePasswordController(req: Request, res: Response) {
     res
       .status(500)
       .json({ error: error.message || "Failed to update password" });
+  }
+}
+
+export async function getRelatedContentCreatorsController(
+  req: Request,
+  res: Response
+) {
+  const { uid } = req.params;
+
+  try {
+    const contentCreators = await getRelatedContentCreators(uid);
+    res.status(200).json(contentCreators);
+  } catch (error: any) {
+    res.status(500).json({
+      error: error.message || "Failed to fetch related content creators",
+    });
   }
 }
 

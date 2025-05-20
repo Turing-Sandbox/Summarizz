@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
-import axios from "axios";
-import { apiURL } from "../../scripts/api";
 import { OAuthButtons } from "../../components/authentication/OAuthButtons";
+import UserService from "../../services/UserService";
+import { AuthenticationService } from "../../services/AuthenticationService";
 
 export default function Register() {
   const [error, setError] = useState("");
@@ -19,58 +19,53 @@ export default function Register() {
   const navigate = useNavigate();
   const auth = useAuth();
 
-  // Check if passwords match
-  useEffect(() => {
-    if (user.password !== user.confirmPassword) {
-      setError("Passwords do not match");
-    } else {
-      setError("");
-    }
-  }, [user.password, user.confirmPassword]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // 1 - Reset Error Message
     setError("");
 
     // 2 - Validate user input
-    if (user.password !== user.confirmPassword) {
-      setError("Passwords do not match");
+    const validationFeedback = await UserService.validatePassword(
+      "",
+      user.password,
+      user.confirmPassword,
+      false
+    );
+
+    if (validationFeedback) {
+      setError(validationFeedback);
       return;
     }
 
     // 3 - Register user
-    axios
-      .post(`${apiURL}/user/register`, user, { withCredentials: true })
-      .then((res) => {
-        if (res.status === 200 || res.status === 201) {
-          // 3 - Set User Session (Save Token and User UID)
-          auth.login(res.data.userUID);
+    const response = await AuthenticationService.register(
+      user.firstName,
+      user.lastName,
+      user.username,
+      user.email,
+      user.password
+    );
 
-          // 4 - Redirect to home page
-          navigate("/");
+    // 4 - Check if response is an error
+    if (response instanceof Error) {
+      setError(response.message || "An error occurred. Please try again.");
+      return;
+    }
 
-          // 5 - Error Handling
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-      })
-      .catch((error) => {
-        if (
-          error.response &&
-          error.response.data &&
-          error.response.data.error
-        ) {
-          setError(error.response.data.error);
-        } else {
-          setError("An error occurred. Please try again.");
-        }
-      });
+    // 5 - Check if the user is logged in
+    if (response.userUID) {
+      // 6 - Set User Session (Save Token and User UID)
+      auth.login(response.userUID);
+      // 7 - Redirect to home page
+      navigate("/");
+    } else {
+      setError("An error occurred. Please try again.");
+    }
   };
 
   // Redirect to home page if user is already logged in
@@ -92,7 +87,6 @@ export default function Register() {
                 name='firstName'
                 placeholder='First Name'
                 className='auth-input'
-                required
               />
               <input
                 type='text'
@@ -101,7 +95,6 @@ export default function Register() {
                 name='lastName'
                 placeholder='Last Name'
                 className='auth-input'
-                required
               />
               <input
                 type='text'
@@ -110,7 +103,6 @@ export default function Register() {
                 name='username'
                 placeholder='Username'
                 className='auth-input'
-                required
               />
               <input
                 type='email'
@@ -119,7 +111,6 @@ export default function Register() {
                 name='email'
                 placeholder='Email'
                 className='auth-input'
-                required
               />
               <input
                 type='password'
@@ -128,7 +119,6 @@ export default function Register() {
                 name='password'
                 placeholder='Password'
                 className='auth-input'
-                required
               />
               <input
                 type='password'
@@ -137,7 +127,6 @@ export default function Register() {
                 name='confirmPassword'
                 placeholder='Confirm Password'
                 className='auth-input'
-                required
               />
 
               {error && <p className='auth-error'>{error}</p>}
@@ -146,9 +135,9 @@ export default function Register() {
                 Register
               </button>
             </form>
-            
-            <div className="oauth-container">
-              <p className="oauth-separator">OR</p>
+
+            <div className='oauth-container'>
+              <p className='oauth-separator'>OR</p>
               <OAuthButtons />
             </div>
 

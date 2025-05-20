@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
 import { User } from "../models/User";
-import { fetchUser } from "../services/userService";
-import axios from "axios";
-import { apiURL } from "../scripts/api";
 import LoadingPage from "../pages/loading/LoadingPage";
+import UserService from "../services/UserService";
+import { AuthenticationService } from "../services/AuthenticationService";
 import { useNavigate } from "react-router-dom";
+import ToastNotification from "../components/ToastNotification";
 
 export default function AuthProvider({
   children,
@@ -14,68 +14,76 @@ export default function AuthProvider({
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "error" | "feedback" | "success";
+  } | null>(null);
 
   const login = async (userUID: string) => {
     await getUserData(userUID);
   };
 
   const logout = async () => {
-    const logoutRequest = await axios.post(
-      `${apiURL}/user/logout`,
-      {},
-      { withCredentials: true }
-    );
+    setToast(null);
 
-    if (logoutRequest.status === 200) {
-      setUser(null);
-      navigate("/authentication/login");
+    const result = await AuthenticationService.logout();
+    if (result instanceof Error) {
+      setToast({
+        message:
+          result.message || "An error to logout occurred. Please try again.",
+        type: "error",
+      });
+      return;
     }
+
+    setUser(null);
+    navigate("/authentication/login");
   };
 
   useEffect(() => {
     const initializeUser = async () => {
-      try {
-        // Check if we have cookies before attempting to refresh
-        const res = await axios.post(
-          `${apiURL}/user/refresh-token`,
-          {},
-          { 
-            withCredentials: true,
-            // Add a timeout to prevent long-hanging requests
-            timeout: 5000
-          }
-        );
+      setToast(null);
 
-        if (res.status === 200) {
-          const data = res.data;
-          console.log("Token refreshed successfully");
+      // Check if we have cookies before attempting to refresh
+      const response = await AuthenticationService.refreshToken();
 
-          // Only try to get user data if we have a userUID
-          if (data.userUID) {
-            await getUserData(data.userUID);
-          } else {
-            console.warn("No userUID received from refresh token endpoint");
-          }
-        }
-      } catch (err) {
-        console.error("Auto-login failed", err);
+      if (response instanceof Error) {
+        setToast({
+          message:
+            response.message ||
+            "An error occurred while refreshing the token. Please try again.",
+          type: "error",
+        });
         setUser(null);
-      } finally {
         setLoading(false);
+        return;
       }
+
+      // Only try to get user data if we have a userUID
+      if (response.userUID) {
+        await getUserData(response.userUID);
+      }
+
+      setLoading(false);
     };
 
     initializeUser();
   }, []);
 
   async function getUserData(userUID: string) {
-    console.log("Fetching user data... for UID:", userUID);
-    const userData = await fetchUser(userUID);
+    setToast(null);
+    const userData = await UserService.fetchUserWithID(userUID);
 
     if (!(userData instanceof Error)) {
+      if (userData === null) {
+        setToast({
+          message: "Issue to login. User not found.",
+          type: "error",
+        });
+        return;
+      }
       setUser(userData || null);
     } else {
-      console.error("Failed to fetch user:", userData);
       setUser(null);
     }
   }
@@ -87,9 +95,16 @@ export default function AuthProvider({
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, isAuthenticated: !!user }}
+      value={{ user, setUser, login, logout, isAuthenticated: !!user }}
     >
       {children}
+      {toast && (
+        <ToastNotification
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </AuthContext.Provider>
   );
 }
