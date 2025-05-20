@@ -293,13 +293,13 @@ export default class UserService {
   }
 
   /**
-   * getUserByUsername(username: string) -> Promise<User | Error>
+   * getRelatedContentCreators(userId: string) -> Promise<User[] | Error>
    *
    * @description
-   * Fetches user data from the backend using the provided username
+   * Fetches related content creators for a given user ID
    *
-   * @param username - The username to fetch
-   * @returns Promise resolving to User object or Error
+   * @param userId - The ID of the user
+   * @returns Promise resolving to an array of User objects or Error
    */
   static async getRelatedContentCreators(
     userId: string

@@ -183,10 +183,8 @@ export async function getUserController(req: Request, res: Response) {
 
 // Update User
 export async function updateUserController(req: Request, res: Response) {
-  console.log("Updating user...");
   const { uid } = req.params;
   const user = req.body;
-  console.log("User data:", user);
 
   try {
     await updateUser(uid, user);

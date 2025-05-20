@@ -108,7 +108,6 @@ export async function updateUser(
   uid: string,
   data: Partial<User>
 ) {
-  console.log(`updating user ${data.username}: ${JSON.stringify(data)}`);
   await updateDoc(doc(db, "users", uid), { ...data });
 }
 

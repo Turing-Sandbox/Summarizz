@@ -26,7 +26,7 @@ export default function ToastNotification({
 
   return (
     <div className={`toast-notification ${notificationStyles[type]}`}>
-      <span className={`toast-message }`}>{message}</span>
+      <span className='toast-message'>{message}</span>
       <button className='toast-close' onClick={onClose} aria-label='Close'>
         ×
       </button>
