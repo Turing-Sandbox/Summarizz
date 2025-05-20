@@ -1,23 +1,49 @@
 import axios from "axios";
 import { apiURL } from "../scripts/api";
 
+/**
+ * AuthenticationService class
+ *
+ * @description
+ * This class provides methods for user authentication, including registration,
+ * login, and OAuth authentication with Google and GitHub.
+ */
 export class AuthenticationService {
-  // Existing email/password authentication
+  /**
+   * register() -> Promise<{ userUID: string; token: string; refreshToken: string } | Error>
+   *
+   * @description
+   * Registers a new user by sending a POST request to the backend
+   *
+   * @param firstName - The user's first name
+   * @param lastName - The user's last name
+   * @param username - The user's username
+   * @param email - The user's email address
+   * @param password - The user's password
+   * @returns Promise resolving to user data or Error
+   */
   static async register(
     firstName: string,
     lastName: string,
     username: string,
     email: string,
     password: string
-  ) {
+  ): Promise<{ userUID: string } | Error> {
     try {
-      const response = await axios.post(`${apiURL}/user/register`, {
-        firstName,
-        lastName,
-        username,
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${apiURL}/user/register`,
+        {
+          firstName,
+          lastName,
+          username,
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+          timeout: 5000,
+        }
+      );
 
       return response.data;
     } catch (error) {
@@ -26,16 +52,36 @@ export class AuthenticationService {
           ? error.response.data.error
           : "Failed to register user";
 
-      throw new Error(message);
+      return new Error(message);
     }
   }
 
-  static async login(email: string, password: string) {
+  /**
+   * login() -> Promise<{ userUID: string; token: string; refreshToken: string } | Error>
+   *
+   * @description
+   * Logs in a user by sending a POST request to the backend
+   *
+   * @param email - The user's email address
+   * @param password - The user's password
+   * @returns Promise resolving to user data or Error
+   */
+  static async login(
+    email: string,
+    password: string
+  ): Promise<{ userUID: string } | Error> {
     try {
-      const response = await axios.post(`${apiURL}/user/login`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${apiURL}/user/login`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+          timeout: 5000,
+        }
+      );
 
       return response.data;
     } catch (error) {
@@ -44,20 +90,54 @@ export class AuthenticationService {
           ? error.response.data.error
           : "Failed to login user";
 
-      throw new Error(message);
+      return new Error(message);
     }
   }
 
-  // OAuth authentication methods
-  static async signInWithGoogle(useRedirect = false) {
-    return this.signInWithProvider("google", useRedirect);
+  /**
+   * signInWithGoogle() -> Promise<{ token: string; userUID: string } | Error>
+   *
+   * @description
+   * Initiates Google OAuth authentication
+   *
+   * @param useRedirect - Whether to use redirect or popup for authentication
+   * @returns Promise resolving to user data or Error
+   */
+  static async signInWithGoogle(
+    useRedirect = false
+  ): Promise<{ token: string; userUID: string } | Error | null> {
+    return AuthenticationService.signInWithProvider("google", useRedirect);
   }
 
-  static async signInWithGithub(useRedirect = false) {
-    return this.signInWithProvider("github", useRedirect);
+  /**
+   * signInWithGithub() -> Promise<{ token: string; userUID: string } | Error>
+   *
+   * @description
+   * Initiates GitHub OAuth authentication
+   *
+   * @param useRedirect - Whether to use redirect or popup for authentication
+   * @returns Promise resolving to user data or Error
+   */
+  static async signInWithGithub(
+    useRedirect = false
+  ): Promise<{ token: string; userUID: string } | Error | null> {
+    return AuthenticationService.signInWithProvider("github", useRedirect);
   }
 
-  static async signInWithProvider(provider: string, useRedirect = false) {
+  /**
+   * signInWithProvider(provider: string, useRedirect: boolean) -> Promise<{ token: string; userUID: string } | Error>
+   *
+   * @description
+   * Initiates OAuth authentication with the specified provider
+   *
+   * @param provider - The OAuth provider (e.g., "google", "github")
+   * @param useRedirect - Whether to use redirect or popup for authentication
+   * @returns Promise resolving to user data or Error
+   */
+  static async signInWithProvider(
+    provider: string,
+    useRedirect = false
+  ): Promise<{ token: string; userUID: string } | Error | null> {
     try {
       // Only proceed if we're in the browser environment
       if (typeof window === "undefined") return null;
@@ -92,7 +172,7 @@ export class AuthenticationService {
         );
 
         if (!popup) {
-          throw new Error("Popup blocked. Please allow popups for this site.");
+          return new Error("Popup blocked. Please allow popups for this site.");
         }
 
         // Listen for the popup to send the authentication result
@@ -129,11 +209,22 @@ export class AuthenticationService {
           ? error.response.data.error
           : "Failed to authenticate with provider";
 
-      throw new Error(message);
+      return new Error(message);
     }
   }
 
-  static async handleCallbackResult(token: string) {
+  /**
+   * handleCallbackResult(token: string) -> Promise<{ token: string; userUID: string } | Error>
+   *
+   * @description
+   * Handles the result of the OAuth callback by verifying the token with the backend
+   *
+   * @param token - The OAuth token received from the provider
+   * @returns Promise resolving to user data or Error
+   */
+  static async handleCallbackResult(
+    token: string
+  ): Promise<{ token: string; userUID: string } | Error> {
     try {
       // Verify the token with our backend
       const response = await axios.post(`${apiURL}/oauth/verify`, {
@@ -151,21 +242,106 @@ export class AuthenticationService {
           ? error.response.data.error
           : "Failed to process authentication";
 
-      throw new Error(message);
+      return new Error(message);
     }
   }
 
-  static async logout() {
+  /**
+   * logout() -> Promise<boolean | Error>
+   *
+   * @description
+   * Logs out the user by sending a POST request to the backend
+   *
+   * @returns Promise resolving to true if successful, or Error
+   */
+  static async logout(): Promise<boolean | Error> {
     try {
-      await axios.post(`${apiURL}/user/logout`);
-      return true;
+      const logoutRequest = await axios.post(
+        `${apiURL}/user/logout`,
+        {},
+        {
+          withCredentials: true,
+          timeout: 5000,
+        }
+      );
+
+      if (logoutRequest.status === 200) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
           : "Failed to logout user";
 
-      throw new Error(message);
+      return new Error(message);
+    }
+  }
+
+  /**
+   * refreshToken() -> Promise<{ message: string; userUID: string } | Error>
+   *
+   * @description
+   * Refreshes the user's authentication token by sending a POST request to the backend
+   *
+   * @returns Promise resolving to user data or Error
+   */
+  static async refreshToken(): Promise<
+    { message: string; userUID: string } | Error
+  > {
+    try {
+      const response = await axios.post(
+        `${apiURL}/user/refresh-token`,
+        {},
+        {
+          withCredentials: true,
+          timeout: 5000,
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to refresh token";
+
+      return new Error(message);
+    }
+  }
+
+  /**
+   * resetPassword() -> Promise<{ message: string } | Error>
+   *
+   * @description
+   * Sends a password reset email to the user by sending a POST request to the backend
+   *
+   * @param email - The user's email address
+   * @returns Promise resolving to a message or Error
+   */
+  static async resetPassword(
+    email: string
+  ): Promise<{ message: string } | Error> {
+    try {
+      const response = await axios.post(
+        `${apiURL}/user/reset-password`,
+        { email },
+        {
+          withCredentials: true,
+          timeout: 5000,
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      const message =
+        axios.isAxiosError(error) && error.response?.data?.error
+          ? error.response.data.error
+          : "Failed to reset password";
+
+      return new Error(message);
     }
   }
 }
