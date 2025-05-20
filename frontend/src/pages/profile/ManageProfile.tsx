@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { User } from "../../models/User";
 import UserService from "../../services/UserService";
 
-// TODO: ADD LOGIC TO REALOAD THE USER DATA IN THE AUTH PROVIDER AFTER EDITING
 export default function ManageProfile() {
   // ---------------------------------------
   // -------------- Variables --------------
