@@ -32,11 +32,12 @@ export class SearchService {
   }
 
   static async searchContents(
-    searchText: string
+    searchText: string,
+    contentStartingPoint: string | null = null
   ): Promise<{ contents: Content[]; nextStartingPoint: string } | Error> {
     try {
       const response = await axios.get(`${apiURL}/search/contents`, {
-        params: { searchText },
+        params: { searchText, contentStartingPoint },
       });
 
       return response.data;

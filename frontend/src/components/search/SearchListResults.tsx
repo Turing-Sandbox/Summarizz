@@ -28,11 +28,10 @@ function SearchListResults({
   );
 
   const [contentReturned, setContentReturned] = useState<Content[]>([]);
-  // const [contentStartingPoint, setContentStartingPoint] = useState<
-  //   string | null
-  // >(null);
-
-  const [numberOfContentsToDisplay, setNumberOfContentsToDisplay] = useState(5);
+  const [contentDisabled, setContentDisabled] = useState(true);
+  const [contentStartingPoint, setContentStartingPoint] = useState<
+    string | null
+  >(null);
 
   const [fetching, setFetching] = useState(false);
 
@@ -65,12 +64,6 @@ function SearchListResults({
    */
   const fetchUserData = async () => {
     if (!query) return;
-
-    if (fetching) {
-      alert("Already Fetching!");
-      return;
-    }
-
     setFetching(true);
 
     const userSearchResults = await SearchService.searchUsers(
@@ -98,9 +91,7 @@ function SearchListResults({
       setUsersReturned((prev) => [...prev, ...uniqueUsers]);
 
       // Update the starting point for the next fetch
-      setUserStartingPoint(
-        uniqueUsers[uniqueUsers.length - 1]?.username.toLowerCase() || null
-      );
+      setUserStartingPoint(uniqueUsers[uniqueUsers.length - 1]?.uid || null);
 
       // Enable or disable the "Fetch more" button based on the number of users
       setUserDisabled(usersReturned.length + uniqueUsers.length < 5);
@@ -120,13 +111,13 @@ function SearchListResults({
    * @returns void
    */
   const fetchContentData = async () => {
-    if (!query) {
-      return;
-    }
-
+    if (!query) return;
     setFetching(true);
 
-    const searchContentResults = await SearchService.searchContents(query);
+    const searchContentResults = await SearchService.searchContents(
+      query,
+      contentStartingPoint
+    );
 
     if (searchContentResults instanceof Error) {
       console.error("Error fetching content data:", searchContentResults);
@@ -146,8 +137,16 @@ function SearchListResults({
 
     if (uniqueContents && uniqueContents.length > 0) {
       setContentReturned((prev) => [...prev, ...uniqueContents]);
+
+      // Update the starting point for the next fetch
+      setContentStartingPoint(
+        uniqueContents[uniqueContents.length - 1]?.uid || null
+      );
+
+      // Enable or disable the "Fetch more" button based on the number of users
+      setContentDisabled(contentReturned.length + uniqueContents.length < 5);
     } else {
-      setUserDisabled(true); // Disable the button if no unique users are found
+      setContentDisabled(true); // Disable the button if no unique content are found
     }
 
     setFetching(false);
@@ -155,12 +154,12 @@ function SearchListResults({
 
   return (
     <>
-      {/* <div className='main-content'> */}
       <div className='searchResults'>
         {query && <h1>Search Results for: {query}</h1>}
+
         <h2>Users</h2>
         {usersReturned?.length === 0 ? (
-          <p>Nothing found...</p>
+          <p>No matching user found...</p>
         ) : (
           usersReturned.map((user: User, index) => (
             <div key={index} className='searchItem'>
@@ -170,38 +169,27 @@ function SearchListResults({
         )}
         {!userDisabled && (
           <button className='fetchMoreButton' onClick={fetchUserData}>
-            Fetch more items
+            Fetch more users
           </button>
         )}
 
         <h2>Content</h2>
-
         {contentReturned?.length === 0 ? (
-          <p>Nothing found...</p>
+          <p>No matching content found...</p>
         ) : (
-          contentReturned.map(
-            (content: Content, index) =>
-              index < numberOfContentsToDisplay && (
-                <div key={index} className='searchItem'>
-                  <ContentSearchResult content={content} />
-                </div>
-              )
-          )
+          contentReturned.map((content: Content, index) => (
+            <div key={index} className='searchItem'>
+              <ContentSearchResult content={content} />
+            </div>
+          ))
         )}
 
-        {contentSearchResults &&
-          contentSearchResults.length > numberOfContentsToDisplay && (
-            <button
-              className='fetchMoreButton'
-              onClick={() =>
-                setNumberOfContentsToDisplay(numberOfContentsToDisplay + 5)
-              }
-            >
-              Fetch more Content
-            </button>
-          )}
+        {!contentDisabled && (
+          <button className='fetchMoreButton' onClick={fetchContentData}>
+            Fetch more contents
+          </button>
+        )}
       </div>
-      {/* </div> */}
     </>
   );
 }
