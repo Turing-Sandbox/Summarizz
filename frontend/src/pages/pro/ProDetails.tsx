@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { apiURL } from "../../scripts/api";
 import SummarizzPro from "../../components/SummarizzPro";
+import { SubscriptionService } from "../../services/SubscriptionService";
 
 export default function ProDetails() {
   const navigate = useNavigate();
@@ -20,18 +19,16 @@ export default function ProDetails() {
   }, []);
 
   const checkSubscriptionStatus = async () => {
-    try {
-      const response = await axios.get(`${apiURL}/subscription/status`, {
-        withCredentials: true,
-      });
+    const subscriptionStatus =
+      await SubscriptionService.getSubscriptionStatus();
 
-      setHasSubscription(response.data.active);
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
+    if (subscriptionStatus instanceof Error) {
       setHasSubscription(false);
-    } finally {
-      setLoading(false);
+    } else {
+      setHasSubscription(subscriptionStatus.status === "active");
     }
+
+    setLoading(false);
   };
 
   const handleSubscribe = () => {

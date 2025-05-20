@@ -1,8 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { apiURL } from "../../scripts/api";
+import { SubscriptionService } from "../../services/SubscriptionService";
 
 export default function SubscribePro() {
   const navigate = useNavigate();
@@ -37,20 +36,22 @@ export default function SubscribePro() {
 
   // Function to check subscription status
   const checkSubscriptionStatus = async () => {
-    try {
-      const response = await axios.get(`${apiURL}/subscription/status`, {
-        withCredentials: true,
-      });
+    const subscriptionStatus =
+      await SubscriptionService.getSubscriptionStatus();
 
+    if (subscriptionStatus instanceof Error) {
+      setError(subscriptionStatus.message);
+    } else {
       // If subscription is active, redirect to feed
-      if (response.data.status === "active" && response.data.tier === "pro") {
+      if (
+        subscriptionStatus.status === "active" &&
+        subscriptionStatus.tier === "pro"
+      ) {
         // Wait a moment to show success message before redirecting
         setTimeout(() => {
           navigate("/");
         }, 3000);
       }
-    } catch (err) {
-      console.error("Error checking subscription status:", err);
     }
   };
 
@@ -63,26 +64,16 @@ export default function SubscribePro() {
     setLoading(true);
     setError("");
 
-    try {
-      const response = await axios.post(
-        `${apiURL}/subscription/create-checkout-session`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
+    const session = await SubscriptionService.createSubscriptionSession();
 
-      // Open Stripe Checkout in a new tab
-      window.location.href = response.data.url;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.data?.error) {
-        setError(error.response.data.error);
-      } else {
-        setError("Failed to create subscription. Please try again.");
-      }
-    } finally {
-      setLoading(false);
+    if (session instanceof Error) {
+      setError(session.message);
+    } else {
+      // Redirect to Stripe Checkout
+      window.location.href = session.url;
     }
+
+    setLoading(false);
   };
 
   return (

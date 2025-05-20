@@ -7,10 +7,12 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL } from "../scripts/api";
-import SearchList from "./search/SearchList";
 
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
+import { SubscriptionService } from "../services/SubscriptionService";
+import { SearchService } from "../services/SearchService";
+import SearchList from "./search/SearchListResults";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -106,34 +108,40 @@ export default function Navbar() {
    */
   const handleSearch = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    if (query) {
-      // Redirect to the search results page, where the actual searching happens.
-      // router.push(`/search?query=${encodeURIComponent(query)}`);
-      // window.location.href = `/search?query=${encodeURIComponent(query)}`;
 
-      const userSearchResults = await axios.get(`${apiURL}/search/users/`, {
-        params: {
-          searchText: query,
-        },
-      });
-
-      const contentSearchResults = await axios.get(
-        `${apiURL}/search/content/`,
-        {
-          params: {
-            searchText: query,
-          },
-        }
-      );
-
-      setUserSearchResults(userSearchResults.data.documents);
-      setContentSearchResults(contentSearchResults.data.documents);
-      setShowSearchResults(true);
-      setShowMenu(false);
-      setShowNotificationList(false);
-    } else {
-      alert("You didn't search for anything.");
+    // Validation
+    const trimmedQuery = query.trim();
+    if (trimmedQuery === "") {
+      setShowSearchResults(false);
+      return;
     }
+
+    // Search Queries
+    const userSearchResults = await SearchService.searchUsers(trimmedQuery);
+    const contentSearchResults = await SearchService.searchContents(
+      trimmedQuery
+    );
+
+    // Display Search Results
+    if (userSearchResults instanceof Error) {
+      console.error("Error fetching user search results:", userSearchResults);
+    } else {
+      setUserSearchResults(userSearchResults.users);
+    }
+
+    if (contentSearchResults instanceof Error) {
+      console.error(
+        "Error fetching content search results:",
+        contentSearchResults
+      );
+    } else {
+      setContentSearchResults(contentSearchResults.contents);
+    }
+
+    // Update states
+    setShowSearchResults(true);
+    setShowMenu(false);
+    setShowNotificationList(false);
   };
 
   const fetchNotifications = async (): Promise<void> => {
@@ -172,21 +180,18 @@ export default function Navbar() {
   const checkSubscriptionStatus = async (): Promise<void> => {
     if (!auth.isAuthenticated) return;
 
-    try {
-      const response = await axios.get(`${apiURL}/subscription/status`, {
-        withCredentials: true,
-      });
+    const subscriptionStatus =
+      await SubscriptionService.getSubscriptionStatus();
 
-      // Check if user has an active subscription
-      const subscriptionData = response.data;
-      setIsProUser(
-        subscriptionData &&
-          subscriptionData.status === "active" &&
-          !subscriptionData.canceledAt
-      );
-    } catch (error) {
-      console.error("Error checking subscription status:", error);
+    if (subscriptionStatus instanceof Error) {
+      console.error("Error fetching subscription status:", subscriptionStatus);
       setIsProUser(false);
+    } else {
+      setIsProUser(
+        subscriptionStatus &&
+          subscriptionStatus.status === "active" &&
+          !subscriptionStatus.canceledAt
+      );
     }
   };
 
