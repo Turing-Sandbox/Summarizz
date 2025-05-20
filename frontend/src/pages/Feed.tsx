@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { User } from "../models/User";
 import ContentList from "../components/feed/ContentList";
+import UserService from "../services/UserService";
 
 export default function Feed() {
   const [creatorProfiles, setCreatorProfiles] = useState<User[]>([]);
@@ -20,84 +21,31 @@ export default function Feed() {
     const fetchContent = async () => {
       setErrorCreators(null);
 
-      let creatorsFetched = false;
-
-      // Only fetch related creators if we have a user
-      if (auth.user?.uid) {
-        creatorsFetched = await fetchRelatedCreators();
-      }
-
-      if (auth.user?.uid && !creatorsFetched) {
-        setErrorCreators(
-          "Failed to fetch related creators. Please reload the page or contact support."
-        );
-      }
+      await fetchRelatedCreators();
     };
 
     fetchContent();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // TODO: Get list of related creators from backend instead of querying each one
-  async function fetchRelatedCreators(): Promise<boolean> {
+  async function fetchRelatedCreators() {
     if (!auth.user?.uid) {
       setCreatorProfiles([]);
-      return false;
+      return;
     }
 
-    // try {
-    //   const creatorsResponse = await axios.get(
-    //     `${apiURL}/content/feed/creators/${auth.user.uid}`,
-    //     { timeout: 8000 }
-    //   );
+    const relatedCreators = await UserService.getRelatedContentCreators(
+      auth.user.uid
+    );
 
-    //   if (creatorsResponse.data && creatorsResponse.data.success) {
-    //     const creatorIds = creatorsResponse.data.relatedCreators || [];
+    if (relatedCreators instanceof Error) {
+      setErrorCreators(
+        relatedCreators.message || "Failed to fetch related creators."
+      );
+      return;
+    }
 
-    //     if (creatorIds.length === 0) {
-    //       setCreatorProfiles([]);
-    //       return false;
-    //     }
-
-        // Profiles for each creator
-        // const profiles = await Promise.all(
-        //   creatorIds.map(async (creatorId: string) => {
-        //     try {
-        //       const userResponse = await axios.get(
-        //         `${apiURL}/user/${creatorId}`,
-        //         { timeout: 5000 }
-        //       );
-        //       if (userResponse.data) {
-        //         return userResponse.data;
-        //       }
-        //       return null;
-        //     } catch {
-        //       console.error(
-        //         `Failed to fetch user profile for ID: ${creatorId}`
-        //       );
-        //       return null;
-        //     }
-        //   })
-        // );
-
-        // // Filter null profiles or profiles that don't exist
-        // const validProfiles = profiles.filter((profile) => profile !== null);
-        // console.log("Valid creator profiles:", validProfiles);
-
-    //     if (validProfiles.length > 0) {
-    //       setCreatorProfiles(validProfiles);
-    //       return true;
-    //     } else {
-    //       setCreatorProfiles([]);
-    //       return false;
-    //     }
-    //   } else {
-    //     setCreatorProfiles([]);
-    //   }
-    // } catch {
-    //   setCreatorProfiles([]);
-    // }
-    return false;
+    setCreatorProfiles(relatedCreators);
   }
 
   return (
@@ -113,7 +61,7 @@ export default function Feed() {
             <h3>No related creators found</h3>
           ) : (
             <div className='creator-profiles-list'>
-              {creatorProfiles.map((creator) => (
+              {creatorProfiles.slice(0, 5).map((creator) => (
                 <div
                   key={creator.uid}
                   className='creator-profile-card'

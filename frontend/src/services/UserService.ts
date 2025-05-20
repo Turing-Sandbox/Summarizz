@@ -288,4 +288,27 @@ export default class UserService {
       return new Error("Failed to change username: Unknown error");
     }
   }
+
+  /**
+   * getUserByUsername(username: string) -> Promise<User | Error>
+   *
+   * @description
+   * Fetches user data from the backend using the provided username
+   *
+   * @param username - The username to fetch
+   * @returns Promise resolving to User object or Error
+   */
+  static async getRelatedContentCreators(userId: string): Promise<User[] | Error> {
+    try {
+      const response = await axios.get(
+        `${apiURL}/user/${userId}/related-content-creators`
+      );
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        return new Error("Failed to fetch related content creators: " + error.message);
+      }
+      return new Error("Failed to fetch related content creators: Unknown error");
+    }
+  }
 }

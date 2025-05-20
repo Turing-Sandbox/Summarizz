@@ -16,6 +16,7 @@ import {
   changeUsernameController,
   refreshUserController,
   logoutUserController,
+  getRelatedContentCreatorsController,
 } from "../controllers/user.controller";
 import { requestPasswordResetController } from "../controllers/password_reset.controller";
 
@@ -33,6 +34,8 @@ router.get("/:uid", getUserController); // Get a user by UID
 router.put("/:uid", updateUserController); // Update a user by UID
 router.delete("/:uid", deleteUserController); // Delete a user by UID
 router.post("/upload-profile-image", uploadProfileImageController); // Upload Profile Image
+
+router.get("/:uid/related-content-creators", getRelatedContentCreatorsController); // Get related content creator
 
 // Profile View - Follow/Unfollow User
 router.post("/:userId/follow/:targetId", followUserController); // Follow User

@@ -284,6 +284,50 @@ export async function deleteUser(uid: string, password: string, email: string) {
   firebaseUser.delete();
 }
 
+export async function getRelatedContentCreators(uid: string): Promise<User[]> {
+  // Find related content creators based on the user current following.
+  // 1 - Get the user document for user uid
+  const user = await getUser(uid);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  // 2 - Get the following list of iser for the user found in step 1
+  const following: string[] = user.following || [];
+  if (following.length === 0) {
+    return [];
+  }
+
+  // 3 - Get the list of users that are followed by the users found in step 2
+  const secondDegreeSet = new Set<string>();
+  for (const followedUserId of following) {
+    const followedUser = await getUser(followedUserId);
+    if (followedUser && followedUser.following) {
+      for (const secondDegreeId of followedUser.following) {
+        secondDegreeSet.add(secondDegreeId);
+      }
+    }
+  }
+
+  // 4 - Filter the list of users to remove the user itself and the users already followed by the user
+  secondDegreeSet.delete(uid);
+  for (const alreadyFollowingId of following) {
+    secondDegreeSet.delete(alreadyFollowingId);
+  }
+
+  // 5 - Return the list of users up to 10 users (fetch their user data)
+  const relatedUserIds = Array.from(secondDegreeSet).slice(0, 10);
+  const relatedUsers: User[] = [];
+  for (const relatedUserId of relatedUserIds) {
+    const relatedUser = await getUser(relatedUserId);
+    if (relatedUser) {
+      relatedUsers.push(relatedUser as User);
+    }
+  }
+
+  return relatedUsers;
+}
+
 // ----------------------------------------------------------
 // -------------------- User Interactions -------------------
 // ----------------------------------------------------------
