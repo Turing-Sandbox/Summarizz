@@ -89,7 +89,8 @@ export const getNotifications = async (userId: string) => {
 
   // Check if the user document exists
   if (!userDoc.exists()) {
-    return "You have not received any recent notifications.";
+    console.log(`User document for ${userId} does not exist.`);
+	return [];
   }
 
   const notificationsRef = collection(
