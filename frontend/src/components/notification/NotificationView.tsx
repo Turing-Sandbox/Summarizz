@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import axios from "axios";
 import { Notification } from "../../models/Notification";
-import { apiURL } from "../../scripts/api";
 import { useNavigate } from "react-router-dom";
+import NotificationService from "../../services/NotificationService";
 
 interface NotificationProps {
   notification: Notification;
@@ -27,27 +26,27 @@ export default function NotificationView({
   switch (notification.type) {
     case "like":
       url = `/content/${notification.contentId}`;
-      text = ` has liked your post:`;
+      text = ` has liked your post: `;
       break;
     case "share":
       url = `/content/${notification.contentId}`;
-      text = ` has shared your post:`;
+      text = ` has shared your post: `;
       break;
     case "comment":
       url = `/content/${notification.contentId}`;
-      text = ` has commented on your post:`;
+      text = ` has commented on your post: `;
       break;
     case "follow":
       url = `/profile/${notification.userId}`;
-      text = ` has followed you!`;
+      text = ` has followed you! `;
       break;
     case "followedPost":
       url = `/profile/${notification.userId}`;
-      text = `, who you follow, has posted something new!`;
+      text = ` has posted something new! `;
       break;
     case "followedShare":
       url = `/content/${notification.contentId}`;
-      text = `, who you follow, has shared this post:`;
+      text = ` has shared your post: `;
       break;
     default:
       url = `/`;
@@ -56,9 +55,20 @@ export default function NotificationView({
   }
 
   const markRead = async () => {
-    await axios.post(
-      `${apiURL}/notifications/${auth.user?.uid}/${notification.notificationId}`
+    if (auth.user === null || notification.notificationId === undefined) {
+      return;
+    }
+
+    const response = await NotificationService.markAsRead(
+      auth.user.uid,
+      notification.notificationId
     );
+
+    if (response instanceof Error) {
+      console.error("Error marking notification as read: ", response);
+      return;
+    }
+
     setUnreadCount(unreadCount - 1);
     setShowNotification(false);
   };
@@ -96,9 +106,11 @@ export default function NotificationView({
           </p>
 
           <div>
-            <span className='markRead' onClick={markRead}>
-              Mark Read
-            </span>
+            {!notification.read && (
+              <span className='markRead' onClick={markRead}>
+                Mark Read
+              </span>
+            )}
           </div>
         </div>
       )}

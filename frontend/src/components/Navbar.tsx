@@ -5,14 +5,13 @@ import { Content } from "../models/Content";
 import { Notification } from "../models/Notification";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { apiURL } from "../scripts/api";
 
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
 import { SearchService } from "../services/SearchService";
 import SearchList from "./search/SearchListResults";
+import NotificationService from "../services/NotificationService";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -73,12 +72,12 @@ export default function Navbar() {
 
   // Update user info
   useEffect(() => {
-    if (auth.isAuthenticated !== undefined) {
+    if (auth.isAuthenticated) {
       // Only call these functions when the auth state is initialized
       fetchNotifications();
       checkSubscriptionStatus();
     }
-  }, [auth.isAuthenticated]);
+  }, []);
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -150,31 +149,29 @@ export default function Navbar() {
       return;
     }
 
-    try {
-      const response = await axios.get(
-        `${apiURL}/notification/unread/${auth.user.uid}`,
-        { withCredentials: true }
-      );
+    // Fetch notifications from the backend
+    const notificationsResult = await NotificationService.getNotifications(
+      auth.user.uid
+    );
 
-      const notificationsData = response.data;
-      // Check if the response is a string (error message) or an object (notifications)
-      if (typeof notificationsData === "string") {
-        setNotifications([]);
-        setUnreadCount(0);
-        return;
-      }
-
-      const notificationsArray: Notification[] =
-        Object.values(notificationsData);
-
-      setNotifications(notificationsArray);
-      setUnreadCount(notificationsArray.length);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      // Set empty notifications on error
+    if (notificationsResult instanceof Error) {
+      console.error("Error fetching notifications:", notificationsResult);
       setNotifications([]);
       setUnreadCount(0);
+      return;
     }
+
+    console.log("Fetched notifications:", notificationsResult);
+
+    // Set notifications state
+    setNotifications(notificationsResult);
+
+    // Count unread notifications
+    const unreadCount = notificationsResult.reduce(
+      (count, notification) => count + (!notification.read ? 1 : 0),
+      0
+    );
+    setUnreadCount(unreadCount);
   };
 
   const checkSubscriptionStatus = async (): Promise<void> => {

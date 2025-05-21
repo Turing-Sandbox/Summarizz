@@ -1,9 +1,9 @@
 export interface Notification {
   // Notification ID
   notificationId?: string;
-  // User ID
+  // User ID of the user who triggered the notification
   userId: string;
-  // Username
+  // Username of the user who triggered the notification
   username: string;
   // Type of notification (comment, like, share, follow, followedPost, followedShare)
   type:
