@@ -12,6 +12,7 @@ const testUserCredentials = {
 };
 
 let userId: string | null = null;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let authToken: string | null = null;
 
 describe('User Module Tests', () => {
