@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { describe, it, expect } from '@jest/globals';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 
 describe('Summarization Route Tests', () => {
   it('should return a summary for valid input', async () => {

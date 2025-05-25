@@ -2,7 +2,7 @@ import axios from "axios";
 import { describe, expect, afterAll } from "@jest/globals";
 
 // Configuration for tests
-const API_URL = 'http://localhost:3000';
+const API_URL = process.env.BACKEND_URL || 'http://localhost:3000';
 const testUserCredentials = {
     firstName: 'Test',
     lastName: 'User',
