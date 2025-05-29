@@ -202,11 +202,8 @@ export default function ContentView() {
 
     if (localStorage.getItem("userUID") === content?.creatorUID) {
       try {
-        // Delete comments
-        const user_id = content?.creatorUID;
-        await axios.delete(`${apiURL}/comment/post/${content.uid}/${user_id}`);
-
         // Delete content
+        const user_id = user?.uid;
         const content_id = content?.uid;
         await axios({
           method: "delete",
