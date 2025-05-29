@@ -23,11 +23,7 @@ export default function AuthProvider({
   const logout = async () => {
     const result = await AuthenticationService.logout();
     if (result instanceof Error) {
-      toast(
-        result.message ||
-          "An error occurred while logging out. Please try again.",
-        "error"
-      );
+      toast("An error occurred while logging out. Please try again.", "error");
       return;
     }
 
@@ -41,10 +37,7 @@ export default function AuthProvider({
       const response = await AuthenticationService.refreshToken();
 
       if (response instanceof Error) {
-        toast(
-          response.message || "An error occurred while refreshing the token.",
-          "error"
-        );
+        toast("An error occurred while refreshing the token.", "error");
         setUser(null);
         setLoading(false);
         return;

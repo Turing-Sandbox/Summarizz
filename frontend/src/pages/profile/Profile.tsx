@@ -11,6 +11,7 @@ import ContentTile from "../../components/content/ContentTile";
 import { User } from "../../models/User";
 import UserService from "../../services/UserService";
 import FollowService from "../../services/FollowService";
+import { useToast } from "../../hooks/ToastProvider/useToast";
 
 export default function Profile() {
   const { id } = useParams();
@@ -28,6 +29,7 @@ export default function Profile() {
 
   const [user, setUser] = useState<User | null>(null);
   const auth = useAuth();
+  const toast = useToast();
 
   // ----------------------------------------
   // ------------ Event Handlers ------------
@@ -45,7 +47,10 @@ export default function Profile() {
       const user = await UserService.fetchUserWithID(id);
 
       if (user instanceof Error) {
-        console.error("Error fetching user data:", user.message);
+        toast(
+          "An error occurred while fetching user data. Please try again.",
+          "error"
+        );
         setIsLoading(false);
         return;
       }
@@ -97,6 +102,10 @@ export default function Profile() {
       );
 
       if (followRequestsResponse instanceof Error) {
+        toast(
+          "An error occurred while fetching follow requests. Please try again.",
+          "error"
+        );
         return;
       }
 
@@ -241,10 +250,11 @@ export default function Profile() {
 
     // Check if the response is an error
     if (response instanceof Error) {
-      alert(
-        `Failed to ${
+      toast(
+        `An error occurred while trying to ${
           isFollowing ? "unfollow" : "follow"
-        } user. Please try again.`
+        } the user.`,
+        "error"
       );
       return;
     }
@@ -302,7 +312,10 @@ export default function Profile() {
     );
 
     if (response instanceof Error) {
-      alert("Failed to approve follow request. Please try again.");
+      toast(
+        "Failed to approve follow request. Please try again.",
+        "error"
+      );
       return;
     }
   };
@@ -320,7 +333,10 @@ export default function Profile() {
     );
 
     if (response instanceof Error) {
-      alert("Failed to approve follow request. Please try again.");
+      toast(
+        "Failed to reject follow request. Please try again.",
+        "error"
+      );
       return;
     }
   };

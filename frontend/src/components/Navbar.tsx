@@ -13,6 +13,7 @@ import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
 import { SearchService } from "../services/SearchService";
 import SearchList from "./search/SearchListResults";
+import { useToast } from "../hooks/ToastProvider/useToast";
 
 export default function Navbar() {
   // ---------------------------------------
@@ -34,6 +35,7 @@ export default function Navbar() {
   const [isProUser, setIsProUser] = useState<boolean>(false);
 
   const auth = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
 
   // ---------------------------------------
@@ -124,16 +126,13 @@ export default function Navbar() {
 
     // Display Search Results
     if (userSearchResults instanceof Error) {
-      console.error("Error fetching user search results:", userSearchResults);
+      toast("An error occurred while searching users.", "error");
     } else {
       setUserSearchResults(userSearchResults.users);
     }
 
     if (contentSearchResults instanceof Error) {
-      console.error(
-        "Error fetching content search results:",
-        contentSearchResults
-      );
+      toast("An error occurred while searching contents.", "error");
     } else {
       setContentSearchResults(contentSearchResults.contents);
     }
@@ -184,7 +183,7 @@ export default function Navbar() {
       await SubscriptionService.getSubscriptionStatus();
 
     if (subscriptionStatus instanceof Error) {
-      console.error("Error fetching subscription status:", subscriptionStatus);
+      toast("Failed to fetch subscription status.", "error");
       setIsProUser(false);
     } else {
       setIsProUser(

@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import ContentSearchResult from "./ContentSearchResult";
 import UserSearchResult from "./UserSearchResult";
 import { SearchService } from "../../services/SearchService";
+import { useToast } from "../../hooks/ToastProvider/useToast";
 
 function SearchListResults({
   userSearchResults,
@@ -34,6 +35,7 @@ function SearchListResults({
   >(null);
 
   const [fetching, setFetching] = useState(false);
+  const toast = useToast();
 
   // ---------------------------------------
   // -------------- Page INIT --------------
@@ -72,7 +74,7 @@ function SearchListResults({
     );
 
     if (userSearchResults instanceof Error) {
-      console.error("Error fetching user data:", userSearchResults);
+      toast("An error occurred while fetching user data.", "error");
       setFetching(false);
       return;
     }
@@ -120,7 +122,7 @@ function SearchListResults({
     );
 
     if (searchContentResults instanceof Error) {
-      console.error("Error fetching content data:", searchContentResults);
+      toast("An error occurred while fetching content data.", "error");
       setFetching(false);
       return;
     }

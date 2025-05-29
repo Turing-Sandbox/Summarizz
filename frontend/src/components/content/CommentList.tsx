@@ -7,13 +7,12 @@ import { XCircleIcon } from "@heroicons/react/24/outline";
 
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
-import { apiURL } from "../../scripts/api";
 
 import { Content } from "../../models/Content";
 import { User } from "../../models/User";
 import { Comment } from "../../models/Comment";
 import CommentService from "../../services/CommentService";
+import { useToast } from "../../hooks/ToastProvider/useToast";
 
 export default function CommentList({
   user,
@@ -34,6 +33,8 @@ export default function CommentList({
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
 
+  const toast = useToast();
+
   useEffect(() => {
     refreshComments();
   }, [contentId]);
@@ -49,7 +50,7 @@ export default function CommentList({
     const commentsResult = await CommentService.getPostComments(contentId);
 
     if (commentsResult instanceof Error) {
-      console.error(commentsResult.message);
+      toast("An error occurred while fetching comments.", "error");
       setLoading(false);
       return;
     }
@@ -72,7 +73,7 @@ export default function CommentList({
 
     // Check if the comment was added successfully
     if (comment instanceof Error) {
-      console.error(comment.message);
+      toast("An error occurred while adding the comment.", "error");
       return;
     }
 
@@ -99,7 +100,7 @@ export default function CommentList({
 
     // Check if the comment was updated successfully
     if (comment instanceof Error) {
-      console.error(comment.message);
+      toast("An error occurred while updating the comment.", "error");
       return;
     }
 
@@ -117,12 +118,21 @@ export default function CommentList({
 
   const handleDeleteComment = async (id: string) => {
     if (!user.uid) navigate(`../authentication/login`);
-    try {
-      await axios.delete(`${apiURL}/comment/${id}/`);
-    } catch (error) {
-      console.error("Error deleting comment:", error);
+
+    // Delete comment from the backend
+    const result = await CommentService.deleteComment(id);
+
+    if (result instanceof Error) {
+      toast("An error occurred while deleting the comment.", "error");
+      return;
     }
-    await refreshComments();
+
+    // Update comments list to reflect the changes
+    const updatedComments = comments.filter(
+      (comment) => comment.comment_id !== id
+    );
+    setComments(updatedComments);
+    setNumComments(updatedComments.length);
   };
 
   // --------------------------------------
