@@ -84,15 +84,14 @@ export default class NotificationService {
    */
   static async markAsRead(
     userId: string,
-    notificationId: string
   ): Promise<void | Error> {
     try {
-      await axios.post(`${apiURL}/notification/${userId}/${notificationId}`);
+      await axios.post(`${apiURL}/notification/${userId}/read`);
     } catch (error) {
       const message =
         axios.isAxiosError(error) && error.response?.data?.error
           ? error.response.data.error
-          : "Failed to mark notification as read";
+          : "Failed to mark notifications as read";
 
       return new Error(message);
     }

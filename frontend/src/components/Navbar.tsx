@@ -92,10 +92,19 @@ export default function Navbar() {
     localStorage.setItem("isDarkMode", isDarkMode ? "false" : "true");
   };
 
-  const toggleNotificationList = () => {
+  const notificationsBellClicked = () => {
+    // 1 - Show or hide the notification list
     setShowNotificationList(!showNotificationList);
+
+    // 2 - Hide the search results and menu (Other menus)
     setShowSearchResults(false);
     setShowMenu(false);
+
+    // 3 Mark notifications as read if needed
+    if (!showNotificationList && unreadCount > 0) {
+      markRead();
+      setUnreadCount(0);
+    }
   };
 
   /**
@@ -199,6 +208,19 @@ export default function Navbar() {
     auth.logout();
   };
 
+  const markRead = async () => {
+    if (auth.user === null) {
+      return;
+    }
+
+    const response = await NotificationService.markAsRead(auth.user.uid);
+
+    if (response instanceof Error) {
+      console.error("Error marking notification as read: ", response);
+      return;
+    }
+  };
+
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
@@ -266,7 +288,7 @@ export default function Navbar() {
             {/* Notifications */}
             <div>
               <div
-                onClick={toggleNotificationList}
+                onClick={notificationsBellClicked}
                 className='notification-button notification-button-large-screen'
               >
                 <BellIcon className='icon' />

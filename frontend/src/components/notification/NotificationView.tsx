@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
 import { Notification } from "../../models/Notification";
 import { useNavigate } from "react-router-dom";
-import NotificationService from "../../services/NotificationService";
 
 interface NotificationProps {
   notification: Notification;
@@ -13,12 +10,8 @@ interface NotificationProps {
 
 export default function NotificationView({
   notification,
-  unreadCount,
-  setUnreadCount,
 }: NotificationProps) {
-  const auth = useAuth();
   const navigate = useNavigate();
-  const [showNotification, setShowNotification] = useState<boolean>(true);
 
   let url = "";
   let text = "";
@@ -54,28 +47,8 @@ export default function NotificationView({
       break;
   }
 
-  const markRead = async () => {
-    if (auth.user === null || notification.notificationId === undefined) {
-      return;
-    }
-
-    const response = await NotificationService.markAsRead(
-      auth.user.uid,
-      notification.notificationId
-    );
-
-    if (response instanceof Error) {
-      console.error("Error marking notification as read: ", response);
-      return;
-    }
-
-    setUnreadCount(unreadCount - 1);
-    setShowNotification(false);
-  };
-
   return (
     <div>
-      {showNotification && (
         <div className='notification' key={notification.notificationId}>
           <span className='date'>
             {/* Format DD/MM/YYY, hh:mm PM/AM */}
@@ -104,16 +77,7 @@ export default function NotificationView({
                 : notification.textPreview}
             </a>
           </p>
-
-          <div>
-            {!notification.read && (
-              <span className='markRead' onClick={markRead}>
-                Mark Read
-              </span>
-            )}
-          </div>
         </div>
-      )}
     </div>
   );
 }
