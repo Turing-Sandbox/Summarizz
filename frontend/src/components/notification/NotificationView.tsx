@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import axios from "axios";
 import { Notification } from "../../models/Notification";
 import { apiURL } from "../../scripts/api";

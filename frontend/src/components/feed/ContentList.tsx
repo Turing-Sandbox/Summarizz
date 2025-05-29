@@ -4,7 +4,7 @@ import { Content } from "../../models/Content";
 import { apiURL } from "../../scripts/api";
 import axios from "axios";
 import { normalizeContentDates } from "../../utils/contentHelper";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import ContentPreviewPopup from "../content/ContentPreviewPopup";
 
 export default function ContentList({ tab }: { tab: string }) {

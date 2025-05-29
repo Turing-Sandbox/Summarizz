@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import { useEffect, useState } from "react";
 import SummarizzPro from "../../components/SummarizzPro";
 import { SubscriptionService } from "../../services/SubscriptionService";

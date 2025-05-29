@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { User } from "../models/User";
 import { Content } from "../models/Content";
 import { Notification } from "../models/Notification";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/AuthProvider/useAuth";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { apiURL } from "../scripts/api";

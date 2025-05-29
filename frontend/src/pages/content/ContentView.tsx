@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import { useEffect, useState } from "react";
 import type { Content } from "../../models/Content";
 import { User } from "../../models/User";
