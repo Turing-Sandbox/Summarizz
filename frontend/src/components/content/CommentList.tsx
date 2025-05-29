@@ -13,9 +13,9 @@ import { apiURL } from "../../scripts/api";
 import { Content } from "../../models/Content";
 import { User } from "../../models/User";
 import { Comment } from "../../models/Comment";
+import CommentService from "../../services/CommentService";
 
 export default function CommentList({
-  content,
   user,
 }: {
   content: Content;
@@ -23,129 +23,102 @@ export default function CommentList({
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
-  const [editingCommentText, setEditingCommentText] = useState("");
+
+  const [selectedCommentEdit, setSelectedCommentEdit] =
+    useState<Comment | null>(null);
+
   const [numComments, setNumComments] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const postId = useParams().id;
+  const contentId = useParams().id as string;
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
 
-  async function refreshComments() {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${apiURL}/comment/comments/${postId}`);
-
-      if (response.data) {
-        console.log("refresh response: ", response.data);
-
-        let commentArray: Comment[] = [];
-        if (Array.isArray(response.data)) {
-          console.log("is array: ", response.data);
-          const responseArray = response.data;
-          responseArray.forEach((c) => {
-            commentArray.push(Object.values(c) as unknown as Comment);
-          });
-        } else {
-          console.log("is NOT array: ", response.data);
-          commentArray = Object.values(response.data) as unknown as Comment[];
-        }
-
-        console.log("refreshComments Response.data: ", commentArray);
-        setComments(commentArray);
-        setNumComments(comments.length);
-        if (Array.isArray(commentArray)) {
-          setNumComments(commentArray.length);
-        } else if (commentArray) {
-          setNumComments(1);
-        } else {
-          setNumComments(0);
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     refreshComments();
-  }, [postId]);
+  }, [contentId]);
 
   useEffect(() => {
     if (editTextareaRef.current) {
       editTextareaRef.current.style.height = "auto";
       editTextareaRef.current.style.height = `${editTextareaRef.current.scrollHeight}px`;
     }
-  }, [editingCommentText]);
+  }, [selectedCommentEdit]);
+
+  const refreshComments = async () => {
+    const commentsResult = await CommentService.getPostComments(contentId);
+
+    if (commentsResult instanceof Error) {
+      console.error(commentsResult.message);
+      setLoading(false);
+      return;
+    }
+    setComments(commentsResult);
+    setNumComments(commentsResult.length);
+    setLoading(false);
+  };
 
   const handleAddComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newComment) return;
     if (!user.uid) navigate(`../authentication/login`);
-    try {
-      await axios.post(`${apiURL}/comment/comments/${postId}`, {
-        owner_id: user.uid,
-        text: newComment,
-      });
 
-      if (content && content.creatorUID != user.uid) {
-        try {
-          await axios.post(`${apiURL}/notifications/create`, {
-            userId: content?.creatorUID,
-            notification: {
-              userId: user.uid,
-              username: user?.username,
-              type: "comment",
-              textPreview: `"${
-                newComment && newComment.length > 30
-                  ? newComment.substring(0, 30) + "..."
-                  : newComment
-              }"!`,
-              contentId: content.uid,
-              timestamp: Date.now(),
-              read: false,
-            },
-          });
-        } catch (error) {
-          console.error(`Error sending notifications: ${error}`);
-        }
-      }
+    // Add comment to the backend
+    const comment = await CommentService.publishComment(
+      contentId,
+      newComment,
+      user.uid
+    );
 
-      await refreshComments();
-      setNewComment("");
-    } catch (error) {
-      console.error("Error adding comment:", error);
+    // Check if the comment was added successfully
+    if (comment instanceof Error) {
+      console.error(comment.message);
+      return;
     }
+
+    setNewComment("");
   };
 
   const handleEditComment = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!editingCommentText) return;
+    if (!selectedCommentEdit) return;
     if (!user.uid) navigate(`../authentication/login`);
-    try {
-      await axios.put(
-        `${apiURL}/comment/comments/${postId}/${editingCommentId}/${user.uid}`,
-        {
-          text: editingCommentText,
-        }
-      );
-      await refreshComments();
-      setEditingCommentId(null);
-      setEditingCommentText("");
-    } catch (error) {
-      console.error("Error editing comment:", error);
+
+    // If comment is empty, delete it
+    if (selectedCommentEdit.text === "") {
+      await handleDeleteComment(selectedCommentEdit.comment_id);
+      setSelectedCommentEdit(null);
+      return;
     }
+
+    // Update comment in the backend
+    const comment = await CommentService.updateComment(
+      selectedCommentEdit.comment_id,
+      selectedCommentEdit.text
+    );
+
+    // Check if the comment was updated successfully
+    if (comment instanceof Error) {
+      console.error(comment.message);
+      return;
+    }
+
+    // Update comments list to reflect the changes
+    const updatedComments = comments.map((comment) =>
+      comment.comment_id === selectedCommentEdit.comment_id
+        ? { ...comment, text: selectedCommentEdit.text }
+        : comment
+    );
+    setComments(updatedComments);
+    setNumComments(updatedComments.length);
+    setNewComment("");
+    setSelectedCommentEdit(null);
   };
 
   const handleDeleteComment = async (id: string) => {
     if (!user.uid) navigate(`../authentication/login`);
     try {
-      await axios.delete(
-        `${apiURL}/comment/comments/${postId}/${id}/${user.uid}`
-      );
+      await axios.delete(`${apiURL}/comment/${id}/`);
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
@@ -187,17 +160,17 @@ export default function CommentList({
       </div>
 
       {/************ EDIT COMMENT ************/}
-      {editingCommentId != null && (
+      {selectedCommentEdit != null && (
         <>
           <div
             className='overlay'
-            onClick={() => setEditingCommentId(null)}
+            onClick={() => setSelectedCommentEdit(null)}
           ></div>
 
           <form onSubmit={handleEditComment} className='edit-comment'>
             <div
               onClick={() => {
-                setEditingCommentId(null);
+                setSelectedCommentEdit(null);
               }}
               className='close-button'
               style={{ cursor: "pointer" }}
@@ -210,9 +183,12 @@ export default function CommentList({
             <textarea
               ref={editTextareaRef}
               className='comment-textarea'
-              value={editingCommentText}
+              value={selectedCommentEdit?.text || ""}
               onChange={(e) => {
-                setEditingCommentText(e.target.value);
+                setSelectedCommentEdit({
+                  ...selectedCommentEdit!,
+                  text: e.target.value,
+                });
                 e.target.style.height = "auto";
                 e.target.style.height = `${e.target.scrollHeight}px`;
               }}
@@ -246,8 +222,7 @@ export default function CommentList({
                         <button
                           className={"icon-button"}
                           onClick={() => {
-                            setEditingCommentId(comment.comment_id);
-                            setEditingCommentText(comment.text);
+                            setSelectedCommentEdit(comment);
                           }}
                         >
                           <PencilIcon className={"icon edit"} />
