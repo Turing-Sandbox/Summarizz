@@ -15,7 +15,7 @@ import notificationRoutes from './modules/notification/routes/notification.route
 import oauthRoutes from './modules/user/routes/oauth.routes';
 import webhookRoutes from './modules/subscription/routes/webhook.routes';
 import searchRoutes from './modules/search/routes/search.routes';
-// import summarizationRoutes from './modules/ai/routes/summarization.routes';
+import summarizationRoutes from './modules/ai/routes/summarization.routes';
 
 
 const app = express();
@@ -60,7 +60,7 @@ app.use('/notification', notificationRoutes);
 app.use('/oauth', oauthRoutes);
 app.use('/webhook', webhookRoutes);
 app.use('/search', searchRoutes);
-// app.use('/ai', summarizationRoutes);
+app.use('/ai', summarizationRoutes);
 
 app.get('/', (_, res) => {
   res.send('Server is Listening!');
