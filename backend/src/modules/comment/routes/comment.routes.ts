@@ -3,16 +3,16 @@ import {
     updateCommentController,
     createCommentController,
     deleteCommentController,
-    getCommentsByPostController,
-    getCommentByIdController, deletePostController
+    getCommentsByContentController,
+    getCommentByIdController
 } from '../controllers/comment.controller';
+import { authenticateToken } from '../../../shared/middleware/auth';
 const router = Router();
 
-router.post('/comments/:post_id', createCommentController);
-router.get('/comments/:post_id/', getCommentsByPostController);
-router.get('/comments/:post_id/:comment_id', getCommentByIdController);
-router.put('/comments/:post_id/:comment_id/:user_id', updateCommentController);
-router.delete('/post/:post_id/:user_id', deletePostController);
-router.delete('/comments/:post_id/:comment_id/:user_id', deleteCommentController);
+router.post('/:contentId', authenticateToken, createCommentController, );
+router.get("/content/:contentId", authenticateToken, getCommentsByContentController);
+router.get("/:commentId", authenticateToken, getCommentByIdController);
+router.put("/:commentId", authenticateToken, updateCommentController);
+router.delete("/:commentId", authenticateToken, deleteCommentController);
 
 export default router;
