@@ -255,28 +255,6 @@ export default function ContentView() {
       const response = await axios.post(url);
 
       if (response.status == 200) {
-        if (!isLiked && user.uid != content?.creatorUID) {
-          try {
-            await axios.post(`${apiURL}/notifications/create`, {
-              userId: content?.creatorUID,
-              notification: {
-                userId: user.uid,
-                username: user.username,
-                type: "like",
-                textPreview: `"${
-                  content?.title && content?.title?.length > 30
-                    ? content?.title.substring(0, 30) + "..."
-                    : content?.title
-                }"!`,
-                contentId: content?.uid,
-                timestamp: Date.now(),
-                read: false,
-              },
-            });
-          } catch (error) {
-            console.error(`Error sending notifications: ${error}`);
-          }
-        }
         setIsLiked(!isLiked);
         setLikes(isLiked ? likes - 1 : likes + 1);
       }
@@ -344,56 +322,6 @@ export default function ContentView() {
       );
 
       if (shareResponse.status == 200) {
-        if (!isShared && user?.uid != content?.creatorUID) {
-          try {
-            await axios.post(`${apiURL}/notifications/create`, {
-              userId: content?.creatorUID,
-              notification: {
-                userId: user.uid,
-                username: user.username,
-                type: "share",
-                textPreview: `"${
-                  content?.title && content?.title?.length > 30
-                    ? content?.title.substring(0, 30) + "..."
-                    : content?.title
-                }"!`,
-                contentId: content?.uid,
-                timestamp: Date.now(),
-                read: false,
-              },
-            });
-          } catch (error) {
-            console.error(`Error sending notifications: ${error}`);
-          }
-        }
-
-        if (!isShared) {
-          const followers = user.followers || [];
-
-          for (let i = 0; i < followers.length; i++) {
-            try {
-              await axios.post(`${apiURL}/notifications/create`, {
-                userId: followers[i],
-                notification: {
-                  userId: user.uid,
-                  username: user.username,
-                  type: "followedShare",
-                  textPreview: `"${
-                    content?.title && content.title?.length > 30
-                      ? content.title.substring(0, 30) + "..."
-                      : content?.title
-                  }"!`,
-                  contentId: content?.uid,
-                  timestamp: Date.now(),
-                  read: false,
-                },
-              });
-            } catch (error) {
-              console.error(`Error sending notifications: ${error}`);
-            }
-          }
-        }
-
         setIsShared(!isShared);
         setShareCount(isShared ? shareCount - 1 : shareCount + 1);
       }

@@ -14,7 +14,6 @@ import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { apiURL } from "../../scripts/api";
-import axios from "axios";
 import Toolbar from "../../components/content/toolbar";
 
 // TODO: Implement Edit/Create Content Logic to adapt this page based on the selected mode.
@@ -215,29 +214,6 @@ export default function ContentEditor() {
         })
         .then(async (response) => {
           if (response.status === 200 || response.status === 201) {
-            const followers = user?.followers || [];
-            for (let i = 0; i < followers.length; i++) {
-              try {
-                await axios.post(`${apiURL}/notifications/create`, {
-                  userId: followers[i],
-                  notification: {
-                    userId: user?.uid,
-                    username: user?.username,
-                    type: "followedPost",
-                    textPreview: `"${
-                      title && title?.length > 30
-                        ? title.substring(0, 30) + "..."
-                        : title
-                    }"`,
-                    timestamp: Date.now(),
-                    read: false,
-                  },
-                });
-              } catch (error) {
-                console.error(`Error sending notifications: ${error}`);
-              }
-            }
-
             Cookies.remove("content");
             localStorage.removeItem("title");
             navigate("/");
@@ -257,30 +233,6 @@ export default function ContentEditor() {
       })
         .then((response) => response.json())
         .then(async () => {
-          const followers = user?.followers || [];
-
-          for (let i = 0; i < followers.length; i++) {
-            try {
-              await axios.post(`${apiURL}/notifications/create`, {
-                userId: followers[i],
-                notification: {
-                  userId: user?.uid,
-                  username: user?.username,
-                  type: "followedPost",
-                  textPreview: `"${
-                    title && title?.length > 30
-                      ? title.substring(0, 30) + "..."
-                      : title
-                  }"`,
-                  timestamp: Date.now(),
-                  read: false,
-                },
-              });
-            } catch (error) {
-              console.error(`Error sending notifications: ${error}`);
-            }
-          }
-
           Cookies.remove("content");
           localStorage.removeItem("title");
           navigate("/");

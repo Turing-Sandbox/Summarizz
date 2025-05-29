@@ -4,36 +4,13 @@
 .notification {
   color: var(--text-color);
   text-align: left;
-}
-
-.markRead {
-  background-color: var(--comment-background-color);
-  padding: 0.5rem;
-  border-radius: 10px;
-  margin-left: auto;
+  border-bottom: 1px solid var(--input-border-color);
   margin-bottom: 10px;
-  user-select: none;
-  cursor: pointer;
 }
 
-.markRead:hover {
-  background-color: var(--input-border-color);
-  color: var(--background-color);
-}
-
-.notification > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  color: var(--text-color);
-  text-align: center;
-  margin: 10px 0;
-  border-bottom: 3px solid var(--input-border-color);
-}
 
 .date {
   color: var(--text-color-light);
-  font-size: large;
 }
 
 .notificationTitle {

@@ -1,8 +1,4 @@
-import { useState } from "react";
-import { useAuth } from "../../hooks/AuthProvider/useAuth";
-import axios from "axios";
 import { Notification } from "../../models/Notification";
-import { apiURL } from "../../scripts/api";
 import { useNavigate } from "react-router-dom";
 
 interface NotificationProps {
@@ -14,12 +10,8 @@ interface NotificationProps {
 
 export default function NotificationView({
   notification,
-  unreadCount,
-  setUnreadCount,
 }: NotificationProps) {
-  const auth = useAuth();
   const navigate = useNavigate();
-  const [showNotification, setShowNotification] = useState<boolean>(true);
 
   let url = "";
   let text = "";
@@ -27,27 +19,27 @@ export default function NotificationView({
   switch (notification.type) {
     case "like":
       url = `/content/${notification.contentId}`;
-      text = ` has liked your post:`;
+      text = ` has liked your post: `;
       break;
     case "share":
       url = `/content/${notification.contentId}`;
-      text = ` has shared your post:`;
+      text = ` has shared your post: `;
       break;
     case "comment":
       url = `/content/${notification.contentId}`;
-      text = ` has commented on your post:`;
+      text = ` has commented on your post: `;
       break;
     case "follow":
       url = `/profile/${notification.userId}`;
-      text = ` has followed you!`;
+      text = ` has followed you! `;
       break;
     case "followedPost":
       url = `/profile/${notification.userId}`;
-      text = `, who you follow, has posted something new!`;
+      text = ` has posted something new! `;
       break;
     case "followedShare":
       url = `/content/${notification.contentId}`;
-      text = `, who you follow, has shared this post:`;
+      text = ` has shared your post: `;
       break;
     default:
       url = `/`;
@@ -55,17 +47,8 @@ export default function NotificationView({
       break;
   }
 
-  const markRead = async () => {
-    await axios.post(
-      `${apiURL}/notifications/${auth.user?.uid}/${notification.notificationId}`
-    );
-    setUnreadCount(unreadCount - 1);
-    setShowNotification(false);
-  };
-
   return (
     <div>
-      {showNotification && (
         <div className='notification' key={notification.notificationId}>
           <span className='date'>
             {/* Format DD/MM/YYY, hh:mm PM/AM */}
@@ -94,14 +77,7 @@ export default function NotificationView({
                 : notification.textPreview}
             </a>
           </p>
-
-          <div>
-            <span className='markRead' onClick={markRead}>
-              Mark Read
-            </span>
-          </div>
         </div>
-      )}
     </div>
   );
 }
