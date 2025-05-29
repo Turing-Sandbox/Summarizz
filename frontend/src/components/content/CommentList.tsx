@@ -91,29 +91,6 @@ export default function CommentList({
         text: newComment,
       });
 
-      if (content && content.creatorUID != user.uid) {
-        try {
-          await axios.post(`${apiURL}/notifications/create`, {
-            userId: content?.creatorUID,
-            notification: {
-              userId: user.uid,
-              username: user?.username,
-              type: "comment",
-              textPreview: `"${
-                newComment && newComment.length > 30
-                  ? newComment.substring(0, 30) + "..."
-                  : newComment
-              }"!`,
-              contentId: content.uid,
-              timestamp: Date.now(),
-              read: false,
-            },
-          });
-        } catch (error) {
-          console.error(`Error sending notifications: ${error}`);
-        }
-      }
-
       await refreshComments();
       setNewComment("");
     } catch (error) {

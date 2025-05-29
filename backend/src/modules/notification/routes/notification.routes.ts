@@ -5,7 +5,6 @@ const notificationRoutes = Router();
 
 notificationRoutes.get(`/unread/:userId`, notificationController.getNewNotifications);
 notificationRoutes.get(`/:userId`, notificationController.getNotifications);
-notificationRoutes.post(`/:userId/:notificationId`, notificationController.markAsRead);
-notificationRoutes.post(`/create`, notificationController.pushNotification);
+notificationRoutes.post(`/:userId/read`, notificationController.markAsRead);
 
 export default notificationRoutes;
