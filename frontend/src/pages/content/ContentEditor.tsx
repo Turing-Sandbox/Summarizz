@@ -64,17 +64,26 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
     }
   }, [editor]);
 
+// At the top of frontend/src/pages/content/ContentEditor.tsx
+-import { useNavigate } from "react-router-dom";
++import { useNavigate, useParams } from "react-router-dom";
+
+function ContentEditor({ /* props */ }) {
+  const navigate = useNavigate();
++  const { id } = useParams<{ id: string }>();
+
   // Fetch existing content data if in edit mode
   useEffect(() => {
     if (isEditMode) {
-      // Fetch existing content data if in edit mode
       const fetchContent = async () => {
         try {
-          const content = await axios.get(
-            `${apiURL}/content/${window.location.pathname.split("/").pop()}`,
-            {
-              withCredentials: true,
-            }
+-          const content = await axios.get(
+-            `${apiURL}/content/${window.location.pathname.split("/").pop()}`,
++          const content = await axios.get(
++            `${apiURL}/content/${id}`,
+             {
+               withCredentials: true,
+             }
           );
 
           if (content.data) {
@@ -83,8 +92,10 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
             if (editor) {
               editor.commands.setContent(content.data.content);
             }
-            if (content.data.thumbnailUrl) {
-              setThumbnailPreview(content.data.thumbnailUrl);
+-            if (content.data.thumbnailUrl) {
+-              setThumbnailPreview(content.data.thumbnailUrl);
++            if (content.data.thumbnail) {
++              setThumbnailPreview(content.data.thumbnail);
             }
           } else {
             setError("Failed to load content. Please try again.");
@@ -97,7 +108,8 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
       fetchContent();
     }
   }, [isEditMode, editor]);
-
+  // …
+}
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
