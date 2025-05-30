@@ -14,7 +14,6 @@ import Heading from "@tiptap/extension-heading";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { apiURL } from "../../scripts/api";
-import axios from "axios";
 import Toolbar from "../../components/content/toolbar";
 
 export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
@@ -172,6 +171,16 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
           {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,
+            body: JSON.stringify(newContent),
+          });
+        })
+        .then(async (response) => {
+          if (response.status === 200 || response.status === 201) {
+            Cookies.remove("content");
+            localStorage.removeItem("title");
+            navigate("/");
+          } else {
+            setError("Failed to create content. Please Try again.");
           }
         );
       } else {
@@ -179,19 +188,22 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
         });
-      }
-
-      // Notify followers if content creation/update was successful
-      if (response.status === 200 || response.status === 201) {
-        Cookies.remove("content");
-        localStorage.removeItem("title");
-        navigate("/");
-      } else {
-        setError("Failed to save content. Please try again.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to save content. Please try again.");
+    } else {
+      fetch(`${apiURL}/content`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newContent),
+      })
+        .then((response) => response.json())
+        .then(async () => {
+          Cookies.remove("content");
+          localStorage.removeItem("title");
+          navigate("/");
+        })
+        .catch((error) => {
+          console.log(error);
+          setError("Failed to create content. Please Try again.");
+        });
     }
   };
 

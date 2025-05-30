@@ -11,26 +11,39 @@ const logFormat = printf(({ level, message, timestamp, ...metadata }) => {
   return msg;
 });
 
+// Base format without colors for file logging
+const fileFormat = combine(
+  timestamp(),
+  format.uncolorize(),
+  logFormat
+);
+
+// Console format with colors for terminal output
+const consoleFormat = combine(
+  timestamp(),
+  colorize(),
+  logFormat
+);
+
 export const logger = createLogger({
   level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-  format: combine(
-    timestamp(),
-    process.env.NODE_ENV === 'development' ? colorize() : format.uncolorize(),
-    logFormat
-  ),
+  exitOnError: false,
   transports: [
-    new transports.Console(),
+    new transports.Console({
+      format: consoleFormat
+    }),
     new transports.File({ 
       filename: 'logs/error.log', 
       level: 'error',
       maxFiles: 5,
       maxsize: 5242880, // 5MB
+      format: fileFormat
     }),
     new transports.File({ 
       filename: 'logs/combined.log',
       maxFiles: 5,
       maxsize: 5242880, // 5MB
+      format: fileFormat
     })
-  ],
-  exitOnError: false
+  ]
 });

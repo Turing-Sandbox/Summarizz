@@ -109,10 +109,8 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# ignore log files and databases
+# ignore log files
 *.log
-*.sql
-*.sqlite
 
 # ignore compiled files
 *.com

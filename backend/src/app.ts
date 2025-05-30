@@ -8,15 +8,15 @@ import { createErrorResponse } from "./shared/utils/response";
 import path from "path";
 
 // Import routes
-import userRoutes from "./modules/user/routes/user.routes";
-import commentRoutes from "./modules/comment/routes/comment.routes";
-import contentRoutes from "./modules/content/routes/content.routes";
-import subscriptionRoutes from "./modules/subscription/routes/subscription.routes";
-import notificationRoutes from "./modules/notification/routes/notification.routes";
-import oauthRoutes from "./modules/user/routes/oauth.routes";
-import webhookRoutes from "./modules/subscription/routes/webhook.routes";
-import searchRoutes from "./modules/search/routes/search.routes";
-// import summarizationRoutes from './modules/ai/routes/summarization.routes';
+import userRoutes from './modules/user/routes/user.routes';
+import commentRoutes from './modules/comment/routes/comment.routes';
+import contentRoutes from './modules/content/routes/content.routes';
+import subscriptionRoutes from './modules/subscription/routes/subscription.routes';
+import notificationRoutes from './modules/notification/routes/notification.routes';
+import oauthRoutes from './modules/user/routes/oauth.routes';
+import webhookRoutes from './modules/subscription/routes/webhook.routes';
+import searchRoutes from './modules/search/routes/search.routes';
+import summarizationRoutes from './modules/ai/routes/summarization.routes';
 
 const app = express();
 
@@ -60,7 +60,7 @@ app.use("/notification", notificationRoutes);
 app.use("/oauth", oauthRoutes);
 app.use("/webhook", webhookRoutes);
 app.use("/search", searchRoutes);
-// app.use('/ai', summarizationRoutes);
+app.use('/ai', summarizationRoutes);
 app.use(
   "/local_uploads",
   express.static(path.join(process.cwd(), "local_uploads"))
