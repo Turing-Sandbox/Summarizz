@@ -20,22 +20,26 @@ const requiredEnv = [
 const isDev = process.env.NODE_ENV === "development";
 const LOCAL_UPLOAD_DIR = path.resolve(process.cwd(), "local_uploads");
 
-const s3Config = {
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-};
-
-const s3 = new S3Client(s3Config);
-const BUCKET = process.env.AWS_S3_BUCKET!;
-
+// Validate required env vars (throws in production if any are missing)
 for (const envVar of requiredEnv) {
   if (!process.env[envVar] && !isDev) {
     throw new Error(`Missing required environment variable: ${envVar}`);
   }
 }
+
+// Use empty config / no client in development, full config in production
+const s3Config = isDev
+  ? {}
+  : {
+      region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    };
+
+const s3 = isDev ? null : new S3Client(s3Config);
+const BUCKET = process.env.AWS_S3_BUCKET || "";
 
 /**
  * StorageService handles file uploads and deletions.
