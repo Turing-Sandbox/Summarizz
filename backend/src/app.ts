@@ -61,26 +61,8 @@ app.use("/oauth", oauthRoutes);
 app.use("/webhook", webhookRoutes);
 app.use("/search", searchRoutes);
 // app.use('/ai', summarizationRoutes);
-
-const allowedOrigins = ["http://localhost:5173", "http://localhost:3001"];
-
 app.use(
   "/local_uploads",
-  (req, res, next) => {
-    const origin = req.headers.origin;
-    if (origin && allowedOrigins.includes(origin)) {
-      res.header("Access-Control-Allow-Origin", origin);
-      res.header("Vary", "Origin");
-      res.header("Access-Control-Allow-Credentials", "true");
-      res.header("Access-Control-Allow-Methods", "GET,OPTIONS");
-      res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
-      if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
-      }
-    }
-    // If no Origin header, do NOT set Access-Control-Allow-Origin at all
-    next();
-  },
   express.static(path.join(process.cwd(), "local_uploads"))
 );
 
