@@ -20,14 +20,12 @@ export class ContentController {
       console.log(error);
       res
         .status(500)
-        .json({ error: error as string || "Failed to create content" });
+        .json({ error: (error as string) || "Failed to create content" });
     }
   }
 
   static async uploadThumbnail(req: Request, res: Response) {
     console.log("Uploading Thumbnail...");
-    console.log(req.body);
-    console.log(req.params);
     const form = new IncomingForm();
     form.parse(req, async (err, fields, files: any) => {
       if (err) {
@@ -35,25 +33,38 @@ export class ContentController {
         return res.status(500).json({ error: "Failed to upload thumbnail." });
       }
 
+      // Check if files.thumbnail exists and is an array
+      if (
+        !files.thumbnail ||
+        !Array.isArray(files.thumbnail) ||
+        !files.thumbnail[0]
+      ) {
+        return res.status(400).json({ error: "No file uploaded." });
+      }
+
       const file = files.thumbnail[0];
       const fileName = file.newFilename;
       const fileType = file.mimetype;
+      const filePath = file.filepath; // Use 'filepath' for formidable v2+
 
-      // Upload thumbnail to storage
       try {
-        // Upload thumbnail
+        if (!filePath) {
+          return res.status(400).json({ error: "File path is missing." });
+        }
+
+        // Pass the file object with the correct path to StorageService
         const response = await StorageService.uploadFile(
-          file,
+          { ...file, path: filePath }, // Ensure 'path' is set if your StorageService expects it
           "thumbnails",
           fileName,
-          fileType
+          fileType,
         );
         res.status(201).json(response);
       } catch (error: any) {
         console.log(error);
         res
           .status(500)
-          .json({ error: error as string || "Failed to upload thumbnail" });
+          .json({ error: error.message || "Failed to upload thumbnail" });
       }
     });
   }
@@ -82,7 +93,7 @@ export class ContentController {
       // const confirmation = await axios.get(`${apiURL}/content/${contentId}`)
       const confirmation = await ContentService.getContent(contentId);
       const owner_id = confirmation?.creatorUID;
-     
+
       if (userId == owner_id) {
         //check whether they are allowed to edit the content
         const response = await ContentService.editContent(contentId, data);
@@ -137,11 +148,15 @@ export class ContentController {
           const fileType = file.mimetype;
 
           try {
+            if (!file) {
+              return res.status(400).json({ error: "No file uploaded." });
+            }
+
             const response = await StorageService.uploadFile(
               file,
               "thumbnails",
               fileName,
-              fileType
+              fileType,
             );
 
             const updateData = JSON.parse(fields.data);
@@ -433,7 +448,7 @@ export class ContentController {
   static async getRelatedContent(req: Request, res: Response) {
     console.log("Fetching Related Content...");
     const { contentId } = req.params;
-    const userId = req.query.userId as string || undefined;
+    const userId = (req.query.userId as string) || undefined;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 5;
 
     try {

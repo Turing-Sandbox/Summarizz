@@ -17,23 +17,14 @@ import { apiURL } from "../../scripts/api";
 import axios from "axios";
 import Toolbar from "../../components/content/toolbar";
 
-// TODO: Implement Edit/Create Content Logic to adapt this page based on the selected mode.
-
-export default function ContentEditor() {
-  // ---------------------------------------
-  // -------------- Variables --------------
-  // ---------------------------------------
-  // State for Editro and Content
+export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isSummarizing, setIsSummarizing] = useState(false);
-  const auth = useAuth();
-  const { user } = useAuth();
   const [error, setError] = useState("");
+
+  const auth = useAuth();
   const navigate = useNavigate();
 
   // Initialize Editor
@@ -60,9 +51,6 @@ export default function ContentEditor() {
   // ----------- Event Handlers ------------
   // ---------------------------------------
   useEffect(() => {
-    // Only proceed if we're in the browser environment
-    if (typeof window === "undefined") return;
-
     const savedTitle = localStorage.getItem("title");
     const savedContent = Cookies.get("content");
 
@@ -75,6 +63,40 @@ export default function ContentEditor() {
       editor.commands.setContent(savedContent);
     }
   }, [editor]);
+
+  // Fetch existing content data if in edit mode
+  useEffect(() => {
+    if (isEditMode) {
+      // Fetch existing content data if in edit mode
+      const fetchContent = async () => {
+        try {
+          const content = await axios.get(
+            `${apiURL}/content/${window.location.pathname.split("/").pop()}`,
+            {
+              withCredentials: true,
+            }
+          );
+
+          if (content.data) {
+            setTitle(content.data.title);
+            setContent(content.data.content);
+            if (editor) {
+              editor.commands.setContent(content.data.content);
+            }
+            if (content.data.thumbnailUrl) {
+              setThumbnailPreview(content.data.thumbnailUrl);
+            }
+          } else {
+            setError("Failed to load content. Please try again.");
+          }
+        } catch {
+          setError("Failed to load content. Please try again.");
+        }
+      };
+
+      fetchContent();
+    }
+  }, [isEditMode, editor]);
 
   // ---------------------------------------
   // -------------- Functions --------------
@@ -92,6 +114,7 @@ export default function ContentEditor() {
    */
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files ? e.target.files[0] : null;
+
     if (file && file.type.startsWith("image/")) {
       setThumbnail(file);
       setThumbnailPreview(URL.createObjectURL(file));
@@ -103,194 +126,74 @@ export default function ContentEditor() {
   };
 
   /**
-   * handleSummarize() -> void
-   *
-   * @description
-   * Handles the summarization of the content using the AI service backend,
-   * this will set the isSummarizing state to true and then call the backend
-   * to summarize the content using the API. If the content is not provided,
-   * it will set an error message and return.
-   *
-   * @returns {Promise<void>}
+   * Handles the submission of the content, including thumbnail upload and notifications.
+   * Uses POST for create and PUT for update mode.
    */
-  const handleSummarize = async () => {
-    if (!content) {
-      setError(
-        "Please add some content before summarizing using our AI service."
-      );
-      return;
-    }
-
-    setIsSummarizing(true);
-    try {
-      const response = await fetch(`${apiURL}/api/v1/summarize`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ input: content }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        setError(
-          data.error ||
-            "Failed to summarize provided content. Please Try again."
-        );
-      }
-
-      if (!editor) {
-        return;
-      }
-
-      const formattedSummary = `
-        <div class="summary-container">
-          <h2 class="summary-title">Summary</h2>
-          <div class="summary-content">
-            <p>${data.summary.output.replace(/\n/g, "</p><p>")}</p>
-          </div>
-        </div>
-      `;
-
-      editor.commands.setContent(formattedSummary);
-      setContent(formattedSummary);
-      Cookies.set("content", formattedSummary);
-    } catch (error) {
-      setError(
-        `Failed to summarize provided content: ${
-          (error as Error).message
-        }, something went wrong. Please Try again.`
-      );
-    }
-
-    setIsSummarizing(false);
-  };
-
-  /**
-   * handleSubmit() -> void
-   *
-   * @description
-   * Handles the submission of the content, setting { title, content, thumbnail }
-   * respectively amnd redirecting to the Content page. If the title and content
-   * are not provided, it will throw an error and set the error state to the current
-   * error message based on the error thrown.
-   *
-   * @returns
-   */
-  function handleSubmit() {
+  const handleSubmit = async () => {
     setError("");
 
-    if (title === "" || content === "") {
+    if (!title || !content) {
       setError(
-        "Title and content are required, and were not provided. Please Try again."
+        "Title and content are required, and were not provided. Please try again."
       );
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const newContent: Record<string, any> = {
-      creatorUID: user!.uid,
-      title,
-      content,
-    };
+    try {
+      // Prepare content payload
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const newContent: Record<string, any> = {
+        creatorUID: auth.user!.uid,
+        title,
+        content,
+      };
 
-    if (thumbnail) {
-      const formData = new FormData();
-      formData.append("thumbnail", thumbnail);
+      // Handle thumbnail upload if present
+      if (thumbnail) {
+        const formData = new FormData();
+        formData.append("thumbnail", thumbnail);
+        const thumbRes = await axios.post(
+          `${apiURL}/content/uploadThumbnail`,
+          formData,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
+        );
+        newContent.thumbnailUrl = thumbRes.data.url;
+      }
 
-      fetch(`${apiURL}/content/uploadThumbnail`, {
-        method: "POST",
-        body: formData,
-      })
-        .then(async (response) => {
-          const res = await response.json();
-          const thumbnailUrl = res.url;
-          newContent["thumbnailUrl"] = thumbnailUrl;
-
-          return fetch(`${apiURL}/content`, {
-            method: "POST",
+      // Determine request method and URL
+      let response;
+      if (isEditMode) {
+        const contentId = window.location.pathname.split("/").pop();
+        response = await axios.put(
+          `${apiURL}/content/${contentId}`,
+          newContent,
+          {
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newContent),
-          });
-        })
-        .then(async (response) => {
-          if (response.status === 200 || response.status === 201) {
-            const followers = user?.followers || [];
-            for (let i = 0; i < followers.length; i++) {
-              try {
-                await axios.post(`${apiURL}/notifications/create`, {
-                  userId: followers[i],
-                  notification: {
-                    userId: user?.uid,
-                    username: user?.username,
-                    type: "followedPost",
-                    textPreview: `"${
-                      title && title?.length > 30
-                        ? title.substring(0, 30) + "..."
-                        : title
-                    }"`,
-                    timestamp: Date.now(),
-                    read: false,
-                  },
-                });
-              } catch (error) {
-                console.error(`Error sending notifications: ${error}`);
-              }
-            }
-
-            Cookies.remove("content");
-            localStorage.removeItem("title");
-            navigate("/");
-          } else {
-            setError("Failed to create content. Please Try again.");
+            withCredentials: true,
           }
-        })
-        .catch((error) => {
-          console.log(error);
-          setError("Failed to create content. Please Try again.");
+        );
+      } else {
+        response = await axios.post(`${apiURL}/content`, newContent, {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
         });
-    } else {
-      fetch(`${apiURL}/content`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newContent),
-      })
-        .then((response) => response.json())
-        .then(async () => {
-          const followers = user?.followers || [];
+      }
 
-          for (let i = 0; i < followers.length; i++) {
-            try {
-              await axios.post(`${apiURL}/notifications/create`, {
-                userId: followers[i],
-                notification: {
-                  userId: user?.uid,
-                  username: user?.username,
-                  type: "followedPost",
-                  textPreview: `"${
-                    title && title?.length > 30
-                      ? title.substring(0, 30) + "..."
-                      : title
-                  }"`,
-                  timestamp: Date.now(),
-                  read: false,
-                },
-              });
-            } catch (error) {
-              console.error(`Error sending notifications: ${error}`);
-            }
-          }
-
-          Cookies.remove("content");
-          localStorage.removeItem("title");
-          navigate("/");
-        })
-        .catch((error) => {
-          console.log(error);
-          setError("Failed to create content. Please Try again.");
-        });
+      // Notify followers if content creation/update was successful
+      if (response.status === 200 || response.status === 201) {
+        Cookies.remove("content");
+        localStorage.removeItem("title");
+        navigate("/");
+      } else {
+        setError("Failed to save content. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to save content. Please try again.");
     }
-  }
+  };
 
   // User must be authenticated to create content
   if (!auth.isAuthenticated) {
@@ -303,7 +206,7 @@ export default function ContentEditor() {
   return (
     <>
       <div className='main-content'>
-        <h1>Create Content</h1>
+        <h1>{isEditMode ? "Edit" : "Create"} Content</h1>
 
         <form className='create-content-form'>
           <input
@@ -391,10 +294,6 @@ export default function ContentEditor() {
             }}
           >
             Clear
-          </button>
-
-          <button className='content-button' onClick={handleSummarize}>
-            Summarize with AI
           </button>
 
           <button className='content-button' onClick={handleSubmit}>
