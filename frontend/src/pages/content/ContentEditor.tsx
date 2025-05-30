@@ -15,6 +15,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import { apiURL } from "../../scripts/api";
 import Toolbar from "../../components/content/toolbar";
+import axios from "axios";
 
 export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
   const [title, setTitle] = useState("");
@@ -138,15 +139,17 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
       return;
     }
 
-    try {
-      // Prepare content payload
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newContent: Record<string, any> = {
-        creatorUID: auth.user!.uid,
-        title,
-        content,
-      };
+    // Prepare content payload
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newContent: Record<string, any> = {
+      creatorUID: auth.user!.uid,
+      title,
+      content,
+    };
 
+    let response; // Declare response here so it's accessible after try-catch
+
+    try {
       // Handle thumbnail upload if present
       if (thumbnail) {
         const formData = new FormData();
@@ -162,7 +165,6 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
       }
 
       // Determine request method and URL
-      let response;
       if (isEditMode) {
         const contentId = window.location.pathname.split("/").pop();
         response = await axios.put(
@@ -171,46 +173,50 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
           {
             headers: { "Content-Type": "application/json" },
             withCredentials: true,
-            body: JSON.stringify(newContent),
-          });
-        })
-        .then(async (response) => {
-          if (response.status === 200 || response.status === 201) {
-            Cookies.remove("content");
-            localStorage.removeItem("title");
-            navigate("/");
-          } else {
-            setError("Failed to create content. Please Try again.");
           }
         );
       } else {
-        response = await axios.post(`${apiURL}/content`, newContent, {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        });
-    } else {
-      fetch(`${apiURL}/content`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newContent),
-      })
-        .then((response) => response.json())
-        .then(async () => {
-          Cookies.remove("content");
-          localStorage.removeItem("title");
-          navigate("/");
-        })
-        .catch((error) => {
-          console.log(error);
-          setError("Failed to create content. Please Try again.");
-        });
+        response = await axios.post(
+          `${apiURL}/content`,
+          {
+            ...newContent,
+          },
+          {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error submitting content:", error);
+      setError(
+        "An error occurred while submitting the content. Please try again."
+      );
+    }
+
+    // If submission was successful, redirect to the content page
+    if (!error) {
+      // Reset local storage and cookies
+      localStorage.removeItem("title");
+      Cookies.remove("content");
+      setTitle("");
+      setContent("");
+
+      const contentId = isEditMode
+        ? window.location.pathname.split("/").pop()
+        : response?.data?.id; // Get the new content ID from the response
+      if (contentId) {
+        navigate(`/content/${contentId}`);
+      } else {
+        setError("Content ID not found after submission. Please try again.");
+      }
+    }
+
+    // User must be authenticated to create content
+    if (!auth.isAuthenticated) {
+      navigate("/authentication/login");
     }
   };
-
-  // User must be authenticated to create content
-  if (!auth.isAuthenticated) {
-    navigate("/authentication/login");
-  }
 
   // --------------------------------------
   // -------------- Render ----------------
