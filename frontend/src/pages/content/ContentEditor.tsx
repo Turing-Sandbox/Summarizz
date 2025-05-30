@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
 // TipTap (Import)
@@ -26,6 +26,7 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
 
   const auth = useAuth();
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
 
   // Initialize Editor
   const editor = useEditor({
@@ -64,27 +65,14 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
     }
   }, [editor]);
 
-// At the top of frontend/src/pages/content/ContentEditor.tsx
--import { useNavigate } from "react-router-dom";
-+import { useNavigate, useParams } from "react-router-dom";
-
-function ContentEditor({ /* props */ }) {
-  const navigate = useNavigate();
-+  const { id } = useParams<{ id: string }>();
-
   // Fetch existing content data if in edit mode
   useEffect(() => {
     if (isEditMode) {
       const fetchContent = async () => {
         try {
--          const content = await axios.get(
--            `${apiURL}/content/${window.location.pathname.split("/").pop()}`,
-+          const content = await axios.get(
-+            `${apiURL}/content/${id}`,
-             {
-               withCredentials: true,
-             }
-          );
+          const content = await axios.get(`${apiURL}/content/${id}`, {
+            withCredentials: true,
+          });
 
           if (content.data) {
             setTitle(content.data.title);
@@ -92,10 +80,8 @@ function ContentEditor({ /* props */ }) {
             if (editor) {
               editor.commands.setContent(content.data.content);
             }
--            if (content.data.thumbnailUrl) {
--              setThumbnailPreview(content.data.thumbnailUrl);
-+            if (content.data.thumbnail) {
-+              setThumbnailPreview(content.data.thumbnail);
+            if (content.data.thumbnail) {
+              setThumbnailPreview(content.data.thumbnail);
             }
           } else {
             setError("Failed to load content. Please try again.");
@@ -109,7 +95,7 @@ function ContentEditor({ /* props */ }) {
     }
   }, [isEditMode, editor]);
   // …
-}
+
   // ---------------------------------------
   // -------------- Functions --------------
   // ---------------------------------------
@@ -159,8 +145,6 @@ function ContentEditor({ /* props */ }) {
       content,
     };
 
-    let response; // Declare response here so it's accessible after try-catch
-
     try {
       // Handle thumbnail upload if present
       if (thumbnail) {
@@ -178,9 +162,8 @@ function ContentEditor({ /* props */ }) {
 
       // Determine request method and URL
       if (isEditMode) {
-        const contentId = window.location.pathname.split("/").pop();
-        response = await axios.put(
-          `${apiURL}/content/${contentId}`,
+        await axios.put(
+          `${apiURL}/content/${id}`,
           newContent,
           {
             headers: { "Content-Type": "application/json" },
@@ -188,7 +171,7 @@ function ContentEditor({ /* props */ }) {
           }
         );
       } else {
-        response = await axios.post(
+        await axios.post(
           `${apiURL}/content`,
           {
             ...newContent,
@@ -214,11 +197,8 @@ function ContentEditor({ /* props */ }) {
       setTitle("");
       setContent("");
 
-      const contentId = isEditMode
-        ? window.location.pathname.split("/").pop()
-        : response?.data?.id; // Get the new content ID from the response
-      if (contentId) {
-        navigate(`/content/${contentId}`);
+      if (id) {
+        navigate(`/content/${id}`);
       } else {
         setError("Content ID not found after submission. Please try again.");
       }
