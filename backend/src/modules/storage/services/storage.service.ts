@@ -20,26 +20,22 @@ const requiredEnv = [
 const isDev = process.env.NODE_ENV === "development";
 const LOCAL_UPLOAD_DIR = path.resolve(process.cwd(), "local_uploads");
 
-// Validate required env vars (throws in production if any are missing)
+const s3Config = {
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+};
+
+const s3 = new S3Client(s3Config);
+const BUCKET = process.env.AWS_S3_BUCKET!;
+
 for (const envVar of requiredEnv) {
   if (!process.env[envVar] && !isDev) {
     throw new Error(`Missing required environment variable: ${envVar}`);
   }
 }
-
-// Use empty config / no client in development, full config in production
-const s3Config = isDev
-  ? {}
-  : {
-      region: process.env.AWS_REGION,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-      },
-    };
-
-const s3 = isDev ? null : new S3Client(s3Config);
-const BUCKET = process.env.AWS_S3_BUCKET || "";
 
 /**
  * StorageService handles file uploads and deletions.
@@ -117,9 +113,8 @@ export class StorageService {
       await fs.writeFile(fullPath, fileBuffer);
       logger.info(`File saved locally at ${fullPath}`);
 
-      // Return the backend-accessible URL
-      const url = `http://localhost:3000/local_uploads/${filePath}/${fileName}`;
-      return { url };
+      // Return the absolute file system path
+      return { url: fullPath };
     } catch (error: any) {
       logger.error("Local upload error:", error);
       throw new Error(`Local upload failed: ${error.message}`);
