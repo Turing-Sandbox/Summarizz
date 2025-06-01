@@ -94,7 +94,8 @@ export default function App() {
           <Route path='/legal/accessibility' element={<Accessibility />} />
 
           {/* CONTENT */}
-          <Route path='/content/create' element={<ContentEditor />} />
+          <Route path='/content/create' element={<ContentEditor isEditMode={false} />} />
+          <Route path='/content/edit/:id' element={<ContentEditor isEditMode={true} />} />
           <Route path='/content/:id' element={<ContentView />} />
 
           {/* PRO */}

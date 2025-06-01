@@ -19,7 +19,7 @@
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.18",
-    "@types/express": "^4.17.1",
+    "@types/express": "^4.17.22",
     "@types/formidable": "^3.4.5",
     "@types/jest": "^29.5.14",
     "@types/ms": "^2.1.0",
@@ -34,6 +34,8 @@
   },
   "dependencies": {
     "@algolia/client-search": "^5.20.4",
+    "@aws-sdk/client-s3": "^3.816.0",
+    "@aws-sdk/s3-request-presigner": "^3.816.0",
     "@google/generative-ai": "^0.24.1",
     "@langchain/core": "^0.3.57",
     "@types/jsonwebtoken": "^9.0.7",
