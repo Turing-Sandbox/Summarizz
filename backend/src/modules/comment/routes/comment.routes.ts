@@ -1,22 +1,41 @@
-import { Router } from 'express';
+import { Router } from "express";
 import {
-    updateCommentController,
-    createCommentController,
-    deleteCommentController,
-    getCommentsByPostController,
-    getCommentByIdController
-} from '../controllers/comment.controller';
-import { authenticateToken } from '../../../shared/middleware/auth';
+  updateCommentController,
+  createCommentController,
+  deleteCommentController,
+  getCommentsByPostController,
+  getCommentByIdController,
+} from "../controllers/comment.controller";
+import { authenticateToken } from "../../../shared/middleware/auth";
 const router = Router();
 
-router.post('/:contentId', authenticateToken, createCommentController, );
+// Post routes
+router.post("/content/:contentId", authenticateToken, createCommentController);
+
+// Get routes
 router.get(
-  "/:contentId",
+  "/content/:contentId",
   authenticateToken,
   getCommentsByPostController
 );
-router.get("/:commentId", authenticateToken, getCommentByIdController);
-router.put("/:commentId", authenticateToken, updateCommentController);
-router.delete("/:commentId", authenticateToken, deleteCommentController);
+router.get(
+  "/:commentId/content/:contentId",
+  authenticateToken,
+  getCommentByIdController
+);
+
+// Put routes
+router.put(
+  "/:commentId/content/:contentId",
+  authenticateToken,
+  updateCommentController
+);
+
+// Delete routes
+router.delete(
+  "/:commentId/content/:contentId",
+  authenticateToken,
+  deleteCommentController
+);
 
 export default router;

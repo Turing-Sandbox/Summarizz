@@ -95,7 +95,8 @@ export default function CommentList({
     // Update comment in the backend
     const comment = await CommentService.updateComment(
       selectedCommentEdit.comment_id,
-      selectedCommentEdit.text
+      selectedCommentEdit.text,
+      contentId
     );
 
     // Check if the comment was updated successfully
@@ -120,7 +121,7 @@ export default function CommentList({
     if (!user.uid) navigate(`../authentication/login`);
 
     // Delete comment from the backend
-    const result = await CommentService.deleteComment(id);
+    const result = await CommentService.deleteComment(id, contentId);
 
     if (result instanceof Error) {
       toast("An error occurred while deleting the comment.", "error");
