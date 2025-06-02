@@ -9,7 +9,6 @@ import path from "path";
 
 // Import routes
 import userRoutes from './modules/user/routes/user.routes';
-import commentRoutes from './modules/comment/routes/comment.routes';
 import contentRoutes from './modules/content/routes/content.routes';
 import subscriptionRoutes from './modules/subscription/routes/subscription.routes';
 import notificationRoutes from './modules/notification/routes/notification.routes';
@@ -53,7 +52,6 @@ app.get("/health", (req, res) => {
 
 // API routes
 app.use("/user", userRoutes);
-app.use("/comment", commentRoutes);
 app.use("/content", contentRoutes);
 app.use("/subscription", subscriptionRoutes);
 app.use("/notification", notificationRoutes);

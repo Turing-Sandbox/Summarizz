@@ -27,7 +27,7 @@ export default class CommentService {
   ): Promise<{ message: string; comment: Comment } | Error> {
     try {
       const response = await axios.post(
-        `${apiURL}/comment/${contentId}`,
+        `${apiURL}/content/${contentId}/comment`,
         {
           text: commentText,
           ownerId: ownerId,
@@ -60,7 +60,7 @@ export default class CommentService {
   static async getPostComments(contentId: string): Promise<Comment[] | Error> {
     try {
       const response = await axios.get(
-        `${apiURL}/comment/content/${contentId}`,
+        `${apiURL}/content/${contentId}/comments`,
         {
           withCredentials: true,
           timeout: 5000,
@@ -93,7 +93,7 @@ export default class CommentService {
   ): Promise<Comment | Error> {
     try {
       const response = await axios.get(
-        `${apiURL}/comment/${commentId}/content/${contentId}`,
+        `${apiURL}/content/${contentId}/comment/${commentId}`,
         {
           withCredentials: true,
           timeout: 5000,
@@ -128,7 +128,7 @@ export default class CommentService {
   ): Promise<{ message: string } | Error> {
     try {
       const response = await axios.put(
-        `${apiURL}/comment/${commentId}/content/${contentId}`,
+        `${apiURL}/content/${contentId}/comment/${commentId}`,
         { text: commentText },
         {
           withCredentials: true,
@@ -162,7 +162,7 @@ export default class CommentService {
   ): Promise<{ message: string } | Error> {
     try {
       const response = await axios.delete(
-        `${apiURL}/comment/${commentId}/content/${contentId}`,
+        `${apiURL}/content/${contentId}/comment/${commentId}`,
         {
           withCredentials: true,
           timeout: 5000,

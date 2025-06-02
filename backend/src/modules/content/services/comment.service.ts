@@ -3,7 +3,7 @@ import { ref, get, set, remove, update, child, push } from "firebase/database";
 import { Comment } from "../models/comment.model";
 import { pushNotification } from "../../notification/services/notification.service";
 import { Notification } from "../../notification/models/notification.model";
-import { ContentService } from "../../content/services/content.service";
+import { ContentService } from "./content.service";
 
 export async function createComment(
   post_id: string,

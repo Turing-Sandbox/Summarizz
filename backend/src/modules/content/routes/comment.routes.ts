@@ -7,35 +7,40 @@ import {
   getCommentByIdController,
 } from "../controllers/comment.controller";
 import { authenticateToken } from "../../../shared/middleware/auth";
-const router = Router();
+
+const commentRouter = Router();
 
 // Post routes
-router.post("/content/:contentId", authenticateToken, createCommentController);
+commentRouter.post(
+  "/:contentId/comment",
+  authenticateToken,
+  createCommentController
+);
 
 // Get routes
-router.get(
-  "/content/:contentId",
+commentRouter.get(
+  "/:contentId/comments",
   authenticateToken,
   getCommentsByPostController
 );
-router.get(
-  "/:commentId/content/:contentId",
+commentRouter.get(
+  "/:contentId/comment/:commentId",
   authenticateToken,
   getCommentByIdController
 );
 
 // Put routes
-router.put(
-  "/:commentId/content/:contentId",
+commentRouter.put(
+  "/:contentId/comment/:commentId",
   authenticateToken,
   updateCommentController
 );
 
 // Delete routes
-router.delete(
-  "/:commentId/content/:contentId",
+commentRouter.delete(
+  "/:contentId/comment/:commentId",
   authenticateToken,
   deleteCommentController
 );
 
-export default router;
+export default commentRouter;
