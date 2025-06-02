@@ -109,10 +109,8 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# ignore log files and databases
+# ignore log files
 *.log
-*.sql
-*.sqlite
 
 # ignore compiled files
 *.com
@@ -186,3 +184,6 @@ backend/node_modules
 
 
 package-lock.json
+
+
+local_uploads

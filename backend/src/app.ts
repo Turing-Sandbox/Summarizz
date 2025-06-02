@@ -1,10 +1,11 @@
-import express from 'express';
-import rateLimit from 'express-rate-limit';
-import { appConfig } from './app.config';
-import { errorHandler } from './shared/middleware/error.middleware';
-import { stripeWebhookMiddleware } from './shared/middleware/stripe.middleware';
-import { logger } from './shared/utils/logger';
-import { createErrorResponse } from './shared/utils/response';
+import express from "express";
+import rateLimit from "express-rate-limit";
+import { appConfig } from "./app.config";
+import { errorHandler } from "./shared/middleware/error.middleware";
+import { stripeWebhookMiddleware } from "./shared/middleware/stripe.middleware";
+import { logger } from "./shared/utils/logger";
+import { createErrorResponse } from "./shared/utils/response";
+import path from "path";
 
 // Import routes
 import userRoutes from './modules/user/routes/user.routes';
@@ -15,8 +16,7 @@ import notificationRoutes from './modules/notification/routes/notification.route
 import oauthRoutes from './modules/user/routes/oauth.routes';
 import webhookRoutes from './modules/subscription/routes/webhook.routes';
 import searchRoutes from './modules/search/routes/search.routes';
-// import summarizationRoutes from './modules/ai/routes/summarization.routes';
-
+import summarizationRoutes from './modules/ai/routes/summarization.routes';
 
 const app = express();
 
@@ -39,37 +39,41 @@ app.use((req, res, next) => {
 const limiter = rateLimit({
   ...appConfig.rateLimiting,
   handler: (req, res) => {
-    res.status(429).json(
-      createErrorResponse('Too many requests, please try again later')
-    );
+    res
+      .status(429)
+      .json(createErrorResponse("Too many requests, please try again later"));
   },
 });
 app.use(limiter);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // API routes
-app.use('/user', userRoutes);
-app.use('/comment', commentRoutes);
-app.use('/content', contentRoutes);
-app.use('/subscription', subscriptionRoutes);
-app.use('/notification', notificationRoutes);
-app.use('/oauth', oauthRoutes);
-app.use('/webhook', webhookRoutes);
-app.use('/search', searchRoutes);
-// app.use('/ai', summarizationRoutes);
+app.use("/user", userRoutes);
+app.use("/comment", commentRoutes);
+app.use("/content", contentRoutes);
+app.use("/subscription", subscriptionRoutes);
+app.use("/notification", notificationRoutes);
+app.use("/oauth", oauthRoutes);
+app.use("/webhook", webhookRoutes);
+app.use("/search", searchRoutes);
+app.use('/ai', summarizationRoutes);
+app.use(
+  "/local_uploads",
+  express.static(path.join(process.cwd(), "local_uploads"))
+);
 
-app.get('/', (_, res) => {
-  res.send('Server is Listening!');
+app.get("/", (_, res) => {
+  res.send("Server is Listening!");
 });
 
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
-    error: `Cannot ${req.method} ${req.path}`
+    error: `Cannot ${req.method} ${req.path}`,
   });
 });
 

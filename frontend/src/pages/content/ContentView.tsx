@@ -39,7 +39,7 @@ export default function ContentView() {
   const { id } = useParams();
 
   // useAuth Hook for Authentication
-  const { user } = useAuth();
+  const auth = useAuth();
 
   // ---------------------------------------
   // -------------- Variables --------------
@@ -163,30 +163,36 @@ export default function ContentView() {
       setFormatedContent(sanitized);
       setLikes(typeof content.likes === "number" ? content.likes : 0);
       setViews(content.views || 0);
-      if (user?.uid) {
-        setIsLiked(content.peopleWhoLiked?.includes(user?.uid) || false);
-        setIsBookmarked(content.bookmarkedBy?.includes(user?.uid) || false);
+      if (auth.user?.uid) {
+        setIsLiked(content.peopleWhoLiked?.includes(auth.user?.uid) || false);
+        setIsBookmarked(
+          content.bookmarkedBy?.includes(auth.user?.uid) || false
+        );
       }
     }
-  }, [content, user?.uid]);
+  }, [content, auth.user?.uid]);
 
   // Update status content stats
   useEffect(() => {
-    if (content?.uid && user?.uid) {
-      setIsBookmarked(user?.bookmarkedContent?.includes(content.uid) || false);
+    if (content?.uid && auth.user?.uid) {
+      setIsBookmarked(
+        auth.user?.bookmarkedContent?.includes(content.uid) || false
+      );
       setBookmarks(content?.bookmarkedBy?.length || 0);
 
-      setIsShared(user?.sharedContent?.includes(content.uid) || false);
+      setIsShared(auth.user?.sharedContent?.includes(content.uid) || false);
       setShareCount(content?.shares || 0);
 
-      setIsLiked(user?.likedContent?.includes(content.uid) || false);
+      setIsLiked(auth.user?.likedContent?.includes(content.uid) || false);
       setLikes(content?.peopleWhoLiked?.length || 0);
     }
 
     if (content?.creatorUID) {
-      setIsFollowing(user?.following?.includes(content.creatorUID) || false);
+      setIsFollowing(
+        auth.user?.following?.includes(content.creatorUID) || false
+      );
     }
-  }, [content, user]);
+  }, [content, auth.user]);
 
   // ---------------------------------------
   // -------------- Handlers ---------------
@@ -227,8 +233,8 @@ export default function ContentView() {
       );
     }
 
-    if (user?.uid) {
-      navigate(`/profile/${user.uid}`);
+    if (auth.user?.uid) {
+      navigate(`/profile/${auth.user.uid}`);
     } else {
       navigate("/");
     }
@@ -245,13 +251,13 @@ export default function ContentView() {
    */
   const handleLike = async () => {
     try {
-      if (!user?.uid) {
+      if (!auth.user?.uid) {
         console.error("No user ID available");
         return;
       }
 
       const action = isLiked ? "unlike" : "like";
-      const url = `${apiURL}/content/${id}/${action}/${user.uid}`;
+      const url = `${apiURL}/content/${id}/${action}/${auth.user.uid}`;
       const response = await axios.post(url);
 
       if (response.status == 200) {
@@ -276,13 +282,13 @@ export default function ContentView() {
    */
   const handleBookmark = async () => {
     try {
-      if (!user?.uid) {
+      if (!auth.user?.uid) {
         console.error("No user ID available");
         return;
       }
 
       const action = isBookmarked ? "unbookmark" : "bookmark";
-      const url = `${apiURL}/content/${user.uid}/${action}/${id}`;
+      const url = `${apiURL}/content/${auth.user.uid}/${action}/${id}`;
       const response = await axios.post(url);
 
       if (response.status === 200) {
@@ -310,13 +316,13 @@ export default function ContentView() {
   const handleShare = async () => {
     try {
       // Check if the user is logged in via AuthProvider
-      if (!user?.uid) {
+      if (!auth.user?.uid) {
         alert("Please log in to share this article.");
         return;
       }
 
       const action = isShared ? "unshare" : "share";
-      const userId = user.uid;
+      const userId = auth.user.uid;
       const shareResponse = await axios.post(
         `${apiURL}/content/${id}/user/${userId}/${action}`
       );
@@ -342,16 +348,22 @@ export default function ContentView() {
    */
   const handleFollow = async () => {
     // Check if the user is logged in
-    if (!user?.uid || !content?.creatorUID) {
+    if (!auth.user?.uid || !content?.creatorUID) {
       return;
     }
 
     // Update following status
     let response: { message: string } | Error;
     if (isFollowing) {
-      response = await FollowService.unfollowUser(user.uid, content.creatorUID);
+      response = await FollowService.unfollowUser(
+        auth.user.uid,
+        content.creatorUID
+      );
     } else {
-      response = await FollowService.followUser(user.uid, content.creatorUID);
+      response = await FollowService.followUser(
+        auth.user.uid,
+        content.creatorUID
+      );
     }
 
     // Check if the response is an error
@@ -386,15 +398,16 @@ export default function ContentView() {
    * Redirects user to the edit page for the current content.
    */
   const editContent = () => {
-    if (content?.creatorUID === user?.uid) navigate(`edit/${content?.uid}`);
+    if (content?.creatorUID === auth.user?.uid)
+      navigate(`/content/edit/${content?.uid}`);
     else throw Error("You cannot edit this content");
   };
 
   const isCreator = () => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("userUID") === content?.creatorUID;
-    }
-    return false;
+    // Check if the user is logged in and if the content has a creator UID
+    if (!auth.user?.uid || !content?.creatorUID) return false;
+    // Compare the logged-in user's UID with the content creator's UID
+    return auth.user.uid === content.creatorUID;
   };
 
   // --------------------------------------
@@ -526,7 +539,7 @@ export default function ContentView() {
                     )}
                   </div>
 
-                  {user && user.uid !== creator?.uid && (
+                  {auth.user && auth.user.uid !== creator?.uid && (
                     <button
                       className='follow-button'
                       onClick={handleFollow}
@@ -569,7 +582,7 @@ export default function ContentView() {
                 className='thumbnail thumbnail-desktop'
               />
             )}
-            {user && <CommentList content={content!} user={user!} />}
+            {auth.user && <CommentList content={content!} user={auth.user!} />}
           </div>
         </div>
       </div>

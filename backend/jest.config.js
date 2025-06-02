@@ -11,6 +11,10 @@ module.exports = {
     transformIgnorePatterns: [
         '/node_modules/'
     ],
+    testPathIgnorePatterns: [
+        '/node_modules/',
+        '/dist/'
+    ],
     verbose: true,
     testTimeout: 30000
 };

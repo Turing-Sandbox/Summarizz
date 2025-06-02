@@ -138,12 +138,16 @@ export async function uploadProfileImageController(
 
     // Upload profile image to storage
     try {
+      if (!file) {
+        return res.status(400).json({ error: "No file uploaded." });
+      }
+
       // Upload profile image
       const response = await StorageService.uploadFile(
         file,
         "profileImage",
         fileName,
-        fileType
+        fileType,
       );
       res.status(201).json(response);
     } catch (error: any) {
