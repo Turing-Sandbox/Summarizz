@@ -65,17 +65,21 @@ export default function CommentList({
     if (!user.uid) navigate(`../authentication/login`);
 
     // Add comment to the backend
-    const comment = await CommentService.publishComment(
+    const result = await CommentService.publishComment(
       contentId,
       newComment,
       user.uid
     );
 
     // Check if the comment was added successfully
-    if (comment instanceof Error) {
+    if (result instanceof Error) {
       toast("An error occurred while adding the comment.", "error");
       return;
     }
+
+    // Update comments list to reflect the new comment
+    setComments((prevComments) => [...prevComments, result.comment]);
+    setNumComments((prevNum) => prevNum + 1);
 
     setNewComment("");
   };
@@ -93,14 +97,14 @@ export default function CommentList({
     }
 
     // Update comment in the backend
-    const comment = await CommentService.updateComment(
+    const result = await CommentService.updateComment(
       selectedCommentEdit.comment_id,
       selectedCommentEdit.text,
       contentId
     );
 
     // Check if the comment was updated successfully
-    if (comment instanceof Error) {
+    if (result instanceof Error) {
       toast("An error occurred while updating the comment.", "error");
       return;
     }
