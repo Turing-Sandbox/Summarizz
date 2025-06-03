@@ -56,6 +56,13 @@ export const env = {
     measurementId: process.env.FIREBASE_MEASUREMENT_ID,
     databaseURL: process.env.FIREBASE_DATABASE_URL
   },
+  db: {
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+  },
   app: {
     frontend: process.env.FRONTEND_URL,
     backend: process.env.BACKEND_URL,
