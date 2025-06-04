@@ -15,8 +15,10 @@ export async function findUsers(searchText: string, limit: number, offset: numbe
       profile_image
     FROM users
     WHERE
-      username ILIKE $1
-    ORDER BY username
+      username ILIKE $1 OR
+      first_name ILIKE $1 OR
+      last_name ILIKE $1
+    ORDER BY first_name, last_name
     LIMIT $2 OFFSET $3;
   `;
   const params = [`%${searchText}%`, limit, offset];
