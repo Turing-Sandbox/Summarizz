@@ -19,6 +19,33 @@ export default function SearchBar() {
   const searchBarRef = useRef<HTMLDivElement>(null);
   const fetchInProgress = useRef(false);
   const initialRender = useRef(true);
+  const previousPath = useRef(location.pathname);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Immediately hide dropdown when location changes
+  // This runs before any other effects
+  useEffect(() => {
+    // Hide dropdown immediately on any location change
+    setShowResults(false);
+    
+    // If the path has changed (not including search params)
+    if (location.pathname !== previousPath.current) {
+      // Clear the search input and results
+      setQuery('');
+      setDebouncedQuery('');
+      setUserResults([]);
+      setContentResults([]);
+      
+      // Clear any pending debounce timers
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+      
+      // Update the previous path
+      previousPath.current = location.pathname;
+    }
+  }, [location]);
 
   // Handle outside clicks to close the dropdown
   useEffect(() => {
@@ -42,18 +69,32 @@ export default function SearchBar() {
       return;
     }
 
-    const handler = setTimeout(() => {
+    // Clear any existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+
+    // Don't set up a new timer if we're on the search results page
+    if (location.pathname === '/search') {
+      return;
+    }
+
+    debounceTimer.current = setTimeout(() => {
       if (query.trim().length >= 3) {
         setDebouncedQuery(query);
       } else {
         setShowResults(false);
       }
+      debounceTimer.current = null;
     }, 500);
 
     return () => {
-      clearTimeout(handler);
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
     };
-  }, [query]);
+  }, [query, location.pathname]);
 
   // Fetch search results when debounced query changes
   useEffect(() => {
@@ -82,6 +123,12 @@ export default function SearchBar() {
     try {
       console.log(`SearchBar: Fetching dropdown results for "${debouncedQuery}"`);
       const response = await SearchService.search(debouncedQuery, "all", 5, 0);
+      
+      // Check if the path has changed since we started the fetch
+      if (location.pathname !== previousPath.current) {
+        // Don't update state if we've navigated away
+        return;
+      }
       
       if (!(response instanceof Error)) {
         // Explicitly type the response to ensure type safety
@@ -147,7 +194,7 @@ export default function SearchBar() {
         </button>
       </form>
 
-      {showResults && (
+      {showResults && query.trim().length >= 3 && (
         <div className="search-dropdown">
           {loading ? (
             <div className="search-loading">Loading...</div>
