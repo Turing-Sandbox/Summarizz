@@ -7,11 +7,8 @@ import ContentSearchResult from "../../components/search/ContentSearchResult";
 import "../../styles/search/search.scss";
 
 export default function SearchResults() {
-  // Search parameters
   const [searchParams] = useSearchParams();
   const query = searchParams.get("query") || "";
-  
-  // State for search results
   const [users, setUsers] = useState<SearchUser[]>([]);
   const [content, setContent] = useState<SearchContent[]>([]);
   const [offset, setOffset] = useState(0);
@@ -23,12 +20,10 @@ export default function SearchResults() {
   const fetchInProgress = useRef(false);
   const currentQuery = useRef("");
 
-  // Constants
   const USER_LIMIT = 10;
   const CONTENT_LIMIT = 20;
   const TOTAL_LIMIT = USER_LIMIT + CONTENT_LIMIT;
 
-  // Define fetchResults with useCallback to avoid dependency issues
   const fetchResults = useCallback(async () => {
     // Prevent duplicate calls and check valid query
     if (!query || 
@@ -56,8 +51,7 @@ export default function SearchResults() {
         if ((newUsers.length + newContent.length) < TOTAL_LIMIT) {
           setHasMore(false);
         }
-        
-        // Use type-safe spread to combine previous and new results
+
         setUsers(prev => [...prev, ...newUsers]);
         setContent(prev => [...prev, ...newContent]);
         setOffset(prev => prev + newUsers.length + newContent.length);
@@ -82,7 +76,7 @@ export default function SearchResults() {
     }
   }, [query]);
 
-  // Initial data fetch - only run once per query
+  // Initial data fetch - only run once per query!!
   useEffect(() => {
     if (!initialFetchDone.current && query && query.length >= 3) {
       initialFetchDone.current = true;
