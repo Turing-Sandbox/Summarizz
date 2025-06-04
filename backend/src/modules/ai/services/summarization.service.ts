@@ -1,8 +1,8 @@
-import {GenerativeModel, GoogleGenerativeAI} from "@google/generative-ai";
+import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { PromptTemplate } from '@langchain/core/prompts';
 import { AIModel, SummarizationRequest, SummarizationResponse } from '../types';
 import { SUMMARY_SYSTEM_PROMPT, SUMMARY_USER_PROMPT } from '../config/prompts';
-import { MODEL_CONFIGS } from '../config/models';
+import { SUMMARIZATION_MODEL_CONFIGS } from '../config/models';
 import { AppError } from '../../../shared/errors';
 import { logger } from '../../../shared/utils/logger';
 import { env } from '../../../shared/config/environment';
@@ -30,7 +30,7 @@ export class SummarizationService {
     const model = genAI.getGenerativeModel({
       model: modelType,
       systemInstruction: SUMMARY_SYSTEM_PROMPT,
-      generationConfig: MODEL_CONFIGS[modelType],
+      generationConfig: SUMMARIZATION_MODEL_CONFIGS[modelType],
     });
 
     try {
