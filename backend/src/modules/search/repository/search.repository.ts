@@ -10,6 +10,8 @@ export async function findUsers(searchText: string, limit: number, offset: numbe
     SELECT
       user_id,
       username,
+      first_name,
+      last_name,
       profile_image
     FROM users
     WHERE
@@ -35,14 +37,18 @@ export async function findUsers(searchText: string, limit: number, offset: numbe
 export async function findContent(searchText: string, limit: number, offset: number): Promise<Content[]> {
   const sql = `
     SELECT
-      content_id,
-      creator_id,
-      title,
-      COALESCE(summary, LEFT(content, 150)) as summary,
-      date_created
-    FROM content
-    WHERE title ILIKE $1 OR content ILIKE $1
-    ORDER BY date_created DESC
+      c.content_id,
+      u.username,
+      u.first_name,
+      u.last_name,
+      u.profile_image,
+      c.title,
+      COALESCE(c.summary, LEFT(c.content, 150)) as summary,
+      c.date_created
+    FROM content c
+    JOIN users u ON c.creator_id = u.user_id
+    WHERE c.title ILIKE $1 OR c.content ILIKE $1
+    ORDER BY c.date_created DESC
     LIMIT $2 OFFSET $3;
   `;
   const params = [`%${searchText}%`, limit, offset];

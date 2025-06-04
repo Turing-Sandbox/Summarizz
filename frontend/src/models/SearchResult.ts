@@ -1,7 +1,7 @@
-export type searchType = "users" | "content" | "all";
+// Models for search results from the backend
+// These match the backend search.types.ts structure
 
-// User record from the database
-export interface User {
+export interface SearchUser {
   user_id: string;
   username: string;
   first_name: string;
@@ -9,8 +9,7 @@ export interface User {
   profile_image?: string;
 }
 
-// Content record from the database
-export interface Content {
+export interface SearchContent {
   content_id: string;
   username: string;
   first_name: string;
@@ -21,8 +20,7 @@ export interface Content {
   date_created: Date;
 }
 
-// API response from the service
 export interface SearchResponse {
-  users: User[];
-  content: Content[];
+  users: SearchUser[];
+  content: SearchContent[];
 }

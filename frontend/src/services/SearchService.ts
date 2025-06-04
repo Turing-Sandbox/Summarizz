@@ -1,51 +1,37 @@
 import axios from "axios";
 import { apiURL } from "../scripts/api";
-import { User } from "../models/User";
-import { Content } from "../models/Content";
+import { SearchResponse } from "../models/SearchResult";
 
 export class SearchService {
   /**
-   * searchUsers(query: string) -> Promise<User[] | Error>
+   * search(searchText: string, searchType: string, limit: number, offset: number) -> Promise<SearchResponse | Error>
    *
    * @description
-   * Searches for users based on the provided query string.
+   * Searches for users and/or content based on the provided parameters.
    *
-   * @param query - The search query string.
-   * @returns A promise that resolves to an array of User objects or an Error.
+   * @param searchText - The search query string.
+   * @param searchType - The type of search to perform (users, content, or all).
+   * @param limit - The maximum number of results to return.
+   * @param offset - The offset for pagination.
+   * @returns A promise that resolves to a SearchResponse object or an Error.
    */
-  static async searchUsers(
+  static async search(
     searchText: string,
-    userStartingPoint: string | null = null
-  ): Promise<{ users: User[]; nextStartingPoint: string } | Error> {
+    searchType: "users" | "content" | "all" = "all",
+    limit: number = 5,
+    offset: number = 0
+  ): Promise<SearchResponse | Error> {
     try {
-      const response = await axios.get(`${apiURL}/search/users`, {
-        params: { searchText, userStartingPoint },
+      const response = await axios.get(`${apiURL}/search`, {
+        params: { searchText, searchType, limit, offset },
       });
 
       return response.data;
     } catch (error) {
       if (error instanceof Error) {
-        return new Error("Failed to fetch user data: " + error.message);
+        return new Error(`Failed to fetch search data: ${error.message}`);
       }
-      return new Error("Failed to fetch user data: Unknown error");
-    }
-  }
-
-  static async searchContents(
-    searchText: string,
-    contentStartingPoint: string | null = null
-  ): Promise<{ contents: Content[]; nextStartingPoint: string } | Error> {
-    try {
-      const response = await axios.get(`${apiURL}/search/contents`, {
-        params: { searchText, contentStartingPoint },
-      });
-
-      return response.data;
-    } catch (error) {
-      if (error instanceof Error) {
-        return new Error("Failed to fetch content data: " + error.message);
-      }
-      return new Error("Failed to fetch content data: Unknown error");
+      return new Error("Failed to fetch search data: Unknown error");
     }
   }
 }

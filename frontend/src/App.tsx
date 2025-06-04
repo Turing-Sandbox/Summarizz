@@ -23,6 +23,7 @@ import ContentView from "./pages/content/ContentView";
 import ProDetails from "./pages/pro/ProDetails";
 import ManageSubscription from "./pages/pro/ManageSubscription";
 import SubscribePro from "./pages/pro/SubscribePro";
+import SearchResults from "./pages/search/SearchResults";
 
 // STYLES
 import "./styles/authentication/authentication.scss";
@@ -97,6 +98,9 @@ export default function App() {
           <Route path='/content/create' element={<ContentEditor isEditMode={false} />} />
           <Route path='/content/edit/:id' element={<ContentEditor isEditMode={true} />} />
           <Route path='/content/:id' element={<ContentView />} />
+
+          {/* SEARCH */}
+          <Route path='/search' element={<SearchResults />} />
 
           {/* PRO */}
           <Route path='/pro' element={<ProDetails />} />
