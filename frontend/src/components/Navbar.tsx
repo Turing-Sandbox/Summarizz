@@ -1,7 +1,5 @@
-import { BellIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { BellIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { User } from "../models/User";
-import { Content } from "../models/Content";
 import { Notification } from "../models/Notification";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -9,8 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import NotificationList from "./notification/NotificationList";
 import { SubscriptionService } from "../services/SubscriptionService";
-import { SearchService } from "../services/SearchService";
-import SearchList from "./search/SearchListResults";
+import SearchBar from "./search/SearchBar";
 import NotificationService from "../services/NotificationService";
 
 export default function Navbar() {
@@ -20,13 +17,6 @@ export default function Navbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationList, setShowNotificationList] = useState(false);
-  const [query, setQuery] = useState("");
-  const [showSearchResults, setShowSearchResults] = useState(false);
-
-  const [userSearchResults, setUserSearchResults] = useState<User[]>([]);
-  const [contentSearchResults, setContentSearchResults] = useState<Content[]>(
-    []
-  );
 
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -97,7 +87,6 @@ export default function Navbar() {
     setShowNotificationList(!showNotificationList);
 
     // 2 - Hide the search results and menu (Other menus)
-    setShowSearchResults(false);
     setShowMenu(false);
 
     // 3 Mark notifications as read if needed
@@ -107,49 +96,24 @@ export default function Navbar() {
     }
   };
 
-  /**
-   * handleSearch() -> void
-   *
-   * @description
-   * Uses the Next.js router to push the user to the search results page,
-   * with the user's input as a url query parameter.
-   */
-  const handleSearch = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("title");
+    }
+    auth.logout();
+  };
 
-    // Validation
-    const trimmedQuery = query.trim();
-    if (trimmedQuery === "") {
-      setShowSearchResults(false);
+  const markRead = async () => {
+    if (auth.user === null) {
       return;
     }
 
-    // Search Queries
-    const userSearchResults = await SearchService.searchUsers(trimmedQuery);
-    const contentSearchResults = await SearchService.searchContents(
-      trimmedQuery
-    );
+    const response = await NotificationService.markAsRead(auth.user.uid);
 
-    // Display Search Results
-    if (userSearchResults instanceof Error) {
-      console.error("Error fetching user search results:", userSearchResults);
-    } else {
-      setUserSearchResults(userSearchResults.users);
+    if (response instanceof Error) {
+      console.error("Error marking notification as read: ", response);
+      return;
     }
-
-    if (contentSearchResults instanceof Error) {
-      console.error(
-        "Error fetching content search results:",
-        contentSearchResults
-      );
-    } else {
-      setContentSearchResults(contentSearchResults.contents);
-    }
-
-    // Update states
-    setShowSearchResults(true);
-    setShowMenu(false);
-    setShowNotificationList(false);
   };
 
   const fetchNotifications = async (): Promise<void> => {
@@ -201,36 +165,15 @@ export default function Navbar() {
     }
   };
 
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("title");
-    }
-    auth.logout();
-  };
-
-  const markRead = async () => {
-    if (auth.user === null) {
-      return;
-    }
-
-    const response = await NotificationService.markAsRead(auth.user.uid);
-
-    if (response instanceof Error) {
-      console.error("Error marking notification as read: ", response);
-      return;
-    }
-  };
-
   // --------------------------------------
   // -------------- Render ----------------
   // --------------------------------------
   return (
     <>
-      {(showSearchResults || showMenu || showNotificationList) && (
+      {(showMenu || showNotificationList) && (
         <div
           className='navbar-page-overlay'
           onClick={() => {
-            setShowSearchResults(false);
             setShowMenu(false);
             setShowNotificationList(false);
           }}
@@ -250,29 +193,9 @@ export default function Navbar() {
         {/* Create New Content */}
         {auth.isAuthenticated ? (
           <>
-            <form
-              onSubmit={handleSearch}
-              className='searchBarContainer search-large-screen'
-            >
-              <input
-                type='text'
-                className='searchBar'
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder='Search for something!'
-              />
-              <button className='searchButton'>
-                <MagnifyingGlassIcon />
-              </button>
-              {showSearchResults && (
-                <div className='nav-searchResults'>
-                  <SearchList
-                    userSearchResults={userSearchResults}
-                    contentSearchResults={contentSearchResults}
-                  />
-                </div>
-              )}
-            </form>
+            <div className='searchBarContainer search-large-screen'>
+              <SearchBar />
+            </div>
 
             <button
               className='navbar-button navbar-button-large-screen'
@@ -312,7 +235,6 @@ export default function Navbar() {
               onClick={() => {
                 setShowMenu(!showMenu);
                 setShowNotificationList(false);
-                setShowSearchResults(false);
               }}
             >
               {auth.user && auth.user.profileImage ? (
@@ -382,7 +304,6 @@ export default function Navbar() {
                 onClick={() => {
                   setShowMenu(false);
                   setShowNotificationList(false);
-                  setShowSearchResults(false);
                 }}
               >
                 <svg
