@@ -87,7 +87,7 @@ export default function SearchResults() {
   }, [query, fetchResults]);
 
   return (
-    <div className="page-container">
+    <div className='main-content'>
       <div className="search-results-page">
         <h1 className="search-results-title">Search Results for: {query}</h1>
         
