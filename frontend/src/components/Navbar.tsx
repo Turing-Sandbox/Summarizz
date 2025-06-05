@@ -323,174 +323,87 @@ export default function Navbar() {
                   <path d='M6 6l12 12' />
                 </svg>
               </div>
+            </div>
 
-              {/* User Info */}
-              <div className='menu-user-info'>
-                <div className='menu-profile-picture-container'>
-                  {auth.user && auth.user.profileImage ? (
-                    <img
-                      src={auth.user.profileImage}
-                      width={50}
-                      height={50}
-                      alt='Profile Picture'
-                      className='profile-picture'
+            {/* ALWAYS DISPLAYED */}
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate(`/profile/${auth.user?.uid}`);
+              }}
+            >
+              View Profile
+            </a>
+            <hr className='menu-divider' />
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate(`/profile/manage`);
+              }}
+            >
+              Manage Profile
+            </a>
+            <hr className='menu-divider' />
+            {!isProUser && (
+              <>
+                <a
+                  className='menu-item upgrade-pro-item'
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate("/pro");
+                  }}
+                >
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    className='pro-star-icon'
+                    viewBox='0 0 24 24'
+                    fill='currentColor'
+                  >
+                    <path
+                      fillRule='evenodd'
+                      d='M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z'
+                      clipRule='evenodd'
                     />
-                  ) : (
-                    <div className='no-profile-picture-container'>
-                      <h1 className='no-profile-picture'>
-                        {auth.user?.username[0].toUpperCase() || ""}
-                      </h1>
-                    </div>
-                  )}
-                </div>
-                <div className='menu-user-details'>
-                  <h3>
-                    {auth.user?.firstName} {auth.user?.lastName}
-                  </h3>
-                  <p>@{auth.user?.username}</p>
-                </div>
-              </div>
-
-              {/* Search Bar for Mobile */}
-              <div className='searchBarContainer search-small-screen'>
-                <SearchBar />
-              </div>
-
-              {/* Create New Content for Mobile */}
-              <button
-                className='navbar-button navbar-button-small-screen'
-                onClick={() => {
-                  navigate("/content/create");
-                  localStorage.removeItem("title");
-                  Cookies.remove("content");
-                }}
-              >
-                Create Content
-              </button>
-
-              {/* Notifications for Mobile */}
-              <div>
-                <div
-                  onClick={notificationsBellClicked}
-                  className='notification-button notification-button-small-screen'
-                >
-                  <BellIcon className='icon' />
-                  {unreadCount > 0 && <span>{unreadCount}</span>}
-                </div>
-              </div>
-            </div>
-
-            {/* Menu Items */}
-            <div className='menu-items'>
-              <div
-                className='menu-item'
-                onClick={() => {
-                  navigate(`/profile/${auth.user?.uid}`);
-                  setShowMenu(false);
-                }}
-              >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='icon icon-tabler icon-tabler-user'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  strokeWidth='2'
-                  stroke='currentColor'
-                  fill='none'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                >
-                  <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-                  <path d='M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0' />
-                  <path d='M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2' />
-                </svg>
-                <p>Profile</p>
-              </div>
-
-              <div
-                className='menu-item'
-                onClick={() => {
-                  navigate("/settings");
-                  setShowMenu(false);
-                }}
-              >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='icon icon-tabler icon-tabler-settings'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  strokeWidth='2'
-                  stroke='currentColor'
-                  fill='none'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                >
-                  <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-                  <path d='M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z' />
-                  <path d='M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0' />
-                </svg>
-                <p>Settings</p>
-              </div>
-
-              <div
-                className='menu-item'
-                onClick={() => {
-                  navigate("/subscription");
-                  setShowMenu(false);
-                }}
-              >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='icon icon-tabler icon-tabler-star'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  strokeWidth='2'
-                  stroke='currentColor'
-                  fill='none'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                >
-                  <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-                  <path d='M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z' />
-                </svg>
-                <p>
-                  {isProUser
-                    ? "Manage Subscription"
-                    : "Upgrade to Pro"}
-                </p>
-              </div>
-
-              <div
-                className='menu-item'
-                onClick={() => {
-                  handleLogout();
-                  setShowMenu(false);
-                }}
-              >
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='icon icon-tabler icon-tabler-logout'
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  strokeWidth='2'
-                  stroke='currentColor'
-                  fill='none'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'
-                >
-                  <path stroke='none' d='M0 0h24v24H0z' fill='none' />
-                  <path d='M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2' />
-                  <path d='M9 12h12l-3 -3' />
-                  <path d='M18 15l3 -3' />
-                </svg>
-                <p>Logout</p>
-              </div>
-            </div>
+                  </svg>
+                  Upgrade to Pro
+                </a>
+                <hr className='menu-divider' />
+              </>
+            )}
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                navigate("/pro/manage");
+              }}
+            >
+              Manage Subscription
+            </a>
+            <hr className='menu-divider' />
+            <a
+              className='menu-item'
+              onClick={() => {
+                setShowMenu(false);
+                handleLogout();
+              }}
+            >
+              Logout
+            </a>
           </>
+
+          {/* Create Content */}
+          <button
+            className='navbar-button navrbar-button-mobile'
+            onClick={() => {
+              navigate("/content/create");
+              localStorage.removeItem("title");
+              Cookies.remove("content");
+            }}
+          >
+            Create Content
+          </button>
         </div>
       )}
     </>
