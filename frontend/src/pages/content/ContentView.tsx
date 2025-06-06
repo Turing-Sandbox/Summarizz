@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import { useEffect, useState } from "react";
 import type { Content } from "../../models/Content";
 import { User } from "../../models/User";
@@ -24,6 +24,7 @@ import CommentList from "../../components/content/CommentList";
 import UserService from "../../services/UserService";
 import FollowService from "../../services/FollowService";
 import { normalizeContentDates } from "../../utils/contentHelper";
+import { useToast } from "../../hooks/ToastProvider/useToast";
 
 /**
  * Page() -> JSX.Element
@@ -64,6 +65,7 @@ export default function ContentView() {
   const [firstRender, setFirstRender] = useState(true);
 
   const navigate = useNavigate();
+  const toast = useToast();
 
   // ---------------------------------------
   // -------------- useEffects -------------
@@ -104,7 +106,10 @@ export default function ContentView() {
           // Check if creator is an instance of Error
           // and handle accordingly.
           if (creator instanceof Error) {
-            console.error("Error fetching creator data:", creator.message);
+            toast(
+              "An error occurred while fetching the creator's data.",
+              "error"
+            );
             setCreator(null);
           } else if (creator) {
             setCreator(creator);
@@ -208,11 +213,8 @@ export default function ContentView() {
 
     if (localStorage.getItem("userUID") === content?.creatorUID) {
       try {
-        // Delete comments
-        const user_id = content?.creatorUID;
-        await axios.delete(`${apiURL}/comment/post/${content.uid}/${user_id}`);
-
         // Delete content
+        const user_id = auth.user?.uid;
         const content_id = content?.uid;
         await axios({
           method: "delete",
@@ -366,10 +368,11 @@ export default function ContentView() {
 
     // Check if the response is an error
     if (response instanceof Error) {
-      alert(
-        `Failed to ${
+      toast(
+        `An error occurred while trying to ${
           isFollowing ? "unfollow" : "follow"
-        } user. Please try again.`
+        } the creator.`,
+        "error"
       );
       return;
     }

@@ -1,9 +1,10 @@
-import Stripe from 'stripe';
-import dotenv from 'dotenv';
+import Stripe from "stripe";
+import dotenv from "dotenv";
 
 dotenv.config();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-05-28.basil',
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2025-05-28.basil",
 });
 
 /**
@@ -24,7 +25,7 @@ export class StripeService {
       });
       return customer;
     } catch (error) {
-      console.error('Error creating Stripe customer:', error);
+      console.error("Error creating Stripe customer:", error);
       throw error;
     }
   }
@@ -46,20 +47,20 @@ export class StripeService {
     try {
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
-        payment_method_types: ['card'],
+        payment_method_types: ["card"],
         line_items: [
           {
             price: priceId,
             quantity: 1,
           },
         ],
-        mode: 'subscription',
+        mode: "subscription",
         success_url: successUrl,
         cancel_url: cancelUrl,
       });
       return session;
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error("Error creating checkout session:", error);
       throw error;
     }
   }
@@ -74,7 +75,7 @@ export class StripeService {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
       return subscription;
     } catch (error) {
-      console.error('Error retrieving subscription:', error);
+      console.error("Error retrieving subscription:", error);
       throw error;
     }
   }
@@ -95,7 +96,7 @@ export class StripeService {
       });
       return subscription;
     } catch (error) {
-      console.error('Error canceling subscription:', error);
+      console.error("Error canceling subscription:", error);
       throw error;
     }
   }
@@ -108,7 +109,7 @@ export class StripeService {
    */
   constructWebhookEvent(payload: string, signature: string): Stripe.Event {
     try {
-      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || "";
       const event = stripe.webhooks.constructEvent(
         payload,
         signature,
@@ -116,7 +117,7 @@ export class StripeService {
       );
       return event;
     } catch (error) {
-      console.error('Error constructing webhook event:', error);
+      console.error("Error constructing webhook event:", error);
       throw error;
     }
   }
@@ -126,12 +127,16 @@ export class StripeService {
    * @param paymentIntentId Stripe payment intent ID
    * @returns Payment intent object
    */
-  async getPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+  async getPaymentIntent(
+    paymentIntentId: string
+  ): Promise<Stripe.PaymentIntent> {
     try {
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        paymentIntentId
+      );
       return paymentIntent;
     } catch (error) {
-      console.error('Error retrieving payment intent:', error);
+      console.error("Error retrieving payment intent:", error);
       throw error;
     }
   }
@@ -152,7 +157,7 @@ export class StripeService {
       });
       return subscription;
     } catch (error) {
-      console.error('Error updating subscription payment method:', error);
+      console.error("Error updating subscription payment method:", error);
       throw error;
     }
   }

@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import { AuthenticationService } from "../../services/AuthenticationService";
 
 function Callback() {

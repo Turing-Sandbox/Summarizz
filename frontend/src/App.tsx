@@ -1,6 +1,8 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Footer from "./components/Footer";
-import AuthProvider from "./hooks/AuthProvider";
+import AuthProvider from "./hooks/AuthProvider/AuthProvider";
+import { ToastProvider } from "./hooks/ToastProvider/ToastProvider";
+
 import NavbarWrapper from "./components/NavbarWrapper";
 import Background from "./components/Background";
 import Feed from "./pages/Feed";
@@ -59,55 +61,59 @@ import NotFound from "./pages/error/404";
 export default function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Background />
-        <NavbarWrapper />
+      <ToastProvider>
+        <AuthProvider>
+          <Background />
+          <NavbarWrapper />
 
-        {/* ROUTER */}
-        <Routes>
-          {/* HOME/FEED */}
-          <Route path='/' element={<Feed />} />
+          {/* ROUTER */}
+          <Routes>
+            {/* HOME/FEED */}
+            <Route path='/' element={<Feed />} />
 
-          {/* AUTHENTICATION */}
-          <Route path='/authentication/login' element={<Login />} />
-          <Route path='/authentication/register' element={<Register />} />
-          <Route
-            path='/authentication/reset-password'
-            element={<ResetPassword />}
-          />
-          <Route path='/auth/callback' element={<CallbackAuthentication />} />
-          <Route path='/auth/popup-callback' element={<PopupCallback />} />
+            {/* AUTHENTICATION */}
+            <Route path='/authentication/login' element={<Login />} />
+            <Route path='/authentication/register' element={<Register />} />
+            <Route
+              path='/authentication/reset-password'
+              element={<ResetPassword />}
+            />
+            <Route path='/auth/callback' element={<CallbackAuthentication />} />
+            <Route path='/auth/popup-callback' element={<PopupCallback />} />
 
-          {/* PROFILE */}
-          <Route path='/profile/:id' element={<Profile />} />
-          <Route path='/profile/manage' element={<ManageProfile />} />
+            {/* PROFILE */}
+            <Route path='/profile/:id' element={<Profile />} />
+            <Route path='/profile/manage' element={<ManageProfile />} />
 
-          {/* CONTACT */}
-          <Route path='/about' element={<About />} />
-          <Route path='/contact' element={<Contact />} />
+            {/* CONTACT */}
+            <Route path='/about' element={<About />} />
+            <Route path='/contact' element={<Contact />} />
 
-          {/* LEGAL */}
-          <Route path='/legal/terms-of-service' element={<TermsOfService />} />
-          <Route path='/legal/privacy-policy' element={<PrivacyPolicy />} />
-          <Route path='/legal/cookie-policy' element={<CookiePolicy />} />
-          <Route path='/legal/ai-disclaimer' element={<AIDisclaimer />} />
-          <Route path='/legal/accessibility' element={<Accessibility />} />
+            {/* LEGAL */}
+            <Route
+              path='/legal/terms-of-service'
+              element={<TermsOfService />}
+            />
+            <Route path='/legal/privacy-policy' element={<PrivacyPolicy />} />
+            <Route path='/legal/cookie-policy' element={<CookiePolicy />} />
+            <Route path='/legal/ai-disclaimer' element={<AIDisclaimer />} />
+            <Route path='/legal/accessibility' element={<Accessibility />} />
 
-          {/* CONTENT */}
-          <Route path='/content/create' element={<ContentEditor isEditMode={false} />} />
-          <Route path='/content/edit/:id' element={<ContentEditor isEditMode={true} />} />
-          <Route path='/content/:id' element={<ContentView />} />
+            {/* CONTENT */}
+            <Route path='/content/create' element={<ContentEditor />} />
+            <Route path='/content/:id' element={<ContentView />} />
 
-          {/* PRO */}
-          <Route path='/pro' element={<ProDetails />} />
-          <Route path='/pro/manage' element={<ManageSubscription />} />
-          <Route path='/pro/subscribe' element={<SubscribePro />} />
+            {/* PRO */}
+            <Route path='/pro' element={<ProDetails />} />
+            <Route path='/pro/manage' element={<ManageSubscription />} />
+            <Route path='/pro/subscribe' element={<SubscribePro />} />
 
-          {/* 404 */}
-          <Route path='*' element={<NotFound />} />
-        </Routes>
-        <Footer />
-      </AuthProvider>
+            {/* 404 */}
+            <Route path='*' element={<NotFound />} />
+          </Routes>
+          <Footer />
+        </AuthProvider>
+      </ToastProvider>
     </Router>
   );
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { AuthContext } from "./AuthContext";
-import { User } from "../models/User";
-import LoadingPage from "../pages/loading/LoadingPage";
-import UserService from "../services/UserService";
-import { AuthenticationService } from "../services/AuthenticationService";
+import { User } from "../../models/User";
+import LoadingPage from "../../pages/loading/LoadingPage";
+import UserService from "../../services/UserService";
+import { AuthenticationService } from "../../services/AuthenticationService";
 import { useNavigate } from "react-router-dom";
-import ToastNotification from "../components/ToastNotification";
+import { useToast } from "../ToastProvider/useToast";
 
 export default function AuthProvider({
   children,
@@ -14,25 +14,16 @@ export default function AuthProvider({
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "error" | "feedback" | "success";
-  } | null>(null);
+  const toast = useToast();
 
   const login = async (userUID: string) => {
     await getUserData(userUID);
   };
 
   const logout = async () => {
-    setToast(null);
-
     const result = await AuthenticationService.logout();
     if (result instanceof Error) {
-      setToast({
-        message:
-          result.message || "An error to logout occurred. Please try again.",
-        type: "error",
-      });
+      toast("An error occurred while logging out. Please try again.", "error");
       return;
     }
 
@@ -42,18 +33,11 @@ export default function AuthProvider({
 
   useEffect(() => {
     const initializeUser = async () => {
-      setToast(null);
-
       // Check if we have cookies before attempting to refresh
       const response = await AuthenticationService.refreshToken();
 
       if (response instanceof Error) {
-        setToast({
-          message:
-            response.message ||
-            "An error occurred while refreshing the token. Please try again.",
-          type: "error",
-        });
+        toast("An error occurred while refreshing the token.", "error");
         setUser(null);
         setLoading(false);
         return;
@@ -71,15 +55,13 @@ export default function AuthProvider({
   }, []);
 
   async function getUserData(userUID: string) {
-    setToast(null);
     const userData = await UserService.fetchUserWithID(userUID);
 
     if (!(userData instanceof Error)) {
       if (userData === null) {
-        setToast({
-          message: "Issue to login. User not found.",
-          type: "error",
-        });
+        toast("User not found. Please log in again.", "error");
+        setUser(null);
+        navigate("/authentication/login");
         return;
       }
       setUser(userData || null);
@@ -98,13 +80,6 @@ export default function AuthProvider({
       value={{ user, setUser, login, logout, isAuthenticated: !!user }}
     >
       {children}
-      {toast && (
-        <ToastNotification
-          type={toast.type}
-          message={toast.message}
-          onClose={() => setToast(null)}
-        />
-      )}
     </AuthContext.Provider>
   );
 }

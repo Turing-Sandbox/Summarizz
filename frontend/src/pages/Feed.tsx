@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/AuthProvider/useAuth";
 import { User } from "../models/User";
 import ContentList from "../components/feed/ContentList";
 import UserService from "../services/UserService";

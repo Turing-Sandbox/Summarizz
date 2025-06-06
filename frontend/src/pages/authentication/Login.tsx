@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 import { OAuthButtons } from "../../components/authentication/OAuthButtons";
 import { AuthenticationService } from "../../services/AuthenticationService";
 

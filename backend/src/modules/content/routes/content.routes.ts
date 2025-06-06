@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { ContentController } from "../controllers/content.controller";
+import commentRouter from "./comment.routes";
 
 const contentRoutes = Router();
 
@@ -7,7 +8,10 @@ contentRoutes.post("/", ContentController.createContent); // Create new content
 contentRoutes.post("/uploadThumbnail", ContentController.uploadThumbnail); // Upload thumbnail
 
 contentRoutes.get("/feed/trending", ContentController.getTrendingContent); // Get trending content
-contentRoutes.get("/feed/creators/:userId", ContentController.getRelatedContentCreators); // Get related content creators
+contentRoutes.get(
+  "/feed/creators/:userId",
+  ContentController.getRelatedContentCreators
+); // Get related content creators
 contentRoutes.get("/feed/:userId", ContentController.getPersonalizedContent); // Get personalized content
 contentRoutes.get("/related/:contentId", ContentController.getRelatedContent); // Get related content
 
@@ -48,5 +52,7 @@ contentRoutes.post(
   "/:contentId/user/:userId/unshare",
   ContentController.unshareContent
 ); // Unshare content
+
+contentRoutes.use("/", commentRouter);
 
 export default contentRoutes;

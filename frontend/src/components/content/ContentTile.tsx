@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Content } from "../../models/Content";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/AuthProvider/useAuth";
 
 import {
   BookmarkIcon as BookmarkIconOutline,
