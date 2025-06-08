@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 echo "Setting up test PostgreSQL database for Summarizz..."
 

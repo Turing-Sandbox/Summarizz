@@ -1,4 +1,3 @@
-
 -- Test data for Summarizz application
 -- This script populates the database with test data for development purposes
 
@@ -245,9 +244,21 @@ CROSS JOIN (SELECT user_id FROM users ORDER BY random() LIMIT 1) u;
 
 -- Update content metrics based on interactions
 UPDATE content c
-SET 
-    likes = (SELECT COUNT(*) FROM user_content_interactions WHERE content_id = c.content_id AND interaction_type = 'like'),
-    shares = (SELECT COUNT(*) FROM user_content_interactions WHERE content_id = c.content_id AND interaction_type = 'share');
+SET
+    likes = (
+        SELECT COUNT(*)
+        FROM user_content_interactions
+        WHERE
+            content_id = c.content_id
+            AND interaction_type = 'like'
+    ),
+    shares = (
+        SELECT COUNT(*)
+        FROM user_content_interactions
+        WHERE
+            content_id = c.content_id
+            AND interaction_type = 'share'
+    );
 
 -- Update comment like counts
 UPDATE comments c

@@ -1,0 +1,91 @@
+export CONFIG_SCRIPT := "./scripts/config.sh"
+
+alias s := setup
+alias b := build
+alias c := clean
+alias t := test
+alias rd := run-dev
+alias rp := run-prod
+
+default:
+    just --list
+
+# NOTE: Cleans build artifacts and deletes node_modules
+clean: 
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+    
+    info "Cleaning build artifacts and node_modules..."
+    items=("node_modules" "dist" "coverage" ".eslintcache" ".cache" ".nyc_output" "package-lock.json" "yarn.lock" "pnpm-lock.yaml")
+    for item in "${items[@]}"; do
+        if [[ "$item" == *.* ]]; then
+            find . -name "$item" -type f -exec rm -f "{}" + 2>/dev/null || true
+        else
+            find . -name "$item" -type d -prune -exec rm -rf "{}" + 2>/dev/null || true
+        fi
+    done
+
+
+# NOTE: Best to run this before any other recipe to ensure a clean start
+setup: clean
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Setting up backend application with provided configuration..."
+    npm install
+
+# NOTE: Builds the entire backend application for dev/prod runs
+build:
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Building backend application with provided configuration..."
+    npm run build
+
+# NOTE: Runs the linter (eslint) to check for standards and code quality
+lint:
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Running linter with provided configuration..."
+    npm run lint
+
+# NOTE: Runs tests using jest (optionally set --verbose flag)
+test arg="default":
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Running backend tests with provided argument: $arg..."
+    if [ -z "$arg" ]; then \
+        arg="default" \
+    fi
+
+    if [ "$arg" == "v" ] || [ "$arg" == "-v" ] || [ "$arg" == "--v" ] || [ "$arg" == "verbose" ]; then \
+        npm run test:verbose \
+    else \
+        npm run test \
+    fi
+
+# NOTE: Runs all tasks in a sequence to setup respective backend environment
+start arg="default": clean build lint (test arg)
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Starting backend application with provided configuration..."
+    npm run start
+
+# NOTE: Runs the respective backend environment in development mode (nodemon for hot reloading)
+run-dev: clean build lint
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Running backend application in development mode..."
+    npm run dev
+
+# NOTE: Runs the respective backend environment in production mode (without nodemon, should only be used when deploying)
+run-prod arg="default": clean build lint (test arg)
+    #!/usr/bin/env bash
+    source $CONFIG_SCRIPT
+
+    info "Running backend application in production mode..."
+    npm run start

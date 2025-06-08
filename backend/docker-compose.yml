@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: summarizz_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: summarizz
+      POSTGRES_PASSWORD: summarizz
+      POSTGRES_DB: summarizz
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5433:5433"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
