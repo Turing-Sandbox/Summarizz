@@ -13,7 +13,6 @@ export class SummarizationController {
 
   summarize = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Validation is handled by middleware
       const requestData: SummarizationRequest = req.body;
       const result = await this.service.summarize(requestData);
       
@@ -29,5 +28,20 @@ export class SummarizationController {
     }
   };
 
-  // Additional endpoints can be added here
+  summarizeAsStream = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const requestData: SummarizationRequest = req.body;
+      const stream = await this.service.summarizeStream(requestData);
+
+      logger.info('Successfully generated summary stream', {
+        textLength: requestData.text.length,
+        processingTime: stream.metadata.processingTime,
+        model: stream.metadata.model,
+      });
+
+      res.json(createSuccessResponse(stream));
+    } catch (error) {
+      next(error);
+    }
+  }
 }

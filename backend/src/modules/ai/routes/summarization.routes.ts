@@ -3,13 +3,19 @@ import { SummarizationController } from '../controllers/summarization.controller
 import { validateRequest } from '../../../shared/middleware/validation.middleware';
 import { SummarizationRequestSchema } from '../types';
 
-const router = Router();
+const summarizationRouter = Router();
 const summarizationController = new SummarizationController();
 
-router.post(
-  '/summarize',
-  validateRequest(SummarizationRequestSchema),
-  summarizationController.summarize
+summarizationRouter.post(
+    '/summarize',
+    validateRequest(SummarizationRequestSchema),
+    summarizationController.summarize
 );
 
-export default router;
+summarizationRouter.post(
+    '/summarize/stream',
+    validateRequest(SummarizationRequestSchema),
+    summarizationController.summarizeAsStream
+);
+
+export default summarizationRouter;

@@ -36,7 +36,7 @@
     "@algolia/client-search": "^5.20.4",
     "@aws-sdk/client-s3": "^3.816.0",
     "@aws-sdk/s3-request-presigner": "^3.816.0",
-    "@google/generative-ai": "^0.24.1",
+    "@google/genai": "^1.4.0",
     "@langchain/core": "^0.3.57",
     "@types/jsonwebtoken": "^9.0.7",
     "algoliasearch": "^4.24.0",
@@ -53,6 +53,7 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "stripe": "^18.1.1",
+    "together-ai": "^0.16.0",
     "winston": "^3.17.0",
     "zod": "^3.24.4"
   }
