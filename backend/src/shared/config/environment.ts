@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import { StringValue } from 'ms';
+import { logger } from '../utils/logger';
 
 
 // Possible locations for .env file
@@ -13,10 +14,10 @@ const possibleEnvPaths = [
 // Find the first existing .env file
 const envPath = possibleEnvPaths.find(fs.existsSync);
 
-console.log('Loading environment from:', envPath);
+logger.info(`Using environment file (if found): ${envPath || 'none'}`);
 
 if (!envPath) {
-  throw new Error('Failed to find .env file in expected locations.');
+  throw new Error('Failed to find .env file in expected location(s).');
 }
 
 const result = dotenv.config({ path: envPath });
@@ -42,9 +43,11 @@ export const env = {
   },
   ai: {
     geminiKey: process.env.GEMINI_API_KEY,
+    googleUseVertexAI: process.env.GOOGLE_USE_VERTEX_AI === 'true',
     langchainKey: process.env.LANGCHAIN_API_KEY,
     langchainTracing: process.env.LANGCHAIN_TRACING_V3,
     openrouterKey: process.env.OPENROUTER_API_KEY,
+    togetherKey: process.env.TOGETHER_API_KEY,
   },
   firebase: {
     apiKey: process.env.FIREBASE_API_KEY,

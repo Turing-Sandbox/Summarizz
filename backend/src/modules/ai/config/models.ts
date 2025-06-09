@@ -1,26 +1,93 @@
 import { AIGenerationModel, AIModel, GenerationModelConfig, ModelConfig } from '../types';
+import { HarmBlockMethod, HarmBlockThreshold, HarmCategory } from '@google/genai';
+import { SUMMARY_SYSTEM_PROMPT } from './prompts';
+
+const MAX_OUTPUT_TOKENS = 1500;
 
 export const SUMMARIZATION_MODEL_CONFIGS: Record<AIModel, ModelConfig> = {
   [AIModel.Gemini20Flash]: {
+    safetySettings: [
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      }
+    ],
+    systemInstruction: SUMMARY_SYSTEM_PROMPT,
     temperature: 0.2,
-    maxOutputTokens: 1500,
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
     topP: 1,
-    frequencyPenalty: 0.1,
-    presencePenalty: 0.1,
   },
   [AIModel.Gemini15Flash]: {
+    safetySettings: [
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      }
+    ],
+    systemInstruction: SUMMARY_SYSTEM_PROMPT,
     temperature: 0.2,
-    maxOutputTokens: 1500,
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
     topP: 1,
-    frequencyPenalty: 0.1,
-    presencePenalty: 0.1,
   },
   [AIModel.Gemini15FlashLite]: {
+    safetySettings: [
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      },
+      {
+        method: HarmBlockMethod.SEVERITY,
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
+      }
+    ],
+    systemInstruction: SUMMARY_SYSTEM_PROMPT,
     temperature: 0.2,
-    maxOutputTokens: 1500,
+    maxOutputTokens: MAX_OUTPUT_TOKENS,
     topP: 1,
-    frequencyPenalty: 0.1,
-    presencePenalty: 0.1,
   }
 };
 
