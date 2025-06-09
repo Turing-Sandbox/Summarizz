@@ -1,37 +1,55 @@
-import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
-import { PromptTemplate } from '@langchain/core/prompts';
-import { AIGenerationModel, HigherTierImageGenerationRequest, LowerTierImageGenerationResponse, SummarizationRequest, SummarizationResponse } from '../types';
-import { IMAGE_GENERATION_USER_PROMPT } from '../config/prompts';
-import { IMAGE_GENERATION_MODEL_CONFIGS } from '../config/models';
 import { AppError } from '../../../shared/errors';
-import { logger } from '../../../shared/utils/logger';
-import { env } from '../../../shared/config/environment';
-import { getEncoding } from 'js-tiktoken';
+
+import { HigherTierImageGenerationRequest, LowerTierImageGenerationRequest, LowerTierImageGenerationResponse } from '../types';
+import { AIProvider, checkEnvironmentVariables } from '../utils/ai.utils';
+import { ImageGenerationStrategy } from '../strategy/generation.strategy';
 
 const APP_ERROR_SOURCE = 'image.generation.service';
 
 export class ImageGenerationService {
-    private readonly defaultModelType: AIGenerationModel;
-    private prompt: PromptTemplate;
+    private strategy: ImageGenerationStrategy;
 
-    constructor() {
-        if (!env.ai.geminiKey) {
-            throw new AppError(500, 'Gemini API key not found in environment variables. Please set GEMINI_API_KEY.', 'image.generation.service');
+    constructor(strategy?: ImageGenerationStrategy) {
+        checkEnvironmentVariables(APP_ERROR_SOURCE, AIProvider.GEMINI);
+        checkEnvironmentVariables(APP_ERROR_SOURCE, AIProvider.TOGETHER);
+
+        if (!strategy) {
+            throw new AppError(
+                400,
+                'Invalid strategy provided. Please provide a valid ImageGenerationStrategy instance.',
+                APP_ERROR_SOURCE
+            );
+        }
+        this.strategy = strategy;
+    }
+
+    getStrategy = (): ImageGenerationStrategy => {
+        return this.strategy;
+    }
+
+    setStrategy = (strategy: ImageGenerationStrategy): boolean => {
+        if (!strategy) {
+            throw new AppError(
+                400,
+                'Invalid strategy provided. Please provide a valid ImageGenerationStrategy instance.',
+                APP_ERROR_SOURCE
+            );
         }
 
-        this.defaultModelType = AIGenerationModel.Gemini20FlashImageGenPreview;
-        this.prompt = PromptTemplate.fromTemplate(IMAGE_GENERATION_USER_PROMPT);
+        this.strategy = strategy;
+        return true;
     }
 
-    async generateImageSingle(request: LowerTierImageGenerationResponse | HigherTierImageGenerationRequest): Promise<LowerTierImageGenerationResponse | HigherTierImageGenerationRequest> {
-        return [];
+    async generate(
+        request: LowerTierImageGenerationRequest | HigherTierImageGenerationRequest
+    ): Promise<LowerTierImageGenerationResponse | HigherTierImageGenerationRequest> {
+        if (!request) {
+            throw new AppError(
+                400,
+                'Invalid request provided. Please provide a valid image generation request.',
+                APP_ERROR_SOURCE
+            );
+        }
+        return this.strategy.generate(request);
     }
-
-    async generateImageMultiple(request: LowerTierImageGenerationResponse | HigherTierImageGenerationRequest): Promise<LowerTierImageGenerationResponse | HigherTierImageGenerationRequest> {
-        return [];
-    }
-
-    async generateImageStream(request: LowerTierImageGenerationResponse | HigherTierImageGenerationRequest): Promise<LowerTierImageGenerationResponse | HigherTierImageGenerationRequest> {
-        return [];
-    }        
 }

@@ -48,6 +48,7 @@ export const env = {
     langchainTracing: process.env.LANGCHAIN_TRACING_V3,
     openrouterKey: process.env.OPENROUTER_API_KEY,
     togetherKey: process.env.TOGETHER_API_KEY,
+    togetherBaseUrl: process.env.TOGETHER_BASE_URL
   },
   firebase: {
     apiKey: process.env.FIREBASE_API_KEY,

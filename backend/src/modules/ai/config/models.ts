@@ -92,8 +92,16 @@ export const SUMMARIZATION_MODEL_CONFIGS: Record<AIModel, ModelConfig> = {
 };
 
 export const IMAGE_GENERATION_MODEL_CONFIGS: Record<AIGenerationModel, GenerationModelConfig> = {
-  [AIGenerationModel.Gemini20FlashImageGenPreview]: {},
-  [AIGenerationModel.TogetherFlux1SchnellFree]: {},
-  [AIGenerationModel.TogetherFlux1Schnell]: {},
-  [AIGenerationModel.TogetherFlux1Dev]: {}
+  [AIGenerationModel.Gemini20FlashImageGenPreview]: {
+
+  },
+  [AIGenerationModel.TogetherFlux1SchnellFree]: {
+
+  },
+  [AIGenerationModel.TogetherFlux1Schnell]: {
+
+  },
+  [AIGenerationModel.TogetherFlux1Dev]: {
+    
+  }
 };

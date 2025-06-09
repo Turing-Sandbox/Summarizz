@@ -33,15 +33,18 @@ export const HigherTierImageGenerationRequestSchema = z.object({
 });
 
 // NOTE: Lower tier image generation using Imagen 3/Gemini 2.0 Flash (Image Generation) models
+// TODO: Implement interface LowerTierImageGenerationRequest
 export interface LowerTierImageGenerationRequest {
-
+    prompt: string;
 }
 
+// TODO: Implement interface LowerTierImageGenerationResponse
 export interface LowerTierImageGenerationResponse {
-
+    prompt: string;
 }
 
 // NOTE: Higher tier image generation using FLUX.1-dev/FLUX.1-schnell-free models
+// TODO: Refactor implementation HigherTierImageGenerationRequest
 export interface HigherTierImageGenerationRequest {
     prompt: string;
     options?: {
@@ -53,6 +56,7 @@ export interface HigherTierImageGenerationRequest {
     };
 }
 
+// TODO: Refactor implementation HigherTierImageGenerationResponse
 export interface HigherTierImageGenerationResponse {
     imageUrl: string;
     metadata: {
