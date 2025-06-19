@@ -3,7 +3,7 @@ import { apiURL } from "../scripts/api";
 import { SubscriptionStatus } from "../models/SubscriptionStatus";
 
 export class SubscriptionService {
-  /**
+  /*
    * Creates a subscription session for the user.
    *
    * @returns A promise that resolves to the response containing the session URL.
@@ -33,7 +33,7 @@ export class SubscriptionService {
     }
   }
 
-  /**
+  /*
    * Cancels the user's subscription.
    *
    * @returns A promise that resolves to a response containing the cancellation message and end date.
@@ -69,7 +69,7 @@ export class SubscriptionService {
     }
   }
 
-  /**
+  /*
    * Retrieves the subscription status for the user.
    *
    * @param forceRefresh - Whether to force a refresh of the subscription status.

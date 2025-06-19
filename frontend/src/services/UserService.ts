@@ -2,7 +2,7 @@ import axios from "axios";
 import { apiURL } from "../scripts/api";
 import { User } from "../models/User";
 
-/**
+/*
  * UserService class
  *
  * @description
@@ -31,7 +31,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * updateUserWithID(user: User) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -54,7 +54,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * deleteUserWithID(id: string, email: string, password: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -88,7 +88,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * uploadProfileImage(profileImage: File, oldProfileImage: string) -> Promise<{ url: string } | Error>
    *
    * @description
@@ -125,7 +125,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * changePassword(userId: string, oldPassword: string, newPassword: string, confirmPassword: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -173,7 +173,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * validatePassword(oldPassword: string, newPassword: string, confirmPassword: string, requireOldPassword: boolean) -> Promise<string | null>
    *
    * @description
@@ -227,7 +227,7 @@ export default class UserService {
     return null;
   }
 
-  /**
+  /*
    * changeEmail(userId: string, newEmail: string, currentPassword: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -261,7 +261,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * changeUsername(userId: string, newUsername: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -292,7 +292,7 @@ export default class UserService {
     }
   }
 
-  /**
+  /*
    * getRelatedContentCreators(userId: string) -> Promise<User[] | Error>
    *
    * @description
