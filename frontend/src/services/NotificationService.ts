@@ -2,7 +2,7 @@ import axios from "axios";
 import { apiURL } from "../scripts/api";
 import { Notification } from "../models/Notification";
 
-/**
+/*
  * NotificationService class
  *
  * @description
@@ -10,7 +10,7 @@ import { Notification } from "../models/Notification";
  * marking as read, and pushing new notifications.
  */
 export default class NotificationService {
-  /**
+  /*
    * getNotifications() -> Promise<Notification[] | Error>
    *
    * @description
@@ -44,7 +44,7 @@ export default class NotificationService {
     }
   }
 
-  /**
+  /*
    * getUnreadNotifications() -> Promise<Notification[] | Error>
    *
    * @description
@@ -72,7 +72,7 @@ export default class NotificationService {
     }
   }
 
-  /**
+  /*
    * markAsRead() -> Promise<void | Error>
    *
    * @description

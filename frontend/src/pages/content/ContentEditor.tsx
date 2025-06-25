@@ -16,6 +16,7 @@ import OrderedList from "@tiptap/extension-ordered-list";
 import { apiURL } from "../../scripts/api";
 import Toolbar from "../../components/content/toolbar";
 import axios from "axios";
+import { ImageService } from "../../services/ImageService";
 
 export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
   const [title, setTitle] = useState("");
@@ -48,9 +49,10 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
     },
   });
 
-  // ---------------------------------------
-  // ----------- Event Handlers ------------
-  // ---------------------------------------
+  /*
+   * Load saved title and content from localStorage and cookies
+   * This will set the title and content in the editor if they exist
+   */
   useEffect(() => {
     const savedTitle = localStorage.getItem("title");
     const savedContent = Cookies.get("content");
@@ -65,7 +67,10 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
     }
   }, [editor]);
 
-  // Fetch existing content data if in edit mode
+  /*
+   * Fetch existing content if in edit mode
+   * This will load the content from the server and set it in the editor
+   */
   useEffect(() => {
     if (isEditMode) {
       const fetchContent = async () => {
@@ -94,13 +99,83 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
       fetchContent();
     }
   }, [isEditMode, editor]);
-  // …
 
-  // ---------------------------------------
-  // -------------- Functions --------------
-  // ---------------------------------------
+  /*
+   * Load thumbnail preview from URL if provided
+   * This will convert the URL to a File object and set it as the thumbnail
+   * This is useful for editing existing content with a thumbnail
+   */
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    if (
+      thumbnailPreview &&
+      typeof thumbnailPreview === "string" &&
+      !thumbnail
+    ) {
+      (async () => {
+        try {
+          const file = await urlToFile(
+            thumbnailPreview,
+            "thumbnail.jpg",
+            "image/jpeg"
+          );
+          setThumbnail(file);
+          objectUrl = URL.createObjectURL(file);
+          setThumbnailPreview(objectUrl);
+        } catch {
+          setThumbnail(null);
+          setThumbnailPreview(null);
+          setError("Failed to load thumbnail image.");
+        }
+      })();
+    } else if (!thumbnailPreview) {
+      setThumbnail(null);
+      setThumbnailPreview(null);
+    }
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [thumbnailPreview]);
 
-  /**
+  /*
+   * Converts a URL to a File object
+   * This is used to convert the thumbnail preview URL to a File object
+   * so it can be uploaded to the server
+   *
+   * @param url - The URL of the image
+   * @param filename - The name of the file
+   * @param mimeType - The MIME type of the file
+   * @returns A Promise that resolves to a File object
+   */
+  async function urlToFile(
+    url: string,
+    filename: string,
+    mimeType: string
+  ): Promise<File> {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new File([blob], filename, { type: mimeType });
+  }
+
+  /*
+   * clearContent() -> void
+   *
+   * @description
+   * Clears the content editor, title, and thumbnail preview.
+   */
+  const clearContent = () => {
+    localStorage.removeItem("title");
+    Cookies.remove("content");
+    setTitle("");
+    setContent("");
+    if (editor) {
+      editor.commands.setContent("");
+    }
+    setThumbnail(null);
+    setThumbnailPreview(null);
+  };
+
+  /*
    * handleThumbnailChange() -> void
    *
    * @description
@@ -123,22 +198,80 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
     }
   };
 
-  /**
-   * Handles the submission of the content, including thumbnail upload and notifications.
-   * Uses POST for create and PUT for update mode.
+  /*
+   * validateForm() -> boolean
+   *
+   * @description
+   * Validates the form to ensure that the title and content are provided.
+   * If either is missing, it sets an error message and returns false.
+   * @return {boolean} - Returns true if the form is valid, false otherwise.
    */
-  const handleSubmit = async () => {
-    setError("");
-
+  const validateForm = () => {
     if (!title || !content) {
       setError(
         "Title and content are required, and were not provided. Please try again."
       );
-      return;
+      return false;
     }
+    return true;
+  };
+
+  /*
+   * submitContent() -> Promise<void>
+   *
+   * @description
+   * Submits the content to the server. If in edit mode, it updates existing content.
+   * If not in edit mode, it creates new content.
+   *
+   * @param payload - The content data to submit
+   */
+  const submitContent = async (data: Record<string, any>) => {
+    if (isEditMode) {
+      await axios.put(`${apiURL}/content/${id}`, data, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+    } else {
+      await axios.post(`${apiURL}/content`, data, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      });
+    }
+  };
+
+  /*
+   * handlePostSubmit() -> void
+   *
+   * @description
+   * Handles the post submission logic, clearing local storage and cookies,
+   * resetting the form state, and navigating to the content page.
+   */
+  const handlePostSubmit = () => {
+    localStorage.removeItem("title");
+    Cookies.remove("content");
+    setTitle("");
+    setContent("");
+
+    if (id) {
+      navigate(`/content/${id}`);
+    } else {
+      setError("Content ID not found after submission. Please try again.");
+    }
+  };
+
+  /*
+   * handleSubmit() -> void
+   *
+   * @description
+   * Handles the form submission, validates the form, uploads the thumbnail if provided,
+   * and submits the content to the server. If successful, it redirects to the content page.
+   */
+  const handleSubmit = async () => {
+    setError("");
+
+    if (!validateForm()) return;
 
     // Prepare content payload
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newContent: Record<string, any> = {
       creatorUID: auth.user!.uid,
       title,
@@ -146,69 +279,39 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
     };
 
     try {
-      // Handle thumbnail upload if present
+      // TODO: Move the thumbnail logic to the CONTENT SERVICE when developing the CONTENT SERVICE. 
       if (thumbnail) {
-        const formData = new FormData();
-        formData.append("thumbnail", thumbnail);
-        const thumbRes = await axios.post(
-          `${apiURL}/content/uploadThumbnail`,
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
+        const thumbnailUploadResponse = await ImageService.uploadThumbnail(
+          thumbnail
         );
-        newContent.thumbnailUrl = thumbRes.data.url;
-      }
 
-      // Determine request method and URL
-      if (isEditMode) {
-        await axios.put(
-          `${apiURL}/content/${id}`,
-          newContent,
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        );
-      } else {
-        await axios.post(
-          `${apiURL}/content`,
-          {
-            ...newContent,
-          },
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
-        );
+        if (thumbnailUploadResponse instanceof Error) {
+          setError(
+            thumbnailUploadResponse.message ||
+              "Failed to upload thumbnail. Please try again."
+          );
+          return;
+        }
+        newContent.thumbnail = thumbnailUploadResponse.url;
       }
+      await submitContent(newContent);
     } catch (error) {
-      console.error("Error submitting content:", error);
       setError(
         "An error occurred while submitting the content. Please try again."
       );
+      return;
     }
 
     // If submission was successful, redirect to the content page
     if (!error) {
-      // Reset local storage and cookies
-      localStorage.removeItem("title");
-      Cookies.remove("content");
-      setTitle("");
-      setContent("");
-
-      if (id) {
-        navigate(`/content/${id}`);
-      } else {
-        setError("Content ID not found after submission. Please try again.");
-      }
-    }
-
-    // User must be authenticated to create content
-    if (!auth.isAuthenticated) {
-      navigate("/authentication/login");
+      handlePostSubmit();
     }
   };
+
+  // User must be authenticated to create content
+  if (!auth.isAuthenticated) {
+    navigate("/authentication/login");
+  }
 
   // --------------------------------------
   // -------------- Render ----------------
@@ -265,8 +368,6 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
             <img
               src={thumbnailPreview}
               alt='Thumbnail Preview'
-              width={200}
-              height={200}
               className='thumbnail-preview'
             />
           )}
@@ -286,23 +387,7 @@ export default function ContentEditor({ isEditMode }: { isEditMode: boolean }) {
         {error && <p className='error-message'>{error}</p>}
 
         <div className='form-buttons'>
-          <button
-            className='content-button left-button'
-            onClick={() => {
-              // Only proceed if we're in the browser environment
-              if (typeof window === "undefined") return;
-
-              localStorage.removeItem("title");
-              Cookies.remove("content");
-              setTitle("");
-              setContent("");
-              if (editor) {
-                editor.commands.setContent("");
-              }
-              setThumbnail(null);
-              setThumbnailPreview(null);
-            }}
-          >
+          <button className='content-button left-button' onClick={clearContent}>
             Clear
           </button>
 

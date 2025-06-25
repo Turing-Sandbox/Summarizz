@@ -1,7 +1,7 @@
 import axios from "axios";
 import { apiURL } from "../scripts/api";
 
-/**
+/*
  * AuthenticationService class
  *
  * @description
@@ -9,7 +9,7 @@ import { apiURL } from "../scripts/api";
  * login, and OAuth authentication with Google and GitHub.
  */
 export class AuthenticationService {
-  /**
+  /*
    * register() -> Promise<{ userUID: string; } | Error>
    *
    * @description
@@ -56,7 +56,7 @@ export class AuthenticationService {
     }
   }
 
-  /**
+  /*
    * login() -> Promise<{ userUID: string; } | Error>
    *
    * @description
@@ -94,7 +94,7 @@ export class AuthenticationService {
     }
   }
 
-  /**
+  /*
    * signInWithGoogle() -> Promise<{ token: string; userUID: string } | Error>
    *
    * @description
@@ -109,7 +109,7 @@ export class AuthenticationService {
     return AuthenticationService.signInWithProvider("google", useRedirect);
   }
 
-  /**
+  /*
    * signInWithGithub() -> Promise<{ token: string; userUID: string } | Error>
    *
    * @description
@@ -124,7 +124,7 @@ export class AuthenticationService {
     return AuthenticationService.signInWithProvider("github", useRedirect);
   }
 
-  /**
+  /*
    * signInWithProvider(provider: string, useRedirect: boolean) -> Promise<{ token: string; userUID: string } | Error>
    *
    * @description
@@ -213,7 +213,7 @@ export class AuthenticationService {
     }
   }
 
-  /**
+  /*
    * handleCallbackResult(token: string) -> Promise<{ token: string; userUID: string } | Error>
    *
    * @description
@@ -246,7 +246,7 @@ export class AuthenticationService {
     }
   }
 
-  /**
+  /*
    * logout() -> Promise<boolean | Error>
    *
    * @description
@@ -280,7 +280,7 @@ export class AuthenticationService {
     }
   }
 
-  /**
+  /*
    * refreshToken() -> Promise<{ message: string; userUID: string } | Error>
    *
    * @description
@@ -312,7 +312,7 @@ export class AuthenticationService {
     }
   }
 
-  /**
+  /*
    * resetPassword() -> Promise<{ message: string } | Error>
    *
    * @description

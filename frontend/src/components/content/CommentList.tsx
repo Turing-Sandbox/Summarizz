@@ -54,8 +54,11 @@ export default function CommentList({
       setLoading(false);
       return;
     }
-    setComments(commentsResult);
-    setNumComments(commentsResult.length);
+
+    if (commentsResult) {
+      setComments(commentsResult);
+      setNumComments(commentsResult.length);
+    }
     setLoading(false);
   };
 

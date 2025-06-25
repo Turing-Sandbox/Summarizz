@@ -2,14 +2,14 @@ import axios from "axios";
 import { apiURL } from "../scripts/api";
 import { User } from "../models/User";
 
-/**
+/*
  * FollowService class
  *
  * @description
  * This class provides methods to follow, unfollow, and manage follow requests between users.
  */
 export default class FollowService {
-  /**
+  /*
    * followUser(userID: string, userToFollowID: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -44,7 +44,7 @@ export default class FollowService {
     }
   }
 
-  /**
+  /*
    * unfollowUser(userID: string, userToUnfollowID: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -78,7 +78,7 @@ export default class FollowService {
     }
   }
 
-  /**
+  /*
    * getFollowers(userID: string) -> Promise<{ followers: User[] } | Error>
    *
    * @description
@@ -107,7 +107,7 @@ export default class FollowService {
     }
   }
 
-  /**
+  /*
    * getFollowing(userID: string) -> Promise<{ following: User[] } | Error>
    *
    * @description
@@ -136,8 +136,7 @@ export default class FollowService {
     }
   }
 
-  // TODO: IMPLEMENT GET FOLLOW REQUESTS IN BACKEND
-  /**
+  /*
    * getFollowRequests(userID: string) -> Promise<{ requests: User[] } | Error>
    *
    * @description
@@ -167,7 +166,7 @@ export default class FollowService {
     }
   }
 
-  /**
+  /*
    * approveFollowRequest(userID: string, requesterID: string) -> Promise<{ message: string } | Error>
    *
    * @description
@@ -202,7 +201,7 @@ export default class FollowService {
     }
   }
 
-  /**
+  /*
    * rejectFollowRequest(userID: string, requesterID: string) -> Promise<{ message: string } | Error>
    *
    * @description

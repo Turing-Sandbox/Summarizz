@@ -107,14 +107,18 @@ export class StorageService {
         throw new Error("No valid file data found (no filepath or buffer).");
       }
 
+      // Saving File to direct path
       fileName = `${fileName}${fileType ? `.${fileType.split("/")[1]}` : ""}`;
-
       const fullPath = path.join(dir, fileName);
       await fs.writeFile(fullPath, fileBuffer);
       logger.info(`File saved locally at ${fullPath}`);
 
+      // Returning URL for the file
+      const urlPath = `${filePath}/${fileName}`;
+      const url = `http://localhost:3000/local_uploads/${urlPath}`;
+
       // Return the absolute file system path
-      return { url: fullPath };
+      return { url };
     } catch (error: any) {
       logger.error("Local upload error:", error);
       throw new Error(`Local upload failed: ${error.message}`);

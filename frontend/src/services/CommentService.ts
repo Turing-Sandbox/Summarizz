@@ -2,7 +2,7 @@ import axios from "axios";
 import { apiURL } from "../scripts/api";
 import { Comment } from "../models/Comment";
 
-/**
+/*
  * CommentService class
  *
  * @description
@@ -10,7 +10,7 @@ import { Comment } from "../models/Comment";
  * fetching, updating, and deleting comments.
  */
 export default class CommentService {
-  /**
+  /*
    * publishComment() -> Promise<{ message: string; comment: Comment } | Error>
    * 
    * Publishes a comment for a specific content ID.
@@ -49,7 +49,7 @@ export default class CommentService {
     }
   }
 
-  /**
+  /*
    * getPostComments() -> Promise<Comment[] | Error>
    * 
    * Fetches all comments for a specific content ID.
@@ -78,7 +78,7 @@ export default class CommentService {
     }
   }
 
-  /**
+  /*
    * getComment() -> Promise<Comment | Error>
    * 
    * Fetches a specific comment by its ID and the content ID it belongs to.
@@ -111,7 +111,7 @@ export default class CommentService {
     }
   }
 
-  /**
+  /*
    * updateComment() -> Promise<{ message: string } | Error>
    * 
    * Updates a comment by its ID and the content ID it belongs to.
@@ -147,7 +147,7 @@ export default class CommentService {
     }
   }
 
-  /**
+  /*
    * deleteComment() -> Promise<{ message: string } | Error>
    * 
    * Deletes a comment by its ID and the content ID it belongs to.
