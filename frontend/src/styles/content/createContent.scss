@@ -95,11 +95,12 @@
 }
 
 .thumbnail-preview {
-  max-width: 100%;
-  width: 500px;
-  height: 500px;
+  max-width: 500px;
+  max-height: 500px;
   border-radius: 10px;
   margin-bottom: -1rem;
+  // Fill image without deforming it
+  object-fit: cover;
 }
 
 .summary-container {

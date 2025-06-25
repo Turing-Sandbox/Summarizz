@@ -45,7 +45,7 @@ export class ContentController {
       const file = files.thumbnail[0];
       const fileName = file.newFilename;
       const fileType = file.mimetype;
-      const filePath = file.filepath; // Use 'filepath' for formidable v2+
+      const filePath = file.filepath; 
 
       try {
         if (!filePath) {
@@ -54,10 +54,10 @@ export class ContentController {
 
         // Pass the file object with the correct path to StorageService
         const response = await StorageService.uploadFile(
-          { ...file, path: filePath }, // Ensure 'path' is set if your StorageService expects it
+          { ...file, path: filePath }, 
           "thumbnails",
           fileName,
-          fileType,
+          fileType
         );
         res.status(201).json(response);
       } catch (error: any) {
@@ -86,15 +86,16 @@ export class ContentController {
 
   static async editContent(req: Request, res: Response) {
     console.log("Fetching Content...");
-    const { contentId, userId } = req.params;
-    const { data } = req.body;
+    const { contentId } = req.params;
+    const data = req.body;
+    const uid = req.user?.uid;
 
     try {
       // const confirmation = await axios.get(`${apiURL}/content/${contentId}`)
       const confirmation = await ContentService.getContent(contentId);
       const owner_id = confirmation?.creatorUID;
 
-      if (userId == owner_id) {
+      if (uid == owner_id) {
         //check whether they are allowed to edit the content
         const response = await ContentService.editContent(contentId, data);
         res.status(200).json(response);
@@ -104,7 +105,7 @@ export class ContentController {
     } catch (error: any) {
       console.log(error);
       res
-        .status(401)
+        .status(500)
         .json({ error: error.message || "Failed to edit content" });
     }
   }
@@ -156,7 +157,7 @@ export class ContentController {
               file,
               "thumbnails",
               fileName,
-              fileType,
+              fileType
             );
 
             const updateData = JSON.parse(fields.data);

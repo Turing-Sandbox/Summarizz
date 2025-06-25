@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { ContentController } from "../controllers/content.controller";
 import commentRouter from "./comment.routes";
+import { authenticateToken } from "../../../shared/middleware/auth";
 
 const contentRoutes = Router();
 
@@ -23,7 +24,11 @@ contentRoutes.put("/shares/:contentId", ContentController.incrementShareCount); 
 
 contentRoutes.delete("/:contentId", ContentController.deleteContent); // Delete content by ID
 
-contentRoutes.put("/:contentId/:userId", ContentController.editContent); // Edit content by ID
+contentRoutes.put(
+  "/:contentId",
+  authenticateToken,
+  ContentController.editContent
+); // Edit content by ID
 contentRoutes.put(
   "/editThumbnail/:contentId/:userId",
   ContentController.editContentAndThumbnail
